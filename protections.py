@@ -8,8 +8,11 @@ def input_regex(input) -> bool:
         return False
 
 
-def output_regex(input) -> bool:
-    return False
+def output_regex(input, check) -> bool:
+    if input in check or input == check:
+        return True
+    else:
+        return False
 
 
 def input_and_output_regex(input) -> bool:
