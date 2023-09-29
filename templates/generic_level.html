@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Level {{_level}}{% endblock %}
+{% block title %}Level {{level}}{% endblock %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -26,7 +26,7 @@
 									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-full fa-lg"></i>
 									{% endif %}
 								</header>
-								<form action="/level/{{_level}}/submit" method="post">
+								<form action="/level/{{level}}/submit" method="post">
 									<div>
 										<div class="row">
 											<div class="col-12">
@@ -42,7 +42,7 @@
 									</div>
 								</form>
 
-								<form action="/level/{{_level}}/confirm" method="post">
+								<form action="/level/{{level}}/confirm" method="post">
 									<div>
 										<div class="row">
 											<div class="col-12">

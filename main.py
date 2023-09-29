@@ -38,19 +38,20 @@ class Input(BaseModel):
 
 @app.post("/level/1/submit")
 def check_level_one(request: Request, message: str = Form(...)):
+    level = 1
     response = search_qdrant(
         search_input=message,
         service_context=service_context,
         QDRANT_CLIENT=QDRANT_CLIENT,
-        collection_name="level-1",
+        collection_name=f"level-{level}",
     )
     if protections.input_regex(message):
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": random_block_msg()}
+            "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
     else:
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": response}
+            "generic_level.html", {"request": request, "message": response, "level": level}
         )
 
 
@@ -68,30 +69,36 @@ def answer_level_one(level: str, password: str = Form(...)):
 
 @app.get("/level/1")
 async def read_item(request: Request):
-    return templates.TemplateResponse("level1.html", {"request": request})
+    level =1
+    return templates.TemplateResponse(
+        "generic_level.html", {"request": request, "level": level}
+    )
 
 
 @app.post("/level/2/submit")
 def check_level_two(request: Request, message: str = Form(...)):
+    level = 2
     response = search_qdrant(
         search_input=message,
         service_context=service_context,
         QDRANT_CLIENT=QDRANT_CLIENT,
-        collection_name="level-2",
+        collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(2)):
+    if protections.output_regex(message, settings.PASSWORDS.get(level)):
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": random_block_msg()}
+            "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
     else:
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": response}
+            "generic_level.html", {"request": request, "message": response, "level": level}
         )
 
 # Progressing between levels
 # @app.post("/level/{level}/{_hash}", include_in_schema=False)
 @app.api_route("/level/{_level}/{_hash}", methods=["GET", "POST"], include_in_schema=False)
 async def level_two(_level: str, request: Request, _hash: str):
+    if not _hash:
+        return templates.TemplateResponse("generic_level.html", {"request": request,"level": 1})
     _pass = settings.PASSWORDS.get(int(_level)-1)
     print(_pass)
     _hash_to_check = return_hash(_pass)
@@ -105,41 +112,44 @@ async def level_two(_level: str, request: Request, _hash: str):
     else:
         print("loading 1")
 
-        return templates.TemplateResponse("level1.html", {"request": request, "message": "Incorrect Answer, try again"})
+        return templates.TemplateResponse("generic_level.html", {"request": request, "message": "Incorrect Answer, try again", "level": int(_level)-1})
 
 
 @app.post("/level/4/submit")
 def check_level_two(request: Request, message: str = Form(...)):
+    level = 4
     response = search_qdrant(
         search_input=message,
         service_context=service_context,
         QDRANT_CLIENT=QDRANT_CLIENT,
-        collection_name="level-4",
+        collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(4)):
+    if protections.output_regex(message, settings.PASSWORDS.get(level)):
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": random_block_msg()}
+            "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
     else:
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": response}
+            "generic_level.html", {"request": request, "message": response, "level": level}
         )
 
 @app.post("/level/5/submit")
 def check_level_two(request: Request, message: str = Form(...)):
+    level = 5
     response = search_qdrant(
         search_input=message,
         service_context=service_context,
         QDRANT_CLIENT=QDRANT_CLIENT,
-        collection_name="level-5",
+        collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(5)):
+    if protections.output_regex(message, settings.PASSWORDS.get(level)):
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": random_block_msg()}
+            "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
     else:
         return templates.TemplateResponse(
-            "level1.html", {"request": request, "message": response}
+            "generic_level.html", {"request": request, "message": response, "level": level}
         )
+
 
 
