@@ -28,6 +28,13 @@ class Settings(BaseSettings):
         4: os.getenv("PASSWORDS_FOUR"),
         5: os.getenv("PASSWORDS_FIVE"),
     }
+    LEVEL_ICONS: dict = {
+        1: "icon fa-solid fa-battery-empty fa-lg",
+        2: "icon fa-solid fa-battery-quarter fa-lg",
+        3:"icon fa-solid fa-battery-half fa-lg",
+        4: "icon fa-solid fa-battery-three-quarters fa-lg",
+        5: "icon fa-solid fa-battery-full fa-lg",
+    }
 
 
 settings = Settings()

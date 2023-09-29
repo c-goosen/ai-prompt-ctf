@@ -99,7 +99,7 @@ async def level_two(_level: str, request: Request, _hash: str):
     if _hash_to_check == _hash:
         print(f"loading {int(_level)}")
         if int(_level)-1 != 5:
-            return templates.TemplateResponse("generic_level.html", {"request": request, "_level":_level})
+            return templates.TemplateResponse("generic_level.html", {"request": request, "level": int(_level)})
         else:
             return templates.TemplateResponse("complete.html", {"request": request, "pass": settings.PASSWORDS.get(int(_level)-1)})
     else:

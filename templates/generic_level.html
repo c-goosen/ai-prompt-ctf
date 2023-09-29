@@ -10,7 +10,21 @@
     <!-- Contact -->
 							<article id="contact" class="panel">
 								<header>
-									<h2>Level {{_level}}</h2>
+									{% if level == 1 %}
+									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-empty fa-lg"></i>
+									{% endif %}
+									{% if level == 2 %}
+									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-quarter fa-lg"></i>
+									{% endif %}
+									{% if level == 3 %}
+									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-half fa-lg"></i>
+									{% endif %}
+									{% if level == 4 %}
+									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-three-quarters fa-lg"></i>
+									{% endif %}
+									{% if level == 5 %}
+									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-full fa-lg"></i>
+									{% endif %}
 								</header>
 								<form action="/level/{{_level}}/submit" method="post">
 									<div>
