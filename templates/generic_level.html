@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Level {{_level}}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- Contact -->
+							<article id="contact" class="panel">
+								<header>
+									<h2>Level {{_level}}</h2>
+								</header>
+								<form action="/level/{{_level}}/submit" method="post">
+									<div>
+										<div class="row">
+											<div class="col-12">
+												<textarea name="message" id="message" placeholder="Message" rows="6"></textarea>
+											</div>
+											{% if message %}
+												<p>Response: {{ message }}</p>
+											{% endif %}
+											<div class="col-12">
+												<input type="submit" value="Prompt AI" />
+											</div>
+										</div>
+									</div>
+								</form>
+
+								<form action="/level/{{_level}}/confirm" method="post">
+									<div>
+										<div class="row">
+											<div class="col-12">
+												<textarea name="password" id="password" placeholder="Password" ></textarea>
+												<input type="submit" value="Answer for new level" />
+											</div>
+										</div>
+									</div>
+								</form>
+							</article>
+
+					</div>
+{% endblock %}
+
+
+

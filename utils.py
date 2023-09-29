@@ -1,6 +1,6 @@
 from app_config import settings
 from hashlib import sha256
-
+import random
 
 def return_hash(input: str):
     return str(sha256(bytes(input, "utf-8")).hexdigest())

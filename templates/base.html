@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<!--
+	Astral by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+        {% block head %}
+		<title>{% block title %}{% endblock %}</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="{{ url_for('static', path='/assets/css/main.css') }}" />
+		<noscript><link rel="stylesheet" href="{{ url_for('static', path='/assets/css/noscript.css') }}" /></noscript>
+        {% endblock %}
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper-->
+			<div id="wrapper">
+
+				<!-- Nav -->
+					<nav id="nav">
+						<a href="#contact" class="icon fa-solid fa-battery-empty fa-lg"><span>Level 1</span></a>
+						<a href="#contact" class="icon fa-solid fa-battery-quarter fa-lg"><span>Level 2</span></a>
+						<a href="#contact" class="icon fa-solid fa-battery-half fa-lg"><span>Level 3</span></a>
+						<a href="#contact" class="icon fa-solid fa-battery-three-quarters fa-lg"><span>Level 4</span></a>
+						<a href="#contact" class="icon fa-solid fa-battery-full fa-lg"><span>Level 5</span></a>
+					</nav>
+
+                    <div id="content">{% block content %}{% endblock %}</div>
+
+					</div>
+
+				<!-- Footer -->
+					<div id="footer">
+                         {% block footer %}
+						<ul class="copyright">
+							<li>&copy; BSIDES CTF</li><li>Design: Christo Goosen</li>
+						</ul>
+                          {% endblock %}
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="{{ url_for('static', path='/assets/js/jquery.min.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/browser.min.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/breakpoints.min.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/util.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/main.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/all.min.js') }}"></script>
+			<script src="{{ url_for('static', path='/assets/js/fontawesome.min.js') }}"></script>
+
+	</body>
+</html>

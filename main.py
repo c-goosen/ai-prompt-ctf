@@ -26,8 +26,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
-async def root():
-    return {"Message": f"Welcome to the {settings.app_name} RETS API"}
+async def root(request:Request):
+    return templates.TemplateResponse(
+            "root.html", {"request": request}
+        )
 
 
 class Input(BaseModel):
@@ -69,34 +71,6 @@ async def read_item(request: Request):
     return templates.TemplateResponse("level1.html", {"request": request})
 
 
-# Level 1 Endpoint
-
-
-# Level 2 Endpoint
-# @app.get("/level/2/{hash}", include_in_schema=False)
-# async def level_two(request: Request, hash: str):
-#     _hash = return_hash(settings.PASSWORDS.get(2))
-#     print(hash)
-#     print(_hash)
-#     if hash == _hash:
-#         print("loading 2")
-#         return templates.TemplateResponse("level2.html", {"request": request})
-#     else:
-#         print("loading 1")
-#
-#         return templates.TemplateResponse("level1.html", {"request": request})@app.get("/level/2/{hash}", include_in_schema=False)
-# async def level_two(request: Request, hash: str):
-#     _hash = return_hash(settings.PASSWORDS.get(2))
-#     print(hash)
-#     print(_hash)
-#     if hash == _hash:
-#         print("loading 2")
-#         return templates.TemplateResponse("level2.html", {"request": request})
-#     else:
-#         print("loading 1")
-#
-#         return templates.TemplateResponse("level1.html", {"request": request})
-
 @app.post("/level/2/submit")
 def check_level_two(request: Request, message: str = Form(...)):
     response = search_qdrant(
@@ -115,18 +89,23 @@ def check_level_two(request: Request, message: str = Form(...)):
         )
 
 # Progressing between levels
-@app.get("/level/{level}/{hash}", include_in_schema=False)
-async def level_two(level: str, request: Request, hash: str):
-    _hash = return_hash(settings.PASSWORDS.get(int(level)))
-    print(hash)
+# @app.post("/level/{level}/{_hash}", include_in_schema=False)
+@app.api_route("/level/{_level}/{_hash}", methods=["GET", "POST"], include_in_schema=False)
+async def level_two(_level: str, request: Request, _hash: str):
+    _pass = settings.PASSWORDS.get(int(_level)-1)
+    print(_pass)
+    _hash_to_check = return_hash(_pass)
     print(_hash)
-    if hash == _hash:
-        print(f"loading {int(level)}")
-        return templates.TemplateResponse(f"level{level}.html", {"request": request})
+    if _hash_to_check == _hash:
+        print(f"loading {int(_level)}")
+        if int(_level)-1 != 5:
+            return templates.TemplateResponse("generic_level.html", {"request": request, "_level":_level})
+        else:
+            return templates.TemplateResponse("complete.html", {"request": request, "pass": settings.PASSWORDS.get(int(_level)-1)})
     else:
         print("loading 1")
 
-        return templates.TemplateResponse("level1.html", {"request": request})
+        return templates.TemplateResponse("level1.html", {"request": request, "message": "Incorrect Answer, try again"})
 
 
 @app.post("/level/4/submit")
