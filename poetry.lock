@@ -361,6 +361,25 @@ files = [
 ]
 
 [[package]]
+name = "clean-text"
+version = "0.6.0"
+description = "Functions to preprocess and normalize text."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "clean-text-0.6.0.tar.gz", hash = "sha256:8374b385fc2a26e06383f62aed076fa6be115e5832239e2a7fd8b344fa8d2ab2"},
+    {file = "clean_text-0.6.0-py3-none-any.whl", hash = "sha256:4fedb156042f192cdef9ed5324b281465f1116aba96791e9289384a2e6bec4da"},
+]
+
+[package.dependencies]
+emoji = ">=1.0.0,<2.0.0"
+ftfy = ">=6.0,<7.0"
+
+[package.extras]
+gpl = ["unidecode (>=1.1.1,<2.0.0)"]
+sklearn = ["pandas (>=1.0.0,<2.0.0)", "scikit-learn (>=1.0.0,<2.0.0)"]
+
+[[package]]
 name = "click"
 version = "8.1.7"
 description = "Composable command line interface toolkit"
@@ -429,14 +448,27 @@ files = [
 ]
 
 [[package]]
+name = "emoji"
+version = "1.7.0"
+description = "Emoji for Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "emoji-1.7.0.tar.gz", hash = "sha256:65c54533ea3c78f30d0729288998715f418d7467de89ec258a31c0ce8660a1d1"},
+]
+
+[package.extras]
+dev = ["coverage", "coveralls", "pytest"]
+
+[[package]]
 name = "fastapi"
-version = "0.103.1"
+version = "0.103.2"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "fastapi-0.103.1-py3-none-any.whl", hash = "sha256:5e5f17e826dbd9e9b5a5145976c5cd90bcaa61f2bf9a69aca423f2bcebe44d83"},
-    {file = "fastapi-0.103.1.tar.gz", hash = "sha256:345844e6a82062f06a096684196aaf96c1198b25c06b72c1311b882aa2d8a35d"},
+    {file = "fastapi-0.103.2-py3-none-any.whl", hash = "sha256:3270de872f0fe9ec809d4bd3d4d890c6d5cc7b9611d721d6438f9dacc8c4ef2e"},
+    {file = "fastapi-0.103.2.tar.gz", hash = "sha256:75a11f6bfb8fc4d2bec0bd710c2d5f2829659c0e8c0afd5560fdda6ce25ec653"},
 ]
 
 [package.dependencies]
@@ -584,6 +616,38 @@ sftp = ["paramiko"]
 smb = ["smbprotocol"]
 ssh = ["paramiko"]
 tqdm = ["tqdm"]
+
+[[package]]
+name = "ftfy"
+version = "6.1.1"
+description = "Fixes mojibake and other problems with Unicode, after the fact"
+optional = false
+python-versions = ">=3.7,<4"
+files = [
+    {file = "ftfy-6.1.1-py3-none-any.whl", hash = "sha256:0ffd33fce16b54cccaec78d6ec73d95ad370e5df5a25255c8966a6147bd667ca"},
+    {file = "ftfy-6.1.1.tar.gz", hash = "sha256:bfc2019f84fcd851419152320a6375604a0f1459c281b5b199b2cd0d2e727f8f"},
+]
+
+[package.dependencies]
+wcwidth = ">=0.2.5"
+
+[[package]]
+name = "googletrans"
+version = "3.1.0a0"
+description = "Free Google Translate API for Python. Translates totally free of charge."
+optional = false
+python-versions = ">=3.6"
+files = []
+develop = false
+
+[package.dependencies]
+httpx = {version = "0.25.0", extras = ["http2"]}
+
+[package.source]
+type = "git"
+url = "git@github.com:c-goosen/py-googletrans.git"
+reference = "upgrade-httpx"
+resolved_reference = "7f999cf46666574f5acb323799b1e1c1e742526c"
 
 [[package]]
 name = "greenlet"
@@ -2963,6 +3027,17 @@ h11 = ">=0.8"
 standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "watchfiles (>=0.13)", "websockets (>=10.4)"]
 
 [[package]]
+name = "wcwidth"
+version = "0.2.7"
+description = "Measures the displayed width of unicode strings in a terminal"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wcwidth-0.2.7-py2.py3-none-any.whl", hash = "sha256:fabf3e32999d9b0dab7d19d845149f326f04fe29bac67709ee071dbd92640a36"},
+    {file = "wcwidth-0.2.7.tar.gz", hash = "sha256:1b6d30a98ddd5ce9bbdb33658191fd2423fc9da203fe3ef1855407dcb7ee4e26"},
+]
+
+[[package]]
 name = "wrapt"
 version = "1.15.0"
 description = "Module for decorators, wrappers and monkey patching."
@@ -3136,4 +3211,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "c7c98af6371e4f151fb4c9eea01ef686fe8b1a6ec66582cf24a928fbf0b33d69"
+content-hash = "6fbc69cacc29519d10f5854d70623a7751fe69d473389d4b1d4cffc07965176b"

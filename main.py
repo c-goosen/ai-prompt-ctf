@@ -45,7 +45,7 @@ def check_level_one(request: Request, message: str = Form(...)):
         QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{level}",
     )
-    if protections.input_regex(message):
+    if protections.input_check(message):
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
@@ -84,7 +84,7 @@ def check_level_two(request: Request, message: str = Form(...)):
         QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(level)):
+    if protections.output_check(message, settings.PASSWORDS.get(level)):
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
@@ -114,7 +114,23 @@ async def level_two(_level: str, request: Request, _hash: str):
 
         return templates.TemplateResponse("generic_level.html", {"request": request, "message": "Incorrect Answer, try again", "level": int(_level)-1})
 
-
+@app.post("/level/3/submit")
+def check_level_two(request: Request, message: str = Form(...)):
+    level = 3
+    response = search_qdrant(
+        search_input=message,
+        service_context=service_context,
+        QDRANT_CLIENT=QDRANT_CLIENT,
+        collection_name=f"level-{level}",
+    )
+    if protections.input_and_output_checks(input=message, output=str(response)):
+        return templates.TemplateResponse(
+            "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
+        )
+    else:
+        return templates.TemplateResponse(
+            "generic_level.html", {"request": request, "message": response, "level": level}
+        )
 @app.post("/level/4/submit")
 def check_level_two(request: Request, message: str = Form(...)):
     level = 4
@@ -124,7 +140,7 @@ def check_level_two(request: Request, message: str = Form(...)):
         QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(level)):
+    if protections.llm_protection(message):
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )
@@ -142,7 +158,7 @@ def check_level_two(request: Request, message: str = Form(...)):
         QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{level}",
     )
-    if protections.output_regex(message, settings.PASSWORDS.get(level)):
+    if protections.translate_and_llm(message):
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": random_block_msg(), "level": level}
         )

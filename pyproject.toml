@@ -14,7 +14,7 @@ pypdf = "^3.15.4"
 llama-cpp-python = "^0.1.82"
 sentence-transformers = "^2.2.2"
 qdrant-client = "^1.5.0"
-fastapi = "^0.103.1"
+fastapi = "0.103.2"
 uvicorn = "^0.23.2"
 pydantic-settings = "^2.0.3"
 black = "^23.9.1"
@@ -23,6 +23,8 @@ llama-hub = "^0.0.29"
 jinja2 = "^3.1.2"
 python-multipart = "^0.0.6"
 python-dotenv = "^1.0.0"
+clean-text = "^0.6.0"
+googletrans = {git = "git@github.com:c-goosen/py-googletrans.git", rev = "upgrade-httpx"}
 
 
 [build-system]
