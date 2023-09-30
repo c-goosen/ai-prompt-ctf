@@ -115,7 +115,7 @@ async def level_two(_level: str, request: Request, _hash: str):
         return templates.TemplateResponse("generic_level.html", {"request": request, "message": "Incorrect Answer, try again", "level": int(_level)-1})
 
 @app.post("/level/3/submit")
-def check_level_two(request: Request, message: str = Form(...)):
+def check_level_three(request: Request, message: str = Form(...)):
     level = 3
     response = search_qdrant(
         search_input=message,
@@ -132,7 +132,7 @@ def check_level_two(request: Request, message: str = Form(...)):
             "generic_level.html", {"request": request, "message": response, "level": level}
         )
 @app.post("/level/4/submit")
-def check_level_two(request: Request, message: str = Form(...)):
+def check_level_four(request: Request, message: str = Form(...)):
     level = 4
     response = search_qdrant(
         search_input=message,
@@ -150,7 +150,7 @@ def check_level_two(request: Request, message: str = Form(...)):
         )
 
 @app.post("/level/5/submit")
-def check_level_two(request: Request, message: str = Form(...)):
+def check_level_five(request: Request, message: str = Form(...)):
     level = 5
     response = search_qdrant(
         search_input=message,
