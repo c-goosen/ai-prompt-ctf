@@ -7,8 +7,14 @@
     </style>
 {% endblock %}
 {% block content %}
-    <h1>Index</h1>
+    <h1>{{ CTF_NAME }}</h1>
+    <br></br>
     <p class="important">
-      Welcome to my awesome homepage.
+        {{ CTF_DETAILS }}
+    </p>
+    <br>
+    </br>
+    <p class="important">
+        To start level 1 click here <a href="/level/1"> Level 1</a>
     </p>
 {% endblock %}

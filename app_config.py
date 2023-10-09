@@ -9,6 +9,13 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
+    CTF_NAME: str = os.getenv("CTF_NAME", "UW Prompt Injection challenge")
+    CTF_DETAILS: str = os.getenv("CTF_DETAILS", """
+    This is a prompt injection ( https://www.lakera.ai/insights/what-is-prompt-injection ) challenge.
+    You need to progress through multiple levels. Each time you get a password/secret back,
+    you should submit it to progress through the levels.
+    Each level becomes harder.
+    """)
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
     QDRANT_PORT: str = os.getenv("QDRANT_PORT")
