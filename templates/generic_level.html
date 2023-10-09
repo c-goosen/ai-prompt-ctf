@@ -26,7 +26,7 @@
 									<h2>Level {{level}}</h2><i class="icon fa-solid fa-battery-full fa-lg"></i>
 									{% endif %}
 								</header>
-								<form action="/level/{{level}}/submit" method="post">
+								<form action="/level/{{level}}/submit/{{Level_hash}}" method="post">
 									<div>
 										<div class="row">
 											<div class="col-12">
@@ -42,7 +42,7 @@
 									</div>
 								</form>
 
-								<form action="/level/{{level}}/confirm" method="post">
+								<form action="/level/{{level}}/confirm/{{Level_hash}}" method="post">
 									<div>
 										<div class="row">
 											<div class="col-12">
