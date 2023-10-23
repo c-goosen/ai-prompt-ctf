@@ -2,6 +2,7 @@ from app_config import settings
 from hashlib import sha256
 import random
 
+
 def return_hash(input: str):
     return str(sha256(bytes(input, "utf-8")).hexdigest())
 
@@ -16,5 +17,7 @@ def hash_and_check_password(level, password_input: str):
         return password_hash
     else:
         return False
+
+
 def random_block_msg():
     return random.choice(settings.BLOCK_MESSAGES)

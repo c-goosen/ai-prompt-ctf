@@ -1,23 +1,28 @@
+import decimal
+
 from app_config import settings
 import re
 import cleantext
 from llm_guard import LLMGaurdV1
 from googletrans import Translator
 
-def text_normalization(text):
 
-    return cleantext.clean(text, fix_unicode=True,               # fix various unicode errors
-    to_ascii=True,                  # transliterate to closest ASCII representation
-    lower=True,                     # lowercase text
-    no_line_breaks=False,           # fully strip line breaks as opposed to only normalizing them
-    #no_urls=False,                  # replace all URLs with a special token
-    #no_emails=False,                # replace all email addresses with a special token
-    no_numbers=False,               # replace all numbers with a special token
-    no_digits=False,                # replace all digits with a special token
-    no_currency_symbols=True,      # replace all currency symbols with a special token
-    no_punct=True,                 # remove punctuations
-    lang="en"                       # set to 'de' for German special handling)
+def text_normalization(text):
+    return cleantext.clean(
+        text,
+        fix_unicode=True,  # fix various unicode errors
+        to_ascii=True,  # transliterate to closest ASCII representation
+        lower=True,  # lowercase text
+        no_line_breaks=False,  # fully strip line breaks as opposed to only normalizing them
+        # no_urls=False,                  # replace all URLs with a special token
+        # no_emails=False,                # replace all email addresses with a special token
+        no_numbers=False,  # replace all numbers with a special token
+        no_digits=False,  # replace all digits with a special token
+        no_currency_symbols=True,  # replace all currency symbols with a special token
+        no_punct=True,  # remove punctuations
+        lang="en",  # set to 'de' for German special handling)
     )
+
 
 def input_check(input) -> bool:
     if any([x in text_normalization(input) for x in settings.INPUT_FILTERS]):
@@ -26,12 +31,13 @@ def input_check(input) -> bool:
         return False
 
 
-def output_check(input:str, output:str) -> bool:
+def output_check(input: str, output: str) -> bool:
     input = text_normalization(input)
     if input in output or input == output:
         return True
     else:
         return False
+
 
 def output_regex(output):
     output = output.lower()
@@ -47,12 +53,18 @@ def output_regex(output):
     return False
 
 
-def input_and_output_checks(input:str, output:str) -> bool:
+def input_and_output_checks(input: str, output: str) -> bool:
     output = text_normalization(output)
     input = text_normalization(input)
 
     output = output.lower()
-    if any([input_check(input), output_check(input=input, output=output), output_regex(output=output)]):
+    if any(
+        [
+            input_check(input),
+            output_check(input=input, output=output),
+            output_regex(output=output),
+        ]
+    ):
         return True
     else:
         return False
@@ -63,33 +75,34 @@ def llm_protection(input) -> bool:
     resp = llm.query(input)[0]
     for x in resp:
         if x.get("label") == "NEGATIVE":
-            if x['score'] > 0.8:
+            if x["score"] > 0.8:
                 return True
     input = text_normalization(input)
     resp = llm.query(input)[0]
     for x in resp:
         if x.get("label") == "NEGATIVE":
-            if x['score'] > 0.8:
+            if x["score"] > 0.8:
                 return True
 
     return False
 
 
 def translate_and_llm(input) -> bool:
+    protected = False
     translator = Translator()
     translated = translator.translate(text=input).text
     llm = LLMGaurdV1()
     resp = llm.query(translated)[0]
     for x in resp:
-        if x.get("label") == "NEGATIVE":
-            if x['score'] > 0.8:
-                return True
+        if x.get("label") == "POSITIVE":
+            if x["score"] > decimal.Decimal(0.8):
+                protected = True
     input = text_normalization(input)
     translated = translator.translate(text=input).text
     resp = llm.query(translated)[0]
     for x in resp:
-        if x.get("label") == "NEGATIVE":
-            if x['score'] > 0.8:
-                return True
+        if x.get("label") == "POSITIVE":
+            if x["score"] > decimal.Decimal(0.8):
+                protected = True
 
-    return False
+    return protected
