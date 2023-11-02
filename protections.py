@@ -71,20 +71,21 @@ def input_and_output_checks(input: str, output: str) -> bool:
 
 
 def llm_protection(input) -> bool:
+    protected = False
     llm = LLMGaurdV1()
     resp = llm.query(input)[0]
     for x in resp:
-        if x.get("label") == "NEGATIVE":
+        if x.get("label") == "POSITIVE":
             if x["score"] > 0.8:
-                return True
+                protected = True
     input = text_normalization(input)
     resp = llm.query(input)[0]
     for x in resp:
-        if x.get("label") == "NEGATIVE":
+        if x.get("label") == "POSITIVE":
             if x["score"] > 0.8:
-                return True
+                protected = True
 
-    return False
+    return protected
 
 
 def translate_and_llm(input) -> bool:

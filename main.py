@@ -14,11 +14,14 @@ from fastapi.staticfiles import StaticFiles
 import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 
-llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo", api_key=settings.OPENAI_API_KEY)
+llm_openai_3_5_turbo = OpenAI(temperature=0.1, model="gpt-3.5-turbo", api_key=settings.OPENAI_API_KEY)
+llm_openai_4_turbo = OpenAI(temperature=0.1, model="gpt-4", api_key=settings.OPENAI_API_KEY)
+
 embed_model = LangchainEmbedding(
     HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 )
-service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
+service_context = ServiceContext.from_defaults(llm=llm_openai_3_5_turbo, embed_model=embed_model)
+service_context_4 = ServiceContext.from_defaults(llm=llm_openai_3_5_turbo, embed_model=embed_model)
 
 app = FastAPI()
 
@@ -117,9 +120,10 @@ async def load_any_level_hash(_level: int, request: Request, _hash: str):
 
 @app.post("/level/submit/{_level}")
 def check_level_generic(request: Request, _level: int, message: str = Form(...)):
+    context = service_context if _level < 6 else service_context_4
     response = search_qdrant(
         search_input=message,
-        service_context=service_context,
+        service_context=context,
         QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{_level}",
     )
@@ -151,13 +155,19 @@ def check_level_generic(request: Request, _level: int, message: str = Form(...))
             trigger_checks = True
         else:
             trigger_checks = False
+    elif _level == 6:
+        print("Defending level 6")
+        if protections.translate_and_llm(message):
+            trigger_checks = True
+        else:
+            trigger_checks = False
     else:
         trigger_checks = False
 
     if trigger_checks:
         return templates.TemplateResponse(
             "generic_level.html",
-            {"request": request, "message": random_block_msg(), "_level": int(_level)},
+            {"request": request, "message": random_block_msg(), "ai_messasge": response, "_level": int(_level)},
         )
     else:
         return templates.TemplateResponse(

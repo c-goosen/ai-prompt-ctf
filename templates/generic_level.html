@@ -27,6 +27,9 @@
 											{% if message %}
 												<p>Response: {{ message }}</p>
 											{% endif %}
+											{% if ai_message %}
+												<p>AI Response: {{ ai_message }}</p>
+											{% endif %}
 											<div class="col-12">
 												<input type="submit" value="Prompt AI" />
 											</div>

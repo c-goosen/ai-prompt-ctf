@@ -18,7 +18,7 @@ client = qdrant_client.QdrantClient(
     f"{settings.QDRANT_HOST}:{settings.QDRANT_PORT}",
     api_key=settings.QDRANT_API_KEY,  # For Qdrant Cloud, None for local instance
 )
-levels = [1, 2, 3, 4, 5]
+levels = [1, 2, 3, 4, 5, 6]
 for k in levels:
     storage_context = StorageContext.from_defaults(
         vector_store=QdrantVectorStore(client=client, collection_name=f"level-{k}")
