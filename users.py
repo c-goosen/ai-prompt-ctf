@@ -13,8 +13,9 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from db import User, get_user_db
 
 from fastapi_users.authentication import CookieTransport
+from app_config import settings
 
-SECRET = "SECRET"
+SECRET = settings.APP_SECRET
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

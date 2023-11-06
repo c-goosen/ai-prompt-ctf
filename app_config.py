@@ -10,6 +10,7 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
+    APP_SECRET: str = os.getenv("SECRET", "SECRET")
     CTF_NAME: str = os.getenv("CTF_NAME", "UW Prompt Injection challenge")
     CTF_DETAILS: str = os.getenv(
         "CTF_DETAILS",
