@@ -28,6 +28,8 @@ googletrans = {git = "git@github.com:c-goosen/py-googletrans.git", rev = "upgrad
 supabase = "^2.0.3"
 vecs = "^0.4.1"
 unidecode = "^1.3.7"
+fastapi-users = {extras = ["sqlalchemy"], version = "^12.1.2"}
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]

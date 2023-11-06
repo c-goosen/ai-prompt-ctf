@@ -11,12 +11,13 @@
 							<article id="contact" class="panel">
 								<header>
 
-									<h2>Level {{_level}}</h2>
+									<h2>Level {{_level}}
 									{% if _level == 1 %}<i class="icon fa-solid fa-battery-empty fa-lg"></i>{% endif %}
 									{% if _level == 2 %}<i class="icon fa-solid fa-battery-quarter fa-lg"></i>{% endif %}
 									{% if _level == 3 %}<i class="icon fa-solid fa-battery-half fa-lg"></i>{% endif %}
 									{% if _level == 4 %}<i class="icon fa-solid fa-battery-three-quarters fa-lg"></i>{% endif %}
 									{% if _level == 5 %}<i class="icon fa-solid fa-battery-full fa-lg"></i>{% endif %}
+									{% if _level == 6 %}<i class="icon fa-solid fa-check fa-lg"></i>{% endif %}</h2>
 								</header>
 								<form action="/level/submit/{{_level}}" method="post">
 									<div>

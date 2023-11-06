@@ -1372,6 +1372,8 @@ input, select, textarea {
 	h1 {
 		font-size: 2.4em;
 		letter-spacing: -0.015em;
+				text-align: centre !important
+
 	}
 
 	h2 {

@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     SUPABASE_PORT: str = "5432"
     SUPABASE_DB_NAME: str = "postgres"
     SUPABASE_PG_URI: str = f"postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
+    SUPABASE_PG_URI_ASYNC: str = f"postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
