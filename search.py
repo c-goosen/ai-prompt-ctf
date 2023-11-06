@@ -16,7 +16,7 @@ def search_supabase(
     index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store, service_context=service_context
     )
-    query_engine = index.as_query_engine()
+    query_engine = index.as_query_engine(similarity_top_k=5)
     response = query_engine.query(search_input)
     print(response)
     return response.response

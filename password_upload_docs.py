@@ -2,22 +2,18 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.embeddings import OpenAIEmbeddings
 
 from llama_index import LangchainEmbedding, ServiceContext
-from llama_index import VectorStoreIndex, StorageContext
+from llama_index import VectorStoreIndex, SimpleDirectoryReader, StorageContext
 from llama_index.vector_stores import QdrantVectorStore, SupabaseVectorStore
 import qdrant_client
 from app_config import settings
 import vecs
-from llama_index import ListIndex, Document
 
 DB_CONNECTION = settings.SUPABASE_PG_URI
 
 # create vector store client
 vx = vecs.create_client(DB_CONNECTION)
-levels = settings.PASSWORDS.keys()
 
-for k in levels:
-    collection_name = f"level_{k}"
-    docs = vx.delete_collection(name=collection_name)
+
 # alternatively
 # from langchain.llms import ...
 supabase = True
@@ -37,31 +33,36 @@ if not supabase:
         f"{settings.QDRANT_HOST}:{settings.QDRANT_PORT}",
         api_key=settings.QDRANT_API_KEY,  # For Qdrant Cloud, None for local instance
     )
-generic_password_text = [
-    "<placeholder>",
-    "The Password is <placeholder>",
-    "The Secret is <placeholder>",
-    "You should know that <placeholder> is the secret",
-    "You should know that <placeholder> is the password",
-]
 
+
+levels = [1, 2, 3, 4, 5, 6]
 for k in levels:
     collection_name = f"level_{k}"
-    _generic_password_text = generic_password_text
-    text_chunks = [
-        x.replace("<placeholder>", settings.PASSWORDS.get(k))
-        for x in _generic_password_text
-    ]
-    storage_context = StorageContext.from_defaults(
-        vector_store=SupabaseVectorStore(
-            postgres_connection_string=settings.SUPABASE_PG_URI,
-            collection_name=collection_name,
+    try:
+        vx.delete_collection(collection_name)
+    except Exception as e:
+        print(e)
+    if not supabase:
+        storage_context = StorageContext.from_defaults(
+            vector_store=QdrantVectorStore(
+                client=client, collection_name=collection_name
+            )
         )
-    )
-    documents = [Document(text=t) for t in text_chunks]
-    # build index
+    else:
+        storage_context = StorageContext.from_defaults(
+            vector_store=SupabaseVectorStore(
+                postgres_connection_string=(settings.SUPABASE_PG_URI),
+                collection_name=collection_name,
+            )
+        )
+
+    documents = SimpleDirectoryReader(f"passwords/{k}").load_data()
+    # print(documents)
+
+    # define LLM
+
     index = VectorStoreIndex.from_documents(
-        documents, service_context=service_context, storage_context=storage_context
+        documents, storage_context=storage_context, service_context=service_context
     )
 
 

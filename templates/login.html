@@ -7,16 +7,16 @@
     </style>
 {% endblock %}
 {% block content %}
-     <form action="/auth/signup" method="post">
-    <h1>Signup</h1>
+     <form action="/auth/login" method="post">
+    <h1>Login</h1>
       <div class="container">
         <label for="email"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="email" required>
+        <input type="text" placeholder="Enter Email" name="username" required>
 
         <label for="password"><b>Password</b></label>
         <input type="password" placeholder="Enter Password" name="password" required>
 
-        <button type="submit">Signup</button>
+        <button type="submit">Login</button>
 
       </div>
 

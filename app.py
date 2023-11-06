@@ -1,9 +1,11 @@
 import random
 
-from fastapi import FastAPI, Form, Request, Response,Depends
+from fastapi import FastAPI, Form, Request, Response, Depends
 from starlette.responses import RedirectResponse
 from llama_index import ServiceContext
 from app_config import settings, QDRANT_CLIENT
+from typing import Annotated
+
 # from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from llama_index import LangchainEmbedding
 from pydantic import BaseModel
@@ -14,7 +16,7 @@ import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 import os
 from langchain.embeddings import OpenAIEmbeddings
-
+from requests import post
 
 from db import User, create_db_and_tables
 from schemas import UserCreate, UserRead, UserUpdate
@@ -23,11 +25,9 @@ from users import auth_backend, current_active_user, fastapi_users
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 
-
 embed_model = LangchainEmbedding(
     # HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
-
 )
 service_context = ServiceContext.from_defaults(
     llm=settings.llm_openai_3_5_turbo, embed_model=embed_model
@@ -73,6 +73,7 @@ async def on_startup():
     # Not needed if you setup a migration system like Alembic
     await create_db_and_tables()
 
+
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -88,6 +89,7 @@ async def root(request: Request):
         },
     )
 
+
 @app.get("/signup")
 async def signup(request: Request):
     return templates.TemplateResponse(
@@ -96,12 +98,19 @@ async def signup(request: Request):
             "request": request,
         },
     )
+
+
 class Input(BaseModel):
     query: str
 
 
 @app.post("/level/{_level}/confirm/", include_in_schema=False)
-def confirm_password_generic(_level: str, request: Request, password: str = Form(...), user: User = Depends(current_active_user)):
+def confirm_password_generic(
+    _level: str,
+    request: Request,
+    password: str = Form(...),
+    user: User = Depends(current_active_user),
+):
     answer_hash = hash_and_check_password(level=int(_level), password_input=password)
     if answer_hash:
         new_level = int(_level) + 1
@@ -127,7 +136,9 @@ def confirm_password_generic(_level: str, request: Request, password: str = Form
 
 # This endpoint allows going back to levels using cookies, don't need hash in URL
 @app.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
-async def load_any_level_cookie(_level: int, request: Request, user: User = Depends(current_active_user)):
+async def load_any_level_cookie(
+    _level: int, request: Request, user: User = Depends(current_active_user)
+):
     if _level == 1:
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": "", "_level": _level}
@@ -234,3 +245,37 @@ def check_level_generic(request: Request, _level: int, message: str = Form(...))
             "generic_level.html",
             {"request": request, "message": response, "_level": int(_level)},
         )
+from fastapi_users.manager import BaseUserManager
+@app.post("/auth/signup")
+async def login(request:Request, email: Annotated[str, Form()], password: Annotated[str, Form()]):
+    import contextlib
+
+    from db import get_async_session, get_user_db
+    from schemas import UserCreate
+    from users import get_user_manager
+    from fastapi_users.exceptions import UserAlreadyExists
+
+    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
+    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+    try:
+        async with get_async_session_context() as session:
+            async with get_user_db_context(session) as user_db:
+                async with get_user_manager_context(user_db) as user_manager:
+                    user = await user_manager.create(
+                        UserCreate(
+                            email=email, password=password, is_superuser=False
+                        )
+                    )
+                    print(f"User created {user}")
+                    return templates.TemplateResponse(
+                        "login.html",
+                        {"request": request}
+                    )
+    except UserAlreadyExists:
+        print(f"User {email} already exists")
+        return templates.TemplateResponse(
+            "signup.html",
+            {"request": request}
+        )
+

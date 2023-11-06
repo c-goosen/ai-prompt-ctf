@@ -39,7 +39,9 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY")
     # OPENAI
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    llm_openai_davinci: object = OpenAI(model='text-davinci-003', temperature=0, max_tokens=256, api_key=OPENAI_API_KEY)
+    llm_openai_davinci: object = OpenAI(
+        model="text-davinci-003", temperature=0, max_tokens=256, api_key=OPENAI_API_KEY
+    )
     llm_openai_3_5_turbo: object = OpenAI(
         temperature=0.1, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY
     )
@@ -60,13 +62,7 @@ class Settings(BaseSettings):
         3: os.getenv("PASSWORDS_THREE"),
         4: os.getenv("PASSWORDS_FOUR"),
         5: os.getenv("PASSWORDS_FIVE"),
-    }
-    LEVEL_ICONS: dict = {
-        1: "icon fa-solid fa-battery-empty fa-lg",
-        2: "icon fa-solid fa-battery-quarter fa-lg",
-        3: "icon fa-solid fa-battery-half fa-lg",
-        4: "icon fa-solid fa-battery-three-quarters fa-lg",
-        5: "icon fa-solid fa-battery-full fa-lg",
+        6: os.getenv("PASSWORDS_FIVE"),
     }
     REGEX_LIST: list = [
         r"(\b[\w]{2}[\d]{6}\b)",
