@@ -24,26 +24,30 @@
 											<div class="col-12">
 												<textarea name="message" id="message" placeholder="Message" rows="6"></textarea>
 											</div>
+
+											<div class="col-12">
+												<input type="submit" value="Prompt AI" />
+											</div>
 											{% if message %}
 												<p>Response: {{ message }}</p>
 											{% endif %}
 											{% if ai_message %}
 												<p>AI Response: {{ ai_message }}</p>
 											{% endif %}
-											<div class="col-12">
-												<input type="submit" value="Prompt AI" />
-											</div>
 										</div>
 									</div>
 								</form>
-
 								<form action="/level/{{_level}}/confirm/" method="post">
 									<div>
 
 										<div class="row">
 											<div class="col-12">
-												<textarea name="password" id="password" placeholder="Password" ></textarea>
+																				{% if message %}
+
+												<textarea style="width:50%" name="password" id="password" placeholder="Password" ></textarea>
 												<input type="submit" value="Proceed to next level" />
+																				{% endif %}
+
 											</div>
 										</div>
 									</div>

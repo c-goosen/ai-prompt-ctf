@@ -133,7 +133,7 @@ def check_level_generic(request: Request, _level: int, message: str = Form(...))
         search_input=message,
         service_context=context,
         # QDRANT_CLIENT=QDRANT_CLIENT,
-        collection_name=f"level-{_level}",
+        collection_name=f"level_{_level}",
     )
     trigger_checks = False
     print(f"LEVEL: {_level}")

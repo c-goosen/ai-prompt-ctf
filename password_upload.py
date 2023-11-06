@@ -3,11 +3,17 @@ from langchain.embeddings import OpenAIEmbeddings
 
 from llama_index import LangchainEmbedding, ServiceContext
 from llama_index import GPTVectorStoreIndex, SimpleDirectoryReader, StorageContext
-from llama_index.llms import OpenAI
 from llama_index.vector_stores import QdrantVectorStore, SupabaseVectorStore
 import qdrant_client
 from app_config import settings
-import os
+import vecs
+
+DB_CONNECTION = settings.SUPABASE_PG_URI
+
+# create vector store client
+vx = vecs.create_client(DB_CONNECTION)
+
+
 
 # alternatively
 # from langchain.llms import ...
@@ -33,7 +39,11 @@ if not supabase:
 
 levels = [1, 2, 3, 4, 5, 6]
 for k in levels:
-    collection_name = f"level-{k}"
+    collection_name = f"level_{k}"
+    try:
+        vx.delete_collection(collection_name)
+    except Exception as e:
+        print(e)
     if not supabase:
         storage_context = StorageContext.from_defaults(
             vector_store=QdrantVectorStore(
@@ -56,3 +66,11 @@ for k in levels:
     index = GPTVectorStoreIndex.from_documents(
         documents, storage_context=storage_context, service_context=service_context
     )
+
+
+
+for k in levels:
+    collection_name = f"level_{k}"
+    docs = vx.get_collection(name=collection_name)
+    docs.create_index()
+

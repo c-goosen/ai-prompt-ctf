@@ -8,6 +8,7 @@ def search_supabase(
     service_context: object,
     collection_name: str = "ctf-secrets",
 ):
+    print(f"collection_name -> {collection_name}")
     vector_store = SupabaseVectorStore(
         postgres_connection_string=settings.SUPABASE_PG_URI,
         collection_name=collection_name,
@@ -17,6 +18,7 @@ def search_supabase(
     )
     query_engine = index.as_query_engine()
     response = query_engine.query(search_input)
+    print(response)
     return response.response
 
 
