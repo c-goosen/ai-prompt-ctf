@@ -1,4 +1,6 @@
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
+
 from llama_index import LangchainEmbedding, ServiceContext
 from llama_index import GPTVectorStoreIndex, SimpleDirectoryReader, StorageContext
 from llama_index.llms import OpenAI
@@ -7,14 +9,15 @@ import qdrant_client
 from app_config import settings
 import os
 
-os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-
 # alternatively
 # from langchain.llms import ...
 supabase = True
 # embed_model = LangchainEmbedding(
 #     HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 # )
+embed_model = LangchainEmbedding(
+    OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
+)
 # llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-16k", api_key=settings.OPENAI_API_KEY)
 service_context = ServiceContext.from_defaults(
     # embed_model=embed_model

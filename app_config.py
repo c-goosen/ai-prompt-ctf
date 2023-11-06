@@ -84,3 +84,4 @@ QDRANT_CLIENT: object = qdrant_client.QdrantClient(
     f"{settings.QDRANT_HOST}:{settings.QDRANT_PORT}",
     api_key=f"{settings.QDRANT_API_KEY}",  # For Qdrant Cloud, None for local instance
 )
+os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
