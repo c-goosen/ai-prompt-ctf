@@ -26,6 +26,7 @@ python-dotenv = "^1.0.0"
 clean-text = "^0.6.0"
 googletrans = {git = "git@github.com:c-goosen/py-googletrans.git", rev = "upgrade-httpx"}
 supabase = "^2.0.3"
+vecs = "^0.4.1"
 
 
 [tool.poetry.group.dev.dependencies]

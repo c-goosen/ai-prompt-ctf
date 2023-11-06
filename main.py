@@ -4,7 +4,6 @@ from fastapi import FastAPI, Form, Request, Response
 from starlette.responses import RedirectResponse
 from llama_index import ServiceContext
 from app_config import settings, QDRANT_CLIENT
-from llama_index.llms import OpenAI
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from llama_index import LangchainEmbedding
 from pydantic import BaseModel
@@ -13,15 +12,21 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
+import os
 
-llm_openai_3_5_turbo = OpenAI(temperature=0.1, model="gpt-3.5-turbo", api_key=settings.OPENAI_API_KEY)
-llm_openai_4_turbo = OpenAI(temperature=0.1, model="gpt-4", api_key=settings.OPENAI_API_KEY)
+os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
+
+
 
 embed_model = LangchainEmbedding(
     HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 )
-service_context = ServiceContext.from_defaults(llm=llm_openai_3_5_turbo, embed_model=embed_model)
-service_context_4 = ServiceContext.from_defaults(llm=llm_openai_3_5_turbo, embed_model=embed_model)
+service_context = ServiceContext.from_defaults(
+    llm=settings.llm_openai_3_5_turbo, embed_model=embed_model
+)
+service_context_4 = ServiceContext.from_defaults(
+    llm=settings.llm_openai_4_turbo, embed_model=embed_model
+)
 
 app = FastAPI()
 
@@ -167,7 +172,12 @@ def check_level_generic(request: Request, _level: int, message: str = Form(...))
     if trigger_checks:
         return templates.TemplateResponse(
             "generic_level.html",
-            {"request": request, "message": random_block_msg(), "ai_messasge": response, "_level": int(_level)},
+            {
+                "request": request,
+                "message": random_block_msg(),
+                "ai_messasge": response,
+                "_level": int(_level),
+            },
         )
     else:
         return templates.TemplateResponse(

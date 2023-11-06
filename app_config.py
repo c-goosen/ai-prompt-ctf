@@ -4,6 +4,7 @@ from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 import qdrant_client
 from dotenv import load_dotenv
+from llama_index.llms import OpenAI
 
 load_dotenv()
 
@@ -19,12 +20,31 @@ class Settings(BaseSettings):
     Each level becomes harder.
     """,
     )
+    # Supabase
+    SUPABASE_PG_USER: str = "postgres"
+    SUPABASE_PG_PASSWORD: str = os.getenv("SUPABASE_PG_PASSWORD")
+    SUPABASE_HOST: str = os.getenv(
+        "SUPABASE_HOST", "db.dfqzxhihppgdbotizxul.supabase.co"
+    )
+    SUPABASE_PORT: str = "5432"
+    SUPABASE_DB_NAME: str = "postgres"
+    SUPABASE_PG_URI: str = f"postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
+    #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
     QDRANT_PORT: str = os.getenv("QDRANT_PORT")
     QDRANT_HOST: AnyUrl = os.getenv("QDRANT_HOST")
     QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY")
+    # OPENAI
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    llm_openai_davinci: object = OpenAI(model='text-davinci-003', temperature=0, max_tokens=256, api_key=OPENAI_API_KEY)
+    llm_openai_3_5_turbo: object = OpenAI(
+        temperature=0.1, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY
+    )
+    llm_openai_4_turbo: object = OpenAI(
+        temperature=0.1, model="gpt-4", api_key=OPENAI_API_KEY
+    )
+    #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
     BLOCK_MESSAGES: list[str] = [
@@ -54,7 +74,7 @@ class Settings(BaseSettings):
         r"^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$"
         r"[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}",  # takealot
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
-        r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b"
+        r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
     FINAL_LEVEL: int = 7  # Actually 5
 
