@@ -9,7 +9,7 @@ def search_supabase(
     collection_name: str = "ctf-secrets",
 ):
     vector_store = SupabaseVectorStore(
-        postgres_connection_string=(settings.SUPABASE_PG_URI),
+        postgres_connection_string=settings.SUPABASE_PG_URI,
         collection_name=collection_name,
     )
     index = VectorStoreIndex.from_vector_store(

@@ -20,7 +20,7 @@ embed_model = LangchainEmbedding(
 )
 # llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-16k", api_key=settings.OPENAI_API_KEY)
 service_context = ServiceContext.from_defaults(
-    # embed_model=embed_model
+    embed_model=embed_model,
 llm=settings.llm_openai_davinci
 )
 

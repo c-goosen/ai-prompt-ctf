@@ -4,22 +4,25 @@ from fastapi import FastAPI, Form, Request, Response
 from starlette.responses import RedirectResponse
 from llama_index import ServiceContext
 from app_config import settings, QDRANT_CLIENT
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+# from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from llama_index import LangchainEmbedding
 from pydantic import BaseModel
-from search import search_qdrant
+from search import search_qdrant, search_supabase
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 import os
+from langchain.embeddings import OpenAIEmbeddings
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 
 
 embed_model = LangchainEmbedding(
-    HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    # HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
+
 )
 service_context = ServiceContext.from_defaults(
     llm=settings.llm_openai_3_5_turbo, embed_model=embed_model
@@ -126,10 +129,10 @@ async def load_any_level_hash(_level: int, request: Request, _hash: str):
 @app.post("/level/submit/{_level}")
 def check_level_generic(request: Request, _level: int, message: str = Form(...)):
     context = service_context if _level < 6 else service_context_4
-    response = search_qdrant(
+    response = search_supabase(
         search_input=message,
         service_context=context,
-        QDRANT_CLIENT=QDRANT_CLIENT,
+        # QDRANT_CLIENT=QDRANT_CLIENT,
         collection_name=f"level-{_level}",
     )
     trigger_checks = False
