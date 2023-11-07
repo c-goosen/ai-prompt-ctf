@@ -1,6 +1,6 @@
 import random
 
-from fastapi import FastAPI, Form, Request, Response, Depends
+from fastapi import FastAPI, Form, Request, Depends
 from starlette.responses import RedirectResponse
 from llama_index import ServiceContext
 from app_config import settings, QDRANT_CLIENT
@@ -98,6 +98,14 @@ async def signup(request: Request):
             "request": request,
         },
     )
+@app.get("/login")
+async def login(request: Request):
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+        },
+    )
 
 
 class Input(BaseModel):
@@ -124,14 +132,6 @@ def confirm_password_generic(
             "generic_level.html",
             {"request": request, "message": "Wrong password", "_level": int(_level)},
         )
-
-
-# @app.get("/level/1")
-# async def read_item(request: Request):
-#     level = 1
-#     return templates.TemplateResponse(
-#         "generic_level.html", {"request": request, "_level": level}
-#     )
 
 
 # This endpoint allows going back to levels using cookies, don't need hash in URL
@@ -246,8 +246,12 @@ def check_level_generic(request: Request, _level: int, message: str = Form(...))
             {"request": request, "message": response, "_level": int(_level)},
         )
 from fastapi_users.manager import BaseUserManager
-@app.post("/auth/signup")
+@app.post("/auth/authenticate")
 async def login(request:Request, email: Annotated[str, Form()], password: Annotated[str, Form()]):
+    from users import auth_backend, get_jwt_strategy
+    res = auth_backend.login()
+@app.post("/auth/signup")
+async def signup(request:Request, email: Annotated[str, Form()], password: Annotated[str, Form()]):
     import contextlib
 
     from db import get_async_session, get_user_db
