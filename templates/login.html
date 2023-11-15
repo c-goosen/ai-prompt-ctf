@@ -5,9 +5,15 @@
     <style type="text/css">
         .important { color: #336699; }
     </style>
+    <script>
+        if( $.cookie('fastapiusersauth') != null ) {
+        window.location.replace('/level/1');
+        }
+</script>
 {% endblock %}
 {% block content %}
-     <form target="_blank" action="/auth/login" method="post">
+<!--    <form target="_blank" action="/auth/login" method="post">-->
+     <form action="/auth/login" method="post">
     <h1>Login</h1>
       <div class="container">
         <label for="email"><b>Username</b></label>
@@ -16,7 +22,8 @@
         <label for="password"><b>Password</b></label>
         <input type="password" placeholder="Enter Password" name="password" required>
 
-        <button onclick="window.location.href = '/level/1';" type="submit">Login</button>
+        <button onclick="if( $.cookie('fastapiusersauth') != null ) {window.location.href = '/level/1';}" type="submit">Login</button>
+<!--        <button  type="submit">Login</button>-->
 
       </div>
 

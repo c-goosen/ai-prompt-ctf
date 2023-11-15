@@ -129,7 +129,7 @@
 		}
 
 	body {
-		background-image: url('images/overlay.png'), url('images/bg.jpg');
+		background-image: linear-gradient(to bottom , #F5F0F8, #fff);
 		background-repeat: repeat, no-repeat;
 		background-size: auto, 100% 100%;
 		background-attachment: fixed;
@@ -491,6 +491,7 @@
 		@include icon;
 		position: relative;
 		text-decoration: none;
+		padding: 4px
 
 		&.solid {
 			&:before {

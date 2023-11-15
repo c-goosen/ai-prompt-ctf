@@ -12,23 +12,24 @@
 								<header>
 
 									<h2>Level {{_level}}
-									{% if _level == 1 %}<i class="icon fa-solid fa-battery-empty fa-lg"></i>{% endif %}
-									{% if _level == 2 %}<i class="icon fa-solid fa-battery-quarter fa-lg"></i>{% endif %}
-									{% if _level == 3 %}<i class="icon fa-solid fa-battery-half fa-lg"></i>{% endif %}
-									{% if _level == 4 %}<i class="icon fa-solid fa-battery-three-quarters fa-lg"></i>{% endif %}
-									{% if _level == 5 %}<i class="icon fa-solid fa-battery-full fa-lg"></i>{% endif %}
-									{% if _level == 6 %}<i class="icon fa-solid fa-check fa-lg"></i>{% endif %}</h2>
+<!--									{% if _level == 1 %}<i class="icon fa-solid fa-1 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 2 %}<i class="icon fa-solid fa-2 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 3 %}<i class="icon fa-solid fa-3 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 4 %}<i class="icon fa-solid fa-4 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 5 %}<i class="icon fa-solid fa-5 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 6 %}<i class="icon fa-solid fa-6 fa-lg"></i>{% endif %}-->
+<!--									{% if _level == 7 %}<i class="icon fa-solid fa-7 fa-lg"></i>{% endif %}-->
+<!--									</h2>-->
 								</header>
 								<form action="/level/submit/{{_level}}" method="post">
 									<div>
 										<div class="row">
 											<div class="col-12">
-												<textarea name="message" id="message" placeholder="Message" rows="6"></textarea>
-											</div>
+												<textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
 
-											<div class="col-12">
 												<input type="submit" value="Prompt AI" />
 											</div>
+
 											{% if message %}
 												<p>Response: {{ message }}</p>
 											{% endif %}
@@ -43,11 +44,10 @@
 
 										<div class="row">
 											<div class="col-12">
-																				{% if message %}
 
-												<textarea style="width:50%" name="password" id="password" placeholder="Password" ></textarea>
+												<textarea style="width:50%" name="password" id="password" placeholder="Password" rows="1"></textarea>
 												<input type="submit" value="Proceed to next level" />
-																				{% endif %}
+
 
 											</div>
 										</div>

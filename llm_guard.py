@@ -2,7 +2,7 @@ import decimal
 import json
 import requests
 from app_config import settings
-
+from requests.adapters import HTTPAdapter, Retry
 
 class LLMGaurdV1:
     API_URL = "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
@@ -14,7 +14,11 @@ class LLMGaurdV1:
 
     def query(self, prompt):
         json_payload = {"inputs": prompt, "wait_for_model": True, "use_cache": True}
-        response = requests.post(
+        s = requests.Session()
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+        s.mount('https://', HTTPAdapter(max_retries=retries))
+
+        response = s.post(
             LLMGaurdV1.API_URL, headers=LLMGaurdV1.headers, json=json_payload
         )
         resp_json = response.json(parse_float=decimal.Decimal)
