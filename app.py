@@ -22,19 +22,22 @@ from database.db import (
     get_async_session,
     get_user_db,
     UserPrompts,
-    LeaderBoard
 )
 from database.leaderboard import get_leaderboard_data, update_leaderboard_user
 from database.schemas import UserCreate, UserRead
-from database.users import auth_backend, current_active_user, fastapi_users
+from database.users import (
+    auth_backend,
+    current_active_user,
+    fastapi_users,
+    current_active_user_opt,
+)
 import logging
 
-#logging.config.fileConfig('log_conf.yaml', disable_existing_loggers=False)
-#logging.config.fileConfig('log_conf.yaml', disable_existing_loggers=False)
-
 # get root logger
-logger = logging.getLogger(__name__)  # the __name__ resolve to "main" since we are at the root of the project.
-                                      # This will get the root logger since no logger in the configuration has this name.
+logger = logging.getLogger(
+    __name__
+)  # the __name__ resolve to "main" since we are at the root of the project.
+# This will get the root logger since no logger in the configuration has this name.
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
@@ -76,10 +79,10 @@ app.include_router(
     tags=["auth"],
 )
 
+
 @app.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
-
 
 
 templates = Jinja2Templates(directory="templates")
@@ -99,7 +102,9 @@ async def root(request: Request):
 
 
 @app.get("/signup")
-async def signup(request: Request):
+async def signup(request: Request, user: User = Depends(current_active_user_opt)):
+    if user:
+        return RedirectResponse("/level/1")
     return templates.TemplateResponse(
         "signup.html",
         {
@@ -107,34 +112,36 @@ async def signup(request: Request):
         },
     )
 
+
 import jwt
-@app.get("/login")
+
+
+@app.get("/logout")
 async def login(request: Request):
+    response = RedirectResponse(url="/login")
+    response.delete_cookie("fastapiusersauth")
+    return response
+
+
+@app.get("/login")
+async def login(request: Request, user: User = Depends(current_active_user_opt)):
+    if user:
+        return RedirectResponse("/level/1")
     response = templates.TemplateResponse(
         "login.html",
         {
             "request": request,
         },
     )
-    # try:
-    #     _cookie = request.cookies.get('fastapiusersauth')
-    #     jwt.decode(_cookie, verify=False, algorithms=["HS256"])
-    #     print(_cookie)
-    #     if _cookie:
-    #         return RedirectResponse(url="/level/1", status_code=303)
-    # except Exception as e:
-    #     print(f"Something wrong with cookie: {e}")
-    #     response.delete_cookie('fastapiusersauth')
 
     return response
+
 
 @app.get("/leaderboard")
 async def login(request: Request):
     return templates.TemplateResponse(
         "leaderboard.html",
-        {
-            "request": request, "leaders": await get_leaderboard_data()
-        },
+        {"request": request, "leaders": await get_leaderboard_data()},
     )
 
 
@@ -154,7 +161,9 @@ async def confirm_secret_generic(
         new_level = _level + 1
         # url = app.url_path_for("redirected")
         url = f"/level/{new_level}/{answer_hash}"
-        await update_leaderboard_user(user=user, level=_level, password_hash=answer_hash)
+        await update_leaderboard_user(
+            user=user, level=_level, password_hash=answer_hash
+        )
         response = RedirectResponse(url=url)
         response.set_cookie(key=f"ctf_level_{new_level}", value=return_hash(password))
         return response
@@ -168,8 +177,10 @@ async def confirm_secret_generic(
 # This endpoint allows going back to levels using cookies, don't need hash in URL
 @app.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
 async def load_any_level_cookie(
-    _level: int, request: Request, user: User = Depends(current_active_user)
+    _level: int, request: Request, user: User = Depends(current_active_user_opt)
 ):
+    if not user:
+        return RedirectResponse("/login")
     if _level == 1:
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": "", "_level": _level}
@@ -188,8 +199,13 @@ async def load_any_level_cookie(
 # Progressing between levels
 @app.api_route("/level/{_level}/{_hash}/", methods=["POST"], include_in_schema=False)
 async def load_any_level_hash(
-    _level: int, request: Request, _hash: str, user: User = Depends(current_active_user)
+    _level: int,
+    request: Request,
+    _hash: str,
+    user: User = Depends(current_active_user_opt),
 ):
+    if not user:
+        return RedirectResponse("/login")
     if not _hash:
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "_level": 1}
@@ -295,6 +311,7 @@ async def check_level_generic(
             {"request": request, "message": response, "_level": int(_level)},
         )
 
+
 @app.post("/auth/signup")
 async def signup(
     request: Request, email: Annotated[str, Form()], password: Annotated[str, Form()]
@@ -318,8 +335,8 @@ async def signup(
         logging.info(f"User {email} already exists")
         return RedirectResponse(url="/signup", status_code=303)
 
+
 @app.on_event("startup")
 async def on_startup():
     # Not needed if you setup a migration system like Alembic
     await create_db_and_tables()
-

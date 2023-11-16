@@ -15,9 +15,12 @@ from database.db import User, get_user_db
 from fastapi_users.authentication import CookieTransport
 from app_config import settings
 import logging
+
 SECRET = settings.APP_SECRET
 
 logger = logging.getLogger(__name__)
+
+
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
@@ -34,12 +37,16 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         request.scope["path"] = "/level/1"
         return RedirectResponse(url="/level/1", status_code=303)
 
-    async def on_after_register(self, user: User, request: Optional[Request] = None, response: Optional[Response] = None,):
+    async def on_after_register(
+        self,
+        user: User,
+        request: Optional[Request] = None,
+        response: Optional[Response] = None,
+    ):
         logger.info(f"User {user.id} has registered.")
         # response.status_code = 303
         # response.headers["Location"] = "/login"
         return RedirectResponse(url="/login", status_code=303)
-
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
@@ -59,10 +66,13 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 cookie_transport = CookieTransport(cookie_max_age=settings.COOKIE_TIMEOUT)
 
+
 class RedirectCookieAuthentication(CookieTransport):
     async def get_login_response(self, token: str) -> Response:
         await super().get_login_response(self, token)
-        response = RedirectResponse(status_code=status.HTTP_303_SEE_OTHER, url="/level/1")
+        response = RedirectResponse(
+            status_code=status.HTTP_303_SEE_OTHER, url="/level/1"
+        )
         return self._set_login_cookie(response, token)
 
     async def get_logout_response(self) -> Response:
@@ -84,3 +94,4 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+current_active_user_opt = fastapi_users.current_user(optional=True, active=True)
