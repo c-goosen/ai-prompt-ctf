@@ -1,4 +1,4 @@
-from .. import protections
+from llm_guard import protections
 
 import pytest
 

@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     ]
     FINAL_LEVEL: int = 7  # Actually 5
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
+    HUGGINGFACE_INFERENCE_API_URL : AnyUrl = os.getenv(
+        "HUGGINGFACE_INFERENCE_API_URL",
+        "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased")
 
 
 settings = Settings()

@@ -1788,7 +1788,7 @@ input, select, textarea {
 
 	#nav {
 		text-align: center;
-		height: 4.25em;
+		/* height: 4.25em;*/
 		cursor: default;
 	}
 
@@ -1892,7 +1892,7 @@ input, select, textarea {
 
 	#wrapper {
 		width: 45em;
-		margin: -80px auto;
+		margin: -40px auto;
 		min-height: 100vh;
 		max-width: 100%;
 		display: -moz-flex;

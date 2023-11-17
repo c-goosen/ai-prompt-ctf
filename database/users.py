@@ -20,22 +20,17 @@ SECRET = settings.APP_SECRET
 
 logger = logging.getLogger(__name__)
 
+class RedirectCookieAuthentication(CookieTransport):
+    async def get_login_response(self, token: str) -> Response:
+        await super().get_login_response(token)
+        response = RedirectResponse(url="/level/1", status_code=303)
+        response.status_code = 303
+        response.headers["Location"] = "/level/1"
+        return self._set_login_cookie(response, token)
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
-
-    async def on_after_login(
-        self,
-        user: User,
-        request: Optional[Request] = None,
-        response: Optional[Response] = None,
-    ):
-        logger.info(f"User {user.id} logged in.")
-        # response.status_code = 303
-        # response.headers["Location"] = "/level/1"
-        request.scope["path"] = "/level/1"
-        return RedirectResponse(url="/level/1", status_code=303)
 
     async def on_after_register(
         self,
@@ -44,8 +39,6 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         response: Optional[Response] = None,
     ):
         logger.info(f"User {user.id} has registered.")
-        # response.status_code = 303
-        # response.headers["Location"] = "/login"
         return RedirectResponse(url="/login", status_code=303)
 
     async def on_after_forgot_password(
@@ -53,18 +46,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     ):
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
-
-
 async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
     yield UserManager(user_db)
 
 
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
-cookie_transport = CookieTransport(cookie_max_age=settings.COOKIE_TIMEOUT)
+cookie_transport = RedirectCookieAuthentication(cookie_max_age=settings.COOKIE_TIMEOUT)
 
 
 class RedirectCookieAuthentication(CookieTransport):

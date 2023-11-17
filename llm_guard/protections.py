@@ -3,7 +3,7 @@ import decimal
 from app_config import settings
 import re
 import cleantext
-from llm_guard import LLMGaurdV1
+from .llm_guard import LLMGaurdV1
 from googletrans import Translator
 
 
@@ -14,8 +14,8 @@ def text_normalization(text):
         to_ascii=True,  # transliterate to closest ASCII representation
         lower=True,  # lowercase text
         no_line_breaks=False,  # fully strip line breaks as opposed to only normalizing them
-        # no_urls=False,                  # replace all URLs with a special token
-        # no_emails=False,                # replace all email addresses with a special token
+        no_urls=False,                  # replace all URLs with a special token
+        no_emails=False,                # replace all email addresses with a special token
         no_numbers=False,  # replace all numbers with a special token
         no_digits=False,  # replace all digits with a special token
         no_currency_symbols=True,  # replace all currency symbols with a special token

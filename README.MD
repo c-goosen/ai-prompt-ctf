@@ -28,6 +28,11 @@ poetry install
 
 ## Loading documents into QDrant
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
-```python
+```bash
 python password_upload.py
+```
+
+## Run
+```bash
+
 ```

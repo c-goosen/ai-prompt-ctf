@@ -19,10 +19,9 @@
 <!--									{% if _level == 5 %}<i class="icon fa-solid fa-5 fa-lg"></i>{% endif %}-->
 <!--									{% if _level == 6 %}<i class="icon fa-solid fa-6 fa-lg"></i>{% endif %}-->
 <!--									{% if _level == 7 %}<i class="icon fa-solid fa-7 fa-lg"></i>{% endif %}-->
-<!--									</h2>-->
+									</h2>
 								</header>
 								<form action="/level/submit/{{_level}}" method="post">
-									<div>
 										<div class="row">
 											<div class="col-12">
 												<textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
@@ -37,21 +36,17 @@
 												<p>AI Response: {{ ai_message }}</p>
 											{% endif %}
 										</div>
-									</div>
 								</form>
 								<form action="/level/{{_level}}/confirm/" method="post">
-									<div>
-
 										<div class="row">
 											<div class="col-12">
 
-												<textarea style="width:50%" name="password" id="password" placeholder="Password" rows="1"></textarea>
-												<input type="submit" value="Proceed to next level" />
+												<textarea  name="password" id="password" placeholder="Password" rows="1"></textarea>
+												<input type="submit" value="Next level" />
 
 
 											</div>
 										</div>
-									</div>
 								</form>
 							</article>
 

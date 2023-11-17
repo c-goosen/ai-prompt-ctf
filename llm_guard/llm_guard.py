@@ -6,11 +6,11 @@ from requests.adapters import HTTPAdapter, Retry
 
 
 class LLMGaurdV1:
-    API_URL = "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
+    API_URL = settings.HUGGINGFACE_INFERENCE_API_URL
     headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
 
     def __init__(self):
-        self.API_URL = "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
+        self.API_URL = settings.HUGGINGFACE_INFERENCE_API_URL
         self.headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
 
     def query(self, prompt):
