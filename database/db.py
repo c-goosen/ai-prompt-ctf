@@ -25,23 +25,21 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 class LeaderBoard(Base):
     __tablename__ = "leaderboard"
-    __table_args__ = (PrimaryKeyConstraint("user_id", name="pk_leaderboard"),)
-    user_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("user.id"),
-        default=uuid.uuid4,
-        unique=True,
-        primary_key=True,
-        index=True,
+    __table_args__ = (
+        PrimaryKeyConstraint("user_id", name="pk_leaderboard"),
+
     )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), default=uuid.uuid4, unique=True, primary_key=True, index=True)
     level = Column(Integer, index=True)
     last_update = Column(DateTime, index=True, default=datetime.datetime.utcnow())
     email = Column(String, ForeignKey("user.email"), index=True)
     password_hash = Column(UnicodeText, index=True)
 
 
+
 class UserPrompts(Base):
     __tablename__ = "user_prompts"
+
 
     id = Column(Integer, primary_key=True, index=True)
     level = Column(Integer, index=True)

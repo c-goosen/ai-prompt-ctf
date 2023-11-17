@@ -2,6 +2,7 @@
 # Uses multi-stage builds requiring Docker 17.05 or higher
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 
+
 # Creating a python base with shared environment variables
 FROM python:3.11-slim-bullseye AS python-base
 ENV PYTHONUNBUFFERED=1 \
@@ -25,7 +26,6 @@ RUN buildDeps="build-essential" \
         curl \
         vim \
         netcat \
-        ssh \
         git \
     && apt-get install -y --no-install-recommends $buildDeps \
     && rm -rf /var/lib/apt/lists/*
@@ -45,6 +45,8 @@ RUN poetry install --only main  # respects
 FROM python-base AS production
 ENV FASTAPI_ENV=production
 
+EXPOSE 8000/tcp
+
 COPY --from=builder-base $VENV_PATH $VENV_PATH
 
 # Create user with the name poetry
@@ -56,5 +58,5 @@ USER poetry
 WORKDIR /app
 
 # ENTRYPOINT /docker-entrypoint.sh $0 $@
-ENTRYPOINT "uvicorn app:app"
-CMD [ "uvicorn", "app:app"]
+ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 8000
+CMD uvicorn app:app --host 0.0.0.0 --port 8000

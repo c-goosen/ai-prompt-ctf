@@ -3,10 +3,8 @@ import os
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
-from llama_index.llms import OpenAI
 
 load_dotenv()
-
 
 class Settings(BaseSettings):
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
@@ -21,8 +19,8 @@ class Settings(BaseSettings):
     """,
     )
     # Supabase
-    SUPABASE_PG_USER: str = "postgres"
-    SUPABASE_PG_PASSWORD: str = os.getenv("SUPABASE_PG_PASSWORD")
+    SUPABASE_PG_USER: str = os.getenv("SUPABASE_PG_USER", "postgres")
+    SUPABASE_PG_PASSWORD: str = os.getenv("SUPABASE_PG_PASSWORD", "")
     SUPABASE_HOST: str = os.getenv(
         "SUPABASE_HOST", "db.dfqzxhihppgdbotizxul.supabase.co"
     )
@@ -68,8 +66,8 @@ class Settings(BaseSettings):
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
     HUGGINGFACE_INFERENCE_API_URL : AnyUrl = os.getenv(
         "HUGGINGFACE_INFERENCE_API_URL",
-        "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased")
-
+        "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
+    )
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
