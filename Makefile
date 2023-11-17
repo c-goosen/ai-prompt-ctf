@@ -7,7 +7,7 @@ endif
 
 NAMESPACE=$(DOCKER_REGISTRY_NAME)
 DOCKER_REGISTRY=registry.uw.systems
-DOCKER_CONTAINER_NAME=security-github-actions-runner
+DOCKER_CONTAINER_NAME=llm-security-challenge
 DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(NAMESPACE)/$(DOCKER_CONTAINER_NAME)
 
 docker-image:
