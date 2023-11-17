@@ -1022,7 +1022,7 @@ httpx = {version = ">=0.23,<0.26", extras = ["http2"]}
 
 [package.source]
 type = "git"
-url = "git@github.com:c-goosen/py-googletrans.git"
+url = "https://github.com/c-goosen/py-googletrans.git"
 reference = "upgrade-httpx"
 resolved_reference = "d57157cc5cc37f5a24a184e52f9674a7b78cfd3c"
 
@@ -3964,4 +3964,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "4a26b847bcd0f893e7cc4e1ff9290261aa5d612eba6cf1cb34dd8142b85358f3"
+content-hash = "bdde195740d8c9a3b7d34d3987b72ebcb942e10e6f85de9217700094f4b5b13c"
