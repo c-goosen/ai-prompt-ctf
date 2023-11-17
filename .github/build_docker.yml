@@ -1,0 +1,29 @@
+name: Github Actions Runner
+
+on:
+  push:
+    branches:
+      - "main"
+  schedule:
+    - cron:  '00 10 * * 1'   # once a week on a monday
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REGISTRY_USERNAME: ${{ vars.DOCKER_REGISTRY_USERNAME }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      DOCKER_REGISTRY_NAME: ${{ vars.DOCKER_REGISTRY_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v3
+        with:
+          buildx-version: latest
+          qemu-version: latest
+      - name: Docker Build & Push
+        run: |
+          make ci-docker-build
+          make ci-docker-push
