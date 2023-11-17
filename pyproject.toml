@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Christo Goosen <christogoosen@gmail.com>"]
 readme = "README.md"
-packages = [{include = "llm-ctf"}]
+#packages = [{include = "llm-ctf"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
