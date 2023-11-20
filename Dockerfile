@@ -54,6 +54,7 @@ RUN groupadd -g 1500 poetry && \
     useradd -m -u 1500 -g poetry poetry
 
 COPY --chown=poetry:poetry ./ /app
+COPY --chown=poetry:poetry .env/ /app
 USER poetry
 WORKDIR /app
 

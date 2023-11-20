@@ -5,7 +5,7 @@ from app_config import settings
 
 def search_supabase(
     search_input: str,
-    service_context: object,
+    service_context: ServiceContext,
     collection_name: str = "ctf-secrets",
 ):
     print(f"collection_name -> {collection_name}")

@@ -35,7 +35,11 @@ class LeaderBoard(Base):
     email = Column(String, ForeignKey("user.email"), index=True)
     password_hash = Column(UnicodeText, index=True)
 
-
+class Levels(Base):
+    __tablename__ = "levels"
+    id = Column(Integer, primary_key=True, index=True)
+    password = Column(UnicodeText, index=True)
+    level = Column(UnicodeText, index=True)
 
 class UserPrompts(Base):
     __tablename__ = "user_prompts"
