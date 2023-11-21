@@ -36,6 +36,7 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
         if leader.user_id:
             # Update existing Leaderboard item
             leader.level = level
+            leader.password_hash = password_hash
             await session.commit()
         else:
             # Create new Item on LeaderBoard

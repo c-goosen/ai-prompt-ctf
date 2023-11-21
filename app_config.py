@@ -3,6 +3,7 @@ import os
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -69,6 +70,10 @@ class Settings(BaseSettings):
         "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
     )
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
+    logger: object = logging.getLogger(
+        __name__
+    )
+
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY

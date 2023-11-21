@@ -14,14 +14,15 @@ class LLMGaurdV1:
         self.headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
 
     def query(self, prompt):
-        json_payload = {"inputs": prompt, "wait_for_model": True, "use_cache": True}
+        json_payload = {"inputs": prompt, "options": {"wait_for_model": True, "use_cache": True}}
         s = requests.Session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+        retries = Retry(total=5, backoff_factor=5, status_forcelist=[502, 503, 504])
         s.mount("https://", HTTPAdapter(max_retries=retries))
 
         response = s.post(
             LLMGaurdV1.API_URL, headers=LLMGaurdV1.headers, json=json_payload
         )
         resp_json = response.json(parse_float=decimal.Decimal)
+        print(response.status_code)
         print(resp_json)
         return resp_json

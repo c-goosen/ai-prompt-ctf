@@ -170,6 +170,7 @@ async def check_level_generic(
         search_input=message,
         service_context=context,
         collection_name=f"level_{_level}",
+        level=_level
     )
 
     async with get_async_session_context() as session:
@@ -181,33 +182,35 @@ async def check_level_generic(
         await session.refresh(user_prompt)
     trigger_checks = False
     logging.info(f"LEVEL: {_level}")
-    if _level == 1:
+    if  _level == 1:
+        trigger_checks = False
+    elif _level == 2:
         if protections.input_check(message):
             trigger_checks = True
         else:
             trigger_checks = False
-    elif _level == 2:
+    elif _level == 3:
         if protections.output_check(message, settings.PASSWORDS.get(_level)):
             trigger_checks = True
         else:
             trigger_checks = False
-    elif _level == 3:
+    elif _level == 4:
         if protections.input_and_output_checks(input=message, output=str(response)):
             trigger_checks = True
         else:
             trigger_checks = False
-    elif _level == 4:
+    elif _level == 5:
         if protections.llm_protection(message):
             trigger_checks = True
         else:
             trigger_checks = False
-    elif _level == 5:
+    elif _level == 6:
         logging.info("Defending level 5")
         if protections.translate_and_llm(message):
             trigger_checks = True
         else:
             trigger_checks = False
-    elif _level == 6:
+    elif _level == 7:
         logging.info("Defending level 6")
         if protections.translate_and_llm(message):
             trigger_checks = True
