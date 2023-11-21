@@ -59,5 +59,5 @@ USER poetry
 WORKDIR /app
 
 # ENTRYPOINT /docker-entrypoint.sh $0 $@
-ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 8000
-CMD uvicorn app:app --host 0.0.0.0 --port 8000
+ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*'
+CMD uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*'
