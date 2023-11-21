@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     This is a prompt injection ( https://www.lakera.ai/insights/what-is-prompt-injection ) challenge.
     You need to progress through multiple levels. Each time you get a password/secret back,
     you should submit it to progress through the levels.
-    Each level becomes harder.
+    Each level becomes progressively harder. Happy chatting/prompting. 
     """,
     )
     # Supabase
