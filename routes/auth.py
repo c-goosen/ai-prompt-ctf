@@ -20,6 +20,7 @@ from database.users import (
 )
 import logging
 from database.schemas import UserCreate, UserRead
+from app_config import settings
 
 app = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -57,7 +58,7 @@ async def signup(request: Request, user: User = Depends(current_active_user_opt)
 @app.get("/logout")
 async def login(request: Request):
     response = RedirectResponse(url="/login")
-    response.delete_cookie("fastapiusersauth")
+    response.delete_cookie("fastapiusersauth", domain=settings.COOKIE_DOMAIN)
     return response
 
 
