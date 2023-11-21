@@ -9,6 +9,7 @@ from sqlalchemy import Column, ForeignKey, Integer, DateTime, UnicodeText, Strin
 import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.pool import NullPool
 
 UUID_ID = uuid.UUID
 
@@ -55,7 +56,7 @@ class UserPrompts(Base):
     # owner = relationship("user", back_populates="leaderboard")
 
 
-engine = create_async_engine(DATABASE_URL)
+engine = create_async_engine(DATABASE_URL, pool_pre_ping=True, poolclass=NullPool,)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
