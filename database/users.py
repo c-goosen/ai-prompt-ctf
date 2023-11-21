@@ -51,7 +51,7 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
 
 
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
-cookie_transport = RedirectCookieAuthentication(cookie_max_age=settings.COOKIE_TIMEOUT)
+cookie_transport = RedirectCookieAuthentication(cookie_max_age=settings.COOKIE_TIMEOUT, cookie_domain=settings.COOKIE_DOMAIN)
 
 
 class RedirectCookieAuthentication(CookieTransport):

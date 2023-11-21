@@ -48,6 +48,10 @@ async def root(request: Request):
         },
     )
 
+@app.get("/health")
+async def health():
+    return {"health": "ok"}
+
 
 @app.get("/leaderboard")
 async def login(request: Request):

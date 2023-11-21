@@ -68,6 +68,7 @@ class Settings(BaseSettings):
         "HUGGINGFACE_INFERENCE_API_URL",
         "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
     )
+    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
