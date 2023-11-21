@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Welcome to the BSIDES CTF{% endblock %}
+{% block title %}Welcome to the {{ CTF_NAME }}{% endblock %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -15,6 +15,6 @@
     <br>
     </br>
     <p class="important" style="text-align: center !important;">
-        To start singup <button onclick="window.location.href = '/signup';" type="submit">Signup</button>
+        To start signup <button onclick="window.location.href = '/signup';" type="submit">Signup</button>
     </p>
 {% endblock %}
