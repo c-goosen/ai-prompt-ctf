@@ -33,7 +33,8 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
     async with get_async_session_context() as session:
         # Check if leaderboard has user on it already
         leader = await leader_exists(session, user_id=user.id)
-        if leader.user_id:
+        if leader:
+        # if leader.user_id:
             # Update existing Leaderboard item
             leader.level = level
             leader.password_hash = password_hash
