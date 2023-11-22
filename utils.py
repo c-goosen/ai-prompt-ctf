@@ -8,11 +8,8 @@ def return_hash(input: str):
 
 
 def hash_and_check_password(level, password_input: str):
-    print(settings.PASSWORDS.get(level))
     password_hash = sha256(bytes(settings.PASSWORDS.get(level), "utf-8")).hexdigest()
     input_hash = sha256(bytes(password_input, "utf-8")).hexdigest()
-    print(password_hash)
-    print(input_hash)
     if password_hash == input_hash:
         return password_hash
     else:
