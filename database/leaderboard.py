@@ -23,7 +23,7 @@ async def get_leaderboard_data():
 async def leader_exists(session: AsyncSession, user_id: str):
     leader = await session.get(LeaderBoard, user_id)
     print(leader)
-    print(leader.user_id)
+    # print(leader.user_id)
     return leader
 
 
