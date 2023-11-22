@@ -73,17 +73,19 @@ def input_and_output_checks(input: str, output: str) -> bool:
 def llm_protection(input) -> bool:
     protected = False
     llm = LLMGaurdV1()
-    resp = llm.query(input)[0]
-    for x in resp:
-        if x.get("label") == "POSITIVE":
-            if x["score"] > 0.8:
-                protected = True
+    resp = llm.query(input)
+    print(resp)
+    resp = resp[0]
+    print(resp)
+    resp = dict(resp)
+    if resp.get("label") == "NEGATIVE":
+        if resp["score"] > 0.8:
+            protected = True
     input = text_normalization(input)
     resp = llm.query(input)[0]
-    for x in resp:
-        if x.get("label") == "POSITIVE":
-            if x["score"] > 0.8:
-                protected = True
+    if resp.get("label") == "NEGATIVE":
+        if resp["score"] > 0.8:
+            protected = True
 
     return protected
 
@@ -94,16 +96,15 @@ def translate_and_llm(input) -> bool:
     translated = translator.translate(text=input).text
     llm = LLMGaurdV1()
     resp = llm.query(translated)[0]
-    for x in resp:
-        if x.get("label") == "POSITIVE":
-            if x["score"] > decimal.Decimal(0.8):
-                protected = True
+    print(resp)
+    if resp.get("label") == "NEGATIVE":
+        if resp["score"] > decimal.Decimal(0.8):
+            protected = True
     input = text_normalization(input)
     translated = translator.translate(text=input).text
     resp = llm.query(translated)[0]
-    for x in resp:
-        if x.get("label") == "POSITIVE":
-            if x["score"] > decimal.Decimal(0.8):
-                protected = True
+    if resp.get("label") == "NEGATIVE":
+        if resp["score"] > decimal.Decimal(0.8):
+            protected = True
 
     return protected
