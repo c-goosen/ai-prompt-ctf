@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
     HUGGINGFACE_INFERENCE_API_URL : AnyUrl = os.getenv(
         "HUGGINGFACE_INFERENCE_API_URL",
-        "https://api-inference.huggingface.co/models/cgoosen/llm_firewall_distilbert-base-uncased"
+        "https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud"
     )
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
     logger: object = logging.getLogger(
