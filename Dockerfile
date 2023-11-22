@@ -59,5 +59,5 @@ USER poetry
 WORKDIR /app
 RUN python -m nltk.downloader punkt
 # ENTRYPOINT /docker-entrypoint.sh $0 $@
-ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*'
-CMD uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*'
+ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*' --workers 2
+CMD uvicorn app:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips '*' --workers 2
