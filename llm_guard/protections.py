@@ -102,9 +102,12 @@ def translate_and_llm(input) -> bool:
             protected = True
     input = text_normalization(input)
     translated = translator.translate(text=input).text
-    resp = llm.query(translated)[0]
-    if resp.get("label") == "NEGATIVE":
-        if resp["score"] > decimal.Decimal(0.8):
-            protected = True
+    try:
+        resp = llm.query(translated)[0]
+        if resp.get("label") == "NEGATIVE":
+            if resp["score"] > decimal.Decimal(0.8):
+                protected = True
+    except Exception as e:
+        protected = False
 
     return protected
