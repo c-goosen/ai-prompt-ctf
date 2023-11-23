@@ -22,17 +22,20 @@
 									</h2>
 								</header>
 								<p style="text-align: center !important;" class="important">
-									Prompt me to try and retrieve a password. Ive been told not to do that, but take on the challenge.
-								</br>If you get stuck have a look at this <a href="https://learnprompting.org/docs/prompt_hacking/injection">Guide</a>.
+									This level is different. You need to select a photo that will described getting a secret or password.
+									You can try and draw your own image.
+									You can additionally add a prompt too and both will go to GPT4-vision.
 								</p>
 
 								<form action="/level/9/photo/upload" method="post" enctype="multipart/form-data">
 
-									  <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg">>
-									  <textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
+									  <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg">
+									  <textarea name="message" id="message" placeholder="Message" rows="4" value=>"Describe this image?"</textarea>
 									  <input type="submit">
 								</form>
+								{% if _img %}
 								<img style="height:600px;width:400px;" src="data:image/jpeg;base64,{{ _img | safe }}"/>
+								{% endif %}
 								{% if message %}
 												<p>Response: {{ message }}</p>
 								{% endif %}

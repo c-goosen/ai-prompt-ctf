@@ -74,9 +74,9 @@ def llm_protection(input) -> bool:
     protected = False
     llm = LLMGaurdV1()
     resp = llm.query(input)
-    print(resp)
+    # print(resp)
     resp = resp[0]
-    print(resp)
+    # print(resp)
     resp = dict(resp)
     if resp.get("label") == "NEGATIVE":
         if resp["score"] > 0.8:
@@ -96,7 +96,7 @@ def translate_and_llm(input) -> bool:
     translated = translator.translate(text=input).text
     llm = LLMGaurdV1()
     resp = llm.query(translated)[0]
-    print(resp)
+    # print(resp)
     if resp.get("label") == "NEGATIVE":
         if resp["score"] > decimal.Decimal(0.8):
             protected = True
