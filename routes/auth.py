@@ -60,12 +60,11 @@ async def login(request: Request):
     response = RedirectResponse(url="/login")
     response.delete_cookie("fastapiusersauth", domain=settings.COOKIE_DOMAIN)
     return response
-
-
 @app.get("/login")
 async def login(request: Request, user: User = Depends(current_active_user_opt)):
     if user is not None:
-        return RedirectResponse(url="/level/1")
+        response = RedirectResponse(url="/level/1")
+        return response
     response = templates.TemplateResponse(
         "login.html",
         {

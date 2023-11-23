@@ -8,6 +8,7 @@ import logging
 load_dotenv()
 
 class Settings(BaseSettings):
+    ORG_NAME: str = "Utility Warehouse"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
     CTF_NAME: str = os.getenv("CTF_NAME", "UW Prompt Injection challenge")
     CTF_DETAILS: str = os.getenv(
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL_3_5_TURBO: str = "gpt-3.5-turbo"
     OPENAI_MODEL_4: str = "gpt-4"
     OPENAI_MODEL_4_TURBO: str = "gpt-4-1106-preview"
+    OPENAI_MODEL_4_VISION: str = "gpt-4-vision-preview"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
@@ -52,6 +54,8 @@ class Settings(BaseSettings):
         5: os.getenv("PASSWORD_FIVE"),
         6: os.getenv("PASSWORD_SIX"),
         7: os.getenv("PASSWORD_SEVEN"),
+        8: os.getenv("PASSWORD_EIGHT"),
+        9: os.getenv("PASSWORD_NINE"),
     }
     REGEX_LIST: list = [
         r"(\b[\w]{2}[\d]{6}\b)",
@@ -63,7 +67,7 @@ class Settings(BaseSettings):
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
-    FINAL_LEVEL: int = 7  # Actually 5
+    FINAL_LEVEL: int = 10  # Actually 5
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
     HUGGINGFACE_INFERENCE_API_URL : AnyUrl = os.getenv(
         "HUGGINGFACE_INFERENCE_API_URL",

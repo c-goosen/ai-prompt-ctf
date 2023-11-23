@@ -60,7 +60,9 @@ class RedirectCookieAuthentication(CookieTransport):
         response = RedirectResponse(
             status_code=status.HTTP_303_SEE_OTHER, url="/level/1"
         )
-        return self._set_login_cookie(response, token)
+        response = self._set_login_cookie(response, token)
+        # response.set_cookie()
+        return response
 
     async def get_logout_response(self) -> Response:
         await super().get_logout_response(self)

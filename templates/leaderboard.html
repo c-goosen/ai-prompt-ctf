@@ -168,10 +168,17 @@ td {
 }</style>
 {% endblock %}
 {% block content %}
- <div id="header">
+    {% if complete %}
+          <p class="important">
+      You finished the challenge with the final password of : {{ pass }}
+    </p>
+    <img src="https://media.giphy.com/media/BPJmthQ3YRwD6QqcVD/giphy.gif">
+          {% endif %}
+    <div id="header">
         <h1>LeaderBoard</h1>
       </div>
       <div id="leaderboard">
+
         <div class="ribbon"></div>
         <table>
         {% for result in leaders %}

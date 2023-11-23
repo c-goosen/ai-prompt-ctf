@@ -1,5 +1,6 @@
 import contextlib
 from llama_index.llms import OpenAI
+from database.leaderboard import get_leaderboard_data
 
 from fastapi import Form, Request, Depends
 from starlette.responses import RedirectResponse
@@ -25,6 +26,7 @@ from database.users import (
     current_active_user_opt,
 )
 import logging
+from database.leaderboard import cookies_after_login
 
 # get root logger
 logger = logging.getLogger(
@@ -60,6 +62,14 @@ service_context_4_turbo = ServiceContext.from_defaults(
     )
 )
 
+service_context_4_vision = ServiceContext.from_defaults(
+    llm=OpenAI(
+        temperature=0.1,
+        model=settings.OPENAI_MODEL_4_VISION,
+        api_key=settings.OPENAI_API_KEY,
+    )
+)
+
 router = APIRouter()
 
 
@@ -79,6 +89,7 @@ async def confirm_secret_generic(
 ):
     answer_hash = hash_and_check_password(level=_level, password_input=password)
     if answer_hash:
+
         new_level = _level + 1
         # url = app.url_path_for("redirected")
         url = f"/level/{new_level}/{answer_hash}"
@@ -103,15 +114,26 @@ async def load_any_level_cookie(
     if not user:
         return RedirectResponse("/login")
     if _level == 1:
-        return templates.TemplateResponse(
+
+        cookies = await cookies_after_login(user)
+        response = templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": "", "_level": _level}
         )
+        for x in cookies:
+            response.set_cookie(key=x['level'], value=x['hash'], domain=settings.COOKIE_DOMAIN)
+        return response
     else:
         cookie = request.cookies.get(f"ctf_level_{_level}", False)
         if cookie == return_hash(settings.PASSWORDS.get(_level - 1)):
-            return templates.TemplateResponse(
-                "generic_level.html", {"request": request, "_level": _level}
-            )
+            if _level < 10:
+                return templates.TemplateResponse(
+                    "generic_level.html", {"request": request, "_level": _level}
+                )
+            else:
+                return templates.TemplateResponse(
+                    "generic_level.html", {"request": request, "_level": _level,
+                                           "message" : "This is a visual challenge, try and prompt back the password in an images"}
+                )
         else:
             url = f"/level/1/"
             return RedirectResponse(url=url)
@@ -142,7 +164,7 @@ async def load_any_level_hash(
             )
         else:
             return templates.TemplateResponse(
-                "complete.html", {"request": request, "_pass": _pass}
+                "leaderboard.html", {"request": request, "_pass": _pass, "complete":True, "leaders": await get_leaderboard_data()}
             )
     else:
         logging.info("loading level 1")
@@ -159,7 +181,9 @@ async def check_level_generic(
     message: str = Form(...),
     user: User = Depends(current_active_user),
 ):
-    if _level == 7:
+    if _level == 9:
+        context = service_context_4_vision
+    elif _level in (7, 8):
         context = service_context_4_turbo
     elif _level == 6:
         context = service_context_4_turbo
@@ -211,6 +235,18 @@ async def check_level_generic(
         else:
             trigger_checks = False
     elif _level == 7:
+        logging.info("Defending level 6")
+        if protections.translate_and_llm(message):
+            trigger_checks = True
+        else:
+            trigger_checks = False
+    elif _level == 8:
+        logging.info("Defending level 6")
+        if protections.translate_and_llm(message):
+            trigger_checks = True
+        else:
+            trigger_checks = False
+    elif _level == 9:
         logging.info("Defending level 6")
         if protections.translate_and_llm(message):
             trigger_checks = True

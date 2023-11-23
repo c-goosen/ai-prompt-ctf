@@ -6,7 +6,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import CursorResult
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from utils import return_hash
+from app_config import settings
 
 async def get_leaderboard_data():
     get_async_session_context = contextlib.asynccontextmanager(get_async_session)
@@ -51,3 +52,18 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
             await session.commit()
             await session.refresh(leader)
     return None
+
+async def cookies_after_login(user: User) -> list:
+    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    cookie_list = []
+    async with get_async_session_context() as session:
+        leader = await leader_exists(session, user_id=user.id)
+        if leader:
+            cookie_list.append({"level": f"ctf_level_{1}", "hash": return_hash(settings.PASSWORDS.get(1))})
+            for x in range(2, int(leader.level+1)):
+                cookie_list.append({"level": f"ctf_level_{x}", "hash": return_hash(settings.PASSWORDS.get(x-1))})
+    return cookie_list
+
+
+
+
