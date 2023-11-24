@@ -61,12 +61,13 @@ async def login(request: Request):
         {"request": request, "leaders": await get_leaderboard_data()},
     )
 
-@app.get("/final")
-async def final(request: Request):
-    return templates.TemplateResponse(
-        "photo_level.html",
-        {"request": request, "message": "Photo challenge"},
-    )
+# @app.get("/final")
+# @app.route("/final")
+# async def final(request: Request):
+#     return templates.TemplateResponse(
+#         "photo_level.html",
+#         {"request": request, "message": "Photo challenge"},
+#     )
 
 @app.post("/level/9/photo/upload")
 async def photo_upload(request: Request, file: UploadFile | None, message: str = Form(...)):
@@ -108,8 +109,8 @@ async def photo_upload(request: Request, file: UploadFile | None, message: str =
         print(response.json())
         resp = response.json()['choices'][0]['message']['content']
         return templates.TemplateResponse(
-            "photo_level.html",
-            {"request": request, "message": resp, "_img": _img},
+            "generic_level.html",
+            {"request": request, "message": resp, "_img": _img, "_level":9 },
         )
 
 
