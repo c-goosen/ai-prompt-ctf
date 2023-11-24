@@ -59,9 +59,9 @@ async def cookies_after_login(user: User) -> list:
     async with get_async_session_context() as session:
         leader = await leader_exists(session, user_id=user.id)
         if leader:
-            cookie_list.append({"level": f"ctf_level_{1}", "hash": return_hash(settings.PASSWORDS.get(1))})
+            cookie_list.append({"level": f"ctf_level_{1}", "hash": return_hash(settings.PASSWORDS.get(1, " "))})
             for x in range(2, int(leader.level+1)):
-                cookie_list.append({"level": f"ctf_level_{x}", "hash": return_hash(settings.PASSWORDS.get(x-1))})
+                cookie_list.append({"level": f"ctf_level_{x}", "hash": return_hash(settings.PASSWORDS.get(x-1, ""))})
     return cookie_list
 
 
