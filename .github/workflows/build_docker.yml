@@ -28,6 +28,8 @@ jobs:
             envkey_PASSWORD_FIVE: ${{ secrets.PASSWORD_FIVE }}
             envkey_PASSWORD_SIX: ${{ secrets.PASSWORD_SIX }}
             envkey_PASSWORD_SEVEN: ${{ secrets.PASSWORD_SEVEN }}
+            envkey_PASSWORD_EIGHT: ${{ secrets.PASSWORD_SEVEN }}
+            envkey_PASSWORD_NINE: ${{ secrets.PASSWORD_SEVEN }}
             envkey_SUPABASE_PG_PASSWORD: ${{ secrets.SUPABASE_PG_PASSWORD }}
             envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
             envkey_HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
