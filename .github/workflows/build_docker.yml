@@ -35,6 +35,8 @@ jobs:
             envkey_SUPABASE_HOST: ${{ secrets.SUPABASE_HOST }}
             envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
             envkey_HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+            envkey_COOKIE_DOMAIN: llm-ctf.christogoosen.co.za
+            envkey_HUGGINGFACE_INFERENCE_API_URL: https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud
 #            envkey_VARIABLE: ${{ vars.SOME_ACTION_VARIABLE }}
             directory: .
             file_name: .env
