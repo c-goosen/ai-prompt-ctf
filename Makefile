@@ -6,9 +6,9 @@ endif
 # ----- Docker -----
 
 NAMESPACE=$(DOCKER_REGISTRY_NAME)
-DOCKER_REGISTRY=registry.uw.systems
-DOCKER_CONTAINER_NAME=llm-security-challenge
-DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(NAMESPACE)/$(DOCKER_CONTAINER_NAME)
+DOCKER_REGISTRY=955244480243.dkr.ecr.us-east-1.amazonaws.com
+DOCKER_CONTAINER_NAME=bsides-llm-ctf
+DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 
 docker-image:
 	docker build -f Dockerfile --rm -t $(DOCKER_REPOSITORY):local .
