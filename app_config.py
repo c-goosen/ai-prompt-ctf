@@ -8,9 +8,9 @@ import logging
 load_dotenv()
 
 class Settings(BaseSettings):
-    ORG_NAME: str = "Utility Warehouse"
+    ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
-    CTF_NAME: str = os.getenv("CTF_NAME", "UW Prompt Injection challenge")
+    CTF_NAME: str = os.getenv("CTF_NAME", "BSIDES CTF Prompt Injection challenge")
     CTF_DETAILS: str = os.getenv(
         "CTF_DETAILS",
         """

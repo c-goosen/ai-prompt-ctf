@@ -15,7 +15,7 @@ docker-image:
 
 ci-docker-auth:
 	@echo "Logging in to $(DOCKER_REGISTRY) as $(DOCKER_REGISTRY_USERNAME)"
-	@docker login -u $(DOCKER_REGISTRY_USERNAME) -p $(DOCKER_REGISTRY_PASSWORD) $(DOCKER_REGISTRY)
+	@aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 955244480243.dkr.ecr.us-east-1.amazonaws.com
 
 ci-docker-build: ci-docker-auth
 	@docker build -f Dockerfile \
