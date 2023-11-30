@@ -89,7 +89,6 @@ async def confirm_secret_generic(
 ):
     answer_hash = hash_and_check_password(level=_level, password_input=password)
     if answer_hash:
-
         new_level = _level + 1
         # url = app.url_path_for("redirected")
         url = f"/level/{new_level}/{answer_hash}"
@@ -115,13 +114,14 @@ async def load_any_level_cookie(
         return RedirectResponse("/login")
 
     if _level == 0:
-
         cookies = await cookies_after_login(user)
         response = templates.TemplateResponse(
             "generic_level.html", {"request": request, "message": "", "_level": _level}
         )
         for x in cookies:
-            response.set_cookie(key=x['level'], value=x['hash'], domain=settings.COOKIE_DOMAIN)
+            response.set_cookie(
+                key=x["level"], value=x["hash"], domain=settings.COOKIE_DOMAIN
+            )
         return response
     else:
         cookie = request.cookies.get(f"ctf_level_{_level}", False)
@@ -132,8 +132,12 @@ async def load_any_level_cookie(
                 )
             else:
                 return templates.TemplateResponse(
-                    "generic_level.html", {"request": request, "_level": _level,
-                                           "message" : "This is a visual challenge, try and prompt back the password in an images"}
+                    "generic_level.html",
+                    {
+                        "request": request,
+                        "_level": _level,
+                        "message": "This is a visual challenge, try and prompt back the password in an images",
+                    },
                 )
         else:
             url = f"/level/0"
@@ -165,7 +169,13 @@ async def load_any_level_hash(
             )
         else:
             return templates.TemplateResponse(
-                "leaderboard.html", {"request": request, "_pass": _pass, "complete":True, "leaders": await get_leaderboard_data()}
+                "leaderboard.html",
+                {
+                    "request": request,
+                    "_pass": _pass,
+                    "complete": True,
+                    "leaders": await get_leaderboard_data(),
+                },
             )
     else:
         logging.info("loading level 1")
@@ -195,7 +205,7 @@ async def check_level_generic(
         search_input=message,
         service_context=context,
         collection_name=f"level_{_level}",
-        level=_level
+        level=_level,
     )
 
     async with get_async_session_context() as session:
@@ -207,7 +217,7 @@ async def check_level_generic(
         await session.refresh(user_prompt)
     trigger_checks = False
     logging.info(f"LEVEL: {_level}")
-    if  _level == 1:
+    if _level == 1:
         trigger_checks = False
     elif _level == 2:
         if protections.input_check(message):
@@ -225,31 +235,31 @@ async def check_level_generic(
         else:
             trigger_checks = False
     elif _level == 5:
-        if protections.llm_protection(message):
+        if await protections.llm_protection(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 6:
         logging.info("Defending level 5")
-        if protections.translate_and_llm(message):
+        if await protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 7:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(message):
+        if protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 8:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(message):
+        if protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 9:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(message):
+        if protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False

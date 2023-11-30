@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from utils import return_hash
 from app_config import settings
 
+
 async def get_leaderboard_data():
     get_async_session_context = contextlib.asynccontextmanager(get_async_session)
     stmt = (
@@ -35,11 +36,11 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
         # Check if leaderboard has user on it already
         leader = await leader_exists(session, user_id=user.id)
         if leader:
-        # if leader.user_id:
-            # Update existing Leaderboard item
-            leader.level = level
-            leader.password_hash = password_hash
-            await session.commit()
+            if leader.level < level:
+                # Update existing Leaderboard item
+                leader.level = level
+                leader.password_hash = password_hash
+                await session.commit()
         else:
             # Create new Item on LeaderBoard
             leader = LeaderBoard(
@@ -53,17 +54,24 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
             await session.refresh(leader)
     return None
 
+
 async def cookies_after_login(user: User) -> list:
     get_async_session_context = contextlib.asynccontextmanager(get_async_session)
     cookie_list = []
     async with get_async_session_context() as session:
         leader = await leader_exists(session, user_id=user.id)
         if leader:
-            cookie_list.append({"level": f"ctf_level_{1}", "hash": return_hash(settings.PASSWORDS.get(1, " "))})
-            for x in range(2, int(leader.level+1)):
-                cookie_list.append({"level": f"ctf_level_{x}", "hash": return_hash(settings.PASSWORDS.get(x-1, ""))})
+            cookie_list.append(
+                {
+                    "level": f"ctf_level_{1}",
+                    "hash": return_hash(settings.PASSWORDS.get(1, " ")),
+                }
+            )
+            for x in range(2, int(leader.level + 1)):
+                cookie_list.append(
+                    {
+                        "level": f"ctf_level_{x}",
+                        "hash": return_hash(settings.PASSWORDS.get(x - 1, "")),
+                    }
+                )
     return cookie_list
-
-
-
-

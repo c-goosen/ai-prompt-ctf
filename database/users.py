@@ -20,6 +20,7 @@ SECRET = settings.APP_SECRET
 
 logger = logging.getLogger(__name__)
 
+
 class RedirectCookieAuthentication(CookieTransport):
     async def get_login_response(self, token: str) -> Response:
         await super().get_login_response(token)
@@ -27,6 +28,7 @@ class RedirectCookieAuthentication(CookieTransport):
         response.status_code = 303
         response.headers["Location"] = "/level/0"
         return self._set_login_cookie(response, token)
+
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
@@ -46,12 +48,15 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     ):
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
+
 async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
     yield UserManager(user_db)
 
 
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
-cookie_transport = RedirectCookieAuthentication(cookie_max_age=settings.COOKIE_TIMEOUT, cookie_domain=settings.COOKIE_DOMAIN)
+cookie_transport = RedirectCookieAuthentication(
+    cookie_max_age=settings.COOKIE_TIMEOUT, cookie_domain=settings.COOKIE_DOMAIN
+)
 
 
 class RedirectCookieAuthentication(CookieTransport):

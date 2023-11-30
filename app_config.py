@@ -7,6 +7,7 @@ import logging
 
 load_dotenv()
 
+
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
@@ -70,14 +71,12 @@ class Settings(BaseSettings):
     ]
     FINAL_LEVEL: int = 10  # Actually 5
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
-    HUGGINGFACE_INFERENCE_API_URL : AnyUrl = os.getenv(
+    HUGGINGFACE_INFERENCE_API_URL: AnyUrl = os.getenv(
         "HUGGINGFACE_INFERENCE_API_URL",
-        "https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud"
+        "https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud",
     )
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
-    logger: object = logging.getLogger(
-        __name__
-    )
+    logger: object = logging.getLogger(__name__)
 
 
 settings = Settings()

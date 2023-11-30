@@ -26,15 +26,20 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 class LeaderBoard(Base):
     __tablename__ = "leaderboard"
-    __table_args__ = (
-        PrimaryKeyConstraint("user_id", name="pk_leaderboard"),
-
+    __table_args__ = (PrimaryKeyConstraint("user_id", name="pk_leaderboard"),)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("user.id"),
+        default=uuid.uuid4,
+        unique=True,
+        primary_key=True,
+        index=True,
     )
-    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), default=uuid.uuid4, unique=True, primary_key=True, index=True)
     level = Column(Integer, index=True)
     last_update = Column(DateTime, index=True, default=datetime.datetime.utcnow())
     email = Column(String, ForeignKey("user.email"), index=True)
     password_hash = Column(UnicodeText, index=True)
+
 
 class Levels(Base):
     __tablename__ = "levels"
@@ -42,9 +47,9 @@ class Levels(Base):
     password = Column(UnicodeText, index=True)
     level = Column(UnicodeText, index=True)
 
+
 class UserPrompts(Base):
     __tablename__ = "user_prompts"
-
 
     id = Column(Integer, primary_key=True, index=True)
     level = Column(Integer, index=True)
@@ -56,7 +61,11 @@ class UserPrompts(Base):
     # owner = relationship("user", back_populates="leaderboard")
 
 
-engine = create_async_engine(DATABASE_URL, pool_pre_ping=True, poolclass=NullPool,)
+engine = create_async_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    poolclass=NullPool,
+)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
