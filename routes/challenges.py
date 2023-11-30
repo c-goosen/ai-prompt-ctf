@@ -113,7 +113,8 @@ async def load_any_level_cookie(
 ):
     if not user:
         return RedirectResponse("/login")
-    if _level == 1:
+
+    if _level == 0:
 
         cookies = await cookies_after_login(user)
         response = templates.TemplateResponse(
@@ -135,7 +136,7 @@ async def load_any_level_cookie(
                                            "message" : "This is a visual challenge, try and prompt back the password in an images"}
                 )
         else:
-            url = f"/level/1/"
+            url = f"/level/0"
             return RedirectResponse(url=url)
 
 
@@ -151,7 +152,7 @@ async def load_any_level_hash(
         return RedirectResponse("/login")
     if not _hash:
         return templates.TemplateResponse(
-            "generic_level.html", {"request": request, "_level": 1}
+            "generic_level.html", {"request": request, "_level": 0}
         )
     _pass = settings.PASSWORDS.get(_level - 1)
     _hash_to_check = return_hash(_pass)

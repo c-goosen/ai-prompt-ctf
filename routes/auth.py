@@ -46,7 +46,7 @@ app.include_router(
 @app.get("/signup")
 async def signup(request: Request, user: User = Depends(current_active_user_opt)):
     if user:
-        return RedirectResponse("/level/1")
+        return RedirectResponse("/level/0")
     return templates.TemplateResponse(
         "signup.html",
         {
@@ -63,7 +63,7 @@ async def login(request: Request):
 @app.get("/login")
 async def login(request: Request, user: User = Depends(current_active_user_opt)):
     if user is not None:
-        response = RedirectResponse(url="/level/1")
+        response = RedirectResponse(url="/level/0")
         return response
     response = templates.TemplateResponse(
         "login.html",

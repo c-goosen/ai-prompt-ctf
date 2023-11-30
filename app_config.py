@@ -47,6 +47,7 @@ class Settings(BaseSettings):
         "LLM protection activated, you can't do that.",
     ]
     PASSWORDS: dict = {
+        0: os.getenv("PASSWORD_ZERO"),
         1: os.getenv("PASSWORD_ONE"),
         2: os.getenv("PASSWORD_TWO"),
         3: os.getenv("PASSWORD_THREE"),

@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 class RedirectCookieAuthentication(CookieTransport):
     async def get_login_response(self, token: str) -> Response:
         await super().get_login_response(token)
-        response = RedirectResponse(url="/level/1", status_code=303)
+        response = RedirectResponse(url="/level/0", status_code=303)
         response.status_code = 303
-        response.headers["Location"] = "/level/1"
+        response.headers["Location"] = "/level/0"
         return self._set_login_cookie(response, token)
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
@@ -58,7 +58,7 @@ class RedirectCookieAuthentication(CookieTransport):
     async def get_login_response(self, token: str) -> Response:
         await super().get_login_response(self, token)
         response = RedirectResponse(
-            status_code=status.HTTP_303_SEE_OTHER, url="/level/1"
+            status_code=status.HTTP_303_SEE_OTHER, url="/level/0"
         )
         response = self._set_login_cookie(response, token)
         # response.set_cookie()

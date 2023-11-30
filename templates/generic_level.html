@@ -38,13 +38,13 @@
 								<img style="height:600px;width:400px;" src="data:image/jpeg;base64,{{ _img | safe }}"/>
 								{% endif %}
 								{% endif %}
-								{% if _level < 9 %}
+								{% if _level < 9 and _level != 0 %}
 								<p style="text-align: center !important;" class="important">
-									Prompt me to try and retrieve a password. Ive been told not to do that, but take on the challenge.
+									Prompt me to try and retrieve a password. I've been told not to do that, but take on the challenge.
 								</br>If you get stuck have a look at this <a href="https://learnprompting.org/docs/prompt_hacking/injection">Guide</a>.
 								</p>
 								{% endif %}
-								{% if _level < 9 %}
+								{% if _level < 9 and _level != 0  %}
 								<form action="/level/submit/{{_level}}" method="post">
 										<div class="row">
 											<div class="col-12">
