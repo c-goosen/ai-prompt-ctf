@@ -56,6 +56,7 @@ async def root(request: Request):
             "request": request,
             "CTF_NAME": settings.CTF_NAME,
             "CTF_DETAILS": settings.CTF_DETAILS,
+            "CTF_SUBTITLE": settings.CTF_SUBTITLE
         },
     )
 

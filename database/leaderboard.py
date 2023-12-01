@@ -63,11 +63,11 @@ async def cookies_after_login(user: User) -> list:
         if leader:
             cookie_list.append(
                 {
-                    "level": f"ctf_level_{1}",
+                    "level": f"ctf_level_{0}",
                     "hash": return_hash(settings.PASSWORDS.get(1, " ")),
                 }
             )
-            for x in range(2, int(leader.level + 1)):
+            for x in range(1, int(leader.level + 1)):
                 cookie_list.append(
                     {
                         "level": f"ctf_level_{x}",

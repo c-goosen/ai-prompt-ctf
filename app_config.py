@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
     CTF_NAME: str = os.getenv("CTF_NAME", "BSIDES CTF Prompt Injection challenge")
+    CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "aka Talk Dirty to me....")
     CTF_DETAILS: str = os.getenv(
         "CTF_DETAILS",
         """
