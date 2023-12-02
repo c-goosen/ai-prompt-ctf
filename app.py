@@ -37,7 +37,7 @@ os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan,docs_url=None, redoc_url=None)
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -47,7 +47,7 @@ from routes import auth, challenges
 app.include_router(challenges.app)
 app.include_router(auth.app)
 
-@app.get("/start")
+@app.get("/start", include_in_schema=False)
 async def start(request: Request):
     return templates.TemplateResponse(
         "start.html",
@@ -75,7 +75,7 @@ async def health():
     return {"health": "ok"}
 
 
-@app.get("/leaderboard")
+@app.get("/leaderboard", include_in_schema=False)
 async def login(request: Request):
     return templates.TemplateResponse(
         "leaderboard.html",
@@ -94,7 +94,7 @@ async def login(request: Request):
 
 @app.post("/level/9/photo/upload")
 async def photo_upload(
-    request: Request, file: UploadFile | None, message: str = Form(...)
+    request: Request, file: UploadFile | None, message: str = Form(...), include_in_schema=False
 ):
     _password = settings.PASSWORDS.get(9)
     _img = base64.b64encode(await file.read()).decode("utf-8")
