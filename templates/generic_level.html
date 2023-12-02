@@ -37,6 +37,9 @@
 								{% if _img %}
 								<img style="height:600px;width:400px;" src="data:image/jpeg;base64,{{ _img | safe }}"/>
 								{% endif %}
+								{% if message %}
+												<p>Response: {{ message }}</p>
+								{% endif %}
 								{% endif %}
 								{% if _level < 9 and _level != 0 %}
 								<p style="text-align: center !important;" class="important">
