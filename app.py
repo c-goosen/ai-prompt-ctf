@@ -98,6 +98,12 @@ async def photo_upload(
 ):
     _password = settings.PASSWORDS.get(9)
     _img = base64.b64encode(await file.read()).decode("utf-8")
+    print(f"len of _img {len(_img)}")
+    if len(_img) == 0:
+        return templates.TemplateResponse(
+            "generic_level.html",
+            {"request": request, "message": """Please upload/attach an image as well. This level requires a prompt + image. Click Choose File.""", "_img": _img, "_level": 9},
+        )
     print(message)
     if not file:
         return {"message": "No upload file sent"}
