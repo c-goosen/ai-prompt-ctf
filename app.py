@@ -47,6 +47,15 @@ from routes import auth, challenges
 app.include_router(challenges.app)
 app.include_router(auth.app)
 
+@app.get("/start")
+async def start(request: Request):
+    return templates.TemplateResponse(
+        "start.html",
+        {
+            "request": request,
+            "START_PASSWORD": settings.PASSWORDS.get(0, ""),
+        },
+    )
 
 @app.get("/")
 async def root(request: Request):
