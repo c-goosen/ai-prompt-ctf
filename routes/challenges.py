@@ -247,19 +247,19 @@ async def check_level_generic(
             trigger_checks = False
     elif _level == 7:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(request, message):
+        if await protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 8:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(request, message):
+        if await protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
     elif _level == 9:
         logging.info("Defending level 6")
-        if protections.translate_and_llm(request, message):
+        if await protections.translate_and_llm(request, message):
             trigger_checks = True
         else:
             trigger_checks = False
