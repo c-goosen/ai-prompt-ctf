@@ -65,6 +65,10 @@
 										</div>
 								</form>
 								{% endif %}
+								{% if _level == 0 %}
+								<h3>To get started go to <a href="/start">Start</a> and copy that password into here</h3>
+								</br>
+								{% endif %}
 								<form action="/level/{{_level}}/confirm/" method="post">
 										<div class="row">
 											<div class="col-12">
