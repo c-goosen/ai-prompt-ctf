@@ -9,7 +9,7 @@ Tools
 * LLamaindex
 * RAG (Retrieval Augmented Generation)
 * QDrant vector DB
-* GPT3.5/GPT4 or LLama2 to ask questions
+* GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting
 * Python 3.11+
 * FastAPI  (async REST API framework)
 * Pydantic (types)
@@ -70,3 +70,12 @@ In terms of timing on CPU inference:
 [{'label': 'NEGATIVE', 'score': 0.9318109154701233}]
 1.6621052910013532
 ```
+
+## Cost of running CTF
+I tweeted about it: https://twitter.com/crypticg00se/status/1731578440166293643
+
+All depends on your python hosting.
+
+OpenAI costs are low.
+
+If you want to use hugginface for Inference, also low costs.

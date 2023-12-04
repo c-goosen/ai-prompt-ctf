@@ -35,9 +35,12 @@ bandit = "^1.7.5"
 googletrans = {git = "https://github.com/c-goosen/py-googletrans.git", rev = "upgrade-httpx"}
 gunicorn = "^21.2.0"
 tenacity = "^8.2.3"
+transformers = "^4.35.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
+importanize = "^0.7.0"
+memory-profiler = "^0.61.0"
 
 [build-system]
 requires = ["poetry-core"]
