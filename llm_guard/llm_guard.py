@@ -4,7 +4,27 @@ from fastapi import Request
 from app_config import settings
 from httpx import HTTPStatusError
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
+from transformers import AutoTokenizer,  AutoModelForSequenceClassification
+from transformers import pipeline
 
+class LLMGuardLocalV1:
+
+    def __init__(self, MODEL="cgoosen/llm_firewall_distilbert-base-uncased", TOKENIZER="cgoosen/llm_firewall_distilbert-base-uncased"):
+        self.MODEL = TOKENIZER
+        self.TOKENIZER = MODEL
+
+    async def query(self, prompt: str) -> list:
+        """
+        Locally run and prompt a AutoModelForSequenceClassification LLM.
+        :param prompt:
+        :return:
+        """
+        tokenizer = AutoTokenizer.from_pretrained(self.TOKENIZER)
+        model = AutoModelForSequenceClassification.from_pretrained(self.MODEL)
+        nlp = pipeline('text-classification', model=model, tokenizer=tokenizer, device_map="auto")
+
+        classification_results = nlp(prompt)
+        return classification_results
 
 class LLMGaurdV1:
     API_URL = settings.HUGGINGFACE_INFERENCE_API_URL
@@ -24,7 +44,6 @@ class LLMGaurdV1:
             url=str(LLMGaurdV1.API_URL), json=json_payload, headers=LLMGaurdV1.headers
         )
         response.raise_for_status()
-        # resp_data = response.json()
 
         resp_json = response.json(parse_float=decimal.Decimal)
         try:
@@ -32,11 +51,6 @@ class LLMGaurdV1:
             print("No Exception")
         except Exception as e:
             print("Exception")
-            # time.sleep(5)
-            # response = s.post(
-            #     LLMGaurdV1.API_URL, headers=LLMGaurdV1.headers, json=json_payload
-            # )
-            # resp_json = response.json(parse_float=decimal.Decimal)
 
         print(response.status_code)
         print(resp_json)

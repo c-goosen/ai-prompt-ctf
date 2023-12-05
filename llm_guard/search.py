@@ -1,5 +1,5 @@
 from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.vector_stores import QdrantVectorStore, SupabaseVectorStore
+from llama_index.vector_stores import SupabaseVectorStore
 from app_config import settings
 import logging
 

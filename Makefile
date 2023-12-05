@@ -25,3 +25,7 @@ ci-docker-build: ci-docker-auth
 ci-docker-push: ci-docker-auth
 	docker tag $(DOCKER_REPOSITORY):$(GIT_HASH) $(DOCKER_REPOSITORY):latest
 	docker push $(DOCKER_REPOSITORY)
+
+ci-code:
+	@poetry run black .
+	@poetry run flake8 .
