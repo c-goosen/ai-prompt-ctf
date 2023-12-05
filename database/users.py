@@ -43,13 +43,15 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         logger.info(f"User {user.id} has registered.")
         return RedirectResponse(url="/login", status_code=303)
 
-    async def on_after_forgot_password(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+    # async def on_after_forgot_password(
+    #     self, user: User, token: str, request: Optional[Request] = None
+    # ):
+    #     print(f"User {user.id} has forgot their password. Reset token: {token}")
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
+async def get_user_manager(
+    user_db: SQLAlchemyUserDatabase = Depends(get_user_db),
+):
     yield UserManager(user_db)
 
 
@@ -71,7 +73,9 @@ class RedirectCookieAuthentication(CookieTransport):
 
     async def get_logout_response(self) -> Response:
         await super().get_logout_response(self)
-        response = RedirectResponse(status_code=status.HTTP_204_NO_CONTENT, url="/")
+        response = RedirectResponse(
+            status_code=status.HTTP_204_NO_CONTENT, url="/"
+        )
         return self._set_logout_cookie(response)
 
 

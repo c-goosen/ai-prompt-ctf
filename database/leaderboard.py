@@ -1,17 +1,15 @@
 from database.db import LeaderBoard, get_async_session, User
 import contextlib
 from sqlalchemy import select
-from sqlalchemy.dialects.sqlite import insert as sqlite_upsert
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.engine import CursorResult
-import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils import return_hash
 from app_config import settings
 
 
 async def get_leaderboard_data():
-    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    get_async_session_context = contextlib.asynccontextmanager(
+        get_async_session
+    )
     stmt = (
         select(LeaderBoard)
         .group_by("level", "last_update", "user_id")
@@ -29,8 +27,12 @@ async def leader_exists(session: AsyncSession, user_id: str):
     return leader
 
 
-async def update_leaderboard_user(user: User, level: int, password_hash: str) -> None:
-    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+async def update_leaderboard_user(
+    user: User, level: int, password_hash: str
+) -> None:
+    get_async_session_context = contextlib.asynccontextmanager(
+        get_async_session
+    )
 
     async with get_async_session_context() as session:
         # Check if leaderboard has user on it already
@@ -56,7 +58,9 @@ async def update_leaderboard_user(user: User, level: int, password_hash: str) ->
 
 
 async def cookies_after_login(user: User) -> list:
-    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    get_async_session_context = contextlib.asynccontextmanager(
+        get_async_session
+    )
     cookie_list = []
     async with get_async_session_context() as session:
         leader = await leader_exists(session, user_id=user.id)

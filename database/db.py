@@ -2,10 +2,21 @@ from typing import AsyncGenerator
 from sqlalchemy import PrimaryKeyConstraint
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase
 from app_config import settings
-from sqlalchemy import Column, ForeignKey, Integer, DateTime, UnicodeText, String
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Integer,
+    DateTime,
+    UnicodeText,
+    String,
+)
 import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
@@ -36,7 +47,9 @@ class LeaderBoard(Base):
         index=True,
     )
     level = Column(Integer, index=True)
-    last_update = Column(DateTime, index=True, default=datetime.datetime.utcnow())
+    last_update = Column(
+        DateTime, index=True, default=datetime.datetime.utcnow()
+    )
     email = Column(String, ForeignKey("user.email"), index=True)
     password_hash = Column(UnicodeText, index=True)
 
@@ -53,7 +66,9 @@ class UserPrompts(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     level = Column(Integer, index=True)
-    last_update = Column(DateTime, index=True, default=datetime.datetime.utcnow())
+    last_update = Column(
+        DateTime, index=True, default=datetime.datetime.utcnow()
+    )
     user = Column(UUID(as_uuid=True), ForeignKey("user.id"), default=uuid.uuid4)
     prompt = Column(UnicodeText, index=True)
     answer = Column(UnicodeText, index=True)

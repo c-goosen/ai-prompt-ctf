@@ -11,7 +11,9 @@ load_dotenv()
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
-    CTF_NAME: str = os.getenv("CTF_NAME", "BSIDES CTF Prompt Injection challenge")
+    CTF_NAME: str = os.getenv(
+        "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
+    )
     CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "aka Talk Dirty to me....")
     CTF_DETAILS: str = os.getenv(
         "CTF_DETAILS",
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     SUPABASE_PORT: str = "5432"
     SUPABASE_DB_NAME: str = "postgres"
     SUPABASE_PG_URI: str = f"postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
-    SUPABASE_PG_URI_ASYNC: str = f"postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
+    SUPABASE_PG_URI_ASYNC: str = f"""postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"""
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
@@ -60,6 +62,7 @@ class Settings(BaseSettings):
         8: os.getenv("PASSWORD_EIGHT"),
         9: os.getenv("PASSWORD_NINE"),
     }
+    # Regex list for things like IPs, credit cards etc
     REGEX_LIST: list = [
         r"(\b[\w]{2}[\d]{6}\b)",
         r"\b(\d{5}-\d{3}-\d{7})|(\d{9})\b",

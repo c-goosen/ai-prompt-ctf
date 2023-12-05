@@ -1,6 +1,7 @@
 # Project  BSIDES Cape Town CTF
 
-Base on a combination of Vector Searching and OpenAI LLMs.
+Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
+https://twitter.com/crypticg00se/status/1731578440166293643 / https://bsidescapetown.co.za.
 
 This project is an exploration of what it would take to build a Gandalf LLM prompt injection challenge as well as 
 train an LLM to protect various levels.
