@@ -36,8 +36,10 @@ logger = logging.getLogger(
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
-
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+if settings.DOCS_ON:
+    app = FastAPI(lifespan=lifespan)
+else:
+    app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")

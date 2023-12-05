@@ -8,15 +8,20 @@ train an LLM to protect various levels.
 Tools
 * LLamaindex
 * RAG (Retrieval Augmented Generation)
-* QDrant vector DB
+* Postgres (supabase)
+* PGvector with postgres
 * GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting
 * Python 3.11+
 * FastAPI  (async REST API framework)
+* Fastapi-users
 * Pydantic (types)
+* Huggingface finetuned model
 
 ## API Docs
 API docs are located at ${URI}/docs
 http://127.0.0.1:8000/docs#
+
+But are switched off for events. You can switch it on with an ENV var DOCS_ON=True
 
 
 ## Install depedencies
@@ -28,13 +33,36 @@ poetry install
 
 ## Loading documents into QDrant
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
+
+You will need to set the level passwords like this:
+PASSWORD_ZERO="BSIDES_GET_STARTED_CTF"
+PASSWORD_ONE="bughuntersquest"
+PASSWORD_TWO="QUANTUMCRYPTO"
+PASSWORD_THREE="BSIDES23"
+PASSWORD_FOUR="SOFARSOGooD"
+PASSWORD_FIVE="REMEMBER_REMEMBER_the_5th_OF_NOVEMBER"
+PASSWORD_SIX="L33tH@x0r"
+PASSWORD_SEVEN="P@SSWORD123"
+PASSWORD_EIGHT="OWASPTOP10AI"
+PASSWORD_NINE="SKYNETRECRUIT"
 ```bash
 python password_upload.py
+# If indexes did not work with password uplaod you can also run 
+python create_vecs_indexes.py
 ```
 
-## Run
+## Run locally
 ```bash
+uvicorn app:app --reload
+```
 
+## Run prod
+```bash
+FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127.0.0.1:8000 --forwarded-allow-ips '*' --workers 2
+
+# or via docker
+docker build -t llm_challenge .
+docker run -p 8000:8000  llm_challenge 
 ```
 
 ## Memory requirements for Local LLM running

@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     )
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
     logger: object = logging.getLogger(__name__)
+    DOCS_ON: bool = False
 
 
 settings = Settings()
