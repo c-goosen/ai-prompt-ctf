@@ -1,9 +1,12 @@
-# Project  BSIDES CTF
+# Project  BSIDES Cape Town CTF
 
-Base on a combination of Vector Searching and LLMs.
+Base on a combination of Vector Searching and OpenAI LLMs.
 
 This project is an exploration of what it would take to build a Gandalf LLM prompt injection challenge as well as 
 train an LLM to protect various levels.
+
+The idea is to create an opensource and accessible CTF for new CTF players to get involved and learn about
+prompt injection, information retrieval and the security issues relating to LLMs.
 
 Tools
 * LLamaindex
@@ -31,7 +34,14 @@ Then run
 poetry install
 ```
 
-## Loading documents into QDrant
+## Database
+Requires postgress with pgvector vector store.
+
+To make my life easier I went with a free tier supabase instance. Comes with pgvector built in as a plugin.
+
+Backend communication with postgress is not via supabase API, but via postgress python library.
+
+## Loading documents into Supabase/postgress vector store
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
 
 You will need to set the level passwords like this:
@@ -65,11 +75,14 @@ docker build -t llm_challenge .
 docker run -p 8000:8000  llm_challenge 
 ```
 
+## Auth 
+Based on cookies and JWT tokens. Requires and email to authenticate, but no verification.
+
 ## Memory requirements for Local LLM running
 Caveat here is this was tested on a 16GB Macbook M1 Pro 14inch.
 
 The local LLm is quite fast, but still requires 286.109MB +/- to load into memory and inference
-shoots memory up to 639MB. Thus inference requires another 352MB.
+shoots memory up to 639MB. Thus inference would require another 352MB.
 
 This is with CPU inference though, so no GPU required.
 
