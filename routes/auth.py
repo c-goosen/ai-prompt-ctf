@@ -44,7 +44,9 @@ app.include_router(
 
 
 @app.get("/signup")
-async def signup(request: Request, user: User = Depends(current_active_user_opt)):
+async def signup(
+    request: Request, user: User = Depends(current_active_user_opt)
+):
     if user:
         return RedirectResponse("/level/0")
     return templates.TemplateResponse(
@@ -63,7 +65,9 @@ async def login(request: Request):
 
 
 @app.get("/login")
-async def login(request: Request, user: User = Depends(current_active_user_opt)):
+async def login(
+    request: Request, user: User = Depends(current_active_user_opt)
+):
     if user is not None:
         response = RedirectResponse(url="/level/0")
         return response
@@ -79,7 +83,9 @@ async def login(request: Request, user: User = Depends(current_active_user_opt))
 
 @app.post("/auth/signup")
 async def signup(
-    request: Request, email: Annotated[str, Form()], password: Annotated[str, Form()]
+    request: Request,
+    email: Annotated[str, Form()],
+    password: Annotated[str, Form()],
 ):
     from database.schemas import UserCreate
     from database.users import get_user_manager
@@ -92,7 +98,9 @@ async def signup(
             async with get_user_db_context(session) as user_db:
                 async with get_user_manager_context(user_db) as user_manager:
                     user = await user_manager.create(
-                        UserCreate(email=email, password=password, is_superuser=False)
+                        UserCreate(
+                            email=email, password=password, is_superuser=False
+                        )
                     )
                     logging.info(f"User created {user}")
                     return RedirectResponse(url="/login", status_code=303)

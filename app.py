@@ -1,16 +1,11 @@
 import contextlib
-# import base64
-# from fastapi import FastAPI, Request, File, UploadFile, Form
-# import requests
 from app_config import settings
-
-# from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
+from routes import auth, challenges
 
 from database.db import (
-    #create_db_and_tables,
     get_async_session,
 )
 from database.leaderboard import get_leaderboard_data
@@ -44,7 +39,6 @@ else:
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-from routes import auth, challenges
 
 app.include_router(challenges.app)
 app.include_router(auth.app)

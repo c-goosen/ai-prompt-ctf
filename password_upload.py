@@ -1,20 +1,25 @@
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.embeddings import OpenAIEmbeddings
 from llama_index.llms import OpenAI
 
 from llama_index import LangchainEmbedding, ServiceContext
 from llama_index import VectorStoreIndex, StorageContext
-from llama_index.vector_stores import QdrantVectorStore, SupabaseVectorStore
+from llama_index.vector_stores import SupabaseVectorStore
 from app_config import settings
 import vecs
-from llama_index import ListIndex, Document
-
+from llama_index import Document
+from database.db import create_db_and_tables
+import asyncio
 DB_CONNECTION = settings.SUPABASE_PG_URI
 
 # create vector store client
 vx = vecs.create_client(DB_CONNECTION)
 levels = list(settings.PASSWORDS.keys())
 print(f"Levels: {levels}")
+
+async def setup_db():
+#     # Not needed if you setup a migration system like Alembic
+    await create_db_and_tables()
+
+asyncio.run(setup_db())
 
 for k in levels:
     collection_name = f"level_{k}"
@@ -58,7 +63,9 @@ for k in levels:
     documents = [Document(text=t) for t in text_chunks]
     # build index
     index = VectorStoreIndex.from_documents(
-        documents, service_context=service_context, storage_context=storage_context
+        documents,
+        service_context=service_context,
+        storage_context=storage_context,
     )
 
 
