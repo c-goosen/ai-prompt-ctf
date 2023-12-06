@@ -59,5 +59,7 @@ USER poetry
 WORKDIR /app
 RUN python -m nltk.downloader punkt
 # ENTRYPOINT /docker-entrypoint.sh $0 $@
+
 ENTRYPOINT FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000 --forwarded-allow-ips '*' --workers 2
 CMD FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000 --forwarded-allow-ips '*' --workers 2
+
