@@ -79,9 +79,3 @@ async def login(request: Request):
         "leaderboard.html",
         {"request": request, "leaders": await get_leaderboard_data()},
     )
-
-
-# @app.on_event("startup")
-# async def on_startup():
-#     # Not needed if you setup a migration system like Alembic
-#     await create_db_and_tables()

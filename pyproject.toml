@@ -39,6 +39,7 @@ transformers = {extras = ["torch"], version = "^4.35.2"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
 
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
 importanize = "^0.7.0"
