@@ -3,7 +3,7 @@ from fastapi import Request
 from app_config import settings
 import re
 import cleantext
-from .llm_guard import LLMGaurdV1
+from .llm_guard import LLMGuardV1, LLMGuardLocalV1
 from googletrans import Translator
 
 
@@ -72,7 +72,10 @@ def input_and_output_checks(input: str, output: str) -> bool:
 
 async def llm_protection(request: Request, input) -> bool:
     protected = False
-    llm = LLMGaurdV1()
+    if settings.LOCAL_GUARD_LLM:
+        llm = LLMGuardLocalV1()
+    else:
+        llm = LLMGuardV1()
     resp = (await llm.query(request, input))[0]
     resp = dict(resp)
     if resp.get("label") == "NEGATIVE":
@@ -91,7 +94,10 @@ async def translate_and_llm(request: Request, input) -> bool:
     protected = False
     translator = Translator()
     translated = translator.translate(text=input).text
-    llm = LLMGaurdV1()
+    if settings.LOCAL_GUARD_LLM:
+        llm = LLMGuardLocalV1()
+    else:
+        llm = LLMGuardV1()
     resp = (await llm.query(request, prompt=translated))[0]
     # print(resp)
     if resp.get("label") == "NEGATIVE":

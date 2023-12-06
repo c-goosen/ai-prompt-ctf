@@ -81,7 +81,8 @@ class Settings(BaseSettings):
     )
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "127.0.0.1")
     logger: object = logging.getLogger(__name__)
-    DOCS_ON: bool = False
+    DOCS_ON: bool = os.getenv("DOCS_ON", False)
+    LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
 
 
 settings = Settings()

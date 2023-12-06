@@ -36,7 +36,7 @@ class LLMGuardLocalV1:
         return classification_results
 
 
-class LLMGaurdV1:
+class LLMGuardV1:
     API_URL = settings.HUGGINGFACE_INFERENCE_API_URL
     headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
 
@@ -56,9 +56,9 @@ class LLMGaurdV1:
             "options": {"wait_for_model": True, "use_cache": True},
         }
         response = await request.app.requests_client.post(
-            url=str(LLMGaurdV1.API_URL),
+            url=str(LLMGuardV1.API_URL),
             json=json_payload,
-            headers=LLMGaurdV1.headers,
+            headers=LLMGuardV1.headers,
         )
         response.raise_for_status()
 
