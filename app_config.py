@@ -83,7 +83,10 @@ class Settings(BaseSettings):
     logger: object = logging.getLogger(__name__)
     DOCS_ON: bool = os.getenv("DOCS_ON", False)
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
+    THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
+    LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
 
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
+os.environ["THEME_COLOR"] = settings.THEME_COLOR

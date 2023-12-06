@@ -37,6 +37,7 @@ else:
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 templates = Jinja2Templates(directory="templates")
+templates.env.globals.update(getenv=os.getenv)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 

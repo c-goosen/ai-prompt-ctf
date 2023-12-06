@@ -37,6 +37,8 @@ jobs:
             envkey_HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
             envkey_COOKIE_DOMAIN: llm-ctf.christogoosen.co.za
             envkey_HUGGINGFACE_INFERENCE_API_URL: https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud
+            envkey_THEME_COLOR: ${{ vars.THEME_COLOR }}
+            envkey_LOGO_URL: ${{ vars.LOGO_URL }}
 #            envkey_VARIABLE: ${{ vars.SOME_ACTION_VARIABLE }}
             directory: .
             file_name: .env
