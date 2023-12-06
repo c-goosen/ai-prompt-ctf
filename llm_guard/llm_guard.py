@@ -17,7 +17,7 @@ class LLMGuardLocalV1:
         self.MODEL = TOKENIZER
         self.TOKENIZER = MODEL
 
-    async def query(self, prompt: str) -> list:
+    async def query(self, request: Request | None, prompt: str) -> list:
         """
         Locally run and prompt a AutoModelForSequenceClassification LLM.
         :param prompt:
