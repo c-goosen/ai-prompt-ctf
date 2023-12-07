@@ -67,7 +67,7 @@ class LLMGuardV1:
             print(resp_json[0])
             print("No Exception")
         except Exception as e:
-            print("Exception")
+            print(f"Exception -> {e}")
 
         print(response.status_code)
         print(resp_json)

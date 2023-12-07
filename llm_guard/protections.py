@@ -110,7 +110,7 @@ async def translate_and_llm(request: Request, input) -> bool:
         if resp.get("label") == "NEGATIVE":
             if resp["score"] > decimal.Decimal(0.8):
                 protected = True
-    except Exception as e:
+    except Exception:
         protected = False
 
     return protected

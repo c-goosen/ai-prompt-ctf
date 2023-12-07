@@ -4,7 +4,7 @@ from database.users import (
     auth_backend,
     fastapi_users,
 )
-from fastapi import FastAPI, Form, Request, Depends
+from fastapi import Form, Request, Depends
 from starlette.responses import RedirectResponse
 from typing import Annotated
 
@@ -44,7 +44,7 @@ app.include_router(
 
 
 @app.get("/signup")
-async def signup(
+async def signup_page(
     request: Request, user: User = Depends(current_active_user_opt)
 ):
     if user:
@@ -58,7 +58,7 @@ async def signup(
 
 
 @app.get("/logout")
-async def login(request: Request):
+async def logout(request: Request):
     response = RedirectResponse(url="/login")
     response.delete_cookie("fastapiusersauth", domain=settings.COOKIE_DOMAIN)
     return response

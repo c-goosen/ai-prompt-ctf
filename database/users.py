@@ -1,8 +1,7 @@
 import uuid
 from typing import Optional
 from starlette.responses import RedirectResponse
-from fastapi import Response, status
-from fastapi import Depends, Request, Response
+from fastapi import Depends, Request, Response, status
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -57,7 +56,8 @@ async def get_user_manager(
 
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 cookie_transport = RedirectCookieAuthentication(
-    cookie_max_age=settings.COOKIE_TIMEOUT, cookie_domain=settings.COOKIE_DOMAIN
+    cookie_max_age=settings.COOKIE_TIMEOUT,
+    cookie_domain=settings.COOKIE_DOMAIN,
 )
 
 

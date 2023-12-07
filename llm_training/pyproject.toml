@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "llm-training"
+version = "0.1.0"
+description = ""
+authors = ["Christo Goosen <christogoosen@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+transformers = {extras = ["torch"], version = "^4.35.2"}
+accelerate = "^0.25.0"
+huggingface-hub = "^0.19.4"
+jupyter = "^1.0.0"
+datasets = "^2.15.0"
+evaluate = "^0.4.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

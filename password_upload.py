@@ -1,6 +1,6 @@
 from llama_index.llms import OpenAI
 
-from llama_index import LangchainEmbedding, ServiceContext
+from llama_index import ServiceContext
 from llama_index import VectorStoreIndex, StorageContext
 from llama_index.vector_stores import SupabaseVectorStore
 from app_config import settings
@@ -8,6 +8,7 @@ import vecs
 from llama_index import Document
 from database.db import create_db_and_tables
 import asyncio
+
 DB_CONNECTION = settings.SUPABASE_PG_URI
 
 # create vector store client
@@ -15,9 +16,11 @@ vx = vecs.create_client(DB_CONNECTION)
 levels = list(settings.PASSWORDS.keys())
 print(f"Levels: {levels}")
 
+
 async def setup_db():
-#     # Not needed if you setup a migration system like Alembic
+    #     # Not needed if you setup a migration system like Alembic
     await create_db_and_tables()
+
 
 asyncio.run(setup_db())
 
@@ -27,9 +30,7 @@ for k in levels:
 # alternatively
 # from langchain.llms import ...
 supabase = True
-# embed_model = LangchainEmbedding(
-#     HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-# )
+
 service_context = ServiceContext.from_defaults(
     llm=OpenAI(
         temperature=0.1,

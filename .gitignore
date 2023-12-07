@@ -4,3 +4,7 @@ Miniforge*
 .env
 .DS_STORE
 .teller.yml
+llm_training/.ipynb_checkpoints/
+llm_training/cgoosen/
+llm_training/wandb/
+supabase/

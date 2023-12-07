@@ -16,10 +16,13 @@ class Settings(BaseSettings):
     )
     CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "aka Talk Dirty to me....")
     CTF_DETAILS: str = os.getenv(
-        "CTF_DETAILS",
-        """
-    This is a prompt injection ( https://www.lakera.ai/insights/what-is-prompt-injection ) challenge.
-    You need to progress through multiple levels. Each time you get a password/secret back,
+    "CTF_DETAILS",
+    """
+    This is a prompt injection 
+    (https://www.lakera.ai/insights/what-is-prompt-injection)
+    challenge.
+    You need to progress through multiple levels. 
+    Each time you get a password/secret back,
     you should submit it to progress through the levels.
     Each level becomes progressively harder. Happy chatting/prompting. 
     """,
@@ -32,8 +35,11 @@ class Settings(BaseSettings):
     )
     SUPABASE_PORT: str = "5432"
     SUPABASE_DB_NAME: str = "postgres"
-    SUPABASE_PG_URI: str = f"postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
-    SUPABASE_PG_URI_ASYNC: str = f"""postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"""
+    SUPABASE_PG_URI: str = f"""
+    postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"""
+    SUPABASE_PG_URI_ASYNC: str = f"""
+    postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}
+    """
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
