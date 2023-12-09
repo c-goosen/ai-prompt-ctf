@@ -28,4 +28,4 @@ ci-docker-push: ci-docker-auth
 
 ci-code:
 	@poetry run black .
-	@poetry run flake8 .
+	@poetry run flake8

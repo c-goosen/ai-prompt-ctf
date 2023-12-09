@@ -19,4 +19,4 @@ def hash_and_check_password(level, password_input: str):
 
 
 def random_block_msg():
-    return random.choice(settings.BLOCK_MESSAGES)
+    return random.choice(settings.BLOCK_MESSAGES) #noqa

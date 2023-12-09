@@ -13,12 +13,14 @@ def text_normalization(text):
         fix_unicode=True,  # fix various unicode errors
         to_ascii=True,  # transliterate to closest ASCII representation
         lower=True,  # lowercase text
-        no_line_breaks=False,  # fully strip line breaks as opposed to only normalizing them
+        no_line_breaks=False,
+        # fully strip line breaks as opposed to only normalizing them
         no_urls=False,  # replace all URLs with a special token
         no_emails=False,  # replace all email addresses with a special token
         no_numbers=False,  # replace all numbers with a special token
         no_digits=False,  # replace all digits with a special token
-        no_currency_symbols=True,  # replace all currency symbols with a special token
+        no_currency_symbols=True,
+        # replace all currency symbols with a special token
         no_punct=True,  # remove punctuations
         lang="en",  # set to 'de' for German special handling)
     )

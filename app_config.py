@@ -16,16 +16,14 @@ class Settings(BaseSettings):
     )
     CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "aka Talk Dirty to me....")
     CTF_DETAILS: str = os.getenv(
-    "CTF_DETAILS",
-    """
-    This is a prompt injection 
-    (https://www.lakera.ai/insights/what-is-prompt-injection)
-    challenge.
-    You need to progress through multiple levels. 
-    Each time you get a password/secret back,
-    you should submit it to progress through the levels.
-    Each level becomes progressively harder. Happy chatting/prompting. 
-    """,
+        "CTF_DETAILS",
+        """This is a prompt injection
+        (https://www.lakera.ai/insights/what-is-prompt-injection)
+        challenge.
+        You need to progress through multiple levels. 
+        Each time you get a password/secret back,
+        you should submit it to progress through the levels.
+        Each level becomes progressively harder. Happy chatting/prompting.""",
     )
     # Supabase
     SUPABASE_PG_USER: str = os.getenv("SUPABASE_PG_USER", "postgres")
@@ -35,8 +33,10 @@ class Settings(BaseSettings):
     )
     SUPABASE_PORT: str = "5432"
     SUPABASE_DB_NAME: str = "postgres"
-    SUPABASE_PG_URI: str = f"""
-    postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"""
+    SUPABASE_PG_URI: str = (
+        f"\n"
+        f"    postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
+    )
     SUPABASE_PG_URI_ASYNC: str = f"""
     postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}
     """
@@ -74,7 +74,8 @@ class Settings(BaseSettings):
         r"\b(\d{5}-\d{3}-\d{7})|(\d{9})\b",
         r"[A-Z]{4}-[A-Z]{6}-[A-Z]{4}",
         r"(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}",
-        r"^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$"
+        r"^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|["
+        r"68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$ ",
         r"[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}",  # takealot
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
