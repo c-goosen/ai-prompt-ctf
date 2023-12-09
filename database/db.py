@@ -27,7 +27,7 @@ from sqlalchemy.pool import NullPool
 
 UUID_ID = uuid.UUID
 
-DATABASE_URL = settings.SUPABASE_PG_URI_ASYNC
+DATABASE_URL = settings.PG_URI_ASYNC
 
 
 class Base(DeclarativeBase):

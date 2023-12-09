@@ -5,7 +5,7 @@ from fastapi import Depends
 from starlette.responses import RedirectResponse
 from llama_index import ServiceContext
 from pydantic import BaseModel
-from llm_guard.search import search_supabase
+from llm_guard.search import search_vecs_and_prompt
 from llm_guard import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 
@@ -222,7 +222,7 @@ async def check_level_generic(
     else:
         context = service_context
 
-    response = search_supabase(
+    response = search_vecs_and_prompt(
         search_input=message,
         service_context=context,
         collection_name=f"level_{_level}",
@@ -327,7 +327,7 @@ async def photo_upload_v2(
     _img = await file.read()
     _img_filename = file.filename
     if _img_filename:
-        with open(f"{os.getcwd()}/tmp/{_img_filename}", "wb") as f: #noqa
+        with open(f"{os.getcwd()}/tmp/{_img_filename}", "wb") as f:  # noqa
             f.write(_img)
     else:
         return templates.TemplateResponse(

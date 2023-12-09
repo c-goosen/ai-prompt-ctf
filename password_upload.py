@@ -9,7 +9,7 @@ from llama_index import Document
 from database.db import create_db_and_tables
 import asyncio
 
-DB_CONNECTION = settings.SUPABASE_PG_URI
+DB_CONNECTION = settings.PG_URI
 
 # create vector store client
 vx = vecs.create_client(DB_CONNECTION)
@@ -57,7 +57,7 @@ for k in levels:
     ]
     storage_context = StorageContext.from_defaults(
         vector_store=SupabaseVectorStore(
-            postgres_connection_string=settings.SUPABASE_PG_URI,
+            postgres_connection_string=settings.PG_URI,
             collection_name=collection_name,
         )
     )

@@ -59,7 +59,7 @@ class LLMGuardV1:
             url=str(LLMGuardV1.API_URL),
             json=json_payload,
             headers=LLMGuardV1.headers,
-            timeout=10.0
+            timeout=10.0,
         )
         response.raise_for_status()
 

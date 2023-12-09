@@ -1,0 +1,4 @@
+# FILE: .bandit
+[bandit]
+exclude = tests/,./.venv/,./llm_training/,./supabase/,.pytest_cache,.github/,./llm_training/.venv/s
+skips = B104

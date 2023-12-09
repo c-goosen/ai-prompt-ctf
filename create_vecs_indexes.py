@@ -1,7 +1,7 @@
 from app_config import settings
 import vecs
 
-DB_CONNECTION = settings.SUPABASE_PG_URI
+DB_CONNECTION = settings.PG_URI
 
 # create vector store client
 vx = vecs.create_client(DB_CONNECTION)

@@ -10,3 +10,4 @@ exclude =
     dist
     .venv
     tests/
+    ./llm_guard/system_prompt.py

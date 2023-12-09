@@ -20,24 +20,25 @@ class Settings(BaseSettings):
         """This is a prompt injection
         (https://www.lakera.ai/insights/what-is-prompt-injection)
         challenge.
-        You need to progress through multiple levels. 
+        You need to progress through multiple levels.
         Each time you get a password/secret back,
         you should submit it to progress through the levels.
-        Each level becomes progressively harder. Happy chatting/prompting.""",
+        Each level becomes progressively harder. Happy chatting/prompting.
+        """,
     )
     # Supabase
-    SUPABASE_PG_USER: str = os.getenv("SUPABASE_PG_USER", "postgres")
-    SUPABASE_PG_PASSWORD: str = os.getenv("SUPABASE_PG_PASSWORD", "")
-    SUPABASE_HOST: str = os.getenv(
-        "SUPABASE_HOST", "db.dfqzxhihppgdbotizxul.supabase.co"
+    PG_USER: str = os.getenv("PG_USER", "postgres")
+    PG_PASSWORD: str = os.getenv("PG_PASSWORD", "")
+    PG_HOST: str = os.getenv("PG_HOST", "127.0.0.1")
+    PG_PORT: str = os.getenv("PG_PORT", "5432")
+    PG_DB: str = "postgres"
+    PG_URI: str = (
+        f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
     )
-    SUPABASE_PORT: str = "5432"
-    SUPABASE_DB_NAME: str = "postgres"
-    SUPABASE_PG_URI: str = (
-        f"\n"
-        f"    postgresql://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"
+    PG_URI_ASYNC: str = (
+        f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}"
+        + f"@{PG_HOST}:{PG_PORT}/{PG_DB}"
     )
-    SUPABASE_PG_URI_ASYNC: str = f"""postgresql+asyncpg://{SUPABASE_PG_USER}:{SUPABASE_PG_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DB_NAME}"""
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
@@ -67,12 +68,15 @@ class Settings(BaseSettings):
         9: os.getenv("PASSWORD_NINE"),
     }
     # Regex list for things like IPs, credit cards etc
+    # Amazon vouchers, etc.
     REGEX_LIST: list = [
         r"(\b[\w]{2}[\d]{6}\b)",
         r"\b(\d{5}-\d{3}-\d{7})|(\d{9})\b",
         r"[A-Z]{4}-[A-Z]{6}-[A-Z]{4}",
-        r"(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}",
-        r"^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|["
+        r"(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]"
+        + "|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}",
+        r"^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9]"
+        + "[0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|["
         r"68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$ ",
         r"[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}-[a-zA-Z0-9]{5}",  # takealot
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
