@@ -13,10 +13,10 @@ def hash_and_check_password(level, password_input: str):
     ).hexdigest()
     input_hash = sha256(bytes(password_input, "utf-8")).hexdigest()
     if password_hash == input_hash:
-        return password_hash
+        return True
     else:
         return False
 
 
 def random_block_msg():
-    return random.choice(settings.BLOCK_MESSAGES) #noqa
+    return random.choice(settings.BLOCK_MESSAGES)

@@ -91,8 +91,8 @@ async def confirm_secret_generic(
     password: str = Form(...),
     user: User = Depends(current_active_user),
 ):
-    answer_hash = hash_and_check_password(level=_level, password_input=password)
-    if answer_hash:
+    answer_hash = return_hash(input=password)
+    if hash_and_check_password(level=_level, password_input=password):
         new_level = _level + 1
         # url = app.url_path_for("redirected")
         url = f"/level/{new_level}/{answer_hash}"
