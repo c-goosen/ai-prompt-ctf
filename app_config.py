@@ -55,6 +55,7 @@ class Settings(BaseSettings):
     BLOCK_MESSAGES: list[str] = [
         "LLM protection activated, you can't do that.",
     ]
+    IMAGE_DIR: str | bool = os.getenv("IMAGE_DIR", f"{os.getcwd()}/tmp")
     PASSWORDS: dict = {
         0: os.getenv("PASSWORD_ZERO"),
         1: os.getenv("PASSWORD_ONE"),
@@ -99,3 +100,4 @@ class Settings(BaseSettings):
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 os.environ["THEME_COLOR"] = settings.THEME_COLOR
+print(settings.IMAGE_DIR)
