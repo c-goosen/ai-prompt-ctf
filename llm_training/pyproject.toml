@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-transformers = {extras = ["torch"], version = "^4.35.2"}
+transformers = {extras = ["torch"], version = "^4.36.0"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
 jupyter = "^1.0.0"
