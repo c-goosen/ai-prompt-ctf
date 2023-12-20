@@ -33,7 +33,7 @@ bandit = "^1.7.5"
 googletrans = {git = "https://github.com/c-goosen/py-googletrans.git", rev = "upgrade-httpx"}
 gunicorn = "^21.2.0"
 tenacity = "^8.2.3"
-transformers = {extras = ["torch"], version = "^4.35.2"}
+transformers = {extras = ["torch"], version = "^4.36.0"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
 
