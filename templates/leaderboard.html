@@ -180,6 +180,10 @@ td {
       <div id="leaderboard">
 
         <div class="ribbon"></div>
+          <div hx-get="/leaderboard/poll"
+            hx-trigger="load delay:5s"
+            hx-swap="outerHTML"
+        >
         <table>
         {% for result in leaders %}
           <tr>
@@ -191,6 +195,8 @@ td {
         {% endfor %}
 
         </table>
+      </div>
+
       </div>
 
 {% endblock %}
