@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
 
 # get root logger
 logger = logging.getLogger(__name__)
+logging.getLogger('passlib').setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
@@ -71,9 +72,16 @@ async def health():
     return {"health": "ok"}
 
 
-@app.get("/leaderboard", include_in_schema=False)
-async def login(request: Request):
+@app.get("/leaderboard", include_in_schema=True)
+async def leaderboard(request: Request):
     return templates.TemplateResponse(
         "leaderboard.html",
+        {"request": request, "leaders": await get_leaderboard_data()},
+    )
+
+@app.get("/leaderboard/poll", include_in_schema=True)
+async def leaderboard_poll(request: Request):
+    return templates.TemplateResponse(
+        "leaderboard_table.html",
         {"request": request, "leaders": await get_leaderboard_data()},
     )
