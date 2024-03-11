@@ -53,7 +53,7 @@ jobs:
       - name: Docker Build & Push
         run: |
           make ci-docker-build
-          make ci-docker-push
+          #make ci-docker-push
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
