@@ -35,6 +35,8 @@ tenacity = "^8.2.3"
 transformers = {extras = ["torch"], version = "^4.35.2"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
+fastapi-cli = "^0.0.4"
+llama-index-multi-modal-llms-openai = "^0.1.8"
 
 
 [tool.poetry.group.dev.dependencies]

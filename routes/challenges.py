@@ -1,5 +1,5 @@
 import datetime
-
+from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from llama_index.llms import OpenAI
 from fastapi import APIRouter
 from llama_index import SimpleDirectoryReader
@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from llm_guard.search import search_vecs_and_prompt
 from llm_guard import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
+from llama_index.core import Settings
 
 from database.db import (
     User,
@@ -84,7 +85,7 @@ service_context_4_o_mini = ServiceContext.from_defaults(
         temperature=0.1,
         model=settings.OPENAI_MODEL_4_O_MINI,
         api_key=settings.OPENAI_API_KEY,
-    )
+    ),
 )
 
 
@@ -231,12 +232,17 @@ async def check_level_generic(
 ):
     if _level == 9:
         context = service_context_4_vision
+        Settings.llm = service_context_4_vision.llm
     elif _level in (7, 8):
         context = service_context_4_o_mini
+        Settings.llm = service_context_4_o_mini.llm
     elif _level == 6:
         context = service_context_4_o_mini
+        Settings.llm = service_context_4_o_mini.llm
     else:
         context = service_context
+        Settings.llm = service_context.llm
+        Settings.llm.system_prompt = get_system_prompt(level=_level)
 
     response = search_vecs_and_prompt(
         search_input=message,
