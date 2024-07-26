@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL_4: str = "gpt-4"
     OPENAI_MODEL_4_TURBO: str = "gpt-4-1106-preview"
     OPENAI_MODEL_4_VISION: str = "gpt-4-vision-preview"
+    OPENAI_MODEL_4_O_MINI: str = "gpt-4o-mini"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]

@@ -79,6 +79,15 @@ service_context_4_vision = ServiceContext.from_defaults(
     )
 )
 
+service_context_4_o_mini = ServiceContext.from_defaults(
+    llm=OpenAI(
+        temperature=0.1,
+        model=settings.OPENAI_MODEL_4_O_MINI,
+        api_key=settings.OPENAI_API_KEY,
+    )
+)
+
+
 router = APIRouter()
 
 
@@ -223,9 +232,9 @@ async def check_level_generic(
     if _level == 9:
         context = service_context_4_vision
     elif _level in (7, 8):
-        context = service_context_4_turbo
+        context = service_context_4_o_mini
     elif _level == 6:
-        context = service_context_4_turbo
+        context = service_context_4_o_mini
     else:
         context = service_context
 
