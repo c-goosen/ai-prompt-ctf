@@ -19,41 +19,40 @@
     </br>
     <p class="important" style="text-align: center !important;">
 <!--        To start: <button onclick="window.location.href = '/signup';" type="submit">Signup</button>-->
-<div id="login" class="container">
-    <div class="row">
+<!--<div id="login" class="container">-->
+<!--    <div class="row">-->
+<!--        <div class="row col s4">-->
+<!--        <form>-->
+<!--            <div class="row">-->
+<!--                <div class="input-field col s12">-->
+<!--                    <input id="username" type="email"  name= "username"  class="validate" required/>-->
+<!--                    <label for="username">Email</label>-->
+<!--                    <span-->
+<!--                        class="helper-text"-->
+<!--                        data-error="Please enter a valid email."-->
+<!--                        data-success=""></span-->
+<!--                    >-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="row">-->
+<!--                <div class="input-field  col s12">-->
+<!--                    <input id="password" name="password" type="password" class="validate" required/>-->
+<!--                    <label for="password">Password</label>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="row col s4">-->
+<!--                <button type="submit"-->
+<!--                        hx-post="/auth/login"-->
+<!--                        hx-swap="innerHTML"-->
+<!--                        hx-target="#login">Login-->
+<!--                  </button>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
         <div class="row col s4">
-        <form class="col s12"
-               hx-post="/auth/login"
-               hx-swap="innerHTML"
-               hx-target="#login"
-               method="post">
-            <div class="row">
-                <div class="input-field col s12">
-                    <input id="username" type="email"  name= "username"  class="validate" required/>
-                    <label for="username">Email</label>
-                    <span
-                        class="helper-text"
-                        data-error="Please enter a valid email."
-                        data-success=""></span
-                    >
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field  col s12">
-                    <input id="password" name="password" type="password" class="validate" required/>
-                    <label for="password">Password</label>
-                </div>
-            </div>
-            <div class="row col s4">
-                <button class="btn waves-effect indigo darken-2 waves-light " type="submit" name="action">Login
-                  </button>
-            </div>
-        </form>
-        </div>
-    </div>
-</div>
-        <div class="row col s4">
-            <p>Don't have an account? <a href="/register/" class="">Register here.</a></p>
+            <p>Don't have an account? <a href="/signup" class="">Register here.</a></p>
         </div>
     </p>
 {% endblock %}

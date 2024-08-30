@@ -1,5 +1,4 @@
 import datetime
-from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from llama_index.llms.openai import OpenAI
 from fastapi import APIRouter
 from llama_index.core import SimpleDirectoryReader
@@ -8,7 +7,6 @@ from llm_guard.system_prompt import get_system_prompt
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from fastapi import Depends
 from starlette.responses import RedirectResponse
-from llama_index.core import ServiceContext
 from pydantic import BaseModel
 from llm_guard.search import search_vecs_and_prompt
 from llm_guard import protections
@@ -49,44 +47,7 @@ get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
 app = APIRouter()
 
-
-service_context = ServiceContext.from_defaults(
-    llm=OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_3_5_TURBO,
-        api_key=settings.OPENAI_API_KEY,
-    )
-)
-service_context_4 = ServiceContext.from_defaults(
-    llm=OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_4,
-        api_key=settings.OPENAI_API_KEY,
-    )
-)
-service_context_4_turbo = ServiceContext.from_defaults(
-    llm=OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_4_TURBO,
-        api_key=settings.OPENAI_API_KEY,
-    )
-)
-
-service_context_4_vision = ServiceContext.from_defaults(
-    llm=OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_4_VISION,
-        api_key=settings.OPENAI_API_KEY,
-    )
-)
-
-service_context_4_o_mini = ServiceContext.from_defaults(
-    llm=OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_4_O_MINI,
-        api_key=settings.OPENAI_API_KEY,
-    ),
-)
+settings.OPENAI_API_KEY
 
 
 router = APIRouter()
@@ -230,25 +191,23 @@ async def check_level_generic(
     message: str = Form(...),
     user: User = Depends(current_active_user),
 ):
+    model = settings.OPENAI_MODEL_3_5_TURBO
     if _level == 9:
-        context = service_context_4_vision
-        Settings.llm = service_context_4_vision.llm
+        model = settings.OPENAI_MODEL_4_VISION
+
     elif _level in (7, 8):
-        context = service_context_4_o_mini
-        Settings.llm = service_context_4_o_mini.llm
+        model = settings.OPENAI_MODEL_4_O_MINI
     elif _level == 6:
-        context = service_context_4_o_mini
-        Settings.llm = service_context_4_o_mini.llm
+        model = settings.OPENAI_MODEL_4_O_MINI
     else:
-        context = service_context
-        Settings.llm = service_context.llm
+        model = settings.OPENAI_MODEL_3_5_TURBO
         Settings.llm.system_prompt = get_system_prompt(level=_level)
 
     response = search_vecs_and_prompt(
         search_input=message,
-        service_context=context,
         collection_name=f"level_{_level}",
         level=_level,
+        model=model
     )
 
     async with get_async_session_context() as session:

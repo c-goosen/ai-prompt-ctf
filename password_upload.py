@@ -1,6 +1,6 @@
 from llama_index.llms.openai import OpenAI
+from llama_index.core import Settings
 
-from llama_index.core import ServiceContext
 from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.vector_stores.supabase import SupabaseVectorStore
 from app_config import settings
@@ -31,13 +31,11 @@ for k in levels:
 # from langchain.llms import ...
 supabase = True
 
-service_context = ServiceContext.from_defaults(
-    llm=OpenAI(
+Settings.llm = OpenAI(
         temperature=0.1,
         model=settings.OPENAI_MODEL_DAVINCI,
         api_key=settings.OPENAI_API_KEY,
     )
-)
 
 generic_password_text = [
     "<placeholder>",
@@ -65,7 +63,6 @@ for k in levels:
     # build index
     index = VectorStoreIndex.from_documents(
         documents,
-        service_context=service_context,
         storage_context=storage_context,
     )
 

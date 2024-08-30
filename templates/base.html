@@ -7,7 +7,7 @@
 <html>
 	<head>
         {% block head %}
-		<script src="/path/to/htmx.min.js"></script>
+		<script src="{{ url_for('static', path='/assets/js/htmx.min.js') }}"></script>
 		<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 		<script src="https://cdn.tailwindcss.com"></script>
 		<title>{% block title %}{% endblock %}</title>
