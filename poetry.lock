@@ -1840,6 +1840,21 @@ llama-index-core = ">=0.11.0,<0.12.0"
 llama-parse = ">=0.4.0"
 
 [[package]]
+name = "llama-index-vector-stores-supabase"
+version = "0.2.0"
+description = "llama-index vector_stores supabase integration"
+optional = false
+python-versions = "<4.0,>=3.8.1"
+files = [
+    {file = "llama_index_vector_stores_supabase-0.2.0-py3-none-any.whl", hash = "sha256:0aef49cdd523ad8ad8812bc3e45cca72c4c06c41e67fec28d2d9020f421f24f9"},
+    {file = "llama_index_vector_stores_supabase-0.2.0.tar.gz", hash = "sha256:cec1c708641f37d6a5388748930c803b9775020a9fdaa28daf5c430e429a900c"},
+]
+
+[package.dependencies]
+llama-index-core = ">=0.11.0,<0.12.0"
+vecs = ">=0.4.2,<0.5.0"
+
+[[package]]
 name = "llama-parse"
 version = "0.5.1"
 description = "Parse files into RAG-Optimized formats."
@@ -4436,4 +4451,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "8ed927cc3558aa781827d984f12918154bd0d5c16afbc666f906732f29692cd6"
+content-hash = "f17c65e3387414c6a46d67720f8d66c9bccbeb725fbe6b7f0703c07b074cb693"

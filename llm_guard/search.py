@@ -1,5 +1,6 @@
-from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.vector_stores import SupabaseVectorStore
+from llama_index.core import ServiceContext
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.supabase import SupabaseVectorStore
 from app_config import settings
 from llm_guard.system_prompt import get_system_prompt
 

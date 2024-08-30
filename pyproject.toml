@@ -36,6 +36,7 @@ accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
 fastapi-cli = "^0.0.4"
 llama-index = "^0.11.2"
+llama-index-vector-stores-supabase = "^0.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,14 +1,14 @@
 import datetime
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
-from llama_index.llms import OpenAI
+from llama_index.llms.openai import OpenAI
 from fastapi import APIRouter
-from llama_index import SimpleDirectoryReader
+from llama_index.core import SimpleDirectoryReader
 from llm_guard.system_prompt import get_system_prompt
 
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from fastapi import Depends
 from starlette.responses import RedirectResponse
-from llama_index import ServiceContext
+from llama_index.core import ServiceContext
 from pydantic import BaseModel
 from llm_guard.search import search_vecs_and_prompt
 from llm_guard import protections

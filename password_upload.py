@@ -1,11 +1,11 @@
-from llama_index.llms import OpenAI
+from llama_index.llms.openai import OpenAI
 
-from llama_index import ServiceContext
-from llama_index import VectorStoreIndex, StorageContext
-from llama_index.vector_stores import SupabaseVectorStore
+from llama_index.core import ServiceContext
+from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.vector_stores.supabase import SupabaseVectorStore
 from app_config import settings
 import vecs
-from llama_index import Document
+from llama_index.core import Document
 from database.db import create_db_and_tables
 import asyncio
 
