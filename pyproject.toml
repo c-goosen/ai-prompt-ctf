@@ -6,11 +6,11 @@ authors = ["Christo Goosen <christogoosen@gmail.com>"]
 readme = "README.md"
 #packages = [{include = "llm-ctf"}]
 
+package-mode = false
+
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-llama-index = "0.9.36"
 nltk = "^3.8.1"
-pypdf = "^3.15.4"
 llama-cpp-python = "^0.1.82"
 sentence-transformers = "^2.2.2"
 fastapi = "0.103.2"
@@ -35,7 +35,7 @@ transformers = {extras = ["torch"], version = "^4.35.2"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
 fastapi-cli = "^0.0.4"
-llama-index-multi-modal-llms-openai = "^0.1.8"
+llama-index = "^0.11.2"
 
 
 [tool.poetry.group.dev.dependencies]
