@@ -1321,7 +1321,7 @@ input, select, textarea {
 	}
 
 	body {
-		background-color: #F5F0F8
+		/* background-color: #F5F0F8de7838 */
 		background-repeat: repeat, no-repeat;
 		background-size: auto, 100% 100%;
 		background-attachment: fixed;

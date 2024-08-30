@@ -13,7 +13,7 @@ import logging
 import httpx
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-
+from starlette.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,6 +32,13 @@ if settings.DOCS_ON:
     app = FastAPI(lifespan=lifespan)
 else:
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+
+app.add_middleware(
+    CORSMiddleware,
+    # Update with specific origins in production
+    allow_origins=["localhost"],
+    allow_methods=["GET", "POST"],
+)
 
 templates = Jinja2Templates(directory="templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
