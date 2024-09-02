@@ -25,7 +25,7 @@
 				<div id="navbar">
 					<nav id="nav" style="padding2%;">
 <!--					<nav id="nav" style="background-color:{{ THEME_COLOR }};padding2%;">-->
-						<a href="/"><i><img style="max-height:100px;max-width:100px;padding:2px" src = "{{ LOGO_URL }}" alt="LOGO"/></i></a>
+						<a href="/"><i><img style="max-height:100px;max-width:100px;padding:2px" src = "{{ url_for('static', path='/') }}{{ LOGO_URL }}" alt="LOGO"/></i></a>
 						<a></a>
 						<a><i></i></a>
 						<a href="/level/0"><i class="icon fa-solid fa-0">LVL1</i></a>
@@ -72,7 +72,7 @@
 					<div id="footer">
                          {% block footer %}
 						<ul class="copyright">
-							<li>&copy; {{ORG_NAME}} CTF</li><li>Design: Christo Goosen</li>
+							<li>&copy; {{ORG_NAME}} CTF</li><li>Design: Christo Goosen <christogoosen@gmail.com></li>
 						</ul>
                           {% endblock %}
 					</div>
