@@ -1908,7 +1908,7 @@ input, select, textarea {
 
 	#wrapper {
 		width: auto;
-		margin: auto auto auto auto;
+		margin: auto;
 		/*min-height: 100vh;*/
 		max-width: 100%;
 		display: -moz-flex;
