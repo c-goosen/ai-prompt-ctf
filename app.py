@@ -92,3 +92,7 @@ async def leaderboard_poll(request: Request):
         "leaderboard_table.html",
         {"request": request, "leaders": await get_leaderboard_data()},
     )
+
+# @app.get("/htmx/leaderboard", include_in_schema=True)
+# async def htmx_leaderboard(request: Request):
+#     leaders = await get_leaderboard_data()

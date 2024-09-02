@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         "HUGGINGFACE_INFERENCE_API_URL",
         "https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud",
     )
-    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "0.0.0.0")
+    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost")
     logger: object = logging.getLogger(__name__)
     DOCS_ON: bool = os.getenv("DOCS_ON", False)
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)

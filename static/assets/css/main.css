@@ -1791,6 +1791,22 @@ input, select, textarea {
 		/* height: 4.25em;*/
 		cursor: default;
 	}
+        #nav button {
+			position: relative;
+			display: inline-block;
+			color: #ffffff;
+			width: 1em;
+			height: 1em;
+			line-height: 0.9em;
+			font-size: 2.5em;
+			margin: 0 0.25em 0 0.25em;
+			opacity: 0.35;
+			outline: 0;
+			-moz-transition: opacity .25s ease-in-out;
+			-webkit-transition: opacity .25s ease-in-out;
+			-ms-transition: opacity .25s ease-in-out;
+			transition: opacity .25s ease-in-out;
+		}
 
 		#nav a {
 			position: relative;
@@ -1891,9 +1907,9 @@ input, select, textarea {
 /* Wrapper */
 
 	#wrapper {
-		width: 45em;
-		margin: -40px auto;
-		min-height: 100vh;
+		width: auto;
+		margin: auto auto auto auto;
+		/*min-height: 100vh;*/
 		max-width: 100%;
 		display: -moz-flex;
 		display: -webkit-flex;

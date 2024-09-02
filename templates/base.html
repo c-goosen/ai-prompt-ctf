@@ -19,6 +19,7 @@
 	</head>
 	<body class="is-preload">
 
+
 		<!-- Wrapper-->
 
 				<div id="navbar">
@@ -37,13 +38,22 @@
 						<a href="/level/7"><i class="icon fa-solid fa-7">LVL7</i></a>
 						<a href="/level/8"><i class="icon fa-solid fa-8">LVL8</i></a>
 						<a href="/level/9"><i class="icon fa-solid fa-9">LVL9</i></a>
-						<a href="/leaderboard"><i class="icon fa-solid fa-trophy">Leaderboard</i></a>
+<!--						<a href="/leaderboard">-->
+<!--							<i class="icon fa-solid fa-trophy">Leaderboard</i>-->
+<!--						</a>-->
+						<a><button hx-get="/leaderboard"
+                        hx-target="#content"
+                        hx-swap="outerHTML">
+							<i class="icon fa-solid fa-trophy">Leaderboard</i>
+						</button></a>
 						<a href="/login"><p style="font-size:1.5rem;margin-bottom:0rem">Login</p><i class="icon fa-solid fa-sign-in">Login</i></a>
 						<a href="/logout"><p style="font-size:1.5rem;margin-bottom:0rem">Logout</p><i class="icon fa-solid fa-sign-out">Logout</i></a>
 
 					</nav>
 
 				</div>
+				<div id="main-content">
+
 				<div id="wrapper">
 
 				<div></div>
@@ -72,6 +82,6 @@
 			<script src="{{ url_for('static', path='/assets/js/main.js') }}"></script>
 			<script src="{{ url_for('static', path='/assets/js/all.min.js') }}"></script>
 			<script src="{{ url_for('static', path='/assets/js/fontawesome.min.js') }}"></script>
-
+</div>
 	</body>
 </html>

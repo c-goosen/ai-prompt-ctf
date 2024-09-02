@@ -57,7 +57,10 @@ async def get_user_manager(
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 cookie_transport = RedirectCookieAuthentication(
     cookie_max_age=settings.COOKIE_TIMEOUT,
-    cookie_domain=settings.COOKIE_DOMAIN,
+    # cookie_domain=settings.COOKIE_DOMAIN,
+    cookie_secure = False,
+    cookie_httponly= False,
+    cookie_samesite= "none"
 )
 
 
