@@ -36,13 +36,14 @@ from database.db import (
 from database.leaderboard import get_leaderboard_data
 import logging
 from fastapi import Request
+from llama_index.core.memory import ChatMemoryBuffer
 
 # get root logger
 logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
-
+memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 
 app = APIRouter()
 
@@ -190,9 +191,10 @@ async def check_level_generic(
 
     response = search_vecs_and_prompt(
         search_input=message,
-        collection_name=f"level_{_level}",
+        collection_name=f"ctf-secrets",
         level=_level,
-        model=model
+        model=model,
+        memory=memory
     )
 
     async with get_async_session_context() as session:
