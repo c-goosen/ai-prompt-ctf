@@ -3,7 +3,7 @@ from app_config import settings
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
-from routes import auth, challenges
+from routes import challenges
 
 from database.db import (
     get_async_session,
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 logger = logging.getLogger(__name__)
 logging.getLogger('passlib').setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+#get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
 if settings.DOCS_ON:
     app = FastAPI(lifespan=lifespan)
@@ -47,7 +47,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 app.include_router(challenges.app)
-app.include_router(auth.app)
 
 
 @app.get("/start", include_in_schema=False)

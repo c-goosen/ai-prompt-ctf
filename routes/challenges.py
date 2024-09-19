@@ -1,5 +1,4 @@
 import datetime
-from llama_index.llms.openai import OpenAI
 from fastapi import APIRouter
 from llama_index.core import SimpleDirectoryReader
 from llm_guard.system_prompt import get_system_prompt
@@ -98,43 +97,29 @@ async def confirm_secret_generic(
 async def load_any_level_cookie(
     _level: int,
     request: Request,
-    user: User = Depends(current_active_user_opt),
 ):
-    if not user:
-        return RedirectResponse("/login")
-
     if _level == 0:
-        cookies = await cookies_after_login(user)
         response = templates.TemplateResponse(
             "generic_level.html",
             {"request": request, "message": "", "_level": _level},
         )
-        for x in cookies:
-            response.set_cookie(
-                key=x["level"], value=x["hash"], domain=settings.COOKIE_DOMAIN
-            )
         return response
     else:
-        cookie = request.cookies.get(f"ctf_level_{_level}", False)
-        if cookie == return_hash(settings.PASSWORDS.get(_level - 1)):
-            if _level < 10:
-                return templates.TemplateResponse(
-                    "generic_level.html",
-                    {"request": request, "_level": _level},
-                )
-            else:
-                return templates.TemplateResponse(
-                    "generic_level.html",
-                    {
-                        "request": request,
-                        "_level": _level,
-                        "message": """This is a visual challenge,
-                        try and prompt back the password in an images""",
-                    },
-                )
+        if _level < 10:
+            return templates.TemplateResponse(
+                "generic_level.html",
+                {"request": request, "_level": _level},
+            )
         else:
-            url = "/level/0"
-            return RedirectResponse(url=url)
+            return templates.TemplateResponse(
+                "generic_level.html",
+                {
+                    "request": request,
+                    "_level": _level,
+                    "message": """This is a visual challenge,
+                    try and prompt back the password in an images""",
+                },
+            )
 
 
 # Progressing between levels

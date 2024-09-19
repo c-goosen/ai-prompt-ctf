@@ -1,7 +1,8 @@
 * Remove auth
-* Chatgpt GPTs level
+* Chatgpt theme
 * Chromadb integration
 * SQLITE vs postgres for local run with chromaDB
+* Function calling
 * Seperate leaderboard
 * Multimodal RAG (partailly integrated)
 * Add https://github.com/deadbits/vigil-llm

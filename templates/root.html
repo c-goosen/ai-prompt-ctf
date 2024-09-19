@@ -7,53 +7,45 @@
     </style>
 {% endblock %}
 {% block content %}
-    <h1 style="text-align: center !important;">{{ CTF_NAME }}</h1>
-<!--    </br>-->
-    <img id="banner-image" style="height:70%; width:70%; margin:auto;" src = "{{ url_for('static', path='/images') }}/ai_image_banner/ai-challenge_{{ RANDOM_IMG | random }}.webp" alt="LOGO"/>
-    <h1 style="text-align: center !important;color:black">{{ CTF_SUBTITLE }}</h1>
-    </br>
-    <h2 style="text-align: center !important;" class="important">
-        {{ CTF_DETAILS }}
-    </h2>
-    <p>If you get stuck message me on HackSouth Discord: crypticgoose or in this channel: ,<a href="https://discord.com/channels/687602309395382282/1168515417514442834">Channel CTF</a> </p>
-    <br>
-    </br>
-    <p class="important" style="text-align: center !important;">
-<!--        To start: <button onclick="window.location.href = '/signup';" type="submit">Signup</button>-->
-<!--<div id="login" class="container">-->
-<!--    <div class="row">-->
-<!--        <div class="row col s4">-->
-<!--        <form>-->
-<!--            <div class="row">-->
-<!--                <div class="input-field col s12">-->
-<!--                    <input id="username" type="email"  name= "username"  class="validate" required/>-->
-<!--                    <label for="username">Email</label>-->
-<!--                    <span-->
-<!--                        class="helper-text"-->
-<!--                        data-error="Please enter a valid email."-->
-<!--                        data-success=""></span-->
-<!--                    >-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="row">-->
-<!--                <div class="input-field  col s12">-->
-<!--                    <input id="password" name="password" type="password" class="validate" required/>-->
-<!--                    <label for="password">Password</label>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="row col s4">-->
-<!--                <button type="submit"-->
-<!--                        hx-post="/auth/login"-->
-<!--                        hx-swap="innerHTML"-->
-<!--                        hx-target="#login">Login-->
-<!--                  </button>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-        <div class="row col s4">
-            <p>Don't have an account? <a href="/signup" class="">Register here.</a></p>
-        </div>
-    </p>
+   <div class="header brand-name">PwnGPT</div>
+            <div class="functionalities">
+                <div class="examples">
+                    <div class="ex-heading func-heading">
+                        <div><i class="fa-regular fa-sun"></i></div>
+                        <div>Examples</div>
+                    </div>
+                    <div>"Explain quantum computing in simple terms" <i class="fa-solid fa-arrow-right-long"></i>
+                    </div>
+                    <div>"Got any creative ideas for a 10 year old's birthday?" <i class="fa-solid fa-arrow-right-long"></i></div>
+                    <div>"How do I make an HTTP request in JavaScript?" <i class="fa-solid fa-arrow-right-long"></i></div>
+                </div>
+                <div class="capabilities">
+                    <div class="cap-heading func-heading">
+                        <div><i class="fa-solid fa-bolt"></i></div>
+                        <div>Capabilities</div>
+                    </div>
+                    <div>Remembers what user said earlier in the conversation</div>
+                    <div>Allows user to provide follow-up corrections</div>
+                    <div>Trained to decline inappropriate requests</div>
+                </div>
+                <div class="limitations">
+                    <div class="lmt-heading func-heading">
+                        <div><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div>Limitations</div>
+                    </div>
+                    <div>May occasionally generate incorrect information</div>
+                    <div>May occasionally produce harmful instructions or biased content</div>
+                    <div>Limited knowledge of world and events after 2021</div>
+                </div>
+            </div>
+
+            <div class="chat-input absolute">
+                <div class="input-box">
+                    <input type="text" name="" id="">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div class="disclaimer">
+                   <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
+                </div>
+            </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 
 from llama_index.core import VectorStoreIndex
-from llama_index.vector_stores.supabase import SupabaseVectorStore
+from llama_index.vector_stores.chroma import ChromaVectorStore
 from app_config import settings
 from llm_guard.system_prompt import get_system_prompt
 from llama_index.llms.openai import OpenAI
@@ -21,10 +21,7 @@ def search_vecs_and_prompt(
     {search_input}
     """
     # print(prompt)
-    vector_store = SupabaseVectorStore(
-        postgres_connection_string=settings.PG_URI,
-        collection_name=collection_name,
-    )
+    vector_store = ChromaVectorStore(chroma_collection="ctf_levels")
     index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store, llm=model,
     )
