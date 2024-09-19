@@ -1,4 +1,9 @@
-* Multimodal RAG
+* Remove auth
+* Chatgpt GPTs level
+* Chromadb integration
+* SQLITE vs postgres for local run with chromaDB
+* Seperate leaderboard
+* Multimodal RAG (partailly integrated)
 * Add https://github.com/deadbits/vigil-llm
 * Cleanup some of the code
 * Logging config
