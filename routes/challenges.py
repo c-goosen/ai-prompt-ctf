@@ -12,16 +12,6 @@ from llm_guard import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 from llama_index.core import Settings
 
-from database.db import (
-    User,
-    UserPrompts,
-)
-from database.leaderboard import update_leaderboard_user
-from database.users import (
-    current_active_user,
-    current_active_user_opt,
-)
-from database.leaderboard import cookies_after_login
 import contextlib
 import base64
 from fastapi import UploadFile, Form
@@ -30,10 +20,6 @@ from app_config import settings
 from fastapi.templating import Jinja2Templates
 import os
 
-from database.db import (
-    get_async_session,
-)
-from database.leaderboard import get_leaderboard_data
 import logging
 from fastapi import Request
 from llama_index.core.memory import ChatMemoryBuffer
@@ -42,7 +28,6 @@ from llama_index.core.memory import ChatMemoryBuffer
 logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 
 app = APIRouter()
@@ -67,16 +52,13 @@ async def confirm_secret_generic(
     _level: int,
     request: Request,
     password: str = Form(...),
-    user: User = Depends(current_active_user),
 ):
     answer_hash = return_hash(input=password)
     if hash_and_check_password(level=_level, password_input=password):
         new_level = _level + 1
         # url = app.url_path_for("redirected")
         url = f"/level/{new_level}/{answer_hash}"
-        await update_leaderboard_user(
-            user=user, level=_level, password_hash=answer_hash
-        )
+
         response = RedirectResponse(url=url)
         response.set_cookie(
             key=f"ctf_level_{new_level}", value=return_hash(password)
@@ -141,10 +123,7 @@ async def load_any_level_hash(
     _level: int,
     request: Request,
     _hash: str,
-    user: User = Depends(current_active_user_opt),
 ):
-    if not user:
-        return RedirectResponse("/login")
     if not _hash:
         return templates.TemplateResponse(
             "generic_level.html", {"request": request, "_level": 0}
@@ -153,21 +132,11 @@ async def load_any_level_hash(
     _hash_to_check = return_hash(_pass)
     if _hash_to_check == _hash:
         logging.info(f"loading {_level}")
-        if int(_level) != settings.FINAL_LEVEL:
-            return templates.TemplateResponse(
-                "generic_level.html",
-                {"request": request, "message": "", "_level": _level},
-            )
-        else:
-            return templates.TemplateResponse(
-                "leaderboard.html",
-                {
-                    "request": request,
-                    "_pass": _pass,
-                    "complete": True,
-                    "leaders": await get_leaderboard_data(),
-                },
-            )
+        return templates.TemplateResponse(
+            "generic_level.html",
+            {"request": request, "message": "", "_level": _level},
+        )
+
     else:
         logging.info("loading level 1")
         return templates.TemplateResponse(
@@ -185,7 +154,6 @@ async def check_level_generic(
     request: Request,
     _level: int,
     message: str = Form(...),
-    user: User = Depends(current_active_user),
 ):
     model = settings.OPENAI_MODEL_3_5_TURBO
     if _level == 9:
@@ -207,13 +175,6 @@ async def check_level_generic(
         memory=memory
     )
 
-    async with get_async_session_context() as session:
-        user_prompt = UserPrompts(
-            level=_level, user=user.id, prompt=message, answer=str(response)
-        )
-        session.add(user_prompt)
-        await session.commit()
-        await session.refresh(user_prompt)
     trigger_checks = False
     logging.info(f"LEVEL: {_level}")
     if _level == 1:
@@ -290,7 +251,6 @@ async def photo_upload_v2(
     file: UploadFile | None,
     message: str = Form(...),
     include_in_schema=False,
-    user: User = Depends(current_active_user),
 ):
     level = 9
     _pass = settings.PASSWORDS.get(level, "")
@@ -305,7 +265,7 @@ async def photo_upload_v2(
 
     _img = await file.read()
     # _img_filename = file.filename
-    _img_filename = f"{user.id}-{datetime.datetime.utcnow().timestamp()}"
+    _img_filename = f"{datetime.datetime.utcnow().timestamp()}"
     full_file_name = f"{image_base_dir}/{_img_filename}{os.path.splitext(file.filename)[1]}"
     openai_mm_llm = OpenAIMultiModal(
         model="gpt-4-vision-preview",
