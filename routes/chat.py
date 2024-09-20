@@ -16,16 +16,6 @@ from llm_guard import protections
 from utils import hash_and_check_password, return_hash, random_block_msg
 from llama_index.core import Settings
 
-from database.db import (
-    User,
-    UserPrompts,
-)
-from database.leaderboard import update_leaderboard_user
-from database.users import (
-    current_active_user,
-    current_active_user_opt,
-)
-from database.leaderboard import cookies_after_login
 import contextlib
 import base64
 from fastapi import UploadFile, Form
@@ -34,20 +24,16 @@ from app_config import settings
 from fastapi.templating import Jinja2Templates
 import os
 
-from database.db import (
-    get_async_session,
-)
-from database.leaderboard import get_leaderboard_data
 import logging
 from fastapi import Request
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
 from fastapi.responses import HTMLResponse
+from llm_guard.protections import input_check, output_check
 # get root logger
 logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 app = APIRouter()
 
@@ -61,39 +47,64 @@ templates = Jinja2Templates(directory="templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
+def denied_response(text_input):
+    response = "You are not allowed to do that, you have been stopped by the LLM protection! Passwords are to be kept secret"
+    return HTMLResponse(content=f"""
+                        <div class='lmt-heading func-heading'>
+                        <div class='new-chat' style='text-align: left;'>
+                        <i class="fa-solid fa-user"></i> >> {text_input}</div>
+                        <div class='new-chat' style='text-align: right;'><i class="fa-solid fa-robot"></i> >> {response}</div>
+                        </div>"""
+                        , status_code=200)
+
 @app.post("/chat/completions", include_in_schema=True)
 async def confirm_secret_generic(
     request: Request,
     text_input: str = Form(...),
+    text_level: str = Form(...),
+    text_model: str = Form(...),
 ):
-    # _level=0
-    # model = settings.OPENAI_MODEL_3_5_TURBO
-    # if _level == 9:
-    #     model = settings.OPENAI_MODEL_4_VISION
-    #
-    # elif _level in (7, 8):
-    #     model = settings.OPENAI_MODEL_4_O_MINI
-    # elif _level == 6:
-    #     model = settings.OPENAI_MODEL_4_O_MINI
-    # else:
-    #     model = settings.OPENAI_MODEL_3_5_TURBO
-    #     Settings.llm.system_prompt = get_system_prompt(level=_level)
-    #
-    # _llm = OpenAI(model=model, temperature=0.5)
-    #
-    # print(text_input)
-    # response = search_vecs_and_prompt(
-    #     search_input=str(text_input),
-    #     collection_name=f"ctf-secrets",
-    #     level=0,
-    #     llm=_llm,
-    #     memory=memory
-    # )
-    response = "Whoa!"
-    return  HTMLResponse(content=f"""
-    <div class='lmt-heading func-heading'>
-    <div class='new-chat' style='text-align: left;'>
-    <i class="fa-solid fa-user"></i> >> {text_input}</div>
-    <div class='new-chat' style='text-align: right;'><i class="fa-solid fa-robot"></i> >> {response}</div>
-    </div>"""
-                         , status_code=200)
+    _level=text_level
+    _llm = OpenAI(model=text_model, temperature=0.5)
+    protect = False
+    response = ""
+    if int(_level) == 1:
+        protect = input_check(text_input)
+
+    else:
+        protect = False
+    if protect:
+        return denied_response(text_input)
+    else:
+        if _level == 9:
+            model = settings.OPENAI_MODEL_4_VISION
+
+        elif _level in (7, 8):
+            model = settings.OPENAI_MODEL_4_O_MINI
+        elif _level == 6:
+            model = settings.OPENAI_MODEL_4_O_MINI
+        else:
+            model = settings.OPENAI_MODEL_3_5_TURBO
+            Settings.llm.system_prompt = get_system_prompt(level=_level)
+
+        _llm = OpenAI(model=model, temperature=0.5)
+
+        print(text_input)
+        response = search_vecs_and_prompt(
+            search_input=str(text_input),
+            collection_name=f"ctf-secrets",
+            level=0,
+            llm=_llm,
+            memory=memory
+        )
+    # if output_check(response, settings.PASSWORDS.get(_level)):
+    #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
+    #     denied_response(text_input)
+
+    return HTMLResponse(content=f"""
+        <div class='lmt-heading func-heading'>
+        <div class='new-chat' style='text-align: left;'>
+        <i class="fa-solid fa-user"></i> >> {text_input}</div>
+        <div class='new-chat' style='text-align: right;'><i class="fa-solid fa-robot"></i> >> {response}</div>
+        </div>"""
+                        , status_code=200)
