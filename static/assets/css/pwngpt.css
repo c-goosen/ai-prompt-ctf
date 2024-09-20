@@ -1,0 +1,206 @@
+*{
+    margin: 0;
+
+    font-family: 'Open Sans', sans-serif;
+}
+
+.content-box {
+    display: flex;
+    height: 100%;
+}
+
+.left-panel {
+    flex-basis: 20%;
+    background-color: #202123;
+    color: #fff;
+
+    display: flex;
+    flex-direction: column;
+
+    font-size: 14px;
+}
+
+.right-panel {
+    flex-basis: 80%;
+}
+
+.left-panel > * {
+    padding: 5px;
+}
+
+.chats {
+    flex-basis: 60%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.chats i {
+    margin-right: 10px;
+}
+
+.control-menus {
+    flex-basis: 40%;
+
+    border-top: 1px solid rgb(172, 172, 172, 0.541);
+
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+}
+
+.control-menus > * {
+    flex-grow: 1;
+
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+
+    cursor: pointer;
+}
+
+.control-menus > div:hover {
+    background-color: #2b2c2f;
+    border-radius: 5px;
+}
+
+.control-menus i {
+    margin-right: 10px;
+}
+
+.new-chat {
+    padding: 13px 12px;
+    border: 0.3px solid rgba(172, 172, 172, 0.541);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.new-chat:hover{
+    background-color: #2b2c2f;
+}
+
+.chat-history {
+    flex-grow: 1;
+}
+
+/* right-panel */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+   /* justify-content: center; */
+
+    gap: 50px;
+    color: #343541;
+}
+
+.right-panel > * {
+    max-width: 90%;
+}
+
+.brand-name {
+    font-size: 2.2em;
+    font-weight: 600;
+}
+
+.functionalities {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+
+    column-gap: 15px;
+}
+
+.functionalities > * {
+    flex: 1 1 100%; /* make all flex items of equal width*/
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+
+    row-gap: 15px;
+}
+
+.func-heading {
+    font-size: 17px;
+    line-height: 40px;
+    padding-top: 10px;
+}
+
+.functionalities > div > div{
+    flex-grow: 1;
+    text-align: center;
+}
+
+.functionalities > div > div:not(.func-heading){
+    font-size: 13px;
+    padding: 13px 15px;
+    background-color: #f7f7f8;
+    border-radius: 5px;
+}
+
+.examples > div:not(.func-heading) {
+    cursor: pointer;
+}
+
+.examples > div:not(.func-heading):hover{
+    background-color: #d9d9e3;
+}
+
+.absolute {
+    position: absolute;
+    bottom: 20px;
+}
+.chat-input {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    row-gap: 10px;
+}
+
+.input-box {
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    display: flex;
+
+    margin: 0 10px;
+    box-shadow: 0 0 20px 2px #e8e8e8;
+}
+
+.input-box input[type="text"] {
+    flex-grow: 1;
+    padding: 15px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+.input-box i {
+    flex-basis: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8e8ea0;
+    cursor: pointer;
+}
+
+.input-box i:hover {
+    background-color: #ececf1;
+}
+
+.disclaimer {
+    font-size: 11px;
+    text-align: center;
+    color: #7f7f7f;
+}
+
+.chatbox {
+    max-height: 400px; /* Set a fixed height */
+    overflow-y: auto;
+   /* transform: rotate(180deg);
+  direction: rtl;
+  text-align: left;*/
+    /*flex-direction: column-reverse;*/
+}

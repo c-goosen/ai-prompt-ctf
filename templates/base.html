@@ -1,73 +1,95 @@
-<!DOCTYPE HTML>
-<!--
-	Astral by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-        {% block head %}
-		 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-		<title>{% block title %}{% endblock %}</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="{{ url_for('static', path='/assets/css/main.css') }}" />
-		<noscript><link rel="stylesheet" href="{{ url_for('static', path='/assets/css/noscript.css') }}" /></noscript>
+<html lang="en">
+<head>
+    {% block head %}
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT</title>
+<!--    <link rel="icon" type="image/png" sizes="32x32" href="https://chat.openai.com/favicon-32x32.png"/>-->
+<!--    <link rel="icon" type="image/png" sizes="16x16" href="https://chat.openai.com/favicon-16x16.png"/>-->
+    <link rel="stylesheet" href="{{ url_for('static', path='/assets/css/pwngpt.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
+    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Almendra+Display&family=Brygada+1918:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Cinzel:wght@400;500;600;700;800;900&family=Estonia&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Josefin+Slab:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@200;300;400&family=Open+Sans:wght@300;400;500;600;700;800&family=Sevillana&display=swap');
+    </style>
         {% endblock %}
-	</head>
-	<body class="is-preload">
 
-		<!-- Wrapper-->
-
-				<div id="navbar">
-					<nav id="nav" style="background-color:{{ THEME_COLOR }};padding2%;">
-						<a href="/"><i><img style="max-height:100px;max-width:100px;padding:2px" src = "{{ LOGO_URL }}" alt="LOGO"/></i></a>
-						<a></a>
-						<a><i></i></a>
-						<a href="/level/0"><i class="icon fa-solid fa-0">LVL1</i></a>
-						<a href="/level/1"><i class="icon fa-solid fa-1">LVL1</i></a>
-						<a href="/level/2"><i class="icon fa-solid fa-2">LVL2</i></a>
-						<a href="/level/3"><i class="icon fa-solid fa-3">LVL3</i></a>
-						<a href="/level/4"><i class="icon fa-solid fa-4">LVL4</i></a>
-						<a href="/level/5"><i class="icon fa-solid fa-5">LVL5</i></a>
-						<a href="/level/6"><i class="icon fa-solid fa-6">LVL6</i></a>
-						<a href="/level/7"><i class="icon fa-solid fa-7">LVL7</i></a>
-						<a href="/level/8"><i class="icon fa-solid fa-8">LVL8</i></a>
-						<a href="/level/9"><i class="icon fa-solid fa-9">LVL9</i></a>
-						<a href="/leaderboard"><i class="icon fa-solid fa-trophy">Leaderboard</i></a>
-						<a href="/login"><p style="font-size:1.5rem;margin-bottom:0rem">Login</p><i class="icon fa-solid fa-sign-in">Login</i></a>
-						<a href="/logout"><p style="font-size:1.5rem;margin-bottom:0rem">Logout</p><i class="icon fa-solid fa-sign-out">Logout</i></a>
-
-					</nav>
-				</div>
-				<div id="wrapper">
-
-				<div></div>
-				</br>
-				</br>
-
-                    <div id="content">{% block content %}{% endblock %}</div>
-
-					</div>
-
-				<!-- Footer -->
-					<div id="footer">
-                         {% block footer %}
-						<ul class="copyright">
-							<li>&copy; {{ORG_NAME}} CTF</li><li>Design: Christo Goosen</li>
-						</ul>
-                          {% endblock %}
-					</div>
-			</div>
-
-		<!-- Scripts -->
-			<script src="{{ url_for('static', path='/assets/js/jquery.min.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/browser.min.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/breakpoints.min.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/util.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/main.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/all.min.js') }}"></script>
-			<script src="{{ url_for('static', path='/assets/js/fontawesome.min.js') }}"></script>
-
-	</body>
+</head>
+<body>
+    <div class="content-box">
+        <div class="left-panel">
+            <div class="chats">
+                <div class="new-chat" hx-get="/htmx/level/0"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"><button
+                ><i class="fa-solid fa-plus"> Level 0</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/1"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"><button><i class="fa-solid fa-plus"> Level 1</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/2"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 2</i></button></div>
+               <div class="new-chat" hx-get="/htmx/level/3"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 3</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/4"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button><i class="fa-solid fa-plus"> Level 4</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/5"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 5</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/6
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 6</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/7"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 7</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/8"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button><i class="fa-solid fa-plus"> Level 8</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/9"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button><i class="fa-solid fa-plus"> Level 9</i></button></div>
+                <div class="new-chat" hx-get="/htmx/level/10"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML"
+                ><button ><i class="fa-solid fa-plus"> Level 10</i></button></div>
+                <div class="chat-history"></div>
+            </div>
+            <div class="control-menus">
+                <div></div>
+                <div></div>
+<!--                <div><i class="fa-regular fa-trash-can"></i> Clear conversations</div>-->
+<!--                <div><i class="fa-regular fa-moon"></i> Dark mode</div>-->
+                <div><i class="fa-brands fa-discord"></i>Discord</div>
+                <div><i class="fa-solid fa-arrow-up-right-from-square"></i> Updates & FAQ</div>
+                <div><i class="fa-solid fa-arrow-right-from-bracket"></i> Submit flags</div>
+            </div>
+        </div>
+        <div class="right-panel">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
 </html>
