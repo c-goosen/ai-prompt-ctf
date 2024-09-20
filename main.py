@@ -17,4 +17,4 @@ if __name__ == "__main__":
     #     memory=memory
     # )
     # print(resp)
-    uvicorn.run("app:app", host="0.0.0.0", log_level="info")
+    uvicorn.run("app:app", host="0.0.0.0", log_level="info", reload=True)

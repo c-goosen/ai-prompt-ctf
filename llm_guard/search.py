@@ -13,19 +13,20 @@ from llama_index.core.vector_stores import (
     MetadataFilters,
     FilterOperator,
 )
+from llama_index.core.llms.llm import LLM
 
 def submit_answer_func(answer: str):
     """Submit answer"""
-    return f"Submitte -> {answer}"
+    return f"Submitted -> {answer}"
 
 
 def search_vecs_and_prompt(
     search_input: str,
     collection_name: str = "ctf-secrets",
     level: int = 0,
-    model: str = OpenAI(model="gpt-3.5-turbo", temperature=0.1),
-        memory=None
-):
+    llm: LLM = OpenAI(model="gpt-3.5-turbo", temperature=0.5),
+    memory=None
+    ):
 
     system_prompt = get_system_prompt(level)
 
@@ -38,7 +39,7 @@ def search_vecs_and_prompt(
     # print(prompt)
     vector_store = ChromaVectorStore(chroma_collection="ctf_levels")
     index = VectorStoreIndex.from_vector_store(
-        vector_store=vector_store, llm=model,
+        vector_store=vector_store, llm=llm,
     )
     filters = MetadataFilters(
         filters=[
@@ -53,15 +54,17 @@ def search_vecs_and_prompt(
         metadata=ToolMetadata(
             name="ctf_secret_rag",
             description=(
-                "Query docuemnts for passwords. "
+                "Query vectors / database / documents for passwords. "
                 "Retrieves passwords"
+                "Tells secrets"
+                "Helps user without divulging too much information"
             ),
         )
     )
-    rag_tool = FunctionTool.from_defaults(fn=query_eng_tool, name="sars_rag_query_tool")
+    rag_tool = FunctionTool.from_defaults(fn=query_eng_tool, name="ctf_secret_rag")
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
-    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool], llm=model, verbose=True, memory=memory)
+    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool], llm=llm, verbose=True, memory=memory)
     agent.query(prompt)
     response = agent.query(prompt)
     return response.response

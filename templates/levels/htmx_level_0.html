@@ -3,6 +3,7 @@
 		<nav id="nav" style="padding2%;">
 			PROGRESS: <progress class="progress w-56" value="{{ _level * 10 }}" max="100"></progress>
 		</nav></div>
+    <div class="chatbox">
             <div class="functionalities">
                 <div class="examples">
                     <div class="ex-heading func-heading">
@@ -33,11 +34,16 @@
                     <div>Limited to gpt-3.5</div>
                 </div>
             </div>
-
+            </div>
             <div class="chat-input absolute">
                 <div class="input-box">
-                    <input type="text" name="" id="">
-                    <i class="fa-solid fa-paper-plane"></i>
+                    <input type="text" name="text_input" id="text_input">
+                    <i class="fa-solid fa-paper-plane"
+                       hx-post="/v1/chat/completions"
+                       hx-include="#text_input"
+                       hx-target=".functionalities"
+                       hx-swap="afterend"
+                    ></i>
                 </div>
                 <div class="disclaimer">
                    <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com

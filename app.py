@@ -4,11 +4,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
 from routes import challenges
+from routes import chat
 
-from database.db import (
-    get_async_session,
-)
-from database.leaderboard import get_leaderboard_data
 import logging
 import httpx
 from fastapi import FastAPI, Request
@@ -47,6 +44,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 app.include_router(challenges.app)
+app.include_router( chat.app, prefix="/v1",)
 
 
 @app.get("/start", include_in_schema=False)
@@ -79,20 +77,3 @@ async def health():
     return {"health": "ok"}
 
 
-@app.get("/leaderboard", include_in_schema=True)
-async def leaderboard(request: Request):
-    return templates.TemplateResponse(
-        "leaderboard.html",
-        {"request": request, "leaders": await get_leaderboard_data()},
-    )
-
-@app.get("/leaderboard/poll", include_in_schema=True)
-async def leaderboard_poll(request: Request):
-    return templates.TemplateResponse(
-        "leaderboard_table.html",
-        {"request": request, "leaders": await get_leaderboard_data()},
-    )
-
-# @app.get("/htmx/leaderboard", include_in_schema=True)
-# async def htmx_leaderboard(request: Request):
-#     leaders = await get_leaderboard_data()

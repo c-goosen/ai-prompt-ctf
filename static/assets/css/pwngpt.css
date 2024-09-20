@@ -88,14 +88,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+   /* justify-content: center; */
 
     gap: 50px;
     color: #343541;
 }
 
 .right-panel > * {
-    max-width: 70%;
+    max-width: 90%;
 }
 
 .brand-name {
@@ -194,4 +194,13 @@
     font-size: 11px;
     text-align: center;
     color: #7f7f7f;
+}
+
+.chatbox {
+    max-height: 400px; /* Set a fixed height */
+    overflow-y: auto;
+   /* transform: rotate(180deg);
+  direction: rtl;
+  text-align: left;*/
+    /*flex-direction: column-reverse;*/
 }

@@ -203,7 +203,7 @@ async def check_level_generic(
         search_input=message,
         collection_name=f"ctf-secrets",
         level=_level,
-        model=model,
+        llm=model,
         memory=memory
     )
 
@@ -357,3 +357,4 @@ async def photo_upload_v2(
             "_level": 9,
         },
     )
+
