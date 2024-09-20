@@ -1,4 +1,4 @@
-# Project  BSIDES Cape Town CTF
+# PwnGPT -  BSIDES Cape Town CTF
 
 Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
 https://twitter.com/crypticg00se/status/1731578440166293643 / https://bsidescapetown.co.za.
@@ -9,12 +9,15 @@ train an LLM to protect various levels.
 The idea is to create an opensource and accessible CTF for new CTF players to get involved and learn about
 prompt injection, information retrieval and the security issues relating to LLMs.
 
+Please use and add challenges
+
 Tools
 * LLamaindex
-* RAG (Retrieval Augmented Generation)
-* Postgres (supabase)
-* PGvector with postgres
-* GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting
+* RAG (Retrieval Augmented Generation) llamaindex
+* Function calling
+* Htmx
+* Chromadb
+* GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, etc
 * Python 3.11+
 * FastAPI  (async REST API framework)
 * Fastapi-users
@@ -58,8 +61,6 @@ PASSWORD_EIGHT="OWASPTOP10AI"
 PASSWORD_NINE="SKYNETRECRUIT"
 ```bash
 python password_upload.py
-# If indexes did not work with password uplaod you can also run 
-python create_vecs_indexes.py
 ```
 
 ## Run locally
@@ -77,7 +78,7 @@ docker run -p 8000:8000  llm_challenge
 ```
 
 ## Auth 
-Based on cookies and JWT tokens. Requires and email to authenticate, but no verification.
+No longer uses auth. Flags to be placed in seperate area
 
 ## Memory requirements for Local LLM running
 Caveat here is this was tested on a 16GB Macbook M1 Pro 14inch.
