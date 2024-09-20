@@ -8,6 +8,11 @@ from llama_index.core.tools import FunctionTool
 from llama_index.core.tools import QueryEngineTool
 from llama_index.core.tools import ToolMetadata
 from llama_index.core.agent import ReActAgent
+from llama_index.core.vector_stores import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+)
 
 def submit_answer_func(answer: str):
     """Submit answer"""
@@ -35,7 +40,13 @@ def search_vecs_and_prompt(
     index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store, llm=model,
     )
-    query_engine = index.as_query_engine(similarity_top_k=5)
+    filters = MetadataFilters(
+        filters=[
+            MetadataFilter(key="level", operator=FilterOperator.EQ, value=level),
+        ]
+    )
+    query_engine = index.as_query_engine(similarity_top_k=5,
+        filters=filters)
 
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
@@ -45,7 +56,7 @@ def search_vecs_and_prompt(
                 "Query docuemnts for passwords. "
                 "Retireves passwords"
             ),
-        ),
+        )
     )
     rag_tool = FunctionTool.from_defaults(fn=query_eng_tool, name="sars_rag_query_tool")
 
