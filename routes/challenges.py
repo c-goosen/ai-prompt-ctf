@@ -92,6 +92,16 @@ async def confirm_secret_generic(
             },
         )
 
+@app.api_route("/htmx/level/{_level}", methods=["GET"], include_in_schema=False)
+async def load_htmx_level(
+    _level: int,
+    request: Request,
+):
+    response = templates.TemplateResponse(
+        f"levels/htmx_level_{_level}.html",
+        {"request": request, "message": "", "_level": _level},
+    )
+    return response
 
 # This endpoint allows going back to levels using cookies, don't need hash in URL
 @app.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)

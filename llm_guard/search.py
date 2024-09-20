@@ -54,7 +54,7 @@ def search_vecs_and_prompt(
             name="ctf_secret_rag",
             description=(
                 "Query docuemnts for passwords. "
-                "Retireves passwords"
+                "Retrieves passwords"
             ),
         )
     )
@@ -64,5 +64,4 @@ def search_vecs_and_prompt(
     agent = ReActAgent.from_tools([submit_answer_tool, rag_tool], llm=model, verbose=True, memory=memory)
     agent.query(prompt)
     response = agent.query(prompt)
-    # response = query_engine.query(prompt)
     return response.response
