@@ -76,4 +76,12 @@ async def root(request: Request):
 async def health():
     return {"health": "ok"}
 
+@app.get("/faq")
+def render_faq(request: Request):
+    response = templates.TemplateResponse(
+        f"faq.html",
+        {"request": request,}
+    )
+    return response
+
 

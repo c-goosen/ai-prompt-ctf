@@ -14,6 +14,7 @@ from llama_index.core.vector_stores import (
     FilterOperator,
 )
 from llama_index.core.llms.llm import LLM
+from llama_index.core.query_engine import RetrieverQueryEngine
 
 def submit_answer_func(answer: str):
     """Submit answer"""
@@ -46,8 +47,15 @@ def search_vecs_and_prompt(
             MetadataFilter(key="level", operator=FilterOperator.EQ, value=level),
         ]
     )
-    query_engine = index.as_query_engine(similarity_top_k=5,
-        filters=filters)
+    retriever = index.as_retriever()
+    query_engine = RetrieverQueryEngine.from_args(
+        retriever, llm=llm,
+        similarity_top_k=5,
+        filters=filters
+
+    )
+    #query_engine = index.as_query_engine(similarity_top_k=5,
+    #    filters=filters)
 
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
@@ -64,7 +72,20 @@ def search_vecs_and_prompt(
     rag_tool = FunctionTool.from_defaults(fn=query_eng_tool, name="ctf_secret_rag")
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
-    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool], llm=llm, verbose=True, memory=memory)
+    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool],
+     llm=llm, verbose=True, memory=memory,
+    run_retrieve_sleep_time = 1.0,
+     )
+    from llama_index.agent.openai import OpenAIAssistantAgent
+    #agent = OpenAIAssistantAgent.from_new(
+    #    name="Password prompt Analyst",
+    #    instructions=system_prompt,
+    #    tools=[submit_answer_tool, rag_tool],
+    #    verbose=True,
+    #    run_retrieve_sleep_time=1.0,
+    #    memory=memory
+    #)
+
     agent.query(prompt)
     response = agent.query(prompt)
     return response.response

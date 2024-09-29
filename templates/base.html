@@ -78,12 +78,14 @@
                 <div class="chat-history"></div>
             </div>
             <div class="control-menus">
-                <div></div>
-                <div></div>
-<!--                <div><i class="fa-regular fa-trash-can"></i> Clear conversations</div>-->
-<!--                <div><i class="fa-regular fa-moon"></i> Dark mode</div>-->
                 <div><i class="fa-brands fa-discord"></i>Discord</div>
-                <div><i class="fa-solid fa-arrow-up-right-from-square"></i> Updates & FAQ</div>
+                <div hx-get="/faq"
+                    hx-trigger="click"
+                    hx-target=".right-panel"
+                    hx-swap="innerHTML">
+                    <button><i class="fa-solid fa-arrow-up-right-from-square">
+
+                    </i> Updates & FAQ</button></div>
                 <div><i class="fa-solid fa-arrow-right-from-bracket"></i> Submit flags</div>
             </div>
         </div>
