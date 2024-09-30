@@ -11,6 +11,8 @@ load_dotenv()
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
+    DISCORD_URL: str = os.getenv("DISCORD_URL", "https://discord.com/channels/687602309395382282/1042715550960341032")
+    SUBMIT_FLAGS_URL: str = os.getenv("SUBMIT_FLAGS_URL", "http://www.example.org")
     CTF_NAME: str = os.getenv(
         "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
     )
@@ -27,18 +29,6 @@ class Settings(BaseSettings):
         """,
     )
     # Supabase
-    PG_USER: str = os.getenv("PG_USER", "postgres")
-    PG_PASSWORD: str = os.getenv("PG_PASSWORD", "")
-    PG_HOST: str = os.getenv("PG_HOST", "127.0.0.1")
-    PG_PORT: str = os.getenv("PG_PORT", "5432")
-    PG_DB: str = "postgres"
-    PG_URI: str = (
-        f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
-    )
-    PG_URI_ASYNC: str = (
-        f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}"
-        + f"@{PG_HOST}:{PG_PORT}/{PG_DB}"
-    )
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
