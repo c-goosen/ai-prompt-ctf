@@ -6,7 +6,7 @@ authors = ["Christo Goosen <christogoosen@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
+python = ">=3.11,<3.13"
 transformers = {extras = ["torch"], version = "^4.35.2"}
 accelerate = "^0.25.0"
 huggingface-hub = "^0.19.4"
