@@ -44,7 +44,7 @@ vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
 
 index = VectorStoreIndex.from_vector_store(
     vector_store=vector_store,
-embed_model=embed_model
+    embed_model=embed_model
 
 )
 for k in levels:

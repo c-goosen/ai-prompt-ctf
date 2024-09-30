@@ -1,4 +1,4 @@
-
+import chromadb
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from app_config import settings
@@ -30,11 +30,13 @@ def search_vecs_and_prompt(
     collection_name: str = "ctf-secrets",
     level: int = 0,
     llm: LLM = OpenAI(model="gpt-3.5-turbo", temperature=0.5),
-    memory=None
+    memory=None,
+        react_agent=False,
+        system_prompt=None
     ):
-
+    if not system_prompt:
     #system_prompt = get_system_prompt(level)
-    system_prompt = get_basic_prompt()
+        system_prompt = get_basic_prompt()
 
     prompt = f"""
     SYSTEM
@@ -42,24 +44,33 @@ def search_vecs_and_prompt(
     USER
     {search_input}
     """
-    prompt = search_input
+    #prompt = search_input
     # print(prompt)
-    vector_store = ChromaVectorStore(chroma_collection="ctf_levels")
     embed_model = OpenAIEmbedding(embed_batch_size=10)
     Settings.embed_model = embed_model
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+
+    print(chroma_client.list_collections())
+    chroma_collection = chroma_client.get_collection("ctf_levels")
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
 
     # Re-initialize your VectorStoreIndex with the storage context and embedding model
     # This step is crucial for integrating your existing vector_index with ChromaDB
     #index = VectorStoreIndex(embed_model=Settings.embed_model, storage_context=storage_context)
     index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store, embed_model=Settings.embed_model,
-        storage_context=storage_context
+        #storage_context=storage_context
     )
     filters = MetadataFilters(
         filters=[
             MetadataFilter(key="level", operator=FilterOperator.EQ, value=level),
         ]
+    )
+
+    index = VectorStoreIndex.from_vector_store(
+        vector_store=vector_store
     )
     retriever = index.as_retriever(filters=filters)
     #query_engine = RetrieverQueryEngine.from_args(
@@ -68,15 +79,20 @@ def search_vecs_and_prompt(
     #    filters=filters
 
     #)
-    query_engine = index.as_query_engine(similarity_top_k=5,
-        filters=filters)
+    retriever = index.as_retriever(similarity_top_k=5, filters=filters)
+    #query_engine = index.as_query_engine(similarity_top_k=5,
+    #    filters=filters
+    #)
+    query_engine = RetrieverQueryEngine.from_args(
+        retriever, llm=llm
+    )
 
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
         metadata=ToolMetadata(
             name="ctf_secret_rag",
             description=(
-                "Query vectors / database / documents for passwords. "
+                "Query vectors / database / documents for passwords."
                 "Retrieves passwords"
                 "Tells secrets"
                 "Helps user without divulging too much information"
@@ -89,22 +105,15 @@ def search_vecs_and_prompt(
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
     agent = ReActAgent.from_tools([submit_answer_tool, rag_tool],
      llm=llm, verbose=True, memory=memory,
-                                 # max_iterations=3,
+                                 max_iterations=5,
     #run_retrieve_sleep_time = 1.0,
                                   return_direct=True,
     #handle_reasoning_failure_fn = custom_handle_reasoning_failure,
      )
-    from llama_index.agent.openai import OpenAIAssistantAgent
-    #agent = OpenAIAssistantAgent.from_new(
-    #    name="Password prompt Analyst",
-    #    instructions=system_prompt,
-    #    tools=[submit_answer_tool, rag_tool],
-    #    verbose=True,
-    #    run_retrieve_sleep_time=1.0,
-    #    memory=memory
-    #)
 
-    #agent.query(prompt)
-    #response = agent.query(prompt)
-    response = query_engine.query(prompt)
+    if react_agent:
+        response = agent.query(prompt)
+    else:
+        response = query_engine.query(prompt)
+    print(response)
     return response.response

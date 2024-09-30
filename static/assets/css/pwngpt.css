@@ -152,7 +152,7 @@
 }
 
 .absolute {
-    position: absolute;
+    /**position: absolute;**/
     bottom: 20px;
 }
 .chat-input {
@@ -200,7 +200,7 @@
 }
 
 .chatbox {
-    max-height: 400px; /* Set a fixed height */
+    height: 60%;/* Set a fixed height */
     overflow-y: auto;
    /* transform: rotate(180deg);
   direction: rtl;

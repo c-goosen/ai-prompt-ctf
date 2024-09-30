@@ -67,7 +67,8 @@ for k in levels:
     # build index
 index = VectorStoreIndex(
     nodes,
-    vector_store=vector_store
+    vector_store=vector_store,
+    storage_context=storage_context # critical for persisting
 )
 
 for k in levels:
@@ -79,4 +80,5 @@ for k in levels:
     retriever = index.as_retriever(filters=filters)
     print(retriever.retrieve("What is the password?"))
 
-chroma_client.
+print(f"chroma_collection-->{chroma_collection} nr={chroma_collection.count()}")
+print(chroma_collection.peek())

@@ -5,7 +5,7 @@ from http.client import responses
 
 from fastapi import APIRouter
 from llama_index.core import SimpleDirectoryReader
-from llm_guard.system_prompt import get_system_prompt
+from llm_guard.system_prompt import get_system_prompt, get_basic_prompt
 
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from fastapi import Depends
@@ -61,7 +61,7 @@ def denied_response(text_input):
 async def confirm_secret_generic(
     request: Request,
     text_input: str = Form(...),
-    text_level: str = Form(...),
+    text_level: int = Form(...),
     text_model: str = Form(...),
 ):
     _level=text_level
@@ -93,9 +93,11 @@ async def confirm_secret_generic(
         response = search_vecs_and_prompt(
             search_input=str(text_input),
             collection_name=f"ctf-secrets",
-            level=0,
+            level=_level,
             llm=_llm,
-            memory=memory
+            memory=memory,
+            react_agent=False if _level < 4 else True,
+            system_prompt=get_system_prompt(level=_level) if _level > 2 else get_basic_prompt()
         )
     # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
