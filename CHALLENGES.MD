@@ -5,19 +5,16 @@
 
 # Level 1
 
-## GPT-4o Prompt engineering
+## Input filtering
 
 
 # Level 2
 
-## Input filtering
-
-
-# Level 3 
-
 ## Output filtering
 
+# Level 3
 
+## GPT-4o Prompt engineering
 
 
 # Level 4

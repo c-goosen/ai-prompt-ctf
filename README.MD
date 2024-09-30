@@ -39,11 +39,9 @@ poetry install
 ```
 
 ## Database
-Requires postgress with pgvector vector store.
+Requires chromadb running locally with persistence.
 
-To make my life easier I went with a free tier supabase instance. Comes with pgvector built in as a plugin.
-
-Backend communication with postgress is not via supabase API, but via postgress python library.
+All passwords get thrown in the same collection, but get filtered to make things simpleer
 
 ## Loading documents into Supabase/postgress vector store
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
@@ -59,6 +57,7 @@ PASSWORD_SIX="L33tH@x0r"
 PASSWORD_SEVEN="P@SSWORD123"
 PASSWORD_EIGHT="OWASPTOP10AI"
 PASSWORD_NINE="SKYNETRECRUIT"
+PASSWORD_TEN="Woohoo"
 ```bash
 python password_upload.py
 ```

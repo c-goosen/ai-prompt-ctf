@@ -8,3 +8,5 @@ llm_training/.ipynb_checkpoints/
 llm_training/cgoosen/
 llm_training/wandb/
 supabase/
+chroma/
+chroma_db/
