@@ -32,7 +32,6 @@
 
 
 
-
 # Level 6
 
 ## Code interpreter
