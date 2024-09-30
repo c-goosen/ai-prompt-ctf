@@ -1,5 +1,7 @@
 # PwnGPT -  BSIDES Cape Town CTF
 
+## Intro
+
 Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
 https://twitter.com/crypticg00se/status/1731578440166293643 / https://bsidescapetown.co.za.
 
@@ -10,6 +12,13 @@ The idea is to create an opensource and accessible CTF for new CTF players to ge
 prompt injection, information retrieval and the security issues relating to LLMs.
 
 Please use and add challenges
+
+## WHOAMI
+Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give myself ridiculous challenges like building this.
+
+CrypticGoose
+christogoosen@gmail.com
+https://x.com/crypticg00se
 
 Tools
 * LLamaindex
@@ -43,7 +52,7 @@ Requires chromadb running locally with persistence.
 
 All passwords get thrown in the same collection, but get filtered to make things simpleer
 
-## Loading documents into Supabase/postgress vector store
+## Loading documents into ChromaDB vector store
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
 
 You will need to set the level passwords like this:
@@ -61,6 +70,7 @@ PASSWORD_TEN="Woohoo"
 ```bash
 python password_upload.py
 ```
+This will eventually be moved to start of app ^^
 
 ## Run locally
 ```bash
@@ -80,6 +90,7 @@ docker run -p 8000:8000  llm_challenge
 No longer uses auth. Flags to be placed in seperate area
 
 ## Memory requirements for Local LLM running
+### Subject to change
 Caveat here is this was tested on a 16GB Macbook M1 Pro 14inch.
 
 The local LLm is quite fast, but still requires 286.109MB +/- to load into memory and inference
