@@ -126,9 +126,10 @@
 }
 
 .func-heading {
+    width:80%
     font-size: 15px;
     line-height: 40px;
-    padding-top: 10px;
+    padding-top: 3%;
 }
 
 .functionalities > div > div{
@@ -201,9 +202,21 @@
 
 .chatbox {
     height: 60%;/* Set a fixed height */
-    overflow-y: auto;
+    overflow-y: scroll;
    /* transform: rotate(180deg);
   direction: rtl;
   text-align: left;*/
     /*flex-direction: column-reverse;*/
+}
+.scroller {
+    overflow: scroll;
+    height: 60%;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-anchor: auto !important; /*  See https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-anchor */
+}
+
+.scroller .scroller-content .item {
+    height: 20px;
+    transform: translateZ(0); /* fixes a bug in Safari iOS where the scroller doesn't update */
 }

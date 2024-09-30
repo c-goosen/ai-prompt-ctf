@@ -33,9 +33,9 @@
                     <div>Multi-shot prompts</div>
                     <div>Reversing answers, poems, etc.</div>
                     <div>Limited to gpt-3.5</div>
-                </div>
             </div>
-            </div>
+        </div>
+    </div>
             <div class="chat-input absolute">
                 <div class="input-box">
                     <input type="text" name="text_input" id="text_input">
@@ -44,8 +44,8 @@
                     <i class="fa-solid fa-paper-plane"
                        hx-post="/v1/chat/completions"
                        hx-include="#text_input,#text_model,#text_level"
-                       hx-target=".functionalities"
-                       hx-swap="afterend"
+                       hx-target=".chatbox"
+                       hx-swap="afterend scroll:bottom"
                     ></i>
                 </div>
                 <div class="disclaimer">

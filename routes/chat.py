@@ -104,6 +104,7 @@ async def confirm_secret_generic(
     #     denied_response(text_input)
 
     return HTMLResponse(content=f"""
+    
         <div class='lmt-heading func-heading'>
         <div class='new-chat' style='text-align: left;'>
         <i class="fa-solid fa-user"></i> >> {text_input}</div>
