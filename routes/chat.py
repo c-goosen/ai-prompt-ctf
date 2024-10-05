@@ -105,10 +105,9 @@ async def confirm_secret_generic(
 
     return HTMLResponse(content=f"""
     
-        <div class='lmt-heading func-heading'>
         <div class='new-chat' style='text-align: left;'>
-        <i class="fa-solid fa-user"></i> >> {text_input}</div>
+        <i class="fa-solid fa-user"></i> <md-block>{text_input}</md-block></div>
         <div class='new-chat' style='text-align: right;'>
-        <i class="fa-solid fa-robot"></i> >> {response}</div>
-        </div>"""
+        <i class="fa-solid fa-robot"></i> >> <md-block>{response}</md-block></div>
+        """
                         , status_code=200)

@@ -18,9 +18,19 @@ from llama_index.core import Settings
 from llama_index.core.llms.llm import LLM
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core import StorageContext
+
 def submit_answer_func(answer: str):
     """Submit answer"""
     return f"Submitted -> {answer}"
+
+def print_file(input:str):
+    """Print file with input dir"""
+    import os
+    with open(input) as f:
+        _ = f.read()
+        print(f"Printing file name--> {input}")
+        print(f"Printing file contents--> {_}")
+        return _
 
 def custom_handle_reasoning_failure(callback_manager, exception):
     callback_manager
@@ -103,7 +113,8 @@ def search_vecs_and_prompt(
     rag_tool = FunctionTool.from_defaults(fn=query_eng_tool, name="ctf_secret_rag")
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
-    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool],
+    print_file_tool = FunctionTool.from_defaults(fn=print_file)
+    agent = ReActAgent.from_tools([submit_answer_tool, rag_tool] if level != 6 else [print_file_tool,rag_tool,submit_answer_tool],
      llm=llm, verbose=True, memory=memory,
                                  max_iterations=5,
     #run_retrieve_sleep_time = 1.0,

@@ -31,7 +31,7 @@
 
 # Level 6
 
-## Code interpreter
+## Code interpreter / prompt injection
 
 
 
