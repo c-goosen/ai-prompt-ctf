@@ -8,14 +8,15 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi.util import get_remote_address, get_ipaddr
 from starlette.middleware.cors import CORSMiddleware
-
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from app_config import settings
 from routes import challenges
 from routes import chat
 
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
 
 @asynccontextmanager
@@ -38,7 +39,8 @@ else:
 
 # Rate limiting to keep AI costs low, naught H@xors
 app.state.limiter = limiter
-app.add_exception_handler(429, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,13 +112,13 @@ async def root(request: Request):
 
 
 @app.get("/health")
-@limiter.limit("1/sec")
-async def health():
+@limiter.limit("1/min")
+async def health(request: Request):
     return {"health": "ok"}
 
 
 @app.get("/faq")
-@limiter.limit("5/sec")
+@limiter.limit("1/min")
 def render_faq(request: Request):
     response = templates.TemplateResponse(
         f"faq.html",
