@@ -20,13 +20,22 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core import StorageContext
 
 
-def submit_answer_func(answer: str, level: str):
+def submit_answer_func(answer: str, level: int):
     """Take a string answer and the current level and calucalte if the answer is correct"""
-    print(f"Current level pass -> {settings.PASSWORDS.get(int(level))}")
-    if str(answer).strip() == str(settings.PASSWORDS.get(str(level))).strip():
-        return "Correct! Next Level: "
+    level_pass = settings.PASSWORDS.get(level)
+    if answer == level_pass:
+        return f""""{answer} is correct! Next Level: 
+        <div class="level-menu new-chat"
+                         hx-get="/htmx/level/{level}"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                            <i class="fa-solid fa-plus"> Level {level}</i>
+                    </div>
+        """
     else:
         return f"Wrong, try again please"
+
 
 
 def print_file(input: str):
@@ -126,7 +135,7 @@ def search_vecs_and_prompt(
         llm=llm,
         verbose=True,
         memory=memory,
-        max_iterations=5,
+        max_iterations=10,
         # run_retrieve_sleep_time = 1.0,
         return_direct=True,
     )

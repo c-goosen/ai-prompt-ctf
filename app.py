@@ -15,7 +15,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app_config import settings
 from routes import challenges
 from routes import chat
-
+import random
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
 
@@ -62,17 +62,6 @@ app.include_router(
 )
 
 
-@app.get("/start", include_in_schema=False)
-async def start(request: Request):
-    return templates.TemplateResponse(
-        "start.html",
-        {
-            "request": request,
-            "START_PASSWORD": settings.PASSWORDS.get(0, ""),
-        },
-    )
-
-
 @app.get("/")
 @limiter.limit("1/sec")
 async def root(request: Request):
@@ -83,28 +72,7 @@ async def root(request: Request):
             "CTF_NAME": settings.CTF_NAME,
             "CTF_DETAILS": settings.CTF_DETAILS,
             "CTF_SUBTITLE": settings.CTF_SUBTITLE,
-            "RANDOM_IMG": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18,
-                19,
-            ],
+            "IMG_FILENAME": app.url_path_for('static', path=f'/images/ai_image_banner/ai-challenge_{random.randint(0,19)}.webp'),
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
         },
@@ -124,28 +92,8 @@ def render_faq(request: Request):
         f"faq.html",
         {
             "request": request,
-            "RANDOM_IMG": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18,
-                19,
-            ],
+              "IMG_FILENAME": app.url_path_for('static', path=f'/images/ai_image_banner/ai-challenge_{random.randint(1,19)}.webp'),
+
         },
     )
     return response

@@ -61,7 +61,7 @@ def denied_response(text_input):
 
 
 @app.post("/chat/completions", include_in_schema=True)
-async def confirm_secret_generic(
+async def chat_completion(
     request: Request,
     text_input: str = Form(...),
     text_level: int = Form(...),
@@ -127,3 +127,16 @@ async def confirm_secret_generic(
         """,
         status_code=200,
     )
+
+@app.get("/chat/completion/suggestion")
+def render_faq(request: Request,
+               completion: str = Form(...),):
+    response = templates.TemplateResponse(
+        f"suggestion_chatbox.html",
+        {
+            "request": request,
+              "completion": completion,
+
+        },
+    )
+    return response

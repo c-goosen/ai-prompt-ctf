@@ -18,8 +18,9 @@
 * Function calling check flag
 * Try Hack Me Flag integration
 * Discord channel configurable
-* Fix some of UI issues
+* ~~Fix some of UI issues~~
 * FAQ with helpful chatbot
+* Chat history
 
 * Challenges
 * * ~~Level 0~~
