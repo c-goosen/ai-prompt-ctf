@@ -74,6 +74,7 @@ async def confirm_secret_generic(
             },
         )
 
+
 @app.api_route("/htmx/level/{_level}", methods=["GET"], include_in_schema=False)
 async def load_htmx_level(
     _level: int,
@@ -84,6 +85,7 @@ async def load_htmx_level(
         {"request": request, "message": "", "_level": _level},
     )
     return response
+
 
 # This endpoint allows going back to levels using cookies, don't need hash in URL
 @app.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
@@ -172,7 +174,7 @@ async def check_level_generic(
         collection_name=f"ctf-secrets",
         level=_level,
         llm=model,
-        memory=memory
+        memory=memory,
     )
 
     trigger_checks = False
@@ -266,7 +268,9 @@ async def photo_upload_v2(
     _img = await file.read()
     # _img_filename = file.filename
     _img_filename = f"{datetime.datetime.utcnow().timestamp()}"
-    full_file_name = f"{image_base_dir}/{_img_filename}{os.path.splitext(file.filename)[1]}"
+    full_file_name = (
+        f"{image_base_dir}/{_img_filename}{os.path.splitext(file.filename)[1]}"
+    )
     openai_mm_llm = OpenAIMultiModal(
         model="gpt-4-vision-preview",
         api_key=settings.OPENAI_API_KEY,
@@ -317,4 +321,3 @@ async def photo_upload_v2(
             "_level": 9,
         },
     )
-

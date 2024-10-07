@@ -26,6 +26,12 @@ ci-docker-push: ci-docker-auth
 	docker tag $(DOCKER_REPOSITORY):$(GIT_HASH) $(DOCKER_REPOSITORY):latest
 	docker push $(DOCKER_REPOSITORY)
 
-ci-code:
+
+ci-format:
 	@poetry run black .
+	@djlint templates/ --reformat
+
+ci-lint:
+	@poetry run black . --check
 	@poetry run flake8
+	@djlint templates/ --lint

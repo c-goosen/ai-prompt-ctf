@@ -1,11 +1,17 @@
 <table>
-        {% for result in leaders %}
-          <tr>
-            <td class="number">{{loop.index}}</td>
-            <td class="email">{{result.email}}</td>
-            <td class="level">{{result.level}} {% if loop.index == 1%} <img class="gold-medal" src="https://github.com/malunaridev/Challenges-iCodeThis/blob/master/4-leaderboard/assets/gold-medal.png?raw=true" alt="gold medal"/>{% endif %}</td>
-            <td class="datetime">{{result.last_update}}</td>
-         </tr>
-        {% endfor %}
-
+    {% for result in leaders %}
+        <tr>
+            <td class="number">{{ loop.index }}</td>
+            <td class="email">{{ result.email }}</td>
+            <td class="level">
+                {{ result.level }}
+                {% if loop.index == 1 %}
+                    <img class="gold-medal"
+                         src="https://github.com/malunaridev/Challenges-iCodeThis/blob/master/4-leaderboard/assets/gold-medal.png?raw=true"
+                         alt="gold medal" />
+                {% endif %}
+            </td>
+            <td class="datetime">{{ result.last_update }}</td>
+        </tr>
+    {% endfor %}
 </table>

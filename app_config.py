@@ -11,8 +11,13 @@ load_dotenv()
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
-    DISCORD_URL: str = os.getenv("DISCORD_URL", "https://discord.com/channels/687602309395382282/1042715550960341032")
-    SUBMIT_FLAGS_URL: str = os.getenv("SUBMIT_FLAGS_URL", "http://www.example.org")
+    DISCORD_URL: str = os.getenv(
+        "DISCORD_URL",
+        "https://discord.com/channels/687602309395382282/1042715550960341032",
+    )
+    SUBMIT_FLAGS_URL: str = os.getenv(
+        "SUBMIT_FLAGS_URL", "http://www.example.org"
+    )
     CTF_NAME: str = os.getenv(
         "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
     )
@@ -52,12 +57,12 @@ class Settings(BaseSettings):
         1: os.getenv("PASSWORD_ONE", "PASSWORD_ONE"),
         2: os.getenv("PASSWORD_TWO", "PASSWORD_TWO"),
         3: os.getenv("PASSWORD_THREE", "PASSWORD_THREE"),
-        4: os.getenv("PASSWORD_FOUR","PASSWORD_FOUR"),
-        5: os.getenv("PASSWORD_FIVE","PASSWORD_FIVE"),
-        6: os.getenv("PASSWORD_SIX","PASSWORD_SIX"),
-        7: os.getenv("PASSWORD_SEVEN","PASSWORD_SEVEN"),
-        8: os.getenv("PASSWORD_EIGHT","PASSWORD_EIGHT"),
-        9: os.getenv("PASSWORD_NINE","PASSWORD_NINE"),
+        4: os.getenv("PASSWORD_FOUR", "PASSWORD_FOUR"),
+        5: os.getenv("PASSWORD_FIVE", "PASSWORD_FIVE"),
+        6: os.getenv("PASSWORD_SIX", "PASSWORD_SIX"),
+        7: os.getenv("PASSWORD_SEVEN", "PASSWORD_SEVEN"),
+        8: os.getenv("PASSWORD_EIGHT", "PASSWORD_EIGHT"),
+        9: os.getenv("PASSWORD_NINE", "PASSWORD_NINE"),
         10: os.getenv("PASSWORD_TEN", "PASSWORD_TEN"),
     }
     # Regex list for things like IPs, credit cards etc

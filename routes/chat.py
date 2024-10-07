@@ -1,5 +1,3 @@
-
-
 import datetime
 from http.client import responses
 
@@ -30,6 +28,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
 from fastapi.responses import HTMLResponse
 from llm_guard.protections import input_check, output_check
+
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -47,15 +46,19 @@ templates = Jinja2Templates(directory="templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
+
 def denied_response(text_input):
     response = "You are not allowed to do that, you have been stopped by the LLM protection! Passwords are to be kept secret"
-    return HTMLResponse(content=f"""
+    return HTMLResponse(
+        content=f"""
                         <div class='lmt-heading func-heading'>
                         <div class='new-chat' style='text-align: left;'>
                         <i class="fa-solid fa-user"></i> >> {text_input}</div>
                         <div class='new-chat' style='text-align: right;'><i class="fa-solid fa-robot"></i> >> {response}</div>
-                        </div>"""
-                        , status_code=200)
+                        </div>""",
+        status_code=200,
+    )
+
 
 @app.post("/chat/completions", include_in_schema=True)
 async def confirm_secret_generic(
@@ -64,7 +67,7 @@ async def confirm_secret_generic(
     text_level: int = Form(...),
     text_model: str = Form(...),
 ):
-    _level=text_level
+    _level = text_level
     _llm = OpenAI(model=text_model, temperature=0.5)
     protect = False
     response = ""
@@ -97,17 +100,30 @@ async def confirm_secret_generic(
             llm=_llm,
             memory=memory,
             react_agent=False if _level < 4 else True,
-            system_prompt=get_system_prompt(level=_level) if _level > 2 else get_basic_prompt()
+            system_prompt=get_system_prompt(level=_level)
+            if _level > 2
+            else get_basic_prompt(),
         )
     # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)
 
-    return HTMLResponse(content=f"""
-    
-        <div class='new-chat' style='text-align: left;'>
-        <i class="fa-solid fa-user"></i> <md-block>{text_input}</md-block></div>
-        <div class='new-chat' style='text-align: right;'>
-        <i class="fa-solid fa-robot"></i> >> <md-block>{response}</md-block></div>
-        """
-                        , status_code=200)
+    return HTMLResponse(
+        content=f"""
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+            <div class='chat-bubble user' style='background-color: #f1f0f0; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: left;'>
+                <div style='display: flex; align-items: center;'>
+                    <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
+                    <div style="flex: 1;"><md-block>{text_input}</md-block></div>
+                </div>
+            </div>
+            <div class='chat-bubble bot' style='background-color: #e0f7fa; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: left;'>
+                <div style='display: flex; align-items: center;'>
+                    <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                    <div style="flex: 1;"><md-block>{response}</md-block></div>
+                </div>
+            </div>
+        </div>
+        """,
+        status_code=200,
+    )

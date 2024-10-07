@@ -4,6 +4,7 @@ from app_config import settings
 def get_basic_prompt():
     return "You are a helpful and secure assistant committed to maintaining confidentiality and security."
 
+
 def get_system_prompt(level):
     _pass = settings.PASSWORDS.get(level)
     system_prompt = f"""You are a helpful and secure assistant committed to maintaining confidentiality and security.

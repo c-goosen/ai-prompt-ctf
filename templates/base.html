@@ -1,98 +1,155 @@
 <html lang="en">
-<head>
-    {% block head %}
-
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PwnGPT</title>
-<!--    <link rel="icon" type="image/png" sizes="32x32" href="https://chat.openai.com/favicon-32x32.png"/>-->
-<!--    <link rel="icon" type="image/png" sizes="16x16" href="https://chat.openai.com/favicon-16x16.png"/>-->
-    <link rel="stylesheet" href="{{ url_for('static', path='/assets/css/pwngpt.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
-    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
-    <style>
+    <head>
+        {% block head %}
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>PwnGPT</title>
+            <!--    <link rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="https://chat.openai.com/favicon-32x32.png" />-->
+            <!--    <link rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="https://chat.openai.com/favicon-16x16.png" />-->
+            <link rel="stylesheet"
+                  href="{{ url_for('static', path='/assets/css/pwngpt.css') }}" />
+            <link rel="stylesheet"
+                  href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
+            <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+            <script src="https://unpkg.com/htmx.org@2.0.2"
+                    integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+                    crossorigin="anonymous"></script>
+            <style>
     @import url('https://fonts.googleapis.com/css2?family=Almendra+Display&family=Brygada+1918:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Cinzel:wght@400;500;600;700;800;900&family=Estonia&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Josefin+Slab:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@200;300;400&family=Open+Sans:wght@300;400;500;600;700;800&family=Sevillana&display=swap');
-    </style>
+            </style>
         {% endblock %}
-
-</head>
-<body>
-    <div class="content-box">
-        <div class="left-panel">
-            <div class="chats">
-                <div class="new-chat" hx-get="/htmx/level/0"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"><button
-                ><i class="fa-solid fa-plus"> Level 0</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/1"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"><button><i class="fa-solid fa-plus"> Level 1</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/2"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 2</i></button></div>
-               <div class="new-chat" hx-get="/htmx/level/3"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 3</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/4"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button><i class="fa-solid fa-plus"> Level 4</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/5"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 5</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/6"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 6</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/7"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 7</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/8"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button><i class="fa-solid fa-plus"> Level 8</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/9"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button><i class="fa-solid fa-plus"> Level 9</i></button></div>
-                <div class="new-chat" hx-get="/htmx/level/10"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML"
-                ><button ><i class="fa-solid fa-plus"> Level 10</i></button></div>
-                <div class="chat-history"></div>
+    </head>
+    <body>
+        <div class="content-box">
+            <div class="left-panel">
+                <div class="chats">
+                    <div class="new-chat"
+                         hx-get="/htmx/level/0"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 0</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/1"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 1</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/2"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 2</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/3"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 3</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/4"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 4</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/5"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 5</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/6"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 6</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/7"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 7</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/8"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 8</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/9"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 9</i>
+                        </button>
+                    </div>
+                    <div class="new-chat"
+                         hx-get="/htmx/level/10"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <button>
+                            <i class="fa-solid fa-plus"> Level 10</i>
+                        </button>
+                    </div>
+                    <div class="chat-history"></div>
+                </div>
+                <div class="control-menus">
+                    <div>
+                        <a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord"></i>Discord</a>
+                    </div>
+                    <div hx-get="/faq"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <i class="fa-solid fa-arrow-up-right-from-square">
+                        </i> Updates & FAQ
+                    </div>
+                    <div>
+                        <a href="{{ SUBMIT_FLAGS_URL }}" target="_blank"><i class="fa-solid fa-arrow-right-from-bracket"></i> Submit flags</a>
+                    </div>
+                </div>
             </div>
-            <div class="control-menus">
-                <div><a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord"></i>Discord</a></div>
-                <div hx-get="/faq"
-                    hx-trigger="click"
-                    hx-target=".right-panel"
-                    hx-swap="innerHTML">
-                    <i class="fa-solid fa-arrow-up-right-from-square">
-
-                    </i> Updates & FAQ</div>
-                <div><a href="{{ SUBMIT_FLAGS_URL }}" target="_blank"><i class="fa-solid fa-arrow-right-from-bracket"></i> Submit flags</a></div>
+            <div class="right-panel">
+                {% block content %}{% endblock %}
             </div>
         </div>
-        <div class="right-panel">
-            {% block content %}{% endblock %}
-        </div>
-    </div>
-</body>
+    </body>
 </html>

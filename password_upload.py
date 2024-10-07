@@ -13,22 +13,24 @@ from llama_index.core.vector_stores import (
     FilterOperator,
 )
 
-from chromadb.config import  Settings
+from chromadb.config import Settings
 import chromadb
+
 # create vector store client
 levels = list(settings.PASSWORDS.keys())
 print(f"Levels: {levels}")
 
 from llama_index.core.schema import TextNode
+
 embed_model = OpenAIEmbedding(embed_batch_size=10)
 
-nodes =[]
+nodes = []
 
 Settings.llm = OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_DAVINCI,
-        api_key=settings.OPENAI_API_KEY,
-    )
+    temperature=0.1,
+    model=settings.OPENAI_MODEL_DAVINCI,
+    api_key=settings.OPENAI_API_KEY,
+)
 
 generic_password_text = [
     "<placeholder>",
@@ -49,7 +51,9 @@ chroma_client = chromadb.PersistentClient(path="./chroma_db")
 chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
 
 
-vector_store = ChromaVectorStore(chroma_collection=chroma_collection, embed_model=embed_model)
+vector_store = ChromaVectorStore(
+    chroma_collection=chroma_collection, embed_model=embed_model
+)
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
 for k in levels:
@@ -57,18 +61,20 @@ for k in levels:
     _generic_password_text = generic_password_text
     print(f"Before rplace {settings.PASSWORDS.get(k)}")
     for x in _generic_password_text:
-        nodes.append(TextNode(
-            text=x.replace("<placeholder>", settings.PASSWORDS.get(k)),
-            metadata={
-                "level": k,
-            },
-        ))
+        nodes.append(
+            TextNode(
+                text=x.replace("<placeholder>", settings.PASSWORDS.get(k)),
+                metadata={
+                    "level": k,
+                },
+            )
+        )
 
     # build index
 index = VectorStoreIndex(
     nodes,
     vector_store=vector_store,
-    storage_context=storage_context # critical for persisting
+    storage_context=storage_context,  # critical for persisting
 )
 
 for k in levels:

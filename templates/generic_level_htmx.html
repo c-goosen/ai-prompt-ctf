@@ -1,78 +1,70 @@
 {% extends "base.html" %}
-{% block title %}Level {{_level}}{% endblock %}
+{% block title %}Level {{ _level }}{% endblock %}
 {% block head %}
     {{ super() }}
-    <style type="text/css">
-        .important { color: #336699; }
-    </style>
+    <style type="text/css">.important { color: #336699; }</style>
 {% endblock %}
 {% block content %}
     <!-- Contact -->
-							<article id="contact" class="panel">
-								<header>
-									<nav id="nav" style="padding2%;">
-										PROGRESS: <progress class="progress w-56" value="{{ _level * 10 }}" max="100"></progress>
-									</nav>
-									<h2>Level {{_level}}
-									</h2>
-
-								</header>
-								{% if _level == 9 %}
-									<p style="text-align: center !important;" class="important">
-										This level is different. You need to select a photo that will described getting a secret or password.
-										You can try and draw your own image.
-										You can additionally add a prompt too and both will go to GPT4-vision.
-									</p>
-
-									<form action="/level/9/photo/upload" method="post" enctype="multipart/form-data">
-
-										  <input style="font-size:30pt" type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg">
-																				</br>
-										  <textarea name="message" id="message" placeholder="Message" rows="4" value=>"Describe this image?"</textarea>
-										  <input type="submit" value="Prompt AI">
-									</form>
-								{% if _img %}
-								<img style="height:600px;width:400px;" src="data:image/jpeg;base64,{{ _img | safe }}"/>
-								{% endif %}
-							<div id="table-and-form">
-								<h2>Contacts</h2>
-								<table class="table">
-								  <thead>
-									<tr>
-									  <th>Name</th>
-									  <th>Email</th>
-									  <th></th>
-									</tr>
-								  </thead>
-								  <tbody id="contacts-table">
-									...
-								  </tbody>
-								</table>
-								<h2>Add A Contact</h2>
-								<form hx-post="/contacts" hx-target="#table-and-form">
-								  <div class="row">
-											<div class="col-12">
-												<textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
-
-												<input type="submit" value="Prompt AI" />
-											</div>
-
-											{% if message %}
-												<p>Response: {{ message }}</p>
-											{% endif %}
-<!--											{% if message_image %}-->
-<!--												<img src={{ message_image }}>-->
-<!--											{% endif %}-->
-											{% if ai_message %}
-												<p>AI Response: {{ ai_message }}</p>
-											{% endif %}
-										</div>
-								</form>
-							</div>
-							</article>
-
-					</div>
+    <article id="contact" class="panel">
+        <header>
+            <nav id="nav" style="padding2%;">
+                PROGRESS: <progress class="progress w-56" value="{{ _level * 10 }}" max="100"></progress>
+            </nav>
+            <h2>Level {{ _level }}</h2>
+        </header>
+        {% if _level == 9 %}
+            <p style="text-align: center !important;" class="important">
+                This level is different. You need to select a photo that will described getting a secret or password.
+                You can try and draw your own image.
+                You can additionally add a prompt too and both will go to GPT4-vision.
+            </p>
+            <form action="/level/9/photo/upload"
+                  method="post"
+                  enctype="multipart/form-data">
+                <input style="font-size:30pt"
+                       type="file"
+                       id="file"
+                       name="file"
+                       accept="image/png, image/jpeg, image/jpg">
+            </br>
+            <textarea name="message" id="message" placeholder="Message" rows="4" value=>"Describe this image?"</textarea>
+            <input type="submit" value="Prompt AI">
+        </form>
+        {% if _img %}
+            <img style="height:600px;
+                        width:400px"
+                 src="data:image/jpeg;base64,{{ _img | safe }}" />
+        {% endif %}
+        <div id="table-and-form">
+            <h2>Contacts</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="contacts-table">
+                    ...
+                </tbody>
+            </table>
+            <h2>Add A Contact</h2>
+            <form hx-post="/contacts" hx-target="#table-and-form">
+                <div class="row">
+                    <div class="col-12">
+                        <textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
+                        <input type="submit" value="Prompt AI" />
+                    </div>
+                    {% if message %}<p>Response: {{ message }}</p>{% endif %}
+                    <!--											{% if message_image %}-->
+                    <!--												<img src={{ message_image }}>-->
+                    <!--											{% endif %}-->
+                    {% if ai_message %}<p>AI Response: {{ ai_message }}</p>{% endif %}
+                </div>
+            </form>
+        </div>
+    </article>
+</div>
 {% endblock %}
-
-
-
