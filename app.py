@@ -75,7 +75,7 @@ async def root(request: Request):
             "CTF_SUBTITLE": settings.CTF_SUBTITLE,
             "IMG_FILENAME": app.url_path_for(
                 "static",
-                path=f"/images/ai_image_banner/ai-challenge_{random.randint(0,19)}.webp",
+                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
             ),
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
@@ -99,7 +99,7 @@ def render_faq(request: Request):
             "request": request,
             "IMG_FILENAME": app.url_path_for(
                 "static",
-                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,19)}.webp",
+                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
             ),
         },
     )
