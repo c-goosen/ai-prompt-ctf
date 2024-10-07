@@ -37,7 +37,6 @@ def submit_answer_func(answer: str, level: int):
         return f"Wrong, try again please"
 
 
-
 def print_file(input: str):
     """Print file with input dir"""
     import os

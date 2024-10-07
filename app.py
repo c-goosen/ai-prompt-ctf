@@ -16,6 +16,7 @@ from app_config import settings
 from routes import challenges
 from routes import chat
 import random
+
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
 
@@ -72,9 +73,13 @@ async def root(request: Request):
             "CTF_NAME": settings.CTF_NAME,
             "CTF_DETAILS": settings.CTF_DETAILS,
             "CTF_SUBTITLE": settings.CTF_SUBTITLE,
-            "IMG_FILENAME": app.url_path_for('static', path=f'/images/ai_image_banner/ai-challenge_{random.randint(0,19)}.webp'),
+            "IMG_FILENAME": app.url_path_for(
+                "static",
+                path=f"/images/ai_image_banner/ai-challenge_{random.randint(0,19)}.webp",
+            ),
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
+            "_level": 0,
         },
     )
 
@@ -92,8 +97,10 @@ def render_faq(request: Request):
         f"faq.html",
         {
             "request": request,
-              "IMG_FILENAME": app.url_path_for('static', path=f'/images/ai_image_banner/ai-challenge_{random.randint(1,19)}.webp'),
-
+            "IMG_FILENAME": app.url_path_for(
+                "static",
+                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,19)}.webp",
+            ),
         },
     )
     return response

@@ -128,15 +128,17 @@ async def chat_completion(
         status_code=200,
     )
 
+
 @app.get("/chat/completion/suggestion")
-def render_faq(request: Request,
-               completion: str = Form(...),):
+def render_faq(
+    request: Request,
+    completion: str = Form(...),
+):
     response = templates.TemplateResponse(
         f"suggestion_chatbox.html",
         {
             "request": request,
-              "completion": completion,
-
+            "completion": completion,
         },
     )
     return response
