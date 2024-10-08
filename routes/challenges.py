@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 
-app = APIRouter()
 
 settings.OPENAI_API_KEY
 
@@ -47,7 +46,7 @@ class Input(BaseModel):
     query: str
 
 
-@app.post("/level/{_level}/confirm/", include_in_schema=False)
+@router.post("/level/{_level}/confirm/", include_in_schema=False)
 async def confirm_secret_generic(
     _level: int,
     request: Request,
@@ -75,7 +74,7 @@ async def confirm_secret_generic(
         )
 
 
-@app.api_route("/htmx/level/{_level}", methods=["GET"], include_in_schema=False)
+@router.api_route("/htmx/level/{_level}", methods=["GET"], include_in_schema=False)
 async def load_htmx_level(
     _level: int,
     request: Request,
@@ -88,7 +87,7 @@ async def load_htmx_level(
 
 
 # This endpoint allows going back to levels using cookies, don't need hash in URL
-@app.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
+@router.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
 async def load_any_level_cookie(
     _level: int,
     request: Request,
@@ -118,7 +117,7 @@ async def load_any_level_cookie(
 
 
 # Progressing between levels
-@app.api_route(
+@router.api_route(
     "/level/{_level}/{_hash}/", methods=["POST"], include_in_schema=False
 )
 async def load_any_level_hash(
@@ -151,7 +150,7 @@ async def load_any_level_hash(
         )
 
 
-@app.post("/level/submit/{_level}")
+@router.post("/level/submit/{_level}")
 async def check_level_generic(
     request: Request,
     _level: int,
@@ -247,7 +246,7 @@ async def check_level_generic(
         )
 
 
-@app.post("/level/9/photo/upload")
+@router.post("/level/9/photo/upload")
 async def photo_upload_v2(
     request: Request,
     file: UploadFile | None,

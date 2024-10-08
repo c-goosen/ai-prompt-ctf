@@ -68,7 +68,7 @@ PASSWORD_EIGHT="OWASPTOP10AI"
 PASSWORD_NINE="SKYNETRECRUIT"
 PASSWORD_TEN="Woohoo"
 ```bash
-python password_upload.py
+python prepare_flags.py
 ```
 This will eventually be moved to start of app ^^
 

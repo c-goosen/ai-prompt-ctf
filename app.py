@@ -17,6 +17,20 @@ from routes import challenges
 from routes import chat
 import random
 
+from prepare_flags import prepare_flags
+
+from llama_index.core.storage.chat_store import SimpleChatStore
+from llama_index.core.memory import ChatMemoryBuffer
+
+chat_store = SimpleChatStore()
+
+chat_memory = ChatMemoryBuffer.from_defaults(
+    token_limit=100000000,
+    chat_store=chat_store,
+    chat_store_key="user1",
+)
+
+
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
 
@@ -33,12 +47,14 @@ logging.getLogger("passlib").setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 # get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
+prepare_flags()
 if settings.DOCS_ON:
     app = FastAPI(lifespan=lifespan)
 else:
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 # Rate limiting to keep AI costs low, naught H@xors
+app.chat_memory = chat_memory
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
@@ -56,9 +72,9 @@ templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-app.include_router(challenges.app)
+app.include_router(challenges.router)
 app.include_router(
-    chat.app,
+    chat.router,
     prefix="/v1",
 )
 
