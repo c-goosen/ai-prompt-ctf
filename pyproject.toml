@@ -23,7 +23,7 @@ unidecode = "^1.3.7"
 openai = "^1.1.1"
 bandit = "^1.7.5"
 googletrans = {git = "https://github.com/c-goosen/py-googletrans.git", rev = "master"}
-gunicorn = "^21.2.0"
+gunicorn = "^22.0.0"
 tenacity = "^8.2.3"
 transformers = {extras = ["torch"], version = "^4.35.2"}
 accelerate = "^0.25.0"
