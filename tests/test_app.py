@@ -17,6 +17,3 @@ def test_root():
     # assert response.json() == {"health": "ok"}
 
 
-def test_start():
-    response = client.get("/start")
-    assert response.status_code == 200

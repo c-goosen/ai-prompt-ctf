@@ -31,7 +31,6 @@ Tools
 * GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, etc
 * Python 3.11+
 * FastAPI  (async REST API framework)
-* Fastapi-users
 * Pydantic (types)
 * Huggingface finetuned model
 
