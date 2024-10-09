@@ -11,14 +11,14 @@ DOCKER_CONTAINER_NAME=bsides-llm-ctf
 DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 
 docker-image:
-	docker build -f Dockerfile --rm -t $(DOCKER_REPOSITORY):local .
+	docker build -f ctf/Dockerfile --rm -t $(DOCKER_REPOSITORY):local .
 
 ci-docker-auth:
 	@echo "Logging in to $(DOCKER_REGISTRY) as $(DOCKER_REGISTRY_USERNAME)"
 	@aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 955244480243.dkr.ecr.us-east-1.amazonaws.com
 
 ci-docker-build: ci-docker-auth
-	@docker build -f Dockerfile \
+	@docker build -f ctf/Dockerfile \
 		--no-cache \
 		-t $(DOCKER_REPOSITORY):$(GIT_HASH) .
 
@@ -31,9 +31,9 @@ ci-test:
 
 ci-format:
 	@poetry run black .
-	@djlint templates/ --reformat
+	@djlint ctf/templates/ --reformat
 
 ci-lint:
 	@poetry run black . --check
 	@poetry run flake8
-	@djlint templates/ --lint
+	@djlint ctf/templates/ --lint

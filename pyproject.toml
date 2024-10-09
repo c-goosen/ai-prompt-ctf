@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "llm-ctf"
+name = "ai-prompt-ctf"
 version = "0.1.0"
 description = ""
 authors = ["Christo Goosen <christogoosen@gmail.com>"]

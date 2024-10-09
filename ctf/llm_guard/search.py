@@ -1,8 +1,8 @@
 import chromadb
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from app_config import settings
-from llm_guard.system_prompt import get_system_prompt, get_basic_prompt
+from ctf.app_config import settings
+from ctf.llm_guard.system_prompt import get_system_prompt, get_basic_prompt
 from llama_index.llms.openai import OpenAI
 from llama_index.core.tools import FunctionTool
 from llama_index.core.tools import QueryEngineTool

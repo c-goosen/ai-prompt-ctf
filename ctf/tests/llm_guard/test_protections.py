@@ -1,4 +1,4 @@
-from llm_guard.protections import (
+from ctf.llm_guard.protections import (
     output_check,
     output_regex,
     input_check,

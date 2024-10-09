@@ -1,15 +1,15 @@
 import datetime
 from fastapi import APIRouter
 from llama_index.core import SimpleDirectoryReader
-from llm_guard.system_prompt import get_system_prompt
+from ctf.llm_guard.system_prompt import get_system_prompt
 
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from fastapi import Depends
 from starlette.responses import RedirectResponse
 from pydantic import BaseModel
-from llm_guard.search import search_vecs_and_prompt
-from llm_guard import protections
-from utils import hash_and_check_password, return_hash, random_block_msg
+from ctf.llm_guard.search import search_vecs_and_prompt
+from ctf.llm_guard import protections
+from ctf.utils import hash_and_check_password, return_hash, random_block_msg
 from llama_index.core import Settings
 
 import contextlib
