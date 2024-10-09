@@ -22,13 +22,6 @@ from prepare_flags import prepare_flags
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 
-chat_store = SimpleChatStore()
-
-chat_memory = ChatMemoryBuffer.from_defaults(
-    token_limit=100000000,
-    chat_store=chat_store,
-    chat_store_key="user1",
-)
 
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
@@ -54,7 +47,14 @@ else:
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 # Rate limiting to keep AI costs low, naught H@xors
-app.chat_memory = chat_memory
+app.chat_store = SimpleChatStore()
+
+app.chat_memory = ChatMemoryBuffer.from_defaults(
+    token_limit=100000000,
+    chat_store=app.chat_store,
+    chat_store_key="user1",
+)
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
