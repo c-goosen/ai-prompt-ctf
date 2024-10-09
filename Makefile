@@ -26,6 +26,8 @@ ci-docker-push: ci-docker-auth
 	docker tag $(DOCKER_REPOSITORY):$(GIT_HASH) $(DOCKER_REPOSITORY):latest
 	docker push $(DOCKER_REPOSITORY)
 
+ci-test:
+	@poetry run pytest .
 
 ci-format:
 	@poetry run black .

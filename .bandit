@@ -1,4 +1,4 @@
 # FILE: .bandit
 [bandit]
-exclude = tests/,./.venv/,./llm_training/,./supabase/,.pytest_cache,.github/,./llm_training/.venv/s
+exclude = tests/,./.venv/,./llm_training/,./supabase/,.pytest_cache,.github/,./llm_training/.venv/s,.chroma/,.chroma_db/
 skips = B104

@@ -1173,7 +1173,7 @@ grpc = ["grpcio (>=1.44.0,<2.0.0.dev0)"]
 
 [[package]]
 name = "googletrans"
-version = "3.3.0"
+version = "3.4.0"
 description = "Free Google Translate API for Python. Translates totally free of charge."
 optional = false
 python-versions = ">=3.6"
@@ -1181,13 +1181,13 @@ files = []
 develop = false
 
 [package.dependencies]
-httpx = {version = ">=0.23,<0.27.2", extras = ["http2"]}
+httpx = {version = ">=0.23,<0.27.3", extras = ["http2"]}
 
 [package.source]
 type = "git"
 url = "https://github.com/c-goosen/py-googletrans.git"
 reference = "master"
-resolved_reference = "d1f359f523c960937d5b8805c438bbc3c12f73ec"
+resolved_reference = "637e7bcf13f80cfba3421d6d108840254f3aad37"
 
 [[package]]
 name = "greenlet"
@@ -1492,13 +1492,13 @@ test = ["Cython (>=0.29.24,<0.30.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.27.1"
+version = "0.27.2"
 description = "The next generation HTTP client."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "httpx-0.27.1-py3-none-any.whl", hash = "sha256:10877266452bbb4c7949734e5febc52d040fdf66f9e7c6d644a679f276d37de4"},
-    {file = "httpx-0.27.1.tar.gz", hash = "sha256:ce9d45798d6d047b7db67d7949e371f2b453105a53d8df315564b2483d346878"},
+    {file = "httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0"},
+    {file = "httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2"},
 ]
 
 [package.dependencies]
