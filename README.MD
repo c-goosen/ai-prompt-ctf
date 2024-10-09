@@ -19,6 +19,7 @@ Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give mys
 [WHOAMI](https://github.com/c-goosen)
 
 ## Other Info
+[CHALLENGES](CHALLENGES.md)
 [TODO](TODO.md)
 
 Tools
