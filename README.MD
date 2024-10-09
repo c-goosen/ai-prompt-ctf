@@ -1,5 +1,6 @@
 # PwnGPT -  BSIDES Cape Town CTF
 
+
 ## Intro
 
 Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
@@ -15,10 +16,10 @@ Please use and add challenges
 
 ## WHOAMI
 Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give myself ridiculous challenges like building this.
+[WHOAMI](https://github.com/c-goosen)
 
-CrypticGoose
-christogoosen@gmail.com
-https://x.com/crypticg00se
+## Other Info
+[TODO](TODO.md)
 
 Tools
 * LLamaindex
