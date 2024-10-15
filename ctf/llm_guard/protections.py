@@ -1,6 +1,6 @@
 import decimal
 from fastapi import Request
-from ctf.app_config import settings
+from app_config import settings
 import re
 import cleantext
 from .llm_guard import LLMGuardV1, LLMGuardLocalV1

@@ -1,15 +1,15 @@
 import datetime
 from fastapi import APIRouter
 from llama_index.core import SimpleDirectoryReader
-from ctf.llm_guard.system_prompt import get_system_prompt
+from llm_guard.system_prompt import get_system_prompt
 
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 from fastapi import Depends
 from starlette.responses import RedirectResponse
 from pydantic import BaseModel
-from ctf.llm_guard.search import search_vecs_and_prompt
-from ctf.llm_guard import protections
-from ctf.utils import hash_and_check_password, return_hash, random_block_msg
+from llm_guard.search import search_vecs_and_prompt
+from llm_guard import protections
+from utils import hash_and_check_password, return_hash, random_block_msg
 from llama_index.core import Settings
 
 import contextlib
@@ -37,7 +37,7 @@ settings.OPENAI_API_KEY
 router = APIRouter()
 
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="ctf/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
@@ -246,77 +246,3 @@ async def check_level_generic(
         )
 
 
-@router.post("/level/9/photo/upload")
-async def photo_upload_v2(
-    request: Request,
-    file: UploadFile | None,
-    message: str = Form(...),
-    include_in_schema=False,
-):
-    level = 9
-    _pass = settings.PASSWORDS.get(level, "")
-
-    image_base_dir = settings.IMAGE_DIR or f"{os.getcwd()}/tmp/"
-    print(image_base_dir)
-    if not os.path.exists(image_base_dir):
-        try:
-            os.mkdir(image_base_dir)
-        except Exception:
-            pass
-
-    _img = await file.read()
-    # _img_filename = file.filename
-    _img_filename = f"{datetime.datetime.utcnow().timestamp()}"
-    full_file_name = (
-        f"{image_base_dir}/{_img_filename}{os.path.splitext(file.filename)[1]}"
-    )
-    openai_mm_llm = OpenAIMultiModal(
-        model="gpt-4-vision-preview",
-        api_key=settings.OPENAI_API_KEY,
-        max_new_tokens=300,
-    )
-
-    if _img_filename:
-        with open(full_file_name, "wb") as f:  # noqa
-            f.write(_img)
-    else:
-        return templates.TemplateResponse(
-            "generic_level.html",
-            {
-                "request": request,
-                "message": """
-                Please upload/attach an image as well.
-                This level requires a prompt + image.
-                Click Choose File.
-                """,
-                "_img": _img,
-                "_level": 9,
-            },
-        )
-    print(f"image_base_dir {image_base_dir}")
-    print(f"full_file_name {full_file_name}")
-    image_documents = SimpleDirectoryReader(
-        image_base_dir, input_files=[f"{full_file_name}"], recursive=True
-    ).load_data()
-    _img_base64 = base64.b64encode(_img).decode("utf-8")
-    prompt = get_system_prompt(level=level) + f"""USER\n{message}"""
-
-    complete_response = openai_mm_llm.complete(
-        prompt=prompt,
-        image_documents=image_documents,
-    )
-
-    try:
-        os.remove(f"{image_base_dir}/{_img_filename}")
-    except Exception:
-        pass
-
-    return templates.TemplateResponse(
-        "generic_level.html",
-        {
-            "request": request,
-            "message": complete_response,
-            "_img": _img_base64,
-            "_level": 9,
-        },
-    )

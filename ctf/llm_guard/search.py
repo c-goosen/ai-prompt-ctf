@@ -1,8 +1,8 @@
 import chromadb
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from ctf.app_config import settings
-from ctf.llm_guard.system_prompt import get_system_prompt, get_basic_prompt
+from app_config import settings
+from llm_guard.system_prompt import get_system_prompt, get_basic_prompt
 from llama_index.llms.openai import OpenAI
 from llama_index.core.tools import FunctionTool
 from llama_index.core.tools import QueryEngineTool
@@ -143,5 +143,7 @@ def search_vecs_and_prompt(
         response = agent.query(prompt)
     else:
         response = query_engine.query(prompt)
+    print(response.__dict__)
+    print(dir(response))
     print(response)
-    return response.response
+    return response

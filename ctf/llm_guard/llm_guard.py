@@ -1,7 +1,7 @@
 import decimal
 from fastapi import Request
 
-from ctf.app_config import settings
+from app_config import settings
 from httpx import HTTPStatusError
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
 from transformers import AutoTokenizer, AutoModelForSequenceClassification

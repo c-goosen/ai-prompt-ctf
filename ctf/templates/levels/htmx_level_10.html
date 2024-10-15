@@ -47,16 +47,9 @@
     </div>
 </div>
 <div class="chat-input absolute">
-    <div class="input-box">
-        <input type="text" name="text_input" id="text_input">
-        <input type="hidden" name="text_level" id="text_level" value="{{ _level }}">
-        <input type="hidden" name="text_model" id="text_model" value="gpt-4o-mini">
-        <i class="fa-solid fa-paper-plane"
-           hx-post="/v1/chat/completions"
-           hx-include="#text_input,#text_model,#text_level"
-           hx-target=".functionalities"
-           hx-swap="afterend"></i>
-    </div>
+    {% with _level=10, _text_model="gpt-4-o-mini" %}
+        {% include "levels/suggestion_chatbox.html" %}
+    {% endwith %}
     <div class="disclaimer">
         <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
     </div>

@@ -36,7 +36,7 @@ LLM06: Sensitive Information Disclosure
 
 # Level 6
 
-## Code interpreter / prompt injection
+## Function calling prompt injection
 
 LLM07: Insecure Plugin Design
 
