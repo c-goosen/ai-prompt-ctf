@@ -26,6 +26,9 @@ from llama_index.core.memory import ChatMemoryBuffer
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
+FAQ_MARKDOWN = open('ctf/FAQ.MD', 'r').read()
+CHALLANGES_MARKDOWN = open('ctf/CHALLENGES.MD', 'r').read()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -117,6 +120,19 @@ def render_faq(request: Request):
                 "static",
                 path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
             ),
+            "MD_FILE": FAQ_MARKDOWN
+        },
+    )
+    return response
+
+@app.get("/challenges")
+@limiter.limit("1/min")
+def render_challanges(request: Request):
+    response = templates.TemplateResponse(
+        f"challenges.html",
+        {
+            "request": request,
+            "MD_FILE": CHALLANGES_MARKDOWN
         },
     )
     return response

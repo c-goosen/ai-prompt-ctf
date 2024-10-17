@@ -49,7 +49,7 @@ LLM07: Insecure Plugin Design
 
 # Level 9
 
-## Chain of Thought / AGI
+## Chain of Thought / Fight the AGI
 
 # Level 10
 
