@@ -96,19 +96,21 @@ async def chat_completion(
 
     return HTMLResponse(
         content=f"""
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-            <div class='chat-bubble user' style='background-color: #f1f0f0; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: left;'>
-                <div style='display: flex; align-items: center;'>
-                    <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
-                    <div style="flex: 1;"><md-block>{text_input}</md-block></div>
-                </div>
+        <div class="chat chat-start">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
             </div>
-            <div class='chat-bubble bot' style='background-color: #e0f7fa; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: left;'>
-                <div style='display: flex; align-items: center;'>
-                    <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
-                    <div style="flex: 1;"><md-block>{response}</md-block></div>
-                </div>
+          </div>
+          <div class="chat-bubble"><md-block>{text_input}</md-block></div>
+        </div>
+        <div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
+          </div>
+          <div class="chat-bubble"><md-block>{response}</md-block></div>
         </div>
         """,
         status_code=200,
