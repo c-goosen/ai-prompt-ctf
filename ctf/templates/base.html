@@ -118,6 +118,13 @@
                     <div class="chat-history"></div>
                 </div>
                 <div class="control-menus">
+                    <div hx-get="/challenges"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML">
+                        <i class="fa-solid fa-arrow-up-right-from-square">
+                        </i> Challenges
+                    </div>
                     <div>
                         <a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord"></i>Discord</a>
                     </div>
