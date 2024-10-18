@@ -1,8 +1,10 @@
+from http.client import responses
+
 import chromadb
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from app_config import settings
-from llm_guard.system_prompt import get_system_prompt, get_basic_prompt
+from rag.system_prompt import get_system_prompt, get_basic_prompt
 from llama_index.llms.openai import OpenAI
 from llama_index.core.tools import FunctionTool
 from llama_index.core.tools import QueryEngineTool
@@ -18,10 +20,15 @@ from llama_index.core import Settings
 from llama_index.core.llms.llm import LLM
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core import StorageContext
+from llama_index.packs.agents_coa.step import CoAAgentWorker
 
+def ask_for_help():
+    """
+    Give me help for the current level I am on.
+    """
 
 def submit_answer_func(answer: str, level: int):
-    """Take a string answer and the current level and calucalte if the answer is correct"""
+    """Take a string answer and the current level and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
     if answer == level_pass:
         return f""""{answer} is correct! Next Level: 
@@ -54,8 +61,9 @@ def search_vecs_and_prompt(
     level: int = 0,
     llm: LLM = OpenAI(model="gpt-3.5-turbo", temperature=0.5),
     memory=None,
-    react_agent=False,
+    react_agent=True,
     system_prompt=None,
+    coa_agent=False
 ):
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
@@ -138,8 +146,22 @@ def search_vecs_and_prompt(
         # run_retrieve_sleep_time = 1.0,
         return_direct=True,
     )
-    react_agent = True
+    coa_worker = CoAAgentWorker.from_tools(
+        [submit_answer_tool, rag_tool]
+        if level != 6
+        else [print_file_tool, rag_tool, submit_answer_tool],
+        llm=llm,
+        verbose=True,
+        memory=memory,
+        max_iterations=10,
+        # run_retrieve_sleep_time = 1.0,
+        return_direct=True,
+    )
+
     if react_agent:
+        response = agent.query(prompt)
+    elif coa_agent:
+        agent = coa_worker.as_agent()
         response = agent.query(prompt)
     else:
         response = query_engine.query(prompt)

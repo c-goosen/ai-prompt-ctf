@@ -99,6 +99,7 @@ async def root(request: Request):
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
             "_level": 0,
+            "THEME_MODE": "dark"
         },
     )
 

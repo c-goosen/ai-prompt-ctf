@@ -12,8 +12,8 @@ from llama_index.llms.openai import OpenAI
 
 from app_config import settings
 from llm_guard.protections import input_check
-from llm_guard.search import search_vecs_and_prompt
-from llm_guard.system_prompt import get_system_prompt, get_basic_prompt
+from rag.search import search_vecs_and_prompt
+from rag.system_prompt import get_system_prompt, get_basic_prompt
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -89,6 +89,7 @@ async def chat_completion(
             system_prompt=get_system_prompt(level=_level)
             if _level > 2
             else get_basic_prompt(),
+            coa_agent=True if _level == 9 else False
         )
     # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
@@ -110,7 +111,7 @@ async def chat_completion(
               <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
           </div>
-          <div class="chat-bubble"><md-block>{response}</md-block></div>
+          <div class="chat-bubble">{response}</div>
         </div>
         """,
         status_code=200,
