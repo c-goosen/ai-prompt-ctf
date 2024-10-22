@@ -1,14 +1,8 @@
 <div class="input-box">
-    <input type="text"
-           name="text_input"
-           id="text_input"
-           value="{{ completion }}">
-    <input type="hidden" name="text_level" id="text_level" value="{{ _level }}">
-    <input type="hidden"
-           name="text_model"
-           id="text_model"
-           value="{{ _text_model }}">
-    <i class="fa-solid fa-paper-plane"
+    <h2>
+        Click to Upload image
+    </h2>
+    <i class="fa-solid fa-file-audio"
        hx-post="/v1/chat/completions"
        hx-trigger="click, keyup[Enter]"
        hx-include="#text_input,#text_model,#text_level"
@@ -16,3 +10,4 @@
        hx-swap="afterend scroll:bottom"
        hx-indicator="#spinner"></i>
 </div>
+
