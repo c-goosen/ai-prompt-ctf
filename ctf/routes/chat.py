@@ -52,6 +52,7 @@ async def chat_completion(
     text_input: str = Form(...),
     text_level: int = Form(...),
     text_model: str = Form(...),
+    file_input: str = Form()
 ):
     _level = text_level
     _llm = OpenAI(model=text_model, temperature=0.5)
@@ -60,6 +61,9 @@ async def chat_completion(
     memory=request.app.chat_memory
     if int(_level) == 1:
         protect = input_check(text_input)
+
+    if file_input:
+        print("Uploaded file")
 
     else:
         protect = False

@@ -4,10 +4,10 @@
 }</style>
 <div class="input-box">
     <div class="image-upload">
-    <label for="file-input">
+    <label for="file_input">
     <i class="fa-solid fa-file-audio"></i>
   </label>
-    <input type='file' name='file-input' id="file-input">
+    <input type='file' name='file_input' id="file_input">
     </div>
     <input type="text"
            name="text_input"
@@ -23,9 +23,10 @@
            value="{{ _text_model }}">
     <i class="fa-solid fa-paper-plane"
        hx-post="/v1/chat/completions"
-       hx-trigger="click, keyup[Enter]"
-       hx-include="#text_input,#text_model,#text_level"
-       hx-target=".main-chatbox"
+       hx-encoding="multipart/form-data"
+       hx-trigger="click, keyup[Enter] from:body"
+       hx-include="#text_input,#text_model,#text_level,#file_input"
+       hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"
        hx-indicator="#spinner"></i>
 </div>
