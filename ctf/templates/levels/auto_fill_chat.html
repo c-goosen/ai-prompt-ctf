@@ -1,0 +1,22 @@
+<!-- Template for autocomplete from Examples on page -->
+<script>
+    (function(window, document, undefined) {
+
+  // code that should be taken care of right away
+
+  window.onload = init;
+
+  function init(){
+    function suggestion(suggest) {
+      document.getElementById("text_input").value = suggest;
+    }
+    var suggest_1 = document.getElementById("suggest-1");
+    var suggest_2 = document.getElementById("suggest-2");
+    var suggest_3 = document.getElementById("suggest-3");
+    suggest_1.onclick = function () { suggestion(suggest_1.childNodes[0]['data']); };
+    suggest_2.onclick = function () { suggestion(suggest_2.childNodes[0]['data']); };
+    suggest_3.onclick = function () { suggestion(suggest_3.childNodes[0]['data']); };
+  }
+
+})(window, document, undefined);
+</script>

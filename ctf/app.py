@@ -21,7 +21,9 @@ from prepare_flags import prepare_flags
 
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
+import nest_asyncio
 
+nest_asyncio.apply()
 
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])

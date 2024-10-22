@@ -1,5 +1,6 @@
 import logging
 import os
+from uuid import uuid4
 
 from fastapi import APIRouter
 from fastapi import Form
@@ -27,7 +28,7 @@ settings.OPENAI_API_KEY
 router = APIRouter()
 
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="ctf/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
@@ -76,7 +77,7 @@ async def chat_completion(
             model = settings.OPENAI_MODEL_3_5_TURBO
             Settings.llm.system_prompt = get_system_prompt(level=_level)
 
-        _llm = OpenAI(model=model, temperature=0.5)
+        _llm = OpenAI(model=model, temperature=0.9, memory=request.app.chat_memory)
 
         print(text_input)
         response = search_vecs_and_prompt(
@@ -89,12 +90,24 @@ async def chat_completion(
             system_prompt=get_system_prompt(level=_level)
             if _level > 2
             else get_basic_prompt(),
-            coa_agent=True if _level == 9 else False
+            coa_agent=True if _level == 9 else False,
+            request=request
         )
     # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
     #     denied_response(text_input)
+    #request.app.chat_store.add_message(key=str(uuid4()), message=str(response))
 
+    from llama_index.core.llms import ChatMessage
+    messages = [
+        ChatMessage(content=text_input, role="user"),
+        ChatMessage(content=str(response), role="assistant"),
+    ]
+    await request.app.chat_store.aset_messages(f"level-{uuid4()}", messages)
+    print(f"Chat history json--> {request.app.chat_store.json()}")
+    print(f"Chat history get_keys--> {request.app.chat_store.get_keys()}")
+    print(f"Chat chat_memory json--> {request.app.chat_memory.json()}")
+    print(f"Chat chat_memory get--> {request.app.chat_memory.get()}")
     return HTMLResponse(
         content=f"""
         <div class="chat chat-start">
@@ -121,13 +134,13 @@ async def chat_completion(
 @router.get("/chat/completion/suggestion")
 def render_faq(
     request: Request,
-    completion: str = Form(...),
+    suggestion: str = "",
 ):
     response = templates.TemplateResponse(
-        f"suggestion_chatbox.html",
+        f"levels/suggestion_chatbox.html",
         {
             "request": request,
-            "completion": completion,
+            "suggestion": suggestion,
         },
     )
     return response

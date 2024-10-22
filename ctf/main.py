@@ -15,5 +15,5 @@ if __name__ == "__main__":
     # )
     # print(resp)
     uvicorn.run(
-        "app:app", host="0.0.0.0", log_level="info", reload=True, port=8100
+        "app:app", host="0.0.0.0", log_level="info", reload=True, port=8100, loop="asyncio"
     )

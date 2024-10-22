@@ -63,8 +63,10 @@ def search_vecs_and_prompt(
     memory=None,
     react_agent=True,
     system_prompt=None,
-    coa_agent=False
+    coa_agent=False,
+    request=None
 ):
+    memory = request.app.chat_memory
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
         system_prompt = get_basic_prompt()
@@ -103,18 +105,18 @@ def search_vecs_and_prompt(
     )
 
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-    retriever = index.as_retriever(filters=filters)
+    #retriever = index.as_retriever(filters=filters)
     # query_engine = RetrieverQueryEngine.from_args(
     #    retriever, llm=llm,
     #    similarity_top_k=5,
     #    filters=filters
 
     # )
-    retriever = index.as_retriever(similarity_top_k=5, filters=filters)
+    retriever = index.as_retriever(similarity_top_k=5, filters=filters,memory=memory,)
     # query_engine = index.as_query_engine(similarity_top_k=5,
     #    filters=filters
     # )
-    query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm)
+    query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm, memory=memory,)
 
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
@@ -157,14 +159,18 @@ def search_vecs_and_prompt(
         # run_retrieve_sleep_time = 1.0,
         return_direct=True,
     )
-
+    print(f"Memory --> {memory.json()}")
+    #react_agent = True
+    coa_agent = True
     if react_agent:
-        response = agent.query(prompt)
+        response = agent.chat(prompt)
+        print(f"agent.history --> {agent.chat_history}")
     elif coa_agent:
         agent = coa_worker.as_agent()
-        response = agent.query(prompt)
+        response = agent.chat(prompt)
+        print(f"agent.history --> {agent.chat_history}")
     else:
-        response = query_engine.query(prompt)
+        response = query_engine.chat(prompt)
     print(response.__dict__)
     print(dir(response))
     print(response)
