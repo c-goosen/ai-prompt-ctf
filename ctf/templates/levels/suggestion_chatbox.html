@@ -8,6 +8,9 @@
            name="text_model"
            id="text_model"
            value="{{ _text_model }}">
+        <input type="hidden"
+           name="text_model"
+           value="{{ _text_model }}">
     <i class="fa-solid fa-paper-plane"
        hx-post="/v1/chat/completions"
        hx-trigger="click, keyup[Enter] from:body"

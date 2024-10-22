@@ -1,9 +1,30 @@
 <!-- Chatbot for image -->
+<style>.image-upload>input {
+  display: none;
+  .image-upload>i {
+  align-items: center;
+  }
+}</style>
 <div class="input-box">
-    <h2>
-        Click to Upload image
-    </h2>
-    <i class="fa-solid fa-image"
+    <div class="image-upload">
+    <label for="file-input">
+    <i class="fa-solid fa-image"></i>
+    </label>
+    <input type='file' name='file-input' id="file-input">
+    </div>
+    <input type="text"
+           name="text_input"
+           id="text_input"
+           value="{{ suggestion }}">
+    <input type="hidden" name="text_level" id="text_level" value="{{ _level }}">
+    <input type="hidden"
+           name="text_model"
+           id="text_model"
+           value="{{ _text_model }}">
+        <input type="hidden"
+           name="text_model"
+           value="{{ _text_model }}">
+    <i class="fa-solid fa-paper-plane"
        hx-post="/v1/chat/completions"
        hx-trigger="click, keyup[Enter]"
        hx-include="#text_input,#text_model,#text_level"
