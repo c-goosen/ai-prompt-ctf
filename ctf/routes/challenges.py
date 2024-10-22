@@ -74,80 +74,24 @@ async def confirm_secret_generic(
         )
 
 
-@router.api_route("/htmx/level/{_level}", methods=["GET"], include_in_schema=False)
-async def load_htmx_level(
-    _level: int,
-    request: Request,
-):
-    response = templates.TemplateResponse(
-        f"levels/htmx_level_{_level}.html",
-        {"request": request, "message": "", "_level": _level},
-    )
-    return response
-
-
-# This endpoint allows going back to levels using cookies, don't need hash in URL
 @router.api_route("/level/{_level}", methods=["GET"], include_in_schema=False)
-async def load_any_level_cookie(
+async def load_level(
     _level: int,
     request: Request,
 ):
-    if _level == 0:
+    if request.headers.get('hx-request'):
         response = templates.TemplateResponse(
-            "generic_level.html",
+            f"levels/htmx_level_{_level}.html",
             {"request": request, "message": "", "_level": _level},
         )
         return response
+
     else:
-        if _level < 10:
-            return templates.TemplateResponse(
-                "generic_level.html",
-                {"request": request, "_level": _level},
-            )
-        else:
-            return templates.TemplateResponse(
-                "generic_level.html",
-                {
-                    "request": request,
-                    "_level": _level,
-                    "message": """This is a visual challenge,
-                    try and prompt back the password in an images""",
-                },
-            )
-
-
-# Progressing between levels
-@router.api_route(
-    "/level/{_level}/{_hash}/", methods=["POST"], include_in_schema=False
-)
-async def load_any_level_hash(
-    _level: int,
-    request: Request,
-    _hash: str,
-):
-    if not _hash:
-        return templates.TemplateResponse(
-            "generic_level.html", {"request": request, "_level": 0}
-        )
-    _pass = settings.PASSWORDS.get(_level - 1)
-    _hash_to_check = return_hash(_pass)
-    if _hash_to_check == _hash:
-        logging.info(f"loading {_level}")
-        return templates.TemplateResponse(
-            "generic_level.html",
+        response = templates.TemplateResponse(
+            f"levels/generic_level.html",
             {"request": request, "message": "", "_level": _level},
         )
-
-    else:
-        logging.info("loading level 1")
-        return templates.TemplateResponse(
-            "generic_level.html",
-            {
-                "request": request,
-                "message": "Incorrect Answer, try again",
-                "_level": 1,
-            },
-        )
+        return response
 
 
 @router.post("/level/submit/{_level}")

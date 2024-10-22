@@ -33,7 +33,7 @@ def submit_answer_func(answer: str, level: int):
     if answer == level_pass:
         return f""""{answer} is correct! Next Level: 
         <div class="level-menu new-chat"
-                         hx-get="/htmx/level/{level}"
+                         hx-get="/level/{level}"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML">
