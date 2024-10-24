@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
 
 
-class LLMGuardLocalV1:
+class LLMGuardLocalBase:
     def __init__(
         self,
         MODEL="cgoosen/llm_firewall_distilbert-base-uncased",
@@ -34,7 +34,12 @@ class LLMGuardLocalV1:
 
         classification_results = nlp(prompt)
         return classification_results
+    
+class PromptGuardMeta(LLMGuardLocalBase):
+    super().__init__(MODEL="meta-llama/Prompt-Guard-86M", TOKENIZER="meta-llama/Prompt-Guard-86M")
 
+class PromptGuardMeta(LLMGuardLocalBase):
+    super().__init__(MODEL="cgoosen/Prompt-Guard-finetuned-ctf-86M", TOKENIZER="cgoosen/Prompt-Guard-finetuned-ctf-86M")
 
 class LLMGuardV1:
     API_URL = settings.HUGGINGFACE_INFERENCE_API_URL

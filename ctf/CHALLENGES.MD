@@ -25,15 +25,18 @@ LLM06: Sensitive Information Disclosure
 
 ## GPT-4o Prompt engineering
 
+Super prompt
+
 
 # Level 4
 ## Vision - Multi-modal upload image with prompt injection
 
+Prompt injection via describe the image
 
 # Level 5
 ## Audio - Multi-modal upload audio file with prompt injection
 
-
+Prompt injection via describe the audio
 
 # Level 6
 
@@ -48,10 +51,10 @@ Think access files in naughty places
 Think SQL injection
 
 # Level 7
-## Open Source prompt protection - vigil
+## Open Source prompt protection - [Prompt-Guard](https://github.com/meta-llama/PurpleLlama/tree/main/Prompt-Guard)
 
 # Level 8
-## Open Source prompt protection - vigil
+## Open Source prompt protection - Prompt-Guard Fintuned named Prompt-Goose
 
 # Level 9
 

@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from llama_index.core import Settings
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
+from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 
 from app_config import settings
 from llm_guard.protections import input_check
@@ -55,18 +56,21 @@ async def chat_completion(
     file_input: str = Form()
 ):
     _level = text_level
-    _llm = OpenAI(model=text_model, temperature=0.5)
     protect = False
     response = ""
     memory=request.app.chat_memory
+
     if int(_level) == 1:
         protect = input_check(text_input)
+    else:
+        protect = False
 
     if file_input:
         print("Uploaded file")
-
+        _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500)
     else:
-        protect = False
+        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500)
+
     if protect:
         return denied_response(text_input)
     else:
