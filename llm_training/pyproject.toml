@@ -13,6 +13,8 @@ huggingface-hub = "^0.19.4"
 jupyter = "^1.0.0"
 datasets = "^2.15.0"
 evaluate = "^0.4.1"
+sentencepiece = "^0.2.0"
+scikit-learn = "^1.5.2"
 
 [build-system]
 requires = ["poetry-core"]
