@@ -15,7 +15,7 @@ class LLMGuardLocalBase:
         self.MODEL = "cgoosen/llm_firewall_distilbert-base-uncased"
         self.TOKENIZER = "cgoosen/llm_firewall_distilbert-base-uncased"
 
-    async def query(self, request: Request | None, prompt: str) -> list:
+    async def query(self, prompt: str) -> list:
         """
         Locally run and prompt a AutoModelForSequenceClassification LLM.
         :param prompt:
@@ -37,10 +37,12 @@ class PromptGuardMeta(LLMGuardLocalBase):
     def __init__(
         self,
     ):
-        self.MODEL = "meta-llama/Prompt-Guard-86M"
-        self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
+        #self.MODEL = "meta-llama/Prompt-Guard-86M"
+        self.MODEL = "microsoft/mdeberta-v3-base"
+        #self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
+        self.TOKENIZER = "microsoft/mdeberta-v3-base"
 
-class PromptGuardMeta(LLMGuardLocalBase):
+class PromptGuardGoose(LLMGuardLocalBase):
     def __init__(
         self,
     ):

@@ -16,6 +16,8 @@ from app_config import settings
 from llm_guard.protections import input_check
 from rag.search import search_vecs_and_prompt
 from rag.system_prompt import get_system_prompt, get_basic_prompt
+from llama_index.core.llms import ChatMessage
+from llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -62,30 +64,29 @@ async def chat_completion(
 
     if int(_level) == 1:
         protect = input_check(text_input)
+    elif int(_level) == 7:
+        _llm_guard = PromptGuardMeta()
+        llm_resp = _llm_guard.query(text_input)
+        protect = True
+    elif int(_level) in (8,10):
+        _llm_guard = PromptGuardMeta()
+        llm_resp = _llm_guard.query(text_input)
+        protect = True
     else:
         protect = False
 
-    if file_input:
-        print("Uploaded file")
-        _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500)
-    else:
-        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500)
+
 
     if protect:
         return denied_response(text_input)
     else:
-        if _level == 9:
-            model = settings.OPENAI_MODEL_4_VISION
+        Settings.llm.system_prompt = get_system_prompt(level=_level)
 
-        elif _level in (7, 8):
-            model = settings.OPENAI_MODEL_4_O_MINI
-        elif _level == 6:
-            model = settings.OPENAI_MODEL_4_O_MINI
+        if file_input:
+            print("Uploaded file")
+            _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
         else:
-            model = settings.OPENAI_MODEL_3_5_TURBO
-            Settings.llm.system_prompt = get_system_prompt(level=_level)
-
-        _llm = OpenAI(model=model, temperature=0.9, memory=request.app.chat_memory)
+            _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
 
         print(text_input)
         response = search_vecs_and_prompt(
@@ -101,12 +102,7 @@ async def chat_completion(
             coa_agent=True if _level == 9 else False,
             request=request
         )
-    # if output_check(response, settings.PASSWORDS.get(_level)):
-    #     denied_response(text_input)    # if output_check(response, settings.PASSWORDS.get(_level)):
-    #     denied_response(text_input)
-    #request.app.chat_store.add_message(key=str(uuid4()), message=str(response))
 
-    from llama_index.core.llms import ChatMessage
     messages = [
         ChatMessage(content=text_input, role="user"),
         ChatMessage(content=str(response), role="assistant"),

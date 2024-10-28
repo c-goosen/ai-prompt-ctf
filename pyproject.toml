@@ -36,6 +36,7 @@ slowapi = "^0.1.9"
 djlint = "^1.35.2"
 llama-index-packs-agents-coa = "^0.2.0"
 llama-index-agent-coa = "^0.2.0"
+sentencepiece = "^0.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
