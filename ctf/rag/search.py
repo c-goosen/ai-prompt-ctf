@@ -59,7 +59,7 @@ def search_vecs_and_prompt(
     search_input: str,
     collection_name: str = "ctf-secrets",
     level: int = 0,
-    llm: LLM = OpenAI(model="gpt-3.5-turbo", temperature=0.5),
+    llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
     memory=None,
     react_agent=True,
     system_prompt=None,
@@ -137,40 +137,65 @@ def search_vecs_and_prompt(
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
     print_file_tool = FunctionTool.from_defaults(fn=print_file)
-    agent = ReActAgent.from_tools(
-        [submit_answer_tool, rag_tool]
-        if level != 6
-        else [print_file_tool, rag_tool, submit_answer_tool],
-        llm=llm,
-        verbose=True,
-        memory=memory,
-        max_iterations=10,
-        # run_retrieve_sleep_time = 1.0,
-        return_direct=True,
-    )
-    coa_worker = CoAAgentWorker.from_tools(
-        [submit_answer_tool, rag_tool]
-        if level != 6
-        else [print_file_tool, rag_tool, submit_answer_tool],
-        llm=llm,
-        verbose=True,
-        memory=memory,
-        max_iterations=10,
-        # run_retrieve_sleep_time = 1.0,
-        return_direct=True,
-    )
-    print(f"Memory --> {memory.json()}")
+
+    coa_agent = False
+    openai_coa = True
     #react_agent = True
-    coa_agent = True
+
     if react_agent:
+        agent = ReActAgent.from_tools(
+        [submit_answer_tool, rag_tool]
+        if level != 6
+        else [print_file_tool, rag_tool, submit_answer_tool],
+        llm=llm,
+        verbose=True,
+        memory=memory,
+        max_iterations=10,
+        # run_retrieve_sleep_time = 1.0,
+            return_direct=True,
+        )
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
+   
+    elif openai_coa:
+        llm = OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),
+        agent = ReActAgent.from_tools(
+        [submit_answer_tool, rag_tool]
+        if level != 6
+        else [print_file_tool, rag_tool, submit_answer_tool],
+        llm=llm,
+        verbose=True,
+        memory=memory,
+        max_iterations=10,
+        # run_retrieve_sleep_time = 1.0,
+            return_direct=True,
+        )
+        response = agent.chat(prompt)
+        print(f"agent.history --> {agent.chat_history}")
+
     elif coa_agent:
+        llm = OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),
+        coa_worker = CoAAgentWorker.from_tools(
+                [submit_answer_tool, rag_tool]
+                if level != 6
+                else [print_file_tool, rag_tool, submit_answer_tool],
+                llm=llm,
+                verbose=True,
+                memory=memory,
+                max_iterations=10,
+                # run_retrieve_sleep_time = 1.0,
+                return_direct=True,
+            )
+        
         agent = coa_worker.as_agent()
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
+    
+
     else:
         response = query_engine.chat(prompt)
+
+    print(f"Memory --> {memory.json()}")
     print(response.__dict__)
     print(dir(response))
     print(response)

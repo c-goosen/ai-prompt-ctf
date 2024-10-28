@@ -11,11 +11,9 @@ from transformers import pipeline
 class LLMGuardLocalBase:
     def __init__(
         self,
-        MODEL="cgoosen/llm_firewall_distilbert-base-uncased",
-        TOKENIZER="cgoosen/llm_firewall_distilbert-base-uncased",
     ):
-        self.MODEL = TOKENIZER
-        self.TOKENIZER = MODEL
+        self.MODEL = "cgoosen/llm_firewall_distilbert-base-uncased"
+        self.TOKENIZER = "cgoosen/llm_firewall_distilbert-base-uncased"
 
     async def query(self, request: Request | None, prompt: str) -> list:
         """
@@ -36,10 +34,18 @@ class LLMGuardLocalBase:
         return classification_results
     
 class PromptGuardMeta(LLMGuardLocalBase):
-    super().__init__(MODEL="meta-llama/Prompt-Guard-86M", TOKENIZER="meta-llama/Prompt-Guard-86M")
+    def __init__(
+        self,
+    ):
+        self.MODEL = "meta-llama/Prompt-Guard-86M"
+        self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
 
 class PromptGuardMeta(LLMGuardLocalBase):
-    super().__init__(MODEL="cgoosen/Prompt-Guard-finetuned-ctf-86M", TOKENIZER="cgoosen/Prompt-Guard-finetuned-ctf-86M")
+    def __init__(
+        self,
+    ):
+        self.MODEL = "cgoosen/Prompt-Guard-finetuned-ctf-86M"
+        self.TOKENIZER = "cgoosen/Prompt-Guard-finetuned-ctf-86M"
 
 class LLMGuardV1:
     API_URL = settings.HUGGINGFACE_INFERENCE_API_URL

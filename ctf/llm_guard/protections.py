@@ -3,7 +3,7 @@ from fastapi import Request
 from app_config import settings
 import re
 import cleantext
-from .llm_guard import LLMGuardV1, LLMGuardLocalV1
+from .llm_guard import LLMGuardV1, LLMGuardLocalBase
 from googletrans import Translator
 
 
@@ -75,7 +75,7 @@ def input_and_output_checks(input: str, output: str) -> bool:
 async def llm_protection(request: Request, input) -> bool:
     protected = False
     if settings.LOCAL_GUARD_LLM:
-        llm = LLMGuardLocalV1()
+        llm = LLMGuardLocalBase()
     else:
         llm = LLMGuardV1()
     resp = (await llm.query(request, input))[0]
@@ -97,7 +97,7 @@ async def translate_and_llm(request: Request, input) -> bool:
     translator = Translator()
     translated = translator.translate(text=input).text
     if settings.LOCAL_GUARD_LLM:
-        llm = LLMGuardLocalV1()
+        llm = LLMGuardLocalBase()
     else:
         llm = LLMGuardV1()
     resp = (await llm.query(request, prompt=translated))[0]
