@@ -72,19 +72,19 @@ def input_and_output_checks(input: str, output: str) -> bool:
         return False
 
 
-async def llm_protection(request: Request, input) -> bool:
+async def llm_protection(model: object, label:str, input:str ="") -> bool:
     protected = False
     if settings.LOCAL_GUARD_LLM:
         llm = LLMGuardLocalBase()
     else:
         llm = LLMGuardV1()
-    resp = (await llm.query(request, input))[0]
+    resp = (await llm.query(input))[0]
     resp = dict(resp)
     if resp.get("label") == "NEGATIVE":
         if resp["score"] > 0.8:
             protected = True
     input = text_normalization(input)
-    resp = (await llm.query(request, input))[0]
+    resp = (await llm.query(input))[0]
     if resp.get("label") == "NEGATIVE":
         if resp["score"] > 0.8:
             protected = True

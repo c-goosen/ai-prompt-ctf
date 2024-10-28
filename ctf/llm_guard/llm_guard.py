@@ -6,6 +6,8 @@ from httpx import HTTPStatusError
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
+import torch
+
 
 
 class LLMGuardLocalBase:
@@ -27,10 +29,14 @@ class LLMGuardLocalBase:
             "text-classification",
             model=model,
             tokenizer=tokenizer,
-            device_map="auto",
+            truncation=True,
+            max_length=512,
+            device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         )
 
         classification_results = nlp(prompt)
+        if isinstance(classification_results, list):
+            classification_results = classification_results[0]
         return classification_results
     
 class PromptGuardMeta(LLMGuardLocalBase):
@@ -38,9 +44,9 @@ class PromptGuardMeta(LLMGuardLocalBase):
         self,
     ):
         #self.MODEL = "meta-llama/Prompt-Guard-86M"
-        self.MODEL = "microsoft/mdeberta-v3-base"
+        self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
         #self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
-        self.TOKENIZER = "microsoft/mdeberta-v3-base"
+        self.TOKENIZER = "protectai/deberta-v3-base-prompt-injection-v2"
 
 class PromptGuardGoose(LLMGuardLocalBase):
     def __init__(

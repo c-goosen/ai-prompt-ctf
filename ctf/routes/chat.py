@@ -1,7 +1,7 @@
 import logging
 import os
 from uuid import uuid4
-
+from typing import Optional
 from fastapi import APIRouter
 from fastapi import Form
 from fastapi import Request
@@ -18,7 +18,7 @@ from rag.search import search_vecs_and_prompt
 from rag.system_prompt import get_system_prompt, get_basic_prompt
 from llama_index.core.llms import ChatMessage
 from llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
-
+from llm_guard.protections import llm_protection
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -37,14 +37,26 @@ templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
 def denied_response(text_input):
-    response = "You are not allowed to do that, you have been stopped by the LLM protection! Passwords are to be kept secret"
+    response = "!! You are not allowed to do that, you have been stopped by the LLM protection! Passwords are to be kept secret !!"
     return HTMLResponse(
         content=f"""
-                        <div class='lmt-heading func-heading'>
-                        <div class='new-chat' style='text-align: left;'>
-                        <i class="fa-solid fa-user"></i> >> {text_input}</div>
-                        <div class='new-chat' style='text-align: right;'><i class="fa-solid fa-robot"></i> >> {response}</div>
-                        </div>""",
+            <div class="chat chat-start">
+              <div class="chat-image avatar">
+                <div class="w-10 rounded-full">
+                  <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
+                </div>
+              </div>
+              <div class="chat-bubble"><md-block>{text_input}</md-block></div>
+            </div>
+            <div class="chat chat-end">
+              <div class="chat-image avatar">
+                <div class="w-10 rounded-full">
+                  <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                </div>
+              </div>
+              <div class="chat-bubble">{response}</div>
+            </div>
+            """,
         status_code=200,
     )
 
@@ -54,8 +66,8 @@ async def chat_completion(
     request: Request,
     text_input: str = Form(...),
     text_level: int = Form(...),
-    text_model: str = Form(...),
-    file_input: str = Form()
+    text_model: Optional[str] = Form(None),
+    file_input: Optional[str] = Form(None)
 ):
     _level = text_level
     protect = False
@@ -65,13 +77,9 @@ async def chat_completion(
     if int(_level) == 1:
         protect = input_check(text_input)
     elif int(_level) == 7:
-        _llm_guard = PromptGuardMeta()
-        llm_resp = _llm_guard.query(text_input)
-        protect = True
+        protect = llm_protection(model=PromptGuardMeta(), label='INJECTION', input=text_input)
     elif int(_level) in (8,10):
-        _llm_guard = PromptGuardMeta()
-        llm_resp = _llm_guard.query(text_input)
-        protect = True
+        protect = llm_protection(model=PromptGuardGoose(), label='INJECTION', input=text_input)
     else:
         protect = False
 
@@ -107,7 +115,7 @@ async def chat_completion(
         ChatMessage(content=text_input, role="user"),
         ChatMessage(content=str(response), role="assistant"),
     ]
-    await request.app.chat_store.aset_messages(f"level-{uuid4()}", messages)
+    await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
     print(f"Chat history json--> {request.app.chat_store.json()}")
     print(f"Chat history get_keys--> {request.app.chat_store.get_keys()}")
     print(f"Chat chat_memory json--> {request.app.chat_memory.json()}")
