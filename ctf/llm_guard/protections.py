@@ -1,10 +1,12 @@
 import decimal
-from fastapi import Request
-from app_config import settings
 import re
+
 import cleantext
-from .llm_guard import LLMGuardV1, LLMGuardLocalBase
+from fastapi import Request
 from googletrans import Translator
+
+from ctf.app_config import settings
+from .llm_guard import LLMGuardV1, LLMGuardLocalBase
 
 
 def text_normalization(text):

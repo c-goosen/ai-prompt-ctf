@@ -1,28 +1,13 @@
-import datetime
-from fastapi import APIRouter
-from llama_index.core import SimpleDirectoryReader
-from rag.system_prompt import get_system_prompt
-
-from llama_index.multi_modal_llms.openai import OpenAIMultiModal
-from fastapi import Depends
-from starlette.responses import RedirectResponse
-from pydantic import BaseModel
-from rag.search import search_vecs_and_prompt
-from llm_guard import protections
-from utils import hash_and_check_password, return_hash, random_block_msg
-from llama_index.core import Settings
-
-import contextlib
-import base64
-from fastapi import UploadFile, Form
-from app_config import settings
-
-from fastapi.templating import Jinja2Templates
+import logging
 import os
 
-import logging
+from fastapi import APIRouter
 from fastapi import Request
+from fastapi.templating import Jinja2Templates
 from llama_index.core.memory import ChatMemoryBuffer
+from pydantic import BaseModel
+
+from ctf.app_config import settings
 
 # get root logger
 logger = logging.getLogger(__name__)

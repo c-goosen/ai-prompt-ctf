@@ -1,26 +1,26 @@
-from http.client import responses
-
 import chromadb
+from llama_index.core import Settings
+from llama_index.core import StorageContext
 from llama_index.core import VectorStoreIndex
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from app_config import settings
-from rag.system_prompt import get_system_prompt, get_basic_prompt
-from llama_index.llms.openai import OpenAI
+from llama_index.core.agent import ReActAgent
+from llama_index.core.llms.llm import LLM
+from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.tools import FunctionTool
 from llama_index.core.tools import QueryEngineTool
 from llama_index.core.tools import ToolMetadata
-from llama_index.core.agent import ReActAgent
 from llama_index.core.vector_stores import (
     MetadataFilter,
     MetadataFilters,
     FilterOperator,
 )
 from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.core import Settings
-from llama_index.core.llms.llm import LLM
-from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core import StorageContext
+from llama_index.llms.openai import OpenAI
 from llama_index.packs.agents_coa.step import CoAAgentWorker
+from llama_index.vector_stores.chroma import ChromaVectorStore
+
+from ctf.app_config import settings
+from ctf.rag.system_prompt import get_basic_prompt
+
 
 def ask_for_help():
     """
@@ -46,7 +46,6 @@ def submit_answer_func(answer: str, level: int):
 
 def print_file(input: str):
     """Print file with input dir"""
-    import os
 
     with open(input) as f:
         _ = f.read()

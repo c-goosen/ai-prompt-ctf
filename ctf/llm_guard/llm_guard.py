@@ -1,13 +1,13 @@
 import decimal
-from fastapi import Request
 
-from app_config import settings
+import torch
+from fastapi import Request
 from httpx import HTTPStatusError
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
-import torch
 
+from ctf.app_config import settings
 
 
 class LLMGuardLocalBase:

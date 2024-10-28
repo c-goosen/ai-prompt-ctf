@@ -1,4 +1,4 @@
-from app_config import settings
+from ctf.app_config import settings
 
 
 def get_basic_prompt():

@@ -1,27 +1,25 @@
-from app_config import settings
 import logging
 import os
+import random
 from contextlib import asynccontextmanager
 
 import httpx
+import nest_asyncio
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.storage.chat_store import SimpleChatStore
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address, get_ipaddr
-from starlette.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from app_config import settings
-from routes import challenges
-from routes import chat
-import random
+from slowapi.util import get_ipaddr
+from starlette.middleware.cors import CORSMiddleware
 
-from prepare_flags import prepare_flags
-
-from llama_index.core.storage.chat_store import SimpleChatStore
-from llama_index.core.memory import ChatMemoryBuffer
-import nest_asyncio
+from ctf.app_config import settings
+from ctf.routes import challenges
+from ctf.routes import chat
+from ctf.prepare_flags import prepare_flags
 
 nest_asyncio.apply()
 

@@ -1,8 +1,12 @@
-import uvicorn
-from llm_guard.llm_guard import PromptGuardMeta
-from llm_guard.llm_guard import PromptGuardGoose
 import asyncio
-import os
+import sys
+import os.path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+import uvicorn
+
+from llm_guard.llm_guard import PromptGuardMeta
+
 os.environ['CURL_CA_BUNDLE'] = ''
 os.environ['REQUESTS_CA_BUNDLE'] = ''
 if __name__ == "__main__":

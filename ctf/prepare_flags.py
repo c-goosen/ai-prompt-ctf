@@ -12,7 +12,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
-from app_config import settings
+from ctf.app_config import settings
 
 
 def prepare_flags():
