@@ -27,7 +27,7 @@ ci-docker-push: ci-docker-auth
 	docker push $(DOCKER_REPOSITORY)
 
 ci-test:
-	@poetry run pytest .
+	@poetry run pytest ctf/
 
 ci-format:
 	@poetry run black .
