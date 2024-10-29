@@ -81,7 +81,7 @@ async def chat_completion(
     elif int(_level) == 7:
         protect = llm_protection(model=PromptGuardMeta(), label='INJECTION', input=text_input)
     elif int(_level) in (8,10):
-        protect = llm_protection(model=PromptGuardGoose(), label='INJECTION', input=text_input)
+        protect = llm_protection(model=PromptGuardGoose(), label='NEGATIVE', input=text_input)
     else:
         protect = False
 
