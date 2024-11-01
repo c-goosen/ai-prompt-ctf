@@ -1,5 +1,6 @@
 import decimal
 import re
+from cProfile import label
 
 import cleantext
 from fastapi import Request
@@ -74,23 +75,23 @@ def input_and_output_checks(input: str, output: str) -> bool:
         return False
 
 
-async def llm_protection(model: object, label:str, input:str ="") -> bool:
+async def llm_protection(model: object, labels:list, input:str ="") -> bool:
     protected = False
     if settings.LOCAL_GUARD_LLM:
         llm = LLMGuardLocalBase()
     else:
         llm = LLMGuardV1()
-    resp = (await llm.query(input))[0]
+    resp = (await llm.query(input))
     resp = dict(resp)
-    if resp.get("label") == "NEGATIVE":
+    if resp.get("label") in labels:
         if resp["score"] > 0.8:
             protected = True
     input = text_normalization(input)
-    resp = (await llm.query(input))[0]
-    if resp.get("label") == "NEGATIVE":
+    resp = (await llm.query(input))
+    if resp.get("label") in labels:
         if resp["score"] > 0.8:
             protected = True
-
+    print(f"resp --> {resp}")
     return protected
 
 

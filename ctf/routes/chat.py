@@ -79,9 +79,10 @@ async def chat_completion(
     if int(_level) == 1:
         protect = input_check(text_input)
     elif int(_level) == 7:
-        protect = llm_protection(model=PromptGuardMeta(), label='INJECTION', input=text_input)
+        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk','NEGATIVE'], input=text_input)
     elif int(_level) in (8,10):
-        protect = llm_protection(model=PromptGuardGoose(), label='NEGATIVE', input=text_input)
+        print("Running llm_protection")
+        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'], input=text_input)
     else:
         protect = False
 
