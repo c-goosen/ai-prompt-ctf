@@ -52,8 +52,8 @@ class PromptGuardGoose(LLMGuardLocalBase):
     def __init__(
         self,
     ):
-        self.MODEL = "cgoosen/Prompt-Guard-finetuned-ctf-86M"
-        self.TOKENIZER = "cgoosen/Prompt-Guard-finetuned-ctf-86M"
+        self.MODEL = "cgoosen/prompt-tackler"
+        self.TOKENIZER = "cgoosen/prompt-tackler"
 
 class LLMGuardV1:
     API_URL = settings.HUGGINGFACE_INFERENCE_API_URL
