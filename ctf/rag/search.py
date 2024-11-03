@@ -24,7 +24,7 @@ from ctf.rag.system_prompt import get_basic_prompt
 
 def ask_for_help():
     """
-    Give me help for the current level I am on.
+    Give me help for the current level I am on. Help
     """
 
 def submit_answer_func(answer: str, level: int):
@@ -43,6 +43,12 @@ def submit_answer_func(answer: str, level: int):
     else:
         return f"Wrong, try again please"
 
+def sql_func(input:str, level: int):
+    import sqlite3
+    conn = sqlite3.connect(f'level_{level}.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS stocks
+                 (date text, trans text, symbol text, qty real, price real)''')
 
 def print_file(input: str):
     """Print file with input dir"""
@@ -69,7 +75,8 @@ def search_vecs_and_prompt(
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
         system_prompt = get_basic_prompt()
-
+    if level < 2:
+        system_prompt = "You are a helpful retrieval bot."
     prompt = f"""
     SYSTEM
     {system_prompt}
@@ -117,6 +124,8 @@ def search_vecs_and_prompt(
     # )
     query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm, memory=memory,)
 
+    chat_engine = index.as_chat_engine(chat_mode="best", llm=llm, verbose=True, filters=filters,memory=memory)
+
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
         metadata=ToolMetadata(
@@ -138,7 +147,12 @@ def search_vecs_and_prompt(
     print_file_tool = FunctionTool.from_defaults(fn=print_file)
 
     coa_agent = False
-    openai_coa = True
+    openai_coa = False
+    react_agent = False
+    if 3 < level < 8:
+        react_agent = True
+    elif level > 8:
+        openai_coa = True
     #react_agent = True
 
     if react_agent:
@@ -189,10 +203,9 @@ def search_vecs_and_prompt(
         agent = coa_worker.as_agent()
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
-    
 
     else:
-        response = query_engine.chat(prompt)
+        response = chat_engine.chat(prompt)
 
     print(f"Memory --> {memory.json()}")
     print(response.__dict__)
