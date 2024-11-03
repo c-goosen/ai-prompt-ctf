@@ -5,9 +5,9 @@
 <div class="input-box">
     <div class="image-upload">
     <label for="file_input">
-    <i class="fa-solid fa-file-audio"></i>
+    <i class="fa-solid fa-file-audio" style="font-size:2.5rem;padding:1%;"></i>
   </label>
-    <input type='file' name='file_input' id="file_input" style>
+    <input type='file' name='file_input' id="file_input" >
     </div>
     <input type="text"
            name="text_input"
@@ -26,6 +26,7 @@
            name="text_model"
            value="{{ _text_model }}">
     <i class="fa-solid fa-paper-plane"
+       style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-encoding="multipart/form-data"
        hx-trigger="click, keyup[Enter] from:body"

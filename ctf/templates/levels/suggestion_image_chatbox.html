@@ -8,9 +8,9 @@
 <div class="input-box">
     <div class="image-upload">
     <label for="file_input">
-    <i class="fa-solid fa-image"></i>
+    <i class="fa-solid fa-image" style="font-size:2.5rem;padding:1%;"></i>
     </label>
-    <input type='file' name='file_input' id="file_input">
+    <input type='file' name='file_input' id="file_input" >
     </div>
     <input type="text"
            name="text_input"
@@ -26,6 +26,7 @@
            id="file_type"
            value="image">
     <i class="fa-solid fa-paper-plane"
+       style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-trigger="click"
        hx-include="#text_input,#text_model,#text_level,#file_input,#file_type"

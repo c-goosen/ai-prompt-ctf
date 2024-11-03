@@ -11,7 +11,8 @@
         <input type="hidden"
            name="text_model"
            value="{{ _text_model }}">
-    <i class="fa-solid fa-paper-plane"
+    <i class="fa-solid fa-paper-plane textbox-icons"
+       style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-trigger="keyup[key=='Enter'], click"
        hx-include="#text_input,#text_model,#text_level"

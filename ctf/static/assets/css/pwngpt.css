@@ -274,3 +274,7 @@ a:link, a:visited {
 .htmx-request.htmx-indicator{
     opacity:1;
 }
+
+textbox-icons {
+ font-size: 1.5rem
+}
