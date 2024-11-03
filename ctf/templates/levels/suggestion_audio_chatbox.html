@@ -15,6 +15,10 @@
            value="{{ suggestion }}">
     <input type="hidden" name="text_level" id="text_level" value="{{ _level }}">
     <input type="hidden"
+           name="file_type"
+           id="file_type"
+           value="audio">
+    <input type="hidden"
            name="text_model"
            id="text_model"
            value="{{ _text_model }}">
@@ -25,8 +29,9 @@
        hx-post="/v1/chat/completions"
        hx-encoding="multipart/form-data"
        hx-trigger="click, keyup[Enter] from:body"
-       hx-include="#text_input,#text_model,#text_level,#file_input"
+       hx-include="#text_input,#text_model,#text_level,#file_input,#file_type"
        hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"
+       hx-encoding="multipart/form-data"
        hx-indicator="#spinner"></i>
 </div>

@@ -20,6 +20,7 @@ from ctf.app_config import settings
 from ctf.routes import challenges
 from ctf.routes import chat
 from ctf.prepare_flags import prepare_flags
+from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 
 nest_asyncio.apply()
 
@@ -80,6 +81,9 @@ app.include_router(
     chat.router,
     prefix="/v1",
 )
+
+PromptGuardGoose()
+PromptGuardMeta()
 
 
 @app.get("/")

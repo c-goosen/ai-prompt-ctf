@@ -1,10 +1,12 @@
 import logging
 import os
+from importlib.resources import contents
 from typing import Optional
 from uuid import uuid4
+from openai import OpenAI as OG_OPENAI
 
 from fastapi import APIRouter
-from fastapi import Form
+from fastapi import Form, File, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -13,7 +15,8 @@ from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
 from llama_index.multi_modal_llms.openai import OpenAIMultiModal
-
+from typing import Annotated
+import base64
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.llm_guard.protections import input_check, input_and_output_checks, llm_protection
@@ -58,44 +61,95 @@ def denied_response(text_input):
             """,
         status_code=200,
     )
+def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
 
 
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
-        request: Request,
-        text_input: str = Form(...),
-        text_level: int = Form(...),
-        text_model: Optional[str] = Form(None),
-        file_input: Optional[str] = Form(None)
+    request: Request,
+    file_input: Annotated[UploadFile, File()] | None,
+    text_input: str = Form(...),
+    text_level: int = Form(...),
+    text_model: Optional[str] = Form(None),
+    file_type: Optional[str] = Form(None)
 ):
     _level = text_level
     protect = False
     response = ""
-    memory = request.app.chat_memory
+    memory=request.app.chat_memory
+
+
+
+    if file_input:
+        data = await file_input.read()
+        print("File input detected -->")
+        print(f"file_type --> {file_type}")
+        form = await request.form()
+        contents = form['file_input']
+        file_text = None
+        if file_type == "audio":
+            client = OG_OPENAI()
+
+            audio_file = file_input
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=data,
+                response_format="text"
+            )
+            file_text = transcription.text
+        else:
+            print("In image file")
+            client = OG_OPENAI()
+
+            #image_path = "path_to_your_image.jpg"
+
+            # Getting the base64 string
+            #base64_image = encode_image(image_path)
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "What is in this image?",
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64.b64encode(data).decode('utf-8')}"
+                                },
+                            },
+                        ],
+                    }
+                ],
+                max_tokens=500
+            )
+            file_text = response.choices[0]
+            print(f"file_text -->{file_text}")
 
     if int(_level) == 1:
         protect = input_check(text_input)
     elif int(_level) == 7:
-        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk', 'NEGATIVE'],
-                                       input=text_input)
-    elif int(_level) in (8, 10):
+        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk','NEGATIVE'], input=text_input)
+    elif int(_level) in (8,10):
         print("Running llm_protection")
-        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'],
-                                       input=text_input)
+        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'], input=text_input)
     else:
         protect = False
+
+
 
     if protect:
         return denied_response(text_input)
     else:
         Settings.llm.system_prompt = get_system_prompt(level=_level)
 
-        if file_input:
-            print("Uploaded file")
-            _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500,
-                                    memory=request.app.chat_memory)
-        else:
-            _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
+        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
 
         print(text_input)
         response = search_vecs_and_prompt(

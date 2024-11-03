@@ -77,10 +77,7 @@ def input_and_output_checks(input: str, output: str) -> bool:
 
 async def llm_protection(model: object, labels:list, input:str ="") -> bool:
     protected = False
-    if settings.LOCAL_GUARD_LLM:
-        llm = LLMGuardLocalBase()
-    else:
-        llm = LLMGuardV1()
+    llm = model
     resp = (await llm.query(input))
     resp = dict(resp)
     if resp.get("label") in labels:
@@ -95,15 +92,12 @@ async def llm_protection(model: object, labels:list, input:str ="") -> bool:
     return protected
 
 
-async def translate_and_llm(request: Request, input) -> bool:
+async def translate_and_llm(model: object, labels:list, input:str ="") -> bool:
     protected = False
     translator = Translator()
     translated = translator.translate(text=input).text
-    if settings.LOCAL_GUARD_LLM:
-        llm = LLMGuardLocalBase()
-    else:
-        llm = LLMGuardV1()
-    resp = (await llm.query(request, prompt=translated))[0]
+    llm = model
+    resp = (await llm.query(prompt=translated))
     # print(resp)
     if resp.get("label") == "NEGATIVE":
         if resp["score"] > decimal.Decimal(0.8):
@@ -111,7 +105,7 @@ async def translate_and_llm(request: Request, input) -> bool:
     input = text_normalization(input)
     translated = translator.translate(text=input).text
     try:
-        resp = (await llm.query(request, prompt=translated))[0]
+        resp = (await llm.query( prompt=translated))
         if resp.get("label") == "NEGATIVE":
             if resp["score"] > decimal.Decimal(0.8):
                 protected = True

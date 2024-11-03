@@ -30,9 +30,11 @@ class LLMGuardLocalBase:
             model=model,
             tokenizer=tokenizer,
             truncation=True,
-            max_length=512,
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+            max_length=1024,
+            #device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+            device="cpu",
         )
+        print(f"Running model --> {self.MODEL} on cpu")
 
         classification_results = nlp(prompt)
         if isinstance(classification_results, list):
