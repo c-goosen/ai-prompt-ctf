@@ -16,8 +16,7 @@ from llama_index.multi_modal_llms.openai import OpenAIMultiModal
 
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
-from ctf.llm_guard.protections import input_check
-from ctf.llm_guard.protections import llm_protection
+from ctf.llm_guard.protections import input_check, input_and_output_checks, llm_protection
 from ctf.rag.search import search_vecs_and_prompt
 from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt
 
@@ -29,9 +28,7 @@ memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 
 settings.OPENAI_API_KEY
 
-
 router = APIRouter()
-
 
 templates = Jinja2Templates(directory="ctf/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
@@ -65,28 +62,28 @@ def denied_response(text_input):
 
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
-    request: Request,
-    text_input: str = Form(...),
-    text_level: int = Form(...),
-    text_model: Optional[str] = Form(None),
-    file_input: Optional[str] = Form(None)
+        request: Request,
+        text_input: str = Form(...),
+        text_level: int = Form(...),
+        text_model: Optional[str] = Form(None),
+        file_input: Optional[str] = Form(None)
 ):
     _level = text_level
     protect = False
     response = ""
-    memory=request.app.chat_memory
+    memory = request.app.chat_memory
 
     if int(_level) == 1:
         protect = input_check(text_input)
     elif int(_level) == 7:
-        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk','NEGATIVE'], input=text_input)
-    elif int(_level) in (8,10):
+        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk', 'NEGATIVE'],
+                                       input=text_input)
+    elif int(_level) in (8, 10):
         print("Running llm_protection")
-        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'], input=text_input)
+        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'],
+                                       input=text_input)
     else:
         protect = False
-
-
 
     if protect:
         return denied_response(text_input)
@@ -95,7 +92,8 @@ async def chat_completion(
 
         if file_input:
             print("Uploaded file")
-            _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
+            _llm = OpenAIMultiModal(model=text_model, temperature=0.5, max_new_tokens=1500,
+                                    memory=request.app.chat_memory)
         else:
             _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
 
@@ -119,16 +117,10 @@ async def chat_completion(
         ChatMessage(content=str(response), role="assistant"),
     ]
     await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
-    print(f"Chat history json--> {request.app.chat_store.json()}")
-    print(f"Chat history get_keys--> {request.app.chat_store.get_keys()}")
-    print(f"Chat chat_memory json--> {request.app.chat_memory.json()}")
-    print(f"Chat chat_memory get--> {request.app.chat_memory.get()}")
-    headers = {}
-    #if _level == 3:
-        #headers = {"HX-Redirect": f"/level/{_level}"}
-        #headers = {"HX-Location" : f"/level/{_level}"}
+
+    if _level in [3, 10] and input_and_output_checks(input=text_input, output=response):
+        return denied_response(text_input)
     return HTMLResponse(
-        headers=headers,
         content=f"""
         <div class="chat chat-start">
           <div class="chat-image avatar">
@@ -153,8 +145,8 @@ async def chat_completion(
 
 @router.get("/chat/completion/suggestion")
 def render_faq(
-    request: Request,
-    suggestion: str = "",
+        request: Request,
+        suggestion: str = "",
 ):
     response = templates.TemplateResponse(
         f"levels/suggestion_chatbox.html",

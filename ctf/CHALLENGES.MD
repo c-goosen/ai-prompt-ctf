@@ -17,10 +17,10 @@ LLM06: Sensitive Information Disclosure
 
 # Level 2
 
-## Output Injection
+## Output Protection
 LLM02: Insecure Output Handling
-
 LLM06: Sensitive Information Disclosure
+
 # Level 3
 
 ## GPT-4o Prompt engineering
