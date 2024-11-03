@@ -181,7 +181,7 @@
 
 .input-box input[type="text"] {
     flex-grow: 1;
-    padding: 15px;
+    padding: 3%;
     border: none;
     outline: none;
     border-radius: 5px;
@@ -207,7 +207,7 @@
 }
 
 .chatbox {
-    height: 70%;/* Set a fixed height */
+    height: 80%;/* Set a fixed height */
     overflow-y: scroll;
    /* transform: rotate(180deg);
   direction: rtl;

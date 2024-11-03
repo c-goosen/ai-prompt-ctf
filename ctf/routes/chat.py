@@ -178,7 +178,12 @@ async def chat_completion(
     print(f"Chat history get_keys--> {request.app.chat_store.get_keys()}")
     print(f"Chat chat_memory json--> {request.app.chat_memory.json()}")
     print(f"Chat chat_memory get--> {request.app.chat_memory.get()}")
+    headers = {}
+    #if _level == 3:
+        #headers = {"HX-Redirect": f"/level/{_level}"}
+        #headers = {"HX-Location" : f"/level/{_level}"}
     return HTMLResponse(
+        headers=headers,
         content=f"""
         <div class="chat chat-start">
           <div class="chat-image avatar">

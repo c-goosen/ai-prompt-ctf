@@ -13,7 +13,7 @@
            value="{{ _text_model }}">
     <i class="fa-solid fa-paper-plane"
        hx-post="/v1/chat/completions"
-       hx-trigger="click, keyup[Enter] from:body"
+       hx-trigger="keyup[key=='Enter'], click"
        hx-include="#text_input,#text_model,#text_level"
        hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"
