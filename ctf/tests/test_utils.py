@@ -1,13 +1,13 @@
-from utils import return_hash, hash_and_check_password, random_block_msg
-from app_config import settings
+from ctf.utils import return_hash, hash_and_check_password, random_block_msg
+from ctf.app_config import settings
 import pytest
 import os
 
 os.environ["PASSWORD_ZERO"] = "test0"
 os.environ["PASSWORD_ONE"] = "test1"
 
-settings.PASSWORDS[0] = "test0"
-settings.PASSWORDS[1] = "test0"
+settings.PASSWORDS[0] = "PASSWORD_ZERO"
+settings.PASSWORDS[1] = "PASSWORD_ONE"
 
 
 def test_return_hash():
@@ -18,8 +18,8 @@ def test_return_hash():
 
 
 def test_hash_and_check_password():
-    assert hash_and_check_password(0, "test0")
-    assert not hash_and_check_password(1, "test2")
+    assert hash_and_check_password(0, "PASSWORD_ZERO")
+    assert not hash_and_check_password(1, "PASSWORD_ZERO")
 
 
 def test_random_block_msg():
