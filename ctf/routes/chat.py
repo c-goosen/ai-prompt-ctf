@@ -124,8 +124,9 @@ async def chat_completion(
     print(f"Chat chat_memory json--> {request.app.chat_memory.json()}")
     print(f"Chat chat_memory get--> {request.app.chat_memory.get()}")
     headers = {}
-    if _level == 3:
-        headers = {"HX-Redirect": f"/level/{_level}"}
+    #if _level == 3:
+        #headers = {"HX-Redirect": f"/level/{_level}"}
+        #headers = {"HX-Location" : f"/level/{_level}"}
     return HTMLResponse(
         headers=headers,
         content=f"""
