@@ -72,7 +72,7 @@ def encode_image(image_path):
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
     request: Request,
-    file_input: Annotated[UploadFile, File()],
+    file_input: Annotated[UploadFile, File()] | None,
     text_input: str = Form(...),
     text_level: int = Form(...),
     text_model: Optional[str] = Form(None),
