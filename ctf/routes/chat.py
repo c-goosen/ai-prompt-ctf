@@ -69,7 +69,7 @@ def encode_image(image_path):
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
     request: Request,
-    file_input: Annotated[UploadFile, File()] | None,
+    file_input: UploadFile | None = None,
     text_input: str = Form(...),
     text_level: int = Form(...),
     text_model: Optional[str] = Form(None),
@@ -86,19 +86,16 @@ async def chat_completion(
         data = await file_input.read()
         print("File input detected -->")
         print(f"file_type --> {file_type}")
-        form = await request.form()
-        contents = form['file_input']
         file_text = None
         if file_type == "audio":
             client = OG_OPENAI()
-
-            audio_file = file_input
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
-                file=data,
+                file=file_input.file.read(),
                 response_format="text"
             )
             file_text = transcription.text
+            print(file_text)
         else:
             print("In image file")
             client = OG_OPENAI()

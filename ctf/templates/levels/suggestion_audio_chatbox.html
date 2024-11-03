@@ -29,7 +29,7 @@
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-encoding="multipart/form-data"
-       hx-trigger="click, keyup[Enter] from:body"
+       hx-trigger="keyup[key=='Enter'], click"
        hx-include="#text_input,#text_model,#text_level,#file_input,#file_type"
        hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"

@@ -28,7 +28,7 @@
     <i class="fa-solid fa-paper-plane"
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
-       hx-trigger="click"
+       hx-trigger="keyup[key=='Enter'], click"
        hx-include="#text_input,#text_model,#text_level,#file_input,#file_type"
        hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"
