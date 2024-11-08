@@ -156,6 +156,19 @@ class Settings(BaseSettings):
             chat_store_key="level-3",
         ),
     }
+    SYSTEM_PROMPTS: dict = {
+        0: os.getenv("SYSTEM_PROMPT_0", "PASSWORD_ZERO"),
+        1: os.getenv("SYSTEM_PROMPT_1", "PASSWORD_ONE"),
+        2: os.getenv("SYSTEM_PROMPT_2", "PASSWORD_TWO"),
+        3: os.getenv("SYSTEM_PROMPT_3", "PASSWORD_THREE"),
+        4: os.getenv("SYSTEM_PROMPT_4", "PASSWORD_FOUR"),
+        5: os.getenv("SYSTEM_PROMPT_5", "PASSWORD_FIVE"),
+        6: os.getenv("SYSTEM_PROMPT_6", "PASSWORD_SIX"),
+        7: os.getenv("SYSTEM_PROMPT_7", "PASSWORD_SEVEN"),
+        8: os.getenv("SYSTEM_PROMPT_8", "PASSWORD_EIGHT"),
+        9: os.getenv("SYSTEM_PROMPT_9", "PASSWORD_NINE"),
+        10: os.getenv("SYSTEM_PROMPT_10", "PASSWORD_TEN"),
+    }
 
 
 

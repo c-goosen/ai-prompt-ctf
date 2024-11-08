@@ -151,15 +151,12 @@ async def chat_completion(
         print(text_input)
         response = search_vecs_and_prompt(
             search_input=str(text_input),
-            collection_name=f"ctf-secrets",
+            collection_name=f"ctf_levels",
             level=_level,
             llm=_llm,
-            memory=memory,
-            react_agent=False if _level < 4 else True,
             system_prompt=get_system_prompt(level=_level)
             if _level > 2
             else get_basic_prompt(),
-            coa_agent=True if _level == 9 else False,
             request=request
         )
 

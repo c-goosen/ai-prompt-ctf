@@ -63,13 +63,10 @@ def print_file(input: str):
 
 def search_vecs_and_prompt(
     search_input: str,
-    collection_name: str = "ctf-secrets",
+    collection_name=f"ctf_levels",
     level: int = 0,
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
-    memory=None,
-    react_agent=True,
     system_prompt=None,
-    coa_agent=False,
     request=None
 ):
     memory = request.app.chats.get(int(level))
@@ -83,7 +80,7 @@ def search_vecs_and_prompt(
     {system_prompt}
     USER
     Level: {level}
-    {search_input}
+    Query: {search_input}
     """
     # prompt = search_input
     # print(prompt)
@@ -92,17 +89,10 @@ def search_vecs_and_prompt(
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
 
     print(chroma_client.list_collections())
-    chroma_collection = chroma_client.get_collection("ctf_levels")
+    chroma_collection = chroma_client.get_collection(collection_name)
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # Re-initialize your VectorStoreIndex with the storage context and embedding model
-    # This step is crucial for integrating your existing vector_index with ChromaDB
-    # index = VectorStoreIndex(embed_model=Settings.embed_model, storage_context=storage_context)
-    index = VectorStoreIndex.from_vector_store(
-        vector_store=vector_store,
-        embed_model=Settings.embed_model,
-    )
     filters = MetadataFilters(
         filters=[
             MetadataFilter(
@@ -111,22 +101,12 @@ def search_vecs_and_prompt(
         ]
     )
 
-    index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-    #retriever = index.as_retriever(filters=filters)
-    # query_engine = RetrieverQueryEngine.from_args(
-    #    retriever, llm=llm,
-    #    similarity_top_k=5,
-    #    filters=filters
-
-    # )
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store,embed_model=Settings.embed_model)
     retriever = index.as_retriever(similarity_top_k=5, filters=filters,memory=memory,)
-    # query_engine = index.as_query_engine(similarity_top_k=5,
-    #    filters=filters
-    # )
     query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm, memory=memory,)
-
     chat_engine = index.as_chat_engine(chat_mode="best", llm=llm, verbose=True, filters=filters,memory=memory)
 
+    # Query Engine tool so that Agent can use RAG
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
         metadata=ToolMetadata(
@@ -150,13 +130,16 @@ def search_vecs_and_prompt(
     coa_agent = False
     openai_coa = False
     react_agent = False
-    if 3 < level < 8:
+    if 3 < level < 8 and level != 0:
         react_agent = True
     elif level > 8:
         openai_coa = True
     #react_agent = True
 
     if react_agent:
+        """
+        OpenAI Agent
+        """
         agent = ReActAgent.from_tools(
         [submit_answer_tool, rag_tool]
         if level != 6
@@ -165,7 +148,6 @@ def search_vecs_and_prompt(
         verbose=True,
         memory=memory,
         max_iterations=10,
-        # run_retrieve_sleep_time = 1.0,
             return_direct=True,
         )
         response = agent.chat(prompt)
@@ -181,13 +163,15 @@ def search_vecs_and_prompt(
         verbose=True,
         memory=memory,
         max_iterations=10,
-        # run_retrieve_sleep_time = 1.0,
             return_direct=True,
         )
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
 
     elif coa_agent:
+        """
+        Chain of Thought Agent
+        """
         llm = OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),
         coa_worker = CoAAgentWorker.from_tools(
                 [submit_answer_tool, rag_tool]

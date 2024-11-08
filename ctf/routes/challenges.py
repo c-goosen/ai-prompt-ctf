@@ -37,15 +37,18 @@ async def load_level(
     _level: int,
     request: Request,
 ):
+    chat_history = app_config.settings.chats.get(int(_level))
+
     if request.headers.get('hx-request'):
         response = templates.TemplateResponse(
             f"levels/htmx_level_{_level}.html",
-            {"request": request, "message": "", "_level": _level},
+            {"request": request, "message": "", "_level": _level,
+             "chat_history": chat_history.chat_store.get_messages(key=f"level-{_level}"),
+             },
         )
         return response
 
     else:
-        chat_history = app_config.settings.chats.get(int(_level))
         response = templates.TemplateResponse(
             f"levels/generic_level.html",
             {"request": request, "message": "", "_level": _level,
