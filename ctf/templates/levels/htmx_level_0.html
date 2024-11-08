@@ -46,6 +46,12 @@
         </div>
     </div>
 </div>
+
+{% if chat_history %}
+{% for chat in chat_history %}
+<p>{{ chat }}</p>
+{% endfor %}
+{% endif %}
 <!--<div class="chat-input absolute">-->
 <div class="chat-input">
     {% with _level=0, _text_model="gpt-3.5-turbo" %}

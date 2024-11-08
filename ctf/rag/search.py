@@ -43,12 +43,13 @@ def submit_answer_func(answer: str, level: int):
     else:
         return f"Wrong, try again please"
 
-def sql_func(input:str, level: int):
+def token_balance(input:str, level: int):
     import sqlite3
     conn = sqlite3.connect(f'level_{level}.db')
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS stocks
-                 (date text, trans text, symbol text, qty real, price real)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS token_balance
+                 (date text, username text, userid text, qty real)''')
+
 
 def print_file(input: str):
     """Print file with input dir"""
@@ -71,7 +72,7 @@ def search_vecs_and_prompt(
     coa_agent=False,
     request=None
 ):
-    memory = request.app.chat_memory
+    memory = request.app.chats.get(int(level))
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
         system_prompt = get_basic_prompt()
@@ -207,7 +208,8 @@ def search_vecs_and_prompt(
     else:
         response = chat_engine.chat(prompt)
 
-    print(f"Memory --> {memory.json()}")
+    # print(f"Memory --> {memory.json()}")
+    print(f"Memory --> {memory}")
     print(response.__dict__)
     print(dir(response))
     print(response)

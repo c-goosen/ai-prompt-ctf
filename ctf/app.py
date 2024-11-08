@@ -16,6 +16,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
 from starlette.middleware.cors import CORSMiddleware
 
+import app_config
 from ctf.app_config import settings
 from ctf.routes import challenges
 from ctf.routes import chat
@@ -51,13 +52,8 @@ else:
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 # Rate limiting to keep AI costs low, naught H@xors
-app.chat_store = SimpleChatStore()
 
-app.chat_memory = ChatMemoryBuffer.from_defaults(
-    token_limit=100000000,
-    chat_store=app.chat_store,
-    chat_store_key="user1",
-)
+app.chats = app_config.settings.chats
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

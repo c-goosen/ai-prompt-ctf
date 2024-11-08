@@ -78,7 +78,7 @@ async def chat_completion(
     _level = text_level
     protect = False
     response = ""
-    memory=request.app.chat_memory
+    memory=request.app.chats.get(int(_level))
 
 
 
@@ -146,7 +146,7 @@ async def chat_completion(
     else:
         Settings.llm.system_prompt = get_system_prompt(level=_level)
 
-        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chat_memory)
+        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chats.get(int(_level)))
 
         print(text_input)
         response = search_vecs_and_prompt(
@@ -167,7 +167,7 @@ async def chat_completion(
         ChatMessage(content=text_input, role="user"),
         ChatMessage(content=str(response), role="assistant"),
     ]
-    await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
+    #await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
 
     if _level in [3, 10] and input_and_output_checks(input=text_input, output=response):
         return denied_response(text_input)

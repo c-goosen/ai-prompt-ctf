@@ -4,6 +4,8 @@ from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import logging
+from llama_index.core.storage.chat_store import SimpleChatStore
+from llama_index.core.memory import ChatMemoryBuffer
 
 load_dotenv()
 
@@ -94,6 +96,67 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
+
+    chat_store: object = SimpleChatStore()
+    token_limit: int = 20000
+    chats: dict = {
+        0: ChatMemoryBuffer.from_defaults(
+        token_limit=token_limit,
+        chat_store=chat_store,
+        chat_store_key="level-0",
+        ),
+        1: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-1",
+        ),
+        2: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-2",
+        ),
+        3: ChatMemoryBuffer.from_defaults(
+        token_limit=token_limit,
+        chat_store=chat_store,
+        chat_store_key="level-3",
+        ),
+        4: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        5: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        6: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        7: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        8: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        9: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+        10: ChatMemoryBuffer.from_defaults(
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
+        ),
+    }
+
 
 
 settings = Settings()
