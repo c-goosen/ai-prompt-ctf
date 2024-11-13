@@ -19,12 +19,12 @@ jobs:
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
         with:
-          installation-arguments: --with dev
           version: latest
           virtualenvs-create: true
           virtualenvs-in-project: true
           virtualenvs-path: .venv/
           installer-parallel: true
+      - run: poetry install --with dev
       - name: Check linting
         run: |
           make ci-lint
