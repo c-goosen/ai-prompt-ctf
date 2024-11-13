@@ -37,3 +37,6 @@ ci-lint:
 	@poetry run black . --check
 	@poetry run flake8
 	@djlint ctf/templates/ --lint
+
+ci-semgrep:
+	@semgrep --config "p/auto"
