@@ -27,6 +27,7 @@ def ask_for_help():
     Give me help for the current level I am on. Help
     """
 
+
 def submit_answer_func(answer: str, level: int):
     """Take a string answer and the current level and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
@@ -43,12 +44,16 @@ def submit_answer_func(answer: str, level: int):
     else:
         return f"Wrong, try again please"
 
-def token_balance(input:str, level: int):
+
+def token_balance(input: str, level: int):
     import sqlite3
-    conn = sqlite3.connect(f'level_{level}.db')
+
+    conn = sqlite3.connect(f"level_{level}.db")
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS token_balance
-                 (date text, username text, userid text, qty real)''')
+    cursor.execute(
+        """CREATE TABLE IF NOT EXISTS token_balance
+                 (date text, username text, userid text, qty real)"""
+    )
 
 
 def print_file(input: str):
@@ -67,7 +72,7 @@ def search_vecs_and_prompt(
     level: int = 0,
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
     system_prompt=None,
-    request=None
+    request=None,
 ):
     memory = request.app.chats.get(int(level))
     if not system_prompt:
@@ -101,10 +106,22 @@ def search_vecs_and_prompt(
         ]
     )
 
-    index = VectorStoreIndex.from_vector_store(vector_store=vector_store,embed_model=Settings.embed_model)
-    retriever = index.as_retriever(similarity_top_k=5, filters=filters,memory=memory,)
-    query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm, memory=memory,)
-    chat_engine = index.as_chat_engine(chat_mode="best", llm=llm, verbose=True, filters=filters,memory=memory)
+    index = VectorStoreIndex.from_vector_store(
+        vector_store=vector_store, embed_model=Settings.embed_model
+    )
+    retriever = index.as_retriever(
+        similarity_top_k=5,
+        filters=filters,
+        memory=memory,
+    )
+    query_engine = RetrieverQueryEngine.from_args(
+        retriever,
+        llm=llm,
+        memory=memory,
+    )
+    chat_engine = index.as_chat_engine(
+        chat_mode="best", llm=llm, verbose=True, filters=filters, memory=memory
+    )
 
     # Query Engine tool so that Agent can use RAG
     query_eng_tool = QueryEngineTool(
@@ -134,35 +151,35 @@ def search_vecs_and_prompt(
         react_agent = True
     elif level > 8:
         openai_coa = True
-    #react_agent = True
+    # react_agent = True
 
     if react_agent:
         """
         OpenAI Agent
         """
         agent = ReActAgent.from_tools(
-        [submit_answer_tool, rag_tool]
-        if level != 6
-        else [print_file_tool, rag_tool, submit_answer_tool],
-        llm=llm,
-        verbose=True,
-        memory=memory,
-        max_iterations=10,
+            [submit_answer_tool, rag_tool]
+            if level != 6
+            else [print_file_tool, rag_tool, submit_answer_tool],
+            llm=llm,
+            verbose=True,
+            memory=memory,
+            max_iterations=10,
             return_direct=True,
         )
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
-   
+
     elif openai_coa:
-        llm = OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),
+        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         agent = ReActAgent.from_tools(
-        [submit_answer_tool, rag_tool]
-        if level != 6
-        else [print_file_tool, rag_tool, submit_answer_tool],
-        llm=llm,
-        verbose=True,
-        memory=memory,
-        max_iterations=10,
+            [submit_answer_tool, rag_tool]
+            if level != 6
+            else [print_file_tool, rag_tool, submit_answer_tool],
+            llm=llm,
+            verbose=True,
+            memory=memory,
+            max_iterations=10,
             return_direct=True,
         )
         response = agent.chat(prompt)
@@ -172,19 +189,19 @@ def search_vecs_and_prompt(
         """
         Chain of Thought Agent
         """
-        llm = OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),
+        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         coa_worker = CoAAgentWorker.from_tools(
-                [submit_answer_tool, rag_tool]
-                if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool],
-                llm=llm,
-                verbose=True,
-                memory=memory,
-                max_iterations=10,
-                # run_retrieve_sleep_time = 1.0,
-                return_direct=True,
-            )
-        
+            [submit_answer_tool, rag_tool]
+            if level != 6
+            else [print_file_tool, rag_tool, submit_answer_tool],
+            llm=llm,
+            verbose=True,
+            memory=memory,
+            max_iterations=10,
+            # run_retrieve_sleep_time = 1.0,
+            return_direct=True,
+        )
+
         agent = coa_worker.as_agent()
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")

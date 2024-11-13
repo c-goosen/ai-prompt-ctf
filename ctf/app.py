@@ -28,8 +28,8 @@ nest_asyncio.apply()
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
-FAQ_MARKDOWN = open('ctf/FAQ.MD', 'r').read()
-CHALLANGES_MARKDOWN = open('ctf/CHALLENGES.MD', 'r').read()
+FAQ_MARKDOWN = open("ctf/FAQ.MD", "r").read()
+CHALLANGES_MARKDOWN = open("ctf/CHALLENGES.MD", "r").read()
 
 
 @asynccontextmanager
@@ -99,7 +99,7 @@ async def root(request: Request):
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
             "_level": 0,
-            "THEME_MODE": "dark"
+            "THEME_MODE": "dark",
         },
     )
 
@@ -121,19 +121,17 @@ def render_faq(request: Request):
                 "static",
                 path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
             ),
-            "MD_FILE": FAQ_MARKDOWN
+            "MD_FILE": FAQ_MARKDOWN,
         },
     )
     return response
+
 
 @app.get("/challenges")
 @limiter.limit("1/min")
 def render_challanges(request: Request):
     response = templates.TemplateResponse(
         f"challenges.html",
-        {
-            "request": request,
-            "MD_FILE": CHALLANGES_MARKDOWN
-        },
+        {"request": request, "MD_FILE": CHALLANGES_MARKDOWN},
     )
     return response

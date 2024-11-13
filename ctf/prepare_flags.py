@@ -20,7 +20,6 @@ def prepare_flags():
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
 
-
     embed_model = OpenAIEmbedding(embed_batch_size=10)
 
     nodes = []
@@ -48,7 +47,6 @@ def prepare_flags():
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
 
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
-
 
     vector_store = ChromaVectorStore(
         chroma_collection=chroma_collection, embed_model=embed_model
@@ -78,8 +76,9 @@ def prepare_flags():
     for k in levels:
         filters = MetadataFilters(
             filters=[
-                MetadataFilter(key="level", operator=FilterOperator.EQ, value=k),
+                MetadataFilter(
+                    key="level", operator=FilterOperator.EQ, value=k
+                ),
             ]
         )
         retriever = index.as_retriever(filters=filters)
-

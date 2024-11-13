@@ -101,9 +101,9 @@ class Settings(BaseSettings):
     token_limit: int = 20000
     chats: dict = {
         0: ChatMemoryBuffer.from_defaults(
-        token_limit=token_limit,
-        chat_store=chat_store,
-        chat_store_key="level-0",
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-0",
         ),
         1: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
@@ -116,9 +116,9 @@ class Settings(BaseSettings):
             chat_store_key="level-2",
         ),
         3: ChatMemoryBuffer.from_defaults(
-        token_limit=token_limit,
-        chat_store=chat_store,
-        chat_store_key="level-3",
+            token_limit=token_limit,
+            chat_store=chat_store,
+            chat_store_key="level-3",
         ),
         4: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
@@ -169,7 +169,6 @@ class Settings(BaseSettings):
         9: os.getenv("SYSTEM_PROMPT_9", "PASSWORD_NINE"),
         10: os.getenv("SYSTEM_PROMPT_10", "PASSWORD_TEN"),
     }
-
 
 
 settings = Settings()

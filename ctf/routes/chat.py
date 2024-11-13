@@ -19,7 +19,11 @@ from typing import Annotated
 import base64
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
-from ctf.llm_guard.protections import input_check, input_and_output_checks, llm_protection
+from ctf.llm_guard.protections import (
+    input_check,
+    input_and_output_checks,
+    llm_protection,
+)
 from ctf.rag.search import search_vecs_and_prompt
 from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt
 
@@ -61,9 +65,11 @@ def denied_response(text_input):
             """,
         status_code=200,
     )
+
+
 def encode_image(image_path):
-  with open(image_path, "rb") as image_file:
-    return base64.b64encode(image_file.read()).decode('utf-8')
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
 
 
 @router.post("/chat/completions", include_in_schema=True)
@@ -73,14 +79,12 @@ async def chat_completion(
     text_input: str = Form(...),
     text_level: int = Form(...),
     text_model: Optional[str] = Form(None),
-    file_type: Optional[str] = Form(None)
+    file_type: Optional[str] = Form(None),
 ):
     _level = text_level
     protect = False
     response = ""
-    memory=request.app.chats.get(int(_level))
-
-
+    memory = request.app.chats.get(int(_level))
 
     if file_input:
         data = await file_input.read()
@@ -92,7 +96,7 @@ async def chat_completion(
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=file_input.file.read(),
-                response_format="text"
+                response_format="text",
             )
             file_text = transcription.text
             print(file_text)
@@ -100,10 +104,10 @@ async def chat_completion(
             print("In image file")
             client = OG_OPENAI()
 
-            #image_path = "path_to_your_image.jpg"
+            # image_path = "path_to_your_image.jpg"
 
             # Getting the base64 string
-            #base64_image = encode_image(image_path)
+            # base64_image = encode_image(image_path)
 
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -124,7 +128,7 @@ async def chat_completion(
                         ],
                     }
                 ],
-                max_tokens=500
+                max_tokens=500,
             )
             file_text = response.choices[0]
             print(f"file_text -->{file_text}")
@@ -132,21 +136,32 @@ async def chat_completion(
     if int(_level) == 1:
         protect = input_check(text_input)
     elif int(_level) == 7:
-        protect = await llm_protection(model=PromptGuardMeta(), labels=['INJECTION', 'JAILBREAk','NEGATIVE'], input=text_input)
-    elif int(_level) in (8,10):
+        protect = await llm_protection(
+            model=PromptGuardMeta(),
+            labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
+            input=text_input,
+        )
+    elif int(_level) in (8, 10):
         print("Running llm_protection")
-        protect = await llm_protection(model=PromptGuardGoose(), labels=['injection', 'jailbreak', 'NEGATIVE'], input=text_input)
+        protect = await llm_protection(
+            model=PromptGuardGoose(),
+            labels=["injection", "jailbreak", "NEGATIVE"],
+            input=text_input,
+        )
     else:
         protect = False
-
-
 
     if protect:
         return denied_response(text_input)
     else:
         Settings.llm.system_prompt = get_system_prompt(level=_level)
 
-        _llm = OpenAI(model=text_model, temperature=0.5, max_new_tokens=1500, memory=request.app.chats.get(int(_level)))
+        _llm = OpenAI(
+            model=text_model,
+            temperature=0.5,
+            max_new_tokens=1500,
+            memory=request.app.chats.get(int(_level)),
+        )
 
         print(text_input)
         response = search_vecs_and_prompt(
@@ -157,16 +172,18 @@ async def chat_completion(
             system_prompt=get_system_prompt(level=_level)
             if _level > 2
             else get_basic_prompt(),
-            request=request
+            request=request,
         )
 
     messages = [
         ChatMessage(content=text_input, role="user"),
         ChatMessage(content=str(response), role="assistant"),
     ]
-    #await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
+    # await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
 
-    if _level in [3, 10] and input_and_output_checks(input=text_input, output=response):
+    if _level in [3, 10] and input_and_output_checks(
+        input=text_input, output=response
+    ):
         return denied_response(text_input)
     return HTMLResponse(
         content=f"""
@@ -193,8 +210,8 @@ async def chat_completion(
 
 @router.get("/chat/completion/suggestion")
 def render_faq(
-        request: Request,
-        suggestion: str = "",
+    request: Request,
+    suggestion: str = "",
 ):
     response = templates.TemplateResponse(
         f"levels/suggestion_chatbox.html",
