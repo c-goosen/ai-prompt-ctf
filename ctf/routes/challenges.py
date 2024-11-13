@@ -55,7 +55,7 @@ async def load_level(
 
     else:
         response = templates.TemplateResponse(
-            f"levels/generic_level.html",
+            "levels/generic_level.html",
             {
                 "request": request,
                 "message": "",

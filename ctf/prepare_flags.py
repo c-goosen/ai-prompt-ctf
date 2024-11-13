@@ -54,7 +54,6 @@ def prepare_flags():
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     for k in levels:
-        collection_name = f"level_{k}"
         _generic_password_text = generic_password_text
         for x in _generic_password_text:
             nodes.append(
@@ -81,4 +80,4 @@ def prepare_flags():
                 ),
             ]
         )
-        retriever = index.as_retriever(filters=filters)
+        _ = index.as_retriever(filters=filters)

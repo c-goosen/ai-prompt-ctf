@@ -1,21 +1,18 @@
 import logging
 import os
-from importlib.resources import contents
 from typing import Optional
-from uuid import uuid4
 from openai import OpenAI as OG_OPENAI
 
 from fastapi import APIRouter
-from fastapi import Form, File, UploadFile
+from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from llama_index.core import Settings
-from llama_index.core.llms import ChatMessage
+
+# from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
-from llama_index.multi_modal_llms.openai import OpenAIMultiModal
-from typing import Annotated
 import base64
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
@@ -43,7 +40,8 @@ templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
 def denied_response(text_input):
-    response = "!! You are not allowed to do that, you have been stopped by the LLM protection! Passwords are to be kept secret !!"
+    response = """!! You are not allowed to do that, you have been stopped by the LLM protection!
+    Passwords are to be kept secret !!"""
     return HTMLResponse(
         content=f"""
             <div class="chat chat-start">
@@ -105,7 +103,7 @@ async def chat_completion(
 
             # Getting the base64 string
             # base64_image = encode_image(image_path)
-
+            b64_img = base64.b64encode(data).decode("utf-8")
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -119,7 +117,7 @@ async def chat_completion(
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64.b64encode(data).decode('utf-8')}"
+                                    "url": f"data:image/jpeg;base64,{b64_img}"
                                 },
                             },
                         ],
@@ -163,7 +161,7 @@ async def chat_completion(
         print(text_input)
         response = search_vecs_and_prompt(
             search_input=str(text_input),
-            collection_name=f"ctf_levels",
+            collection_name="ctf_levels",
             level=_level,
             llm=_llm,
             system_prompt=get_system_prompt(level=_level)
@@ -172,10 +170,10 @@ async def chat_completion(
             request=request,
         )
 
-    messages = [
-        ChatMessage(content=text_input, role="user"),
-        ChatMessage(content=str(response), role="assistant"),
-    ]
+    # messages = [
+    #   ChatMessage(content=text_input, role="user"),
+    #    ChatMessage(content=str(response), role="assistant"),
+    # ]
     # await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
 
     if _level in [3, 10] and input_and_output_checks(
@@ -211,7 +209,7 @@ def render_faq(
     suggestion: str = "",
 ):
     response = templates.TemplateResponse(
-        f"levels/suggestion_chatbox.html",
+        "levels/suggestion_chatbox.html",
         {
             "request": request,
             "suggestion": suggestion,

@@ -1,6 +1,5 @@
 import chromadb
 from llama_index.core import Settings
-from llama_index.core import StorageContext
 from llama_index.core import VectorStoreIndex
 from llama_index.core.agent import ReActAgent
 from llama_index.core.llms.llm import LLM
@@ -33,7 +32,7 @@ def submit_answer_func(answer: str, level: int):
     and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
     if answer == level_pass:
-        return f""""{answer} is correct! Next Level: 
+        return f""""{answer} is correct! Next Level:
         <div class="level-menu new-chat"
                          hx-get="/level/{level}"
                          hx-trigger="click"
@@ -43,7 +42,7 @@ def submit_answer_func(answer: str, level: int):
                     </div>
         """
     else:
-        return f"Wrong, try again please"
+        return "Wrong, try again please"
 
 
 def token_balance(input: str, level: int):
@@ -69,7 +68,7 @@ def print_file(input: str):
 
 def search_vecs_and_prompt(
     search_input: str,
-    collection_name=f"ctf_levels",
+    collection_name="ctf_levels",
     level: int = 0,
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
     system_prompt=None,
@@ -97,7 +96,7 @@ def search_vecs_and_prompt(
     print(chroma_client.list_collections())
     chroma_collection = chroma_client.get_collection(collection_name)
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    # storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     filters = MetadataFilters(
         filters=[

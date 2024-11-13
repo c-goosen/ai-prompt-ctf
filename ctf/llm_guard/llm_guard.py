@@ -1,6 +1,4 @@
 import decimal
-
-import torch
 from fastapi import Request
 from httpx import HTTPStatusError
 from tenacity import retry, stop_after_attempt, retry_if_exception_type

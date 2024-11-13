@@ -113,7 +113,7 @@ async def health(request: Request):
 @limiter.limit("1/min")
 def render_faq(request: Request):
     response = templates.TemplateResponse(
-        f"faq.html",
+        "faq.html",
         {
             "request": request,
             "IMG_FILENAME": app.url_path_for(
@@ -130,7 +130,7 @@ def render_faq(request: Request):
 @limiter.limit("1/min")
 def render_challanges(request: Request):
     response = templates.TemplateResponse(
-        f"challenges.html",
+        "challenges.html",
         {"request": request, "MD_FILE": CHALLANGES_MARKDOWN},
     )
     return response
