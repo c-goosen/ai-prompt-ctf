@@ -29,7 +29,8 @@ def ask_for_help():
 
 
 def submit_answer_func(answer: str, level: int):
-    """Take a string answer and the current level and calculate if the answer is correct"""
+    """Take a string answer and the current level
+    and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
     if answer == level_pass:
         return f""""{answer} is correct! Next Level: 

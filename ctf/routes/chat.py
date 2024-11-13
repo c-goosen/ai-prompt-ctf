@@ -82,9 +82,6 @@ async def chat_completion(
     file_type: Optional[str] = Form(None),
 ):
     _level = text_level
-    protect = False
-    response = ""
-    memory = request.app.chats.get(int(_level))
 
     if file_input:
         data = await file_input.read()

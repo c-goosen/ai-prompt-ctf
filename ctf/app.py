@@ -8,8 +8,6 @@ import nest_asyncio
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.core.storage.chat_store import SimpleChatStore
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -85,6 +83,7 @@ PromptGuardMeta()
 @app.get("/")
 @limiter.limit("1/sec")
 async def root(request: Request):
+    rand_img = random.randint(1, 18)
     return templates.TemplateResponse(
         "root.html",
         {
@@ -94,7 +93,7 @@ async def root(request: Request):
             "CTF_SUBTITLE": settings.CTF_SUBTITLE,
             "IMG_FILENAME": app.url_path_for(
                 "static",
-                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
+                path=f"/images/ai_image_banner/ai-challenge_{rand_img}.webp",
             ),
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,

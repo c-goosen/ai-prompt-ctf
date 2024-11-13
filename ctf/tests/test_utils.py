@@ -1,6 +1,5 @@
 from ctf.utils import return_hash, hash_and_check_password, random_block_msg
 from ctf.app_config import settings
-import pytest
 import os
 
 os.environ["PASSWORD_ZERO"] = "test0"
