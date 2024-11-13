@@ -1,4 +1,4 @@
-name: Github Actions Runner
+name: CI Runner
 
 on:
   push:
