@@ -52,6 +52,11 @@
     </div>
 </div>
 <!--<div class="chat-input absolute">-->
+<div class="chat-history"
+    hx-get="/level/history/7"
+    hx-trigger="load"
+    >
+</div>
 <div class="chat-input">
     {% with _level=7, _text_model="gpt-4o-mini" %}
         {% include "levels/suggestion_chatbox.html" %}

@@ -72,15 +72,16 @@ async def load_level(
 @router.get("/level/history/{_level}", include_in_schema=False)
 def load_history(
     request: Request,
-    level: int = 0,
+    _level: int = 0,
 ):
-    chat_history = app_config.settings.chats.get(int(level))
+    chat_history = app_config.settings.chats.get(int(_level))
+    print(f"chat_history len: {chat_history}")
     response = templates.TemplateResponse(
         "levels/chat_history.html",
         {
             "request": request,
             "chat_history": chat_history.chat_store.get_messages(
-                    key=f"level-{level}"
+                    key=f"level-{_level}"
                 ),
         },
     )

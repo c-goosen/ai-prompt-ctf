@@ -54,34 +54,11 @@
         </div>
     </div>
 </div>
-{% if chat_history %}
-    {% for chat in chat_history %}
-        {% if chat.role.value == 'user' %}
-            <div class="chat chat-start">
-                <div class="chat-image avatar">
-                    <div class="w-10 rounded-full">
-                        <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
-                    </div>
-                </div>
-                <div class="chat-bubble">
-                    <md-block>{{ chat.content.split("Query:")[1] }}</md-block>
-                </div>
-            </div>
-        {% endif %}
-        {% if chat.role.value in ['assistant'] %}
-            {% if chat.content %}
-            <div class="chat chat-end">
-                <div class="chat-image avatar">
-                    <div class="w-10 rounded-full">
-                        <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
-                    </div>
-                </div>
-                <div class="chat-bubble">{{ chat.content }}</div>
-            </div>
-        {% endif %}
-        {% endif %}
-    {% endfor %}
-{% endif %}
+<div class="chat-history"
+        hx-get="/level/history/0"
+        hx-trigger="load"
+        >
+</div>
 <!--<div class="chat-input absolute">-->
 <div class="chat-input">
     {% with _level=0, _text_model="gpt-3.5-turbo" %}

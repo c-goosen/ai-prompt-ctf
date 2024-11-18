@@ -12,7 +12,8 @@
                 </div>
             </div>
         {% endif %}
-        {% if chat.role.value in ['tool', 'assistant','function','chatbot'] %}
+        {% if chat.role.value in ['assistant'] %}
+            {% if chat.content %}
             <div class="chat chat-end">
                 <div class="chat-image avatar">
                     <div class="w-10 rounded-full">
@@ -21,6 +22,7 @@
                 </div>
                 <div class="chat-bubble">{{ chat.content }}</div>
             </div>
+        {% endif %}
         {% endif %}
     {% endfor %}
 {% endif %}
