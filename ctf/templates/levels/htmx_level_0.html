@@ -3,7 +3,7 @@
 <div class="header">Learn to Pwn Skynet</div>
 <div>
     <h3>Level {{ _level }}</h3>
-    <nav id="nav" style="padding2%;">
+    <nav id="nav">
         PROGRESS: <progress class="progress w-56" value="{{ _level * 10 }}" max="100"></progress>
     </nav>
 </div>
@@ -68,7 +68,8 @@
                 </div>
             </div>
         {% endif %}
-        {% if chat.role.value in ['tool', 'assistant','function','chatbot'] %}
+        {% if chat.role.value in ['assistant'] %}
+            {% if chat.content %}
             <div class="chat chat-end">
                 <div class="chat-image avatar">
                     <div class="w-10 rounded-full">
@@ -77,6 +78,7 @@
                 </div>
                 <div class="chat-bubble">{{ chat.content }}</div>
             </div>
+        {% endif %}
         {% endif %}
     {% endfor %}
 {% endif %}

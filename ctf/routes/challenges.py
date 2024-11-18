@@ -38,6 +38,8 @@ async def load_level(
     request: Request,
 ):
     chat_history = app_config.settings.chats.get(int(_level))
+    print(dir(chat_history))
+    print(chat_history.__dict__)
 
     if request.headers.get("hx-request"):
         response = templates.TemplateResponse(
@@ -66,3 +68,20 @@ async def load_level(
             },
         )
         return response
+
+@router.get("/level/history/{_level}", include_in_schema=False)
+def load_history(
+    request: Request,
+    level: int = 0,
+):
+    chat_history = app_config.settings.chats.get(int(level))
+    response = templates.TemplateResponse(
+        "levels/chat_history.html",
+        {
+            "request": request,
+            "chat_history": chat_history.chat_store.get_messages(
+                    key=f"level-{level}"
+                ),
+        },
+    )
+    return response

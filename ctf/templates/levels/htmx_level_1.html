@@ -3,7 +3,7 @@
 <div class="header">Learn to Pwn Skynet</div>
 <div>
     <h3>Level {{ _level }}</h3>
-    <nav id="nav" style="padding2%;">
+    <nav id="nav">
         PROGRESS: <progress class="progress w-56" value="{{ _level * 10 }}" max="100"></progress>
     </nav>
 </div>
@@ -53,6 +53,14 @@
     </div>
 </div>
 <!--<div class="chat-input absolute">-->
+    <div class="chat-history">
+    <div
+         hx-get="/level/history/1"
+         hx-trigger="load"
+         hx-target=".chat-history"
+         hx-swap="innerHTML">
+    </div>
+    </div>
 <div class="chat-input">
     {% with _level=1, _text_model="gpt-4o-mini" %}
         {% include "levels/suggestion_chatbox.html" %}

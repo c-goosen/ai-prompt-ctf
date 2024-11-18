@@ -12,7 +12,7 @@
     <i class="fa-solid fa-paper-plane"
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
-       hx-trigger="keyup[key=='Enter'], click"
+       hx-trigger="keyup[key=='Enter'] from:body, click"
        hx-include="#text_input,#text_model,#text_level"
        hx-target=".chatbox"
        hx-swap="afterend scroll:bottom"

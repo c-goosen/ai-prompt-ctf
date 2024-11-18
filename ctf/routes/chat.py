@@ -201,18 +201,3 @@ async def chat_completion(
         """,
         status_code=200,
     )
-
-
-@router.get("/chat/completion/suggestion")
-def render_faq(
-    request: Request,
-    suggestion: str = "",
-):
-    response = templates.TemplateResponse(
-        "levels/suggestion_chatbox.html",
-        {
-            "request": request,
-            "suggestion": suggestion,
-        },
-    )
-    return response
