@@ -19,7 +19,7 @@
 * Discord channel configurable
 * ~~Fix some of UI issues~~
 * ~~FAQ~~
-* Chat history
+* ~~Chat history~~
 
 * Challenges
 * * ~~Level 0~~

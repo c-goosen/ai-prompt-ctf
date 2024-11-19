@@ -69,6 +69,7 @@ async def load_level(
         )
         return response
 
+
 @router.get("/level/history/{_level}", include_in_schema=False)
 def load_history(
     request: Request,
@@ -81,8 +82,8 @@ def load_history(
         {
             "request": request,
             "chat_history": chat_history.chat_store.get_messages(
-                    key=f"level-{_level}"
-                ),
+                key=f"level-{_level}"
+            ),
         },
     )
     return response

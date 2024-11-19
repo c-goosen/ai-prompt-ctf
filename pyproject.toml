@@ -41,7 +41,7 @@ certifi = "^2024.8.30"
 pytest = "^8.3.3"
 importanize = "^0.7.0"
 memory-profiler = "^0.61.0"
-black = "^23.11.0"
+black = {extras = ["jupyter"], version = "^24.10.0"}
 flake8 = "^6.1.0"
 flake8-bugbear = "^23.12.2"
 bandit = "^1.7.5"
