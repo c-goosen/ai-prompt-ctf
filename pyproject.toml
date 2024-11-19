@@ -21,7 +21,6 @@ clean-text = "^0.6.0"
 unidecode = "^1.3.7"
 openai = "^1.1.1"
 bandit = "^1.7.5"
-googletrans = {git = "https://github.com/ssut/py-googletrans", rev = "master"}
 gunicorn = "23.0.0"
 transformers = "^4.46.1"
 accelerate = "^1.1.0"

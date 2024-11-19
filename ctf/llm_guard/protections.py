@@ -1,7 +1,6 @@
 import decimal
 import re
 import cleantext
-from googletrans import Translator
 from ctf.app_config import settings
 
 
@@ -87,26 +86,26 @@ async def llm_protection(model: object, labels: list, input: str = "") -> bool:
     return protected
 
 
-async def translate_and_llm(
-    model: object, labels: list, input: str = ""
-) -> bool:
-    protected = False
-    translator = Translator()
-    translated = translator.translate(text=input).text
-    llm = model
-    resp = await llm.query(prompt=translated)
-    # print(resp)
-    if resp.get("label") == "NEGATIVE":
-        if resp["score"] > decimal.Decimal(0.8):
-            protected = True
-    input = text_normalization(input)
-    translated = translator.translate(text=input).text
-    try:
-        resp = await llm.query(prompt=translated)
-        if resp.get("label") == "NEGATIVE":
-            if resp["score"] > decimal.Decimal(0.8):
-                protected = True
-    except Exception:
-        protected = False
-
-    return protected
+# async def translate_and_llm(
+#     model: object, labels: list, input: str = ""
+# ) -> bool:
+#     protected = False
+#     translator = Translator()
+#     translated = translator.translate(text=input).text
+#     llm = model
+#     resp = await llm.query(prompt=translated)
+#     # print(resp)
+#     if resp.get("label") == "NEGATIVE":
+#         if resp["score"] > decimal.Decimal(0.8):
+#             protected = True
+#     input = text_normalization(input)
+#     translated = translator.translate(text=input).text
+#     try:
+#         resp = await llm.query(prompt=translated)
+#         if resp.get("label") == "NEGATIVE":
+#             if resp["score"] > decimal.Decimal(0.8):
+#                 protected = True
+#     except Exception:
+#         protected = False
+#
+#     return protected
