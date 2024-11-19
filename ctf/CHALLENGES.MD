@@ -9,7 +9,6 @@ Just ask it what you are looking for, aka secrets, passwords, etc.
 OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
 # Level 1
-Done
 ## Input Injection
 OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
