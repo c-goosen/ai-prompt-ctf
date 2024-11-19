@@ -31,12 +31,12 @@ ci-test:
 
 ci-format:
 	@poetry run black .
-	@djlint ctf/templates/ --reformat
+	@poetry run djlint ctf/templates/ --reformat
 
 ci-lint:
 	@poetry run black . --check
 	@poetry run flake8
-	@djlint ctf/templates/ --lint
+	@poetry run djlint ctf/templates/ --lint
 
 ci-semgrep:
 	@semgrep --config "p/auto"

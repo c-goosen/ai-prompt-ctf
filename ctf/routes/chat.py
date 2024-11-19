@@ -164,9 +164,11 @@ async def chat_completion(
             collection_name="ctf_levels",
             level=_level,
             llm=_llm,
-            system_prompt=get_system_prompt(level=_level)
-            if _level > 2
-            else get_basic_prompt(),
+            system_prompt=(
+                get_system_prompt(level=_level)
+                if _level > 2
+                else get_basic_prompt()
+            ),
             request=request,
         )
 

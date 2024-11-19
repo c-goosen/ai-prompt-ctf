@@ -54,11 +54,7 @@
         </div>
     </div>
 </div>
-<div class="chat-history"
-        hx-get="/level/history/0"
-        hx-trigger="load"
-        >
-</div>
+<div class="chat-history" hx-get="/level/history/0" hx-trigger="load"></div>
 <!--<div class="chat-input absolute">-->
 <div class="chat-input">
     {% with _level=0, _text_model="gpt-3.5-turbo" %}

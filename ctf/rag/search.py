@@ -158,9 +158,11 @@ def search_vecs_and_prompt(
         OpenAI Agent
         """
         agent = ReActAgent.from_tools(
-            [submit_answer_tool, rag_tool]
-            if level != 6
-            else [print_file_tool, rag_tool, submit_answer_tool],
+            (
+                [submit_answer_tool, rag_tool]
+                if level != 6
+                else [print_file_tool, rag_tool, submit_answer_tool]
+            ),
             llm=llm,
             verbose=True,
             memory=memory,
@@ -173,9 +175,11 @@ def search_vecs_and_prompt(
     elif openai_coa:
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         agent = ReActAgent.from_tools(
-            [submit_answer_tool, rag_tool]
-            if level != 6
-            else [print_file_tool, rag_tool, submit_answer_tool],
+            (
+                [submit_answer_tool, rag_tool]
+                if level != 6
+                else [print_file_tool, rag_tool, submit_answer_tool]
+            ),
             llm=llm,
             verbose=True,
             memory=memory,
@@ -191,9 +195,11 @@ def search_vecs_and_prompt(
         """
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         coa_worker = CoAAgentWorker.from_tools(
-            [submit_answer_tool, rag_tool]
-            if level != 6
-            else [print_file_tool, rag_tool, submit_answer_tool],
+            (
+                [submit_answer_tool, rag_tool]
+                if level != 6
+                else [print_file_tool, rag_tool, submit_answer_tool]
+            ),
             llm=llm,
             verbose=True,
             memory=memory,

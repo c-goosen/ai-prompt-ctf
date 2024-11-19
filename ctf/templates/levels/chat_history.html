@@ -14,15 +14,15 @@
         {% endif %}
         {% if chat.role.value in ['assistant'] %}
             {% if chat.content %}
-            <div class="chat chat-end">
-                <div class="chat-image avatar">
-                    <div class="w-10 rounded-full">
-                        <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                <div class="chat chat-end">
+                    <div class="chat-image avatar">
+                        <div class="w-10 rounded-full">
+                            <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                        </div>
                     </div>
+                    <div class="chat-bubble">{{ chat.content }}</div>
                 </div>
-                <div class="chat-bubble">{{ chat.content }}</div>
-            </div>
-        {% endif %}
+            {% endif %}
         {% endif %}
     {% endfor %}
 {% endif %}
