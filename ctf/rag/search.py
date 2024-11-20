@@ -149,7 +149,7 @@ def search_vecs_and_prompt(
     react_agent = False
     if 3 < level < 8 and level != 0:
         react_agent = True
-    elif level > 8:
+    elif level == 8 and level != 0:
         openai_coa = True
     # react_agent = True
 

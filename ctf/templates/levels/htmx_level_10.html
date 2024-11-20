@@ -54,7 +54,7 @@
 <!--<div class="chat-input absolute">-->
 <div class="chat-history" hx-get="/level/history/10" hx-trigger="load"></div>
 <div class="chat-input">
-    {% with _level=10, _text_model="o1" %}
+    {% with _level=10, _text_model="o1-preview" %}
         {% include "levels/suggestion_chatbox.html" %}
     {% endwith %}
     <div class="disclaimer">
