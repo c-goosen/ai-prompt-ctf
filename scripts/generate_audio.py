@@ -2,7 +2,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from dotenv import load_dotenv
-client = OpenAI(api_key="sk-None-n8pbuIZOx9TyvW8f7XNcT3BlbkFJKTa80fVgLzRUjyt3vAUC")
+client = OpenAI(api_key="sk-None-xx")
 
 
 
