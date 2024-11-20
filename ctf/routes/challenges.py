@@ -76,14 +76,17 @@ def load_history(
     _level: int = 0,
 ):
     chat_history = app_config.settings.chats.get(int(_level))
-    print(f"chat_history len: {chat_history}")
+    _messages = chat_history.chat_store.get_messages(
+                key=f"level-{_level}"
+            )
+    # print(len(_messages))
+    print(f"chat_history len: {len(_messages)}")
+
     response = templates.TemplateResponse(
         "levels/chat_history.html",
         {
             "request": request,
-            "chat_history": chat_history.chat_store.get_messages(
-                key=f"level-{_level}"
-            ),
+            "chat_history": _messages,
         },
     )
     return response

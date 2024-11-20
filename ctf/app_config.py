@@ -123,37 +123,37 @@ class Settings(BaseSettings):
         4: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-4",
         ),
         5: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-5",
         ),
         6: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-6",
         ),
         7: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-7",
         ),
         8: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-8",
         ),
         9: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-9",
         ),
         10: ChatMemoryBuffer.from_defaults(
             token_limit=token_limit,
             chat_store=chat_store,
-            chat_store_key="level-3",
+            chat_store_key="level-10",
         ),
     }
     SYSTEM_PROMPTS: dict = {

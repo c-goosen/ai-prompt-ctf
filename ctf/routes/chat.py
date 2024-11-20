@@ -1,5 +1,6 @@
 import logging
 import os
+import io
 from typing import Optional
 from openai import OpenAI as OG_OPENAI
 
@@ -80,7 +81,6 @@ async def chat_completion(
     file_type: Optional[str] = Form(None),
 ):
     _level = text_level
-
     if file_input:
         data = await file_input.read()
         print("File input detected -->")
@@ -88,12 +88,13 @@ async def chat_completion(
         file_text = None
         if file_type == "audio":
             client = OG_OPENAI()
+
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
-                file=file_input.file.read(),
+                file=("temp." + file_input.filename.split(".")[1], file_input.file, file_input.content_type),
                 response_format="text",
             )
-            file_text = transcription.text
+            file_text = transcription
             print(file_text)
         else:
             print("In image file")
