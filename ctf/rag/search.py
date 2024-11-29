@@ -19,7 +19,12 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
-
+from llama_index.core.multi_modal_llms import MultiModalLLM
+from llama_index.multi_modal_llms.openai import OpenAIMultiModal
+from llama_index.core.agent.react_multimodal.step import (
+            MultimodalReActAgentWorker,
+        )
+from llama_index.core.schema import ImageDocument
 
 def ask_for_help():
     """
@@ -56,6 +61,12 @@ def token_balance(input: str, level: int):
     )
 
 
+def exec_python(input: str):
+    """Exec python code"""
+
+    resp = exec(input)
+    return resp
+
 def print_file(input: str):
     """Print file with input dir"""
 
@@ -68,6 +79,8 @@ def print_file(input: str):
 
 def search_vecs_and_prompt(
     search_input: str,
+    file_text:str|None,
+    file_type: str|None,
     collection_name="ctf_levels",
     level: int = 0,
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
@@ -83,6 +96,7 @@ def search_vecs_and_prompt(
     prompt = f"""
     SYSTEM
     {system_prompt}
+    {(file_type + " file contents: " + file_text) if file_text else ""}
     USER
     Level: {level}
     Query: {search_input}
@@ -143,12 +157,19 @@ def search_vecs_and_prompt(
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
     print_file_tool = FunctionTool.from_defaults(fn=print_file)
+    exec_py_tool = FunctionTool.from_defaults(fn=exec_python)
 
     coa_agent = False
     openai_coa = False
     react_agent = False
-    if 3 < level < 8 and level != 0:
+    multimodal_agent = False
+    if 3 < level < 8 and level not in [0,5,6]:
         react_agent = True
+    elif level in [5,6]:
+        react_agent = True
+        openai_coa = False
+        coa_agent = False
+
     elif level == 8 and level != 0:
         openai_coa = True
     # react_agent = True
@@ -161,7 +182,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
             ),
             llm=llm,
             verbose=True,
@@ -171,6 +192,45 @@ def search_vecs_and_prompt(
         )
         response = agent.chat(prompt)
         print(f"agent.history --> {agent.chat_history}")
+    elif multimodal_agent:
+        mm_llm = OpenAIMultiModal(model="gpt-4o", max_new_tokens=1000)
+
+        # Option 2: Initialize with OpenAIAgentWorker
+
+        react_step_engine = MultimodalReActAgentWorker.from_tools(
+            [submit_answer_tool, rag_tool],
+            # [],
+            multi_modal_llm=mm_llm,
+            verbose=True,
+        )
+        agent = react_step_engine.as_agent()
+
+        query_str = "Look up some reviews regarding these shoes."
+        image_document = ImageDocument(image_path="other_images/adidas.png")
+
+        task = agent.create_task(
+            prompt, extra_state={"image_docs": [image_document]}
+        )
+        #response = agent.chat(prompt)
+        from llama_index.core.agent import AgentRunner
+        from llama_index.core.agent import Task
+        def execute_step(agent: AgentRunner, task: Task):
+            step_output = agent.run_step(task.task_id)
+            if step_output.is_last:
+                response = agent.finalize_response(task.task_id)
+                print(f"> Agent finished: {str(response)}")
+                return response
+            else:
+                return None
+
+        def execute_steps(agent: AgentRunner, task: Task):
+            response = execute_step(agent, task)
+            while response is None:
+                response = execute_step(agent, task)
+            return response
+
+        response = execute_step(agent, task)
+        print(f"agent.history --> {agent.chat_history}")
 
     elif openai_coa:
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
@@ -178,7 +238,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
             ),
             llm=llm,
             verbose=True,
@@ -198,7 +258,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
             ),
             llm=llm,
             verbose=True,

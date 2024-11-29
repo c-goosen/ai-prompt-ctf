@@ -81,7 +81,7 @@ async def chat_completion(
     file_type: Optional[str] = Form(None),
 ):
     _level = text_level
-    if file_input:
+    if file_input and _level in [5,6]:
         data = await file_input.read()
         print("File input detected -->")
         print(f"file_type --> {file_type}")
@@ -96,6 +96,7 @@ async def chat_completion(
             )
             file_text = transcription
             print(file_text)
+            
         else:
             print("In image file")
             client = OG_OPENAI()
@@ -126,7 +127,7 @@ async def chat_completion(
                 ],
                 max_tokens=500,
             )
-            file_text = response.choices[0]
+            file_text = response.choices[0].message
             print(f"file_text -->{file_text}")
 
     if int(_level) == 1:
@@ -141,7 +142,7 @@ async def chat_completion(
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),
-            labels=["injection", "jailbreak", "NEGATIVE"],
+            labels=["injection", "jailbreak", "negative"],
             input=text_input,
         )
     else:
@@ -162,6 +163,8 @@ async def chat_completion(
         print(text_input)
         response = search_vecs_and_prompt(
             search_input=str(text_input),
+            file_text=str(file_text),
+            file_type=file_type,
             collection_name="ctf_levels",
             level=_level,
             llm=_llm,
@@ -171,6 +174,7 @@ async def chat_completion(
                 else get_basic_prompt()
             ),
             request=request,
+
         )
 
     # messages = [
