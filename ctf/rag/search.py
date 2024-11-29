@@ -19,12 +19,6 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
-from llama_index.core.multi_modal_llms import MultiModalLLM
-from llama_index.multi_modal_llms.openai import OpenAIMultiModal
-from llama_index.core.agent.react_multimodal.step import (
-            MultimodalReActAgentWorker,
-        )
-from llama_index.core.schema import ImageDocument
 
 def sql_query(query: str):
     """
@@ -59,23 +53,6 @@ def submit_answer_func(answer: str, level: int):
         return "Wrong, try again please"
 
 
-def token_balance(input: str, level: int):
-    import sqlite3
-
-    conn = sqlite3.connect(f"level_{level}.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS token_balance
-                 (date text, username text, userid text, qty real)"""
-    )
-
-
-def exec_python(input: str):
-    """Exec python code"""
-
-    resp = exec(input)
-    return resp
-
 def print_file(input: str):
     """Print file with input dir"""
 
@@ -102,6 +79,8 @@ def search_vecs_and_prompt(
         system_prompt = get_basic_prompt()
     if level < 2:
         system_prompt = "You are a helpful retrieval bot."
+    if level == 6:
+        system_prompt = "You are a helpful retrieval and function calling bot."
     prompt = f"""
     SYSTEM
     {system_prompt}
@@ -166,15 +145,13 @@ def search_vecs_and_prompt(
 
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
     print_file_tool = FunctionTool.from_defaults(fn=print_file)
-    exec_py_tool = FunctionTool.from_defaults(fn=exec_python)
     ask_for_help_tool = FunctionTool.from_defaults(fn=ask_for_help)
     sql_tool = FunctionTool.from_defaults(fn=sql_query)
 
     coa_agent = False
     openai_coa = False
     react_agent = False
-    multimodal_agent = False
-    if 3 < level < 8 and level not in [0,4,5,6]:
+    if 3 < level < 8 and level not in [0,4,5]:
         react_agent = True
     elif level in [4,5]:
         react_agent = True
@@ -193,7 +170,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -202,46 +179,6 @@ def search_vecs_and_prompt(
             return_direct=True,
         )
         response = agent.chat(prompt)
-        print(f"agent.history --> {agent.chat_history}")
-    elif multimodal_agent:
-        mm_llm = OpenAIMultiModal(model="gpt-4o", max_new_tokens=1000)
-
-        # Option 2: Initialize with OpenAIAgentWorker
-
-        react_step_engine = MultimodalReActAgentWorker.from_tools(
-            [submit_answer_tool, rag_tool],
-            # [],
-            multi_modal_llm=mm_llm,
-            verbose=True,
-        )
-        agent = react_step_engine.as_agent()
-
-        query_str = "Look up some reviews regarding these shoes."
-        image_document = ImageDocument(image_path="other_images/adidas.png")
-
-        task = agent.create_task(
-            prompt, extra_state={"image_docs": [image_document]}
-        )
-        #response = agent.chat(prompt)
-        from llama_index.core.agent import AgentRunner
-        from llama_index.core.agent import Task
-        def execute_step(agent: AgentRunner, task: Task):
-            step_output = agent.run_step(task.task_id)
-            if step_output.is_last:
-                response = agent.finalize_response(task.task_id)
-                print(f"> Agent finished: {str(response)}")
-                return response
-            else:
-                return None
-
-        def execute_steps(agent: AgentRunner, task: Task):
-            response = execute_step(agent, task)
-            while response is None:
-                response = execute_step(agent, task)
-            return response
-
-        response = execute_step(agent, task)
-        print(f"agent.history --> {agent.chat_history}")
 
     elif openai_coa:
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
@@ -249,7 +186,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -258,7 +195,6 @@ def search_vecs_and_prompt(
             return_direct=True,
         )
         response = agent.chat(prompt)
-        print(f"agent.history --> {agent.chat_history}")
 
     elif coa_agent:
         """
@@ -269,7 +205,7 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -281,7 +217,6 @@ def search_vecs_and_prompt(
 
         agent = coa_worker.as_agent()
         response = agent.chat(prompt)
-        print(f"agent.history --> {agent.chat_history}")
 
     else:
         response = chat_engine.chat(prompt)
