@@ -14,7 +14,7 @@
        hx-post="/v1/chat/completions"
        hx-trigger="keyup[key=='Enter'] from:body, click"
        hx-include="#text_input,#text_model,#text_level"
-       hx-target=".chatbox"
-       hx-swap="afterend scroll:bottom"
+       hx-target=".chat-history"
+       hx-swap="beforeend scroll:bottom"
        hx-indicator="#spinner"></i>
 </div>

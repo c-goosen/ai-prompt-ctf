@@ -28,8 +28,8 @@
        hx-post="/v1/chat/completions"
        hx-trigger="keyup[key=='Enter'], click"
        hx-include="#text_input,#text_model,#text_level,#file_input,#file_type"
-       hx-target=".chatbox"
-       hx-swap="afterend scroll:bottom"
+       hx-target=".chat-history"
+       hx-swap="beforeend scroll:bottom"
        hx-encoding="multipart/form-data"
        hx-indicator="#spinner"></i>
 </div>

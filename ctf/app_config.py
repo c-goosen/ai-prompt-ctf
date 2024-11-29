@@ -57,17 +57,17 @@ class Settings(BaseSettings):
     ]
     IMAGE_DIR: str | bool = os.getenv("IMAGE_DIR", f"{os.getcwd()}/tmp")
     PASSWORDS: dict = {
-        0: os.getenv("PASSWORD_ZERO", "PASSWORD_ZERO"),
-        1: os.getenv("PASSWORD_ONE", "PASSWORD_ONE"),
-        2: os.getenv("PASSWORD_TWO", "PASSWORD_TWO"),
-        3: os.getenv("PASSWORD_THREE", "PASSWORD_THREE"),
-        4: os.getenv("PASSWORD_FOUR", "PASSWORD_FOUR"),
-        5: os.getenv("PASSWORD_FIVE", "PASSWORD_FIVE"),
-        6: os.getenv("PASSWORD_SIX", "PASSWORD_SIX"),
-        7: os.getenv("PASSWORD_SEVEN", "PASSWORD_SEVEN"),
-        8: os.getenv("PASSWORD_EIGHT", "PASSWORD_EIGHT"),
-        9: os.getenv("PASSWORD_NINE", "PASSWORD_NINE"),
-        10: os.getenv("PASSWORD_TEN", "PASSWORD_TEN"),
+        0: os.getenv("PASSWORD_ZERO", "PASS_ZERO"),
+        1: os.getenv("PASSWORD_ONE", "PASS_ONE"),
+        2: os.getenv("PASSWORD_TWO", "PASS_TWO"),
+        3: os.getenv("PASSWORD_THREE", "PASS_THREE"),
+        4: os.getenv("PASSWORD_FOUR", "PASS_FOUR"),
+        5: os.getenv("PASSWORD_FIVE", "PASS_FIVE"),
+        6: os.getenv("PASSWORD_SIX", "PASS_SIX"),
+        7: os.getenv("PASSWORD_SEVEN", "PASS_SEVEN"),
+        8: os.getenv("PASSWORD_EIGHT", "PASS_EIGHT"),
+        9: os.getenv("PASSWORD_NINE", "PASS_NINE"),
+        10: os.getenv("PASSWORD_TEN", "PASS_TEN"),
     }
     # Regex list for things like IPs, credit cards etc
     # Amazon vouchers, etc.

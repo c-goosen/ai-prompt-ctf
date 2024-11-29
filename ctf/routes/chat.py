@@ -81,11 +81,12 @@ async def chat_completion(
     file_type: Optional[str] = Form(None),
 ):
     _level = text_level
-    if file_input and _level in [5,6]:
+    file_text = ""
+
+    if file_input and _level in [4,5]:
         data = await file_input.read()
         print("File input detected -->")
         print(f"file_type --> {file_type}")
-        file_text = None
         if file_type == "audio":
             client = OG_OPENAI()
 
@@ -138,7 +139,7 @@ async def chat_completion(
             labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
             input=text_input,
         )
-    elif int(_level) in (8, 10):
+    elif int(_level) in (8,9, 10):
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),

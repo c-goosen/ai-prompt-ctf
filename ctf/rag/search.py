@@ -30,12 +30,15 @@ def ask_for_help():
     """
     Give me help for the current level I am on. Help
     """
+    return "Help!"
 
 
 def submit_answer_func(answer: str, level: int):
     """Take a string answer and the current level
     and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
+    print(f"level_pass {level_pass}")
+    print(f"answer {answer}")
     if answer == level_pass:
         return f""""{answer} is correct! Next Level:
         <div class="level-menu new-chat"
@@ -80,7 +83,7 @@ def print_file(input: str):
 def search_vecs_and_prompt(
     search_input: str,
     file_text:str|None,
-    file_type: str|None,
+    file_type: str = "",
     collection_name="ctf_levels",
     level: int = 0,
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
@@ -163,9 +166,9 @@ def search_vecs_and_prompt(
     openai_coa = False
     react_agent = False
     multimodal_agent = False
-    if 3 < level < 8 and level not in [0,5,6]:
+    if 3 < level < 8 and level not in [0,4,5,6]:
         react_agent = True
-    elif level in [5,6]:
+    elif level in [4,5]:
         react_agent = True
         openai_coa = False
         coa_agent = False

@@ -81,6 +81,7 @@ def load_history(
             )
     # print(len(_messages))
     print(f"chat_history len: {len(_messages)}")
+    #_messages = _messages.reverse()
 
     response = templates.TemplateResponse(
         "levels/chat_history.html",
