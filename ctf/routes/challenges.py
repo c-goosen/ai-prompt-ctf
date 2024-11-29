@@ -38,8 +38,6 @@ async def load_level(
     request: Request,
 ):
     chat_history = app_config.settings.chats.get(int(_level))
-    print(dir(chat_history))
-    print(chat_history.__dict__)
 
     if request.headers.get("hx-request"):
         response = templates.TemplateResponse(

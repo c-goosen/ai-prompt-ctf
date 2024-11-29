@@ -26,7 +26,13 @@ from llama_index.core.agent.react_multimodal.step import (
         )
 from llama_index.core.schema import ImageDocument
 
-def ask_for_help():
+def sql_query(query: str):
+    """
+    SQL query.
+    """
+    return "0,fname,lname"
+
+def ask_for_help(help_query: str):
     """
     Give me help for the current level I am on. Help
     """
@@ -161,6 +167,8 @@ def search_vecs_and_prompt(
     submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
     print_file_tool = FunctionTool.from_defaults(fn=print_file)
     exec_py_tool = FunctionTool.from_defaults(fn=exec_python)
+    ask_for_help_tool = FunctionTool.from_defaults(fn=ask_for_help)
+    sql_tool = FunctionTool.from_defaults(fn=sql_query)
 
     coa_agent = False
     openai_coa = False
@@ -183,9 +191,9 @@ def search_vecs_and_prompt(
         """
         agent = ReActAgent.from_tools(
             (
-                [submit_answer_tool, rag_tool]
+                [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -239,9 +247,9 @@ def search_vecs_and_prompt(
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         agent = ReActAgent.from_tools(
             (
-                [submit_answer_tool, rag_tool]
+                [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -259,9 +267,9 @@ def search_vecs_and_prompt(
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         coa_worker = CoAAgentWorker.from_tools(
             (
-                [submit_answer_tool, rag_tool]
+                [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool]
+                else [print_file_tool, rag_tool, submit_answer_tool, exec_py_tool, sql_tool, ask_for_help_tool]
             ),
             llm=llm,
             verbose=True,
@@ -280,7 +288,5 @@ def search_vecs_and_prompt(
 
     # print(f"Memory --> {memory.json()}")
     print(f"Memory --> {memory}")
-    print(response.__dict__)
-    print(dir(response))
     print(response)
     return response
