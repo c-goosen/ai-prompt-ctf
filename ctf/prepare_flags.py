@@ -16,11 +16,11 @@ from ctf.app_config import settings
 import sqlite3
 
 
-def setup_sql_level(PASSWORD:str):
+def setup_sql_level(PASSWORD: str):
 
     # Connecting to sqlite
     # connection object
-    connection_obj = sqlite3.connect('users.db')
+    connection_obj = sqlite3.connect("users.db")
 
     # cursor object
     cursor_obj = connection_obj.cursor()
@@ -30,30 +30,41 @@ def setup_sql_level(PASSWORD:str):
 
     # Creating table
     table = """ CREATE TABLE USERS (
-                User_Id INT NOT NULL,
-                First_Name CHAR(25) NOT NULL,
-                Last_Name CHAR(25),
-                Token_Count INT
+                UserId INT NOT NULL,
+                FirstName CHAR(25) NOT NULL,
+                LastName CHAR(25),
+                TokenCount INT
             ); """
 
     cursor_obj.execute(table)
     cursor_obj.execute(
-        f'''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count) VALUES (1, '{PASSWORD}', '{PASSWORD}', 190)''')
-    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (2, 'Cryptic', 'Goose', 190)''')
-    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (3, 'Test', 'Tube', 50)''')
-    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (4, 'l33t', 'hacker', 20)''')
-    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (5, 'Michael', 'Office', 5)''')
-    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (5, 'SQL', 'Injection', 1000)''')
+        f"""INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (33, '{PASSWORD}', '{PASSWORD}', 190)"""
+    )
+    cursor_obj.execute(
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (2, 'Cryptic', 'Goose', 190)"""
+    )
+    cursor_obj.execute(
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (3, 'Test', 'Tube', 50)"""
+    )
+    cursor_obj.execute(
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (4, 'l33t', 'hacker', 20)"""
+    )
+    cursor_obj.execute(
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'Michael', 'Office', 5)"""
+    )
+    cursor_obj.execute(
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'SQL', 'Injection', 1000)"""
+    )
     connection_obj.commit()
     print("Table & data is Ready")
-    statement = '''SELECT * FROM USERS;'''
+    statement = """SELECT * FROM USERS;"""
 
     cursor_obj.execute(statement)
 
     print("All the data")
-    output = cursor_obj.fetchall()
-    for row in output:
-        print(row)
+    _ = cursor_obj.fetchall()
+    # for row in _:
+    #     print(row)
 
     # Close the connection
     connection_obj.close()
@@ -103,7 +114,9 @@ def prepare_flags():
             for x in _generic_password_text:
                 nodes.append(
                     TextNode(
-                        text=x.replace("<placeholder>", settings.PASSWORDS.get(k)),
+                        text=x.replace(
+                            "<placeholder>", settings.PASSWORDS.get(k)
+                        ),
                         metadata={
                             "level": k,
                         },
@@ -111,7 +124,6 @@ def prepare_flags():
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
-
 
         # build index
     index = VectorStoreIndex(
@@ -129,5 +141,3 @@ def prepare_flags():
             ]
         )
         _ = index.as_retriever(filters=filters)
-
-

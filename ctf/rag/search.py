@@ -19,13 +19,24 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
+import sqlite3
 
 
-def sql_query(query: str):
+def sql_query(userId: str):
     """
-    SQL query.
+    Return users from sql where id equals
     """
-    return "0,fname,lname"
+    connection_obj = sqlite3.connect("users.db")
+
+    # cursor object
+    cursor_obj = connection_obj.cursor()
+    # Drop the GEEK table if already exists.
+    cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + userId + ";")
+    # cursor_obj.execute(query)
+    output = cursor_obj.fetchone()
+    print(output)
+    cursor_obj.close()
+    return output
 
 
 def ask_for_help(help_query: str):

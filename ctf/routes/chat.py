@@ -1,6 +1,5 @@
 import logging
 import os
-import io
 from typing import Optional
 from openai import OpenAI as OG_OPENAI
 
