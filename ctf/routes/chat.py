@@ -83,7 +83,7 @@ async def chat_completion(
     _level = text_level
     file_text = ""
 
-    if file_input and _level in [4,5]:
+    if file_input and _level in [4, 5]:
         data = await file_input.read()
         print("File input detected -->")
         print(f"file_type --> {file_type}")
@@ -92,12 +92,16 @@ async def chat_completion(
 
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
-                file=("temp." + file_input.filename.split(".")[1], file_input.file, file_input.content_type),
+                file=(
+                    "temp." + file_input.filename.split(".")[1],
+                    file_input.file,
+                    file_input.content_type,
+                ),
                 response_format="text",
             )
             file_text = transcription
             print(file_text)
-            
+
         else:
             print("In image file")
             client = OG_OPENAI()
@@ -139,7 +143,7 @@ async def chat_completion(
             labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
             input=text_input,
         )
-    elif int(_level) in (8,9, 10):
+    elif int(_level) in (8, 9, 10):
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),
@@ -175,7 +179,6 @@ async def chat_completion(
                 else get_basic_prompt()
             ),
             request=request,
-
         )
 
     # messages = [

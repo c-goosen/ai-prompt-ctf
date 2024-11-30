@@ -5,7 +5,7 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
 )
 
-from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
+from ctf.llm_guard.llm_guard import PromptGuardMeta#, PromptGuardGoose
 
 import pytest
 

@@ -20,11 +20,13 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
 
+
 def sql_query(query: str):
     """
     SQL query.
     """
     return "0,fname,lname"
+
 
 def ask_for_help(help_query: str):
     """
@@ -65,7 +67,7 @@ def print_file(input: str):
 
 def search_vecs_and_prompt(
     search_input: str,
-    file_text:str|None,
+    file_text: str | None,
     file_type: str = "",
     collection_name="ctf_levels",
     level: int = 0,
@@ -151,9 +153,9 @@ def search_vecs_and_prompt(
     coa_agent = False
     openai_coa = False
     react_agent = False
-    if 3 < level < 8 and level not in [0,4,5]:
+    if 3 < level < 8 and level not in [0, 4, 5]:
         react_agent = True
-    elif level in [4,5]:
+    elif level in [4, 5]:
         react_agent = True
         openai_coa = False
         coa_agent = False
@@ -170,7 +172,13 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
+                else [
+                    print_file_tool,
+                    rag_tool,
+                    submit_answer_tool,
+                    sql_tool,
+                    ask_for_help_tool,
+                ]
             ),
             llm=llm,
             verbose=True,
@@ -186,7 +194,13 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
+                else [
+                    print_file_tool,
+                    rag_tool,
+                    submit_answer_tool,
+                    sql_tool,
+                    ask_for_help_tool,
+                ]
             ),
             llm=llm,
             verbose=True,
@@ -205,7 +219,13 @@ def search_vecs_and_prompt(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
                 if level != 6
-                else [print_file_tool, rag_tool, submit_answer_tool, sql_tool, ask_for_help_tool]
+                else [
+                    print_file_tool,
+                    rag_tool,
+                    submit_answer_tool,
+                    sql_tool,
+                    ask_for_help_tool,
+                ]
             ),
             llm=llm,
             verbose=True,

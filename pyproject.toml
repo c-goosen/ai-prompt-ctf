@@ -6,8 +6,6 @@ authors = ["Christo Goosen <christogoosen@gmail.com>"]
 readme = "README.md"
 #packages = [{include = "llm-ctf"}]
 
-package-mode = false
-
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
 nltk = "^3.8.1"
@@ -24,7 +22,6 @@ bandit = "^1.7.5"
 gunicorn = "23.0.0"
 transformers = "^4.46.1"
 accelerate = "^1.1.0"
-fastapi-cli = "^0.0.5"
 llama-index = "^0.11.18"
 llama-index-vector-stores-chroma = "^0.2.0"
 chromadb = "^0.5.7"
@@ -37,6 +34,7 @@ certifi = "^2024.8.30"
 
 
 [tool.poetry.group.dev.dependencies]
+fastapi-cli = "^0.0.5"
 pytest = "^8.3.3"
 importanize = "^0.7.0"
 memory-profiler = "^0.61.0"
@@ -53,7 +51,7 @@ djlint = "^1.36.1"
 anyio = "^4.6.2.post1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]

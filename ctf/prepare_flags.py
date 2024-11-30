@@ -13,6 +13,50 @@ from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
+import sqlite3
+
+
+def setup_sql_level(PASSWORD:str):
+
+    # Connecting to sqlite
+    # connection object
+    connection_obj = sqlite3.connect('users.db')
+
+    # cursor object
+    cursor_obj = connection_obj.cursor()
+
+    # Drop the GEEK table if already exists.
+    cursor_obj.execute("DROP TABLE IF EXISTS USERS")
+
+    # Creating table
+    table = """ CREATE TABLE USERS (
+                User_Id INT NOT NULL,
+                First_Name CHAR(25) NOT NULL,
+                Last_Name CHAR(25),
+                Token_Count INT
+            ); """
+
+    cursor_obj.execute(table)
+    cursor_obj.execute(
+        f'''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count) VALUES (1, '{PASSWORD}', '{PASSWORD}', 190)''')
+    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (2, 'Cryptic', 'Goose', 190)''')
+    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (3, 'Test', 'Tube', 50)''')
+    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (4, 'l33t', 'hacker', 20)''')
+    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (5, 'Michael', 'Office', 5)''')
+    cursor_obj.execute('''INSERT INTO USERS (User_Id,First_Name,Last_Name,Token_Count ) VALUES (5, 'SQL', 'Injection', 1000)''')
+    connection_obj.commit()
+    print("Table & data is Ready")
+    statement = '''SELECT * FROM USERS;'''
+
+    cursor_obj.execute(statement)
+
+    print("All the data")
+    output = cursor_obj.fetchall()
+    for row in output:
+        print(row)
+
+    # Close the connection
+    connection_obj.close()
 
 
 def prepare_flags():
@@ -54,16 +98,20 @@ def prepare_flags():
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     for k in levels:
-        _generic_password_text = generic_password_text
-        for x in _generic_password_text:
-            nodes.append(
-                TextNode(
-                    text=x.replace("<placeholder>", settings.PASSWORDS.get(k)),
-                    metadata={
-                        "level": k,
-                    },
+        if k != 6:
+            _generic_password_text = generic_password_text
+            for x in _generic_password_text:
+                nodes.append(
+                    TextNode(
+                        text=x.replace("<placeholder>", settings.PASSWORDS.get(k)),
+                        metadata={
+                            "level": k,
+                        },
+                    )
                 )
-            )
+        else:
+            setup_sql_level(settings.PASSWORDS.get(k))
+
 
         # build index
     index = VectorStoreIndex(
@@ -81,3 +129,5 @@ def prepare_flags():
             ]
         )
         _ = index.as_retriever(filters=filters)
+
+

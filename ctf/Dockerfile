@@ -4,13 +4,8 @@
 
 
 # Creating a python base with shared environment variables
-FROM python:3.12-slim-bullseye AS python-base
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_HOME="/opt/poetry" \
+FROM python:3.12 AS python-base
+ENV POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1 \
     PYSETUP_PATH="/opt/pysetup" \
@@ -23,15 +18,12 @@ FROM python-base AS builder-base
 RUN buildDeps="build-essential" \
     && apt-get update \
     && apt-get install --no-install-recommends -y \
-        curl \
-        vim \
-        netcat \
-        git \
-    && apt-get install -y --no-install-recommends $buildDeps \
-    && rm -rf /var/lib/apt/lists/*
+        curl vim git python3-dev
+RUN apt-get install -y --no-install-recommends $buildDeps
+RUN rm -rf /var/lib/apt/lists/*
 
 # Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
-ENV POETRY_VERSION=1.8.4
+ENV POETRY_VERSION=1.7.1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=${POETRY_HOME} python3 - --version ${POETRY_VERSION} && \
     chmod a+x /opt/poetry/bin/poetry
@@ -40,14 +32,21 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=${POETRY_HOME} pyt
 # and install only runtime deps using poetry
 WORKDIR $PYSETUP_PATH
 COPY ./poetry.lock ./pyproject.toml ./
-RUN poetry install --only main  # respects
+#RUN poetry install --only main  # respects
 
-FROM python-base AS production
+RUN poetry config virtualenvs.create true && \
+    poetry config virtualenvs.in-project true
+RUN poetry run python -m pip wheel setuptools
+#RUN poetry run python -m pip install pandas==2.2.3 --no-use-pep517
+RUN poetry install --no-root --no-interaction --only main
+
+FROM python:3.12 AS production
 ENV FASTAPI_ENV=production
 
 EXPOSE 8000/tcp
 
 COPY --from=builder-base $VENV_PATH $VENV_PATH
+RUN adduser THM_PASSWORD --allow-bad-names
 
 # Create user with the name poetry
 RUN groupadd -g 1500 poetry && \

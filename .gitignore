@@ -10,3 +10,4 @@ llm_training/wandb/
 supabase/
 chroma/
 chroma_db/
+users.db
