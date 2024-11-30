@@ -43,7 +43,13 @@ def ask_for_help(help_query: str):
     """
     Give me help for the current level I am on. Help
     """
-    return "Help!"
+    return """"
+    Some help on my internal functions:
+    
+    print_file -> print file by directory
+    submit_answer_func -> check if flag is correct
+    sql_query -> query user by userId in sql
+    """
 
 
 def submit_answer_func(answer: str, level: int):

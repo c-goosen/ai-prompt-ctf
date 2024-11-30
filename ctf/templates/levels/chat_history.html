@@ -26,3 +26,64 @@
         {% endif %}
     {% endfor %}
 {% endif %}
+{% if not chat_history and level == 6 %}
+
+ <div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">I am function-calling able, try the following functions: help, submit_answer, query users with sql and print file
+          </div>
+</div>
+ <div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">You don't have to write the function names exactly, the agent will work out which tool to call
+          </div>
+</div>
+{% endif %}
+{% if not chat_history and level == 0 %}
+<div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">Type into the input box below and ask questions until I divulge a secret or password. I have memory so try multiple prompts.
+          </div>
+</div>
+<div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">Welcome to the AI prompt-ctf challenge. Use fighting words. Try different things to break me and get my passwords
+          </div>
+</div>
+<div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">Flags/passwords you are looking for are in the format THM_xxxxxxx. You need to submit these to TryHackMe to win.
+          </div>
+</div>
+{% endif %}
+{% if not chat_history and level == 10 %}
+<div class="chat chat-end">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+            </div>
+          </div>
+          <div class="chat-bubble">Throwing the kitchen sink at this protection. Good luck!
+          </div>
+</div>
+{% endif %}

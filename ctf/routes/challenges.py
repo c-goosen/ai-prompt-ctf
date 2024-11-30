@@ -84,6 +84,7 @@ def load_history(
         {
             "request": request,
             "chat_history": _messages,
+            "level": _level
         },
     )
     return response
