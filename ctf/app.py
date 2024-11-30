@@ -19,6 +19,7 @@ from ctf.app_config import settings
 from ctf.routes import challenges
 from ctf.routes import chat
 from ctf.prepare_flags import prepare_flags
+from ctf.prepare_hf_models import download_models
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 
 nest_asyncio.apply()
@@ -44,6 +45,8 @@ os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 # get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
 prepare_flags()
+download_models()
+
 if settings.DOCS_ON:
     app = FastAPI(lifespan=lifespan)
 else:
