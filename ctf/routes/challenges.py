@@ -7,7 +7,6 @@ from fastapi.templating import Jinja2Templates
 from llama_index.core.memory import ChatMemoryBuffer
 from pydantic import BaseModel
 
-import app_config
 from ctf.app_config import settings
 
 # get root logger
@@ -37,7 +36,7 @@ async def load_level(
     _level: int,
     request: Request,
 ):
-    chat_history = app_config.settings.chats.get(int(_level))
+    chat_history = settings.chats.get(int(_level))
 
     if request.headers.get("hx-request"):
         response = templates.TemplateResponse(
@@ -73,7 +72,7 @@ def load_history(
     request: Request,
     _level: int = 0,
 ):
-    chat_history = app_config.settings.chats.get(int(_level))
+    chat_history = settings.chats.get(int(_level))
     _messages = chat_history.chat_store.get_messages(key=f"level-{_level}")
     # print(len(_messages))
     print(f"chat_history len: {len(_messages)}")

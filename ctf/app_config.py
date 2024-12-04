@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
-        "https://discord.com/channels/687602309395382282/1042715550960341032",
+        "https://discord.com/channels/687602309395382282/1168515417514442834",
     )
     SUBMIT_FLAGS_URL: str = os.getenv(
         "SUBMIT_FLAGS_URL", "http://www.example.org"

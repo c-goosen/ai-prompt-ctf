@@ -14,7 +14,6 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
 from starlette.middleware.cors import CORSMiddleware
 
-import app_config
 from ctf.app_config import settings
 from ctf.routes import challenges
 from ctf.routes import chat
@@ -54,7 +53,7 @@ else:
 
 # Rate limiting to keep AI costs low, naught H@xors
 
-app.chats = app_config.settings.chats
+app.chats = settings.chats
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
