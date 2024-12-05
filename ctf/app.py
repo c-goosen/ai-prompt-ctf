@@ -59,12 +59,12 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-app.add_middleware(
-    CORSMiddleware,
-    # Update with specific origins in production
-    allow_origins=["localhost"],
-    allow_methods=["GET", "POST"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     # Update with specific origins in production
+#     allow_origins=["localhost", '0.0.0.0', "0.0.0.0:8100"],
+#     allow_methods=["GET", "POST"],
+# )
 
 templates = Jinja2Templates(directory="ctf/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
