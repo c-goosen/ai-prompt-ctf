@@ -15,7 +15,7 @@ if __name__ == "__main__":
         "app:app",
         host="0.0.0.0",
         log_level="info",
-        reload=True,
+        reload=os.getenv("RELOAD", False),
         port=8100,
         loop="asyncio",
     )
