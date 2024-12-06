@@ -12,7 +12,10 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
-from ctf.app_config import settings
+try:
+    from ctf.app_config import settings
+except:
+    from app_config import settings
 import sqlite3
 
 
@@ -141,3 +144,7 @@ def prepare_flags():
             ]
         )
         _ = index.as_retriever(filters=filters)
+
+
+if __name__ == "__main__":
+    prepare_flags()

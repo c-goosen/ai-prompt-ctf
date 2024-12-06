@@ -43,7 +43,9 @@ logging.getLogger("passlib").setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 # get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
-prepare_flags()
+if os.getenv("PREPARE_FLAGS", False):
+    prepare_flags()
+
 download_models()
 
 if settings.DOCS_ON:
