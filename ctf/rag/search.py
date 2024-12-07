@@ -173,7 +173,7 @@ def search_vecs_and_prompt(
     if 3 < level < 8 and level not in [0, 4, 5]:
         react_agent = True
     elif level in [4, 5]:
-        react_agent = True
+        react_agent = False
         openai_coa = False
         coa_agent = False
 
@@ -200,7 +200,7 @@ def search_vecs_and_prompt(
             llm=llm,
             verbose=True,
             memory=memory,
-            max_iterations=10,
+            max_iterations=5,
             return_direct=True,
         )
         response = agent.chat(prompt)

@@ -82,26 +82,27 @@ async def chat_completion(
     _level = text_level
     file_text = ""
 
-    if file_input and _level in [4, 5]:
+    if file_input:
         data = await file_input.read()
-        print("File input detected -->")
-        print(f"file_type --> {file_type}")
-        if file_type == "audio":
-            client = OG_OPENAI()
+        if _level == 5:
+            print("File input detected -->")
+            print(f"file_type --> {file_type}")
+            if file_type == "audio":
+                client = OG_OPENAI()
 
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=(
-                    "temp." + file_input.filename.split(".")[1],
-                    file_input.file,
-                    file_input.content_type,
-                ),
-                response_format="text",
-            )
-            file_text = transcription
-            print(file_text)
+                transcription = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=(
+                        "temp." + file_input.filename.split(".")[1],
+                        file_input.file,
+                        file_input.content_type,
+                    ),
+                    response_format="text",
+                )
+                file_text = transcription
+                print(file_text)
 
-        else:
+        elif _level == 4:
             print("In image file")
             client = OG_OPENAI()
 
@@ -131,6 +132,7 @@ async def chat_completion(
                 ],
                 max_tokens=500,
             )
+            print(f"Image response: {response}")
             file_text = response.choices[0].message
             print(f"file_text -->{file_text}")
 
