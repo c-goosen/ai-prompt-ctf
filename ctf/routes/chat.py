@@ -23,7 +23,7 @@ from ctf.llm_guard.protections import (
     llm_protection,
 )
 from ctf.rag.search import search_vecs_and_prompt
-from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt
+from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt, decide_prompt
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -150,7 +150,7 @@ async def chat_completion(
             labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
             input=text_input,
         )
-    elif int(_level) in (8, 9, 10):
+    elif int(_level) in (8, 9, 10) and len(text_input.split(" ")) > 1 :
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),
@@ -163,7 +163,7 @@ async def chat_completion(
     if protect:
         return denied_response(text_input)
     else:
-        Settings.llm.system_prompt = get_system_prompt(level=_level)
+        Settings.llm.system_prompt = decide_prompt(level=_level)
 
         _llm = OpenAI(
             model=text_model,
@@ -181,11 +181,7 @@ async def chat_completion(
             collection_name="ctf_levels",
             level=_level,
             llm=_llm,
-            system_prompt=(
-                get_system_prompt(level=_level)
-                if _level > 2
-                else get_basic_prompt()
-            ),
+            system_prompt=decide_prompt(_level),
             request=request,
             memory=memory
         )
