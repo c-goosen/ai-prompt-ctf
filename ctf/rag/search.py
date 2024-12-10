@@ -189,31 +189,30 @@ def search_vecs_and_prompt(
         openai_coa = True
     # react_agent = True
 
-    if react_agent:
-        """
-        React Agent
-        """
-        agent = ReActAgent.from_tools(
-            (
-                [submit_answer_tool, rag_tool, ask_for_help_tool]
-                if level != 6
-                else [
-                    print_file_tool,
-                    rag_tool,
-                    submit_answer_tool,
-                    sql_tool,
-                    ask_for_help_tool,
-                ]
-            ),
-            llm=llm,
-            verbose=True,
-            memory=memory,
-            max_iterations=5,
-            return_direct=True,
-        )
-        response = agent.chat(prompt)
+    """
+    React Agent
+    """
+    agent = ReActAgent.from_tools(
+        (
+            [submit_answer_tool, rag_tool, ask_for_help_tool]
+            if level != 6
+            else [
+                print_file_tool,
+                rag_tool,
+                submit_answer_tool,
+                sql_tool,
+                ask_for_help_tool,
+            ]
+        ),
+        llm=llm,
+        verbose=True,
+        memory=memory,
+        max_iterations=5,
+        return_direct=True,
+    )
+    # response = agent.chat(prompt)
 
-    elif openai_coa:
+    if openai_coa:
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
         agent = ReActAgent.from_tools(
             (
@@ -233,7 +232,7 @@ def search_vecs_and_prompt(
             max_iterations=10,
             return_direct=True,
         )
-        response = agent.chat(prompt)
+        # response = agent.chat(prompt)
 
     elif coa_agent:
         """
@@ -261,7 +260,7 @@ def search_vecs_and_prompt(
         )
 
         agent = coa_worker.as_agent()
-        response = agent.chat(prompt)
+    response = agent.chat(prompt)
 
     # else:
     #     response = chat_engine.chat(prompt)
