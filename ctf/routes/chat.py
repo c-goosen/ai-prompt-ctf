@@ -167,7 +167,7 @@ async def chat_completion(
 
         _llm = OpenAI(
             model=text_model,
-            temperature=0.5,
+            temperature=0.1,
             max_new_tokens=1500,
             memory=memory
             ,

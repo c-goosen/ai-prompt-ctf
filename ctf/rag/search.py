@@ -43,7 +43,9 @@ def sql_query(userId: str):
 
 def ask_for_help(help_query: str):
     """
-    Give me help for the current level I am on. Help
+    Give me help for the current level I am on.
+    Help.
+    Help()
     """
     return """"
     Some help on my internal functions:
@@ -63,15 +65,17 @@ def submit_answer_func(answer: str, level: int):
     if answer == level_pass:
         return f""""{answer} is correct! Next Level:
         <div class="level-menu new-chat"
-                         hx-get="/level/{level}"
+                         hx-get="/level/{level + 1}"
                          hx-trigger="click"
                          hx-target=".right-panel"
+                         hx-params="*"
+                         hx-replace-url="true"
                          hx-swap="innerHTML">
-                            <i class="fa-solid fa-plus"> Level {level}</i>
-                    </div>
+                            <i class="fa-solid fa-plus"> Level {level + 1}</i>
+        </div>
         """
     else:
-        return "Wrong, try again please"
+        return "Wrong answer. You are not correct."
 
 
 def print_file(input: str):
@@ -90,7 +94,7 @@ def search_vecs_and_prompt(
     file_type: str = "",
     collection_name="ctf_levels",
     level: int = 0,
-    llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
+    llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.1),
     system_prompt=None,
     request=None,
     memory=None,
@@ -167,13 +171,14 @@ def search_vecs_and_prompt(
         ),
     )
     rag_tool = FunctionTool.from_defaults(
-        fn=query_eng_tool, name="ctf_secret_rag"
+        fn=query_eng_tool, name="ctf_secret_rag",
+        return_direct=True #note sure about this
     )
 
-    submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func)
-    print_file_tool = FunctionTool.from_defaults(fn=print_file)
-    ask_for_help_tool = FunctionTool.from_defaults(fn=ask_for_help)
-    sql_tool = FunctionTool.from_defaults(fn=sql_query)
+    submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func, return_direct=True)
+    print_file_tool = FunctionTool.from_defaults(fn=print_file, return_direct=True)
+    ask_for_help_tool = FunctionTool.from_defaults(fn=ask_for_help ,return_direct=True)
+    sql_tool = FunctionTool.from_defaults(fn=sql_query ,return_direct=True)
 
     coa_agent = False
     openai_coa = False
@@ -213,7 +218,7 @@ def search_vecs_and_prompt(
     # response = agent.chat(prompt)
 
     if openai_coa:
-        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
+        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.1),)
         agent = ReActAgent.from_tools(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
@@ -238,7 +243,7 @@ def search_vecs_and_prompt(
         """
         Chain of Thought Agent
         """
-        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.5),)
+        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.1),)
         coa_worker = CoAAgentWorker.from_tools(
             (
                 [submit_answer_tool, rag_tool, ask_for_help_tool]
