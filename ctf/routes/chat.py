@@ -1,19 +1,20 @@
+import base64
 import logging
 import os
+from typing import Annotated
 from typing import Optional
-from openai import OpenAI as OG_OPENAI
 
 from fastapi import APIRouter
+from fastapi import Cookie
 from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from llama_index.core import Settings
-
-# from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.openai import OpenAI
-import base64
+from openai import OpenAI as OG_OPENAI
+
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.llm_guard.protections import (
@@ -28,7 +29,6 @@ from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt
 logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-memory = ChatMemoryBuffer.from_defaults(token_limit=100000000)
 
 settings.OPENAI_API_KEY
 
@@ -78,9 +78,15 @@ async def chat_completion(
     text_level: int = Form(...),
     text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
+    cookie_identity: Annotated[str | None, Cookie(alias="anon_user_identity",title="anon_user_identity")] = None
 ):
     _level = text_level
     file_text = ""
+    memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
+        token_limit=settings.token_limit,
+        chat_store=settings.chat_store,
+        chat_store_key=f"level-{_level}-{cookie_identity}",
+    )
 
     if file_input:
         data = await file_input.read()
@@ -163,7 +169,8 @@ async def chat_completion(
             model=text_model,
             temperature=0.5,
             max_new_tokens=1500,
-            memory=request.app.chats.get(int(_level)),
+            memory=memory
+            ,
         )
 
         print(text_input)
@@ -180,6 +187,7 @@ async def chat_completion(
                 else get_basic_prompt()
             ),
             request=request,
+            memory=memory
         )
 
     # messages = [

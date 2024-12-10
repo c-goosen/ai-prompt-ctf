@@ -15,7 +15,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
-from starlette.middleware.cors import CORSMiddleware
 
 from ctf.app_config import settings
 from ctf.routes import challenges
@@ -45,7 +44,6 @@ async def lifespan(app: FastAPI):
 logger = logging.getLogger(__name__)
 logging.getLogger("passlib").setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-# get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 
 if os.getenv("PREPARE_FLAGS", False):
     prepare_flags()
@@ -59,18 +57,9 @@ else:
 
 # Rate limiting to keep AI costs low, naught H@xors
 
-app.chats = settings.chats
-
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     # Update with specific origins in production
-#     allow_origins=["localhost", '0.0.0.0', "0.0.0.0:8100"],
-#     allow_methods=["GET", "POST"],
-# )
 
 templates = Jinja2Templates(directory="ctf/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
@@ -83,6 +72,7 @@ app.include_router(
     chat.router,
     prefix="/v1",
 )
+cookie = Cookie(alias="anon_user_identity",title="anon_user_identity")
 
 PromptGuardGoose()
 PromptGuardMeta()
@@ -90,7 +80,7 @@ PromptGuardMeta()
 
 @app.get("/")
 @limiter.limit("1/sec")
-async def root(request: Request, cookie_identity: Annotated[str | None, Cookie()] = None):
+async def root(request: Request, cookie_identity: Annotated[str | None, cookie] = None):
     rand_img = random.randint(1, 18)
 
     resp = templates.TemplateResponse(
@@ -112,6 +102,7 @@ async def root(request: Request, cookie_identity: Annotated[str | None, Cookie()
     )
     if not cookie_identity:
         resp.set_cookie(key="anon_user_identity", value=str(uuid.uuid4()))
+    print(cookie_identity)
     return resp
 
 

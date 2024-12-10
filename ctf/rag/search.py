@@ -1,3 +1,6 @@
+import sqlite3
+from llama_index.core.memory import ChatMemoryBuffer
+
 import chromadb
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex
@@ -19,7 +22,6 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
-import sqlite3
 
 
 def sql_query(userId: str):
@@ -91,8 +93,14 @@ def search_vecs_and_prompt(
     llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.5),
     system_prompt=None,
     request=None,
+    memory=None,
 ):
-    memory = request.app.chats.get(int(level))
+    #memory = request.app.chats.get(int(level))
+    # memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
+    #     token_limit=settings.token_limit,
+    #     chat_store=settings.chat_store,
+    #     chat_store_key=f"level-{_level}-{cookie_identity}",
+    # )
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
         system_prompt = get_basic_prompt()
@@ -140,9 +148,9 @@ def search_vecs_and_prompt(
         llm=llm,
         memory=memory,
     )
-    chat_engine = index.as_chat_engine(
-        chat_mode="best", llm=llm, verbose=True, filters=filters, memory=memory
-    )
+    # chat_engine = index.as_chat_engine(
+    #     chat_mode="best", llm=llm, verbose=True, filters=filters, memory=memory
+    # )
 
     # Query Engine tool so that Agent can use RAG
     query_eng_tool = QueryEngineTool(
@@ -169,8 +177,8 @@ def search_vecs_and_prompt(
 
     coa_agent = False
     openai_coa = False
-    react_agent = False
-    if 3 < level < 8 and level not in [0, 4, 5]:
+    react_agent = True
+    if level < 8 and level not in [0, 4, 5]:
         react_agent = True
     elif level in [4, 5]:
         react_agent = False
@@ -183,7 +191,7 @@ def search_vecs_and_prompt(
 
     if react_agent:
         """
-        OpenAI Agent
+        React Agent
         """
         agent = ReActAgent.from_tools(
             (
@@ -255,8 +263,8 @@ def search_vecs_and_prompt(
         agent = coa_worker.as_agent()
         response = agent.chat(prompt)
 
-    else:
-        response = chat_engine.chat(prompt)
+    # else:
+    #     response = chat_engine.chat(prompt)
 
     # print(f"Memory --> {memory.json()}")
     print(f"Memory --> {memory}")
