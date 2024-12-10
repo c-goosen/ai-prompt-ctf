@@ -6,6 +6,9 @@ from contextlib import asynccontextmanager
 import httpx
 import nest_asyncio
 from fastapi import FastAPI, Request
+from typing import Annotated
+
+from fastapi import Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -20,6 +23,7 @@ from ctf.routes import chat
 from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
+import uuid
 
 nest_asyncio.apply()
 
@@ -86,9 +90,10 @@ PromptGuardMeta()
 
 @app.get("/")
 @limiter.limit("1/sec")
-async def root(request: Request):
+async def root(request: Request, cookie_identity: Annotated[str | None, Cookie()] = None):
     rand_img = random.randint(1, 18)
-    return templates.TemplateResponse(
+
+    resp = templates.TemplateResponse(
         "root.html",
         {
             "request": request,
@@ -105,6 +110,9 @@ async def root(request: Request):
             "THEME_MODE": "dark",
         },
     )
+    if not cookie_identity:
+        resp.set_cookie(key="anon_user_identity", value=str(uuid.uuid4()))
+    return resp
 
 
 @app.get("/health")
