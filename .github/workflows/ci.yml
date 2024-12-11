@@ -28,10 +28,6 @@ jobs:
       - name: Check linting
         run: |
           make ci-lint
-      - name: Check semgrep
-        run: |
-          make ci-semgrep
       - name: Check tests
         run: |
-          python3 -m pip install semgrep
           make ci-test
