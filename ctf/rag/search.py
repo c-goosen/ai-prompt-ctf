@@ -44,7 +44,7 @@ def sql_query(userId: str = Field(
 
 def hints_func(hints_query: str = Field(
         description="Hints for current level and issues"
-    ), level: str = Field(
+    ), level: int = Field(
         description="Current level"
     )):
     """
@@ -72,7 +72,7 @@ def submit_answer_func(answer: str = Field(
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
-        return f"""{answer} is correct! Next Level:
+        return f"""{answer} is correct! Click for next Level:
         <div class="level-menu new-chat"
                          hx-get="/level/{level + 1}"
                          hx-trigger="click"
@@ -80,7 +80,7 @@ def submit_answer_func(answer: str = Field(
                          hx-params="*"
                          hx-replace-url="true"
                          hx-swap="innerHTML">
-                            <i class="fa-solid fa-plus"> Level {level + 1}</i>
+                            <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
         </div>
         """
     else:
