@@ -136,6 +136,10 @@ def render_faq(request: Request):
 def render_challanges(request: Request):
     response = templates.TemplateResponse(
         "challenges.html",
-        {"request": request, "PAGE_HEADER": settings.CTF_SUBTITLE, "MD_FILE": CHALLANGES_MARKDOWN},
+        {
+            "request": request,
+            "PAGE_HEADER": settings.CTF_SUBTITLE,
+            "MD_FILE": CHALLANGES_MARKDOWN,
+        },
     )
     return response

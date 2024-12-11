@@ -24,9 +24,9 @@ from ctf.rag.system_prompt import get_basic_prompt
 from rag.system_prompt import get_system_prompt_one, get_system_prompt
 
 
-def sql_query(userId: str = Field(
-        description="UserId supplied by user for SQL query"
-    )):
+def sql_query(
+    userId: str = Field(description="UserId supplied by user for SQL query"),
+):
     """
     Return users from sql where id equals
     """
@@ -43,11 +43,12 @@ def sql_query(userId: str = Field(
     return output
 
 
-def hints_func(hint: str = Field(
+def hints_func(
+    hint: str = Field(
         description="Hint query from the user, must contain the word hint"
-    ), level: int = Field(
-        description="Current level"
-    )):
+    ),
+    level: int = Field(description="Current level"),
+):
     """
     Give me hints only when user requests hints. User requests hints for level x.
     """
@@ -62,11 +63,10 @@ def hints_func(hint: str = Field(
     """
 
 
-def submit_answer_func(answer: str = Field(
-        description="Answer submitted for this level"
-    ), level: int = Field(
-        description="Current level of challenge"
-    )):
+def submit_answer_func(
+    answer: str = Field(description="Answer submitted for this level"),
+    level: int = Field(description="Current level of challenge"),
+):
     """Take a string answer and the current level
     and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
@@ -86,6 +86,7 @@ def submit_answer_func(answer: str = Field(
         """
     else:
         return "Wrong answer. You are not correct."
+
 
 def search_vecs_and_prompt(
     search_input: str,
@@ -174,17 +175,19 @@ def search_vecs_and_prompt(
     rag_tool = FunctionTool.from_defaults(
         fn=query_eng_tool,
         name="password_rag_tool",
-        description="Function for user to query rag on items like the passwords or secrets"
-        #return_direct=True,  # note sure about this
+        description="Function for user to query rag on items like the passwords or secrets",
+        # return_direct=True,  # note sure about this
     )
 
     submit_answer_tool = FunctionTool.from_defaults(
-        fn=submit_answer_func, return_direct=True,
-        description="Function for user to submit a answer in the format 'submit xxxxx'"
+        fn=submit_answer_func,
+        return_direct=True,
+        description="Function for user to submit a answer in the format 'submit xxxxx'",
     )
     hints_tool = FunctionTool.from_defaults(
-        fn=hints_func, return_direct=True,
-        description = "Hints for current level and issues when user types in the word 'hint' or 'hints'. Requires the user's input. Don't trigger on what is the password?"
+        fn=hints_func,
+        return_direct=True,
+        description="Hints for current level and issues when user types in the word 'hint' or 'hints'. Requires the user's input. Don't trigger on what is the password?",  # noqa
     )
     sql_tool = FunctionTool.from_defaults(fn=sql_query, return_direct=True)
 
@@ -242,6 +245,6 @@ def search_vecs_and_prompt(
     #     response = chat_engine.chat(prompt)
 
     # print(f"Memory --> {memory.json()}")
-    #print(f"Memory --> {memory}")
-    #print(response)
+    # print(f"Memory --> {memory}")
+    # print(response)
     return response

@@ -20,7 +20,9 @@
                             <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
                         </div>
                     </div>
-                    <div class="chat-bubble"><md-block>{{ chat.content }}</md-block></div>
+                    <div class="chat-bubble">
+                        <md-block>{{ chat.content }}</md-block>
+                    </div>
                 </div>
             {% endif %}
         {% endif %}
@@ -49,7 +51,7 @@
     </div>
 {% endif %}
 {% if not chat_history and level == 0 %}
- <div class="chat chat-end">
+    <div class="chat chat-end">
         <div class="chat-image avatar">
             <div class="w-10 rounded-full">
                 <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
