@@ -23,7 +23,9 @@ from ctf.llm_guard.protections import (
     llm_protection,
 )
 from ctf.rag.search import search_vecs_and_prompt
-from ctf.rag.system_prompt import get_system_prompt, get_basic_prompt, decide_prompt
+from ctf.rag.system_prompt import (
+    decide_prompt,
+)
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -78,7 +80,10 @@ async def chat_completion(
     text_level: int = Form(...),
     text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
-    cookie_identity: Annotated[str | None, Cookie(alias="anon_user_identity",title="anon_user_identity")] = None
+    cookie_identity: Annotated[
+        str | None,
+        Cookie(alias="anon_user_identity", title="anon_user_identity"),
+    ] = None,
 ):
     _level = text_level
     file_text = ""
@@ -150,7 +155,7 @@ async def chat_completion(
             labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
             input=text_input,
         )
-    elif int(_level) in (8, 9, 10) and len(text_input.split(" ")) > 1 :
+    elif int(_level) in (8, 9, 10) and len(text_input.split(" ")) > 1:
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),
@@ -169,8 +174,7 @@ async def chat_completion(
             model=text_model,
             temperature=0.1,
             max_new_tokens=1500,
-            memory=memory
-            ,
+            memory=memory,
         )
 
         print(text_input)
@@ -183,7 +187,7 @@ async def chat_completion(
             llm=_llm,
             system_prompt=decide_prompt(_level),
             request=request,
-            memory=memory
+            memory=memory,
         )
 
     # messages = [

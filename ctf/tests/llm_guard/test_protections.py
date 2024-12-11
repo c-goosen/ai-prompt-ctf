@@ -1,13 +1,12 @@
+import pytest
+
+from ctf.llm_guard.llm_guard import PromptGuardMeta  # , PromptGuardGoose
 from ctf.llm_guard.protections import (
     output_check,
     output_regex,
     input_check,
     input_and_output_checks,
 )
-
-from ctf.llm_guard.llm_guard import PromptGuardMeta  # , PromptGuardGoose
-
-import pytest
 
 testdata = [("4111111111111111", True), ("378282246310005", True)]
 

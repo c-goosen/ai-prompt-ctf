@@ -1,11 +1,10 @@
+import logging
 import os
 
+from dotenv import load_dotenv
+from llama_index.core.storage.chat_store import SimpleChatStore
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
-import logging
-from llama_index.core.storage.chat_store import SimpleChatStore
-from llama_index.core.memory import ChatMemoryBuffer
 
 load_dotenv()
 

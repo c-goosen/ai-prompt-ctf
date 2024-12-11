@@ -1,14 +1,14 @@
 import logging
 import os
 import random
+import uuid
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 import httpx
 import nest_asyncio
-from fastapi import FastAPI, Request
-from typing import Annotated
-
 from fastapi import Cookie
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -17,12 +17,11 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
 
 from ctf.app_config import settings
-from ctf.routes import challenges
-from ctf.routes import chat
+from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
-from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
-import uuid
+from ctf.routes import challenges
+from ctf.routes import chat
 
 nest_asyncio.apply()
 
@@ -72,7 +71,7 @@ app.include_router(
     chat.router,
     prefix="/v1",
 )
-cookie = Cookie(alias="anon_user_identity",title="anon_user_identity")
+cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
 
 PromptGuardGoose()
 PromptGuardMeta()
@@ -80,7 +79,9 @@ PromptGuardMeta()
 
 @app.get("/")
 @limiter.limit("1/sec")
-async def root(request: Request, cookie_identity: Annotated[str | None, cookie] = None):
+async def root(
+    request: Request, cookie_identity: Annotated[str | None, cookie] = None
+):
     rand_img = random.randint(1, 18)
 
     resp = templates.TemplateResponse(

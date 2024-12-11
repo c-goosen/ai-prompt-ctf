@@ -1,5 +1,4 @@
 import sqlite3
-from llama_index.core.memory import ChatMemoryBuffer
 
 import chromadb
 from llama_index.core import Settings
@@ -49,7 +48,6 @@ def ask_for_help(help_query: str):
     """
     return """"
     Some help on my internal functions:
-    
     print_file -> print file by directory
     submit_answer_func -> check if flag is correct
     sql_query -> query user by userId in sql
@@ -99,7 +97,7 @@ def search_vecs_and_prompt(
     request=None,
     memory=None,
 ):
-    #memory = request.app.chats.get(int(level))
+    # memory = request.app.chats.get(int(level))
     # memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
     #     token_limit=settings.token_limit,
     #     chat_store=settings.chat_store,
@@ -171,29 +169,23 @@ def search_vecs_and_prompt(
         ),
     )
     rag_tool = FunctionTool.from_defaults(
-        fn=query_eng_tool, name="ctf_secret_rag",
-        return_direct=True #note sure about this
+        fn=query_eng_tool,
+        name="ctf_secret_rag",
+        return_direct=True,  # note sure about this
     )
 
-    submit_answer_tool = FunctionTool.from_defaults(fn=submit_answer_func, return_direct=True)
-    print_file_tool = FunctionTool.from_defaults(fn=print_file, return_direct=True)
-    ask_for_help_tool = FunctionTool.from_defaults(fn=ask_for_help ,return_direct=True)
-    sql_tool = FunctionTool.from_defaults(fn=sql_query ,return_direct=True)
+    submit_answer_tool = FunctionTool.from_defaults(
+        fn=submit_answer_func, return_direct=True
+    )
+    print_file_tool = FunctionTool.from_defaults(
+        fn=print_file, return_direct=True
+    )
+    ask_for_help_tool = FunctionTool.from_defaults(
+        fn=ask_for_help, return_direct=True
+    )
+    sql_tool = FunctionTool.from_defaults(fn=sql_query, return_direct=True)
 
     coa_agent = False
-    openai_coa = False
-    react_agent = True
-    # if level < 8 and level not in [0, 4, 5]:
-    #     react_agent = True
-    # elif level in [4, 5]:
-    #     react_agent = False
-    #     openai_coa = False
-    #     coa_agent = False
-
-    # elif level == 8 and level != 0:
-    #     openai_coa = True
-    # # react_agent = True
-
     """
     React Agent
     """

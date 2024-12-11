@@ -2,7 +2,6 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
 
 
-
 class LLMGuardLocalBase:
     def __init__(
         self,

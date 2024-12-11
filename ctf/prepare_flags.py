@@ -14,7 +14,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 try:
     from ctf.app_config import settings
-except:
+except Exception:
     from app_config import settings
 import sqlite3
 
@@ -41,22 +41,22 @@ def setup_sql_level(PASSWORD: str):
 
     cursor_obj.execute(table)
     cursor_obj.execute(
-        f"""INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (33, '{PASSWORD}', '{PASSWORD}', 190)"""
+        f"""INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (33, '{PASSWORD}', '{PASSWORD}', 190)"""  # noqa
     )
     cursor_obj.execute(
-        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (2, 'Cryptic', 'Goose', 190)"""
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (2, 'Cryptic', 'Goose', 190)"""  # noqa
     )
     cursor_obj.execute(
-        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (3, 'Test', 'Tube', 50)"""
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (3, 'Test', 'Tube', 50)"""  # noqa
     )
     cursor_obj.execute(
-        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (4, 'l33t', 'hacker', 20)"""
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (4, 'l33t', 'hacker', 20)"""  # noqa
     )
     cursor_obj.execute(
-        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'Michael', 'Office', 5)"""
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'Michael', 'Office', 5)"""  # noqa
     )
     cursor_obj.execute(
-        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'SQL', 'Injection', 1000)"""
+        """INSERT INTO USERS (UserId,FirstName,LastName,TokenCount) VALUES (5, 'SQL', 'Injection', 1000)"""  # noqa
     )
     connection_obj.commit()
     print("Table & data is Ready")

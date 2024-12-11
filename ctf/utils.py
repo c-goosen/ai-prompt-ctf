@@ -1,6 +1,7 @@
-from app_config import settings
-from hashlib import sha256
 import random
+from hashlib import sha256
+
+from app_config import settings
 
 
 def return_hash(input: str):
