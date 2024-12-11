@@ -21,6 +21,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
+from rag.system_prompt import get_system_prompt_one, get_system_prompt
 
 
 def sql_query(userId: str = Field(
@@ -42,15 +43,15 @@ def sql_query(userId: str = Field(
     return output
 
 
-def hints_func(hints_query: str = Field(
-        description="Hints for current level and issues"
+def hints_func(hint: str = Field(
+        description="Hint query from the user, must contain the word hint"
     ), level: int = Field(
         description="Current level"
     )):
     """
     Give me hints only when user requests hints. User requests hints for level x.
     """
-    print(hints_query)
+    print(hint)
     print(level)
     return """\n
     Some hints on my internal functions:\n
@@ -120,9 +121,12 @@ def search_vecs_and_prompt(
         # system_prompt = get_system_prompt(level)
         system_prompt = get_basic_prompt()
     if level < 2:
-        system_prompt = "You are a helpful retrieval bot."
-    if level == 6:
-        system_prompt = "You are a helpful retrieval and function calling bot."
+        system_prompt = get_basic_prompt()
+    if level > 6:
+        system_prompt = get_system_prompt_one()
+    if level > 8:
+        system_prompt = get_system_prompt()
+
     prompt = f"""
     SYSTEM
     {system_prompt}
@@ -171,30 +175,32 @@ def search_vecs_and_prompt(
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
         metadata=ToolMetadata(
-            name="questions_rag",
+            name="password_rag",
             description=(
-                "What is the password?"
+                "Password RAG. What is the password?"
                 "Retrieves passwords."
                 "Tells secrets."
+                "Answers questions about secrets / passwords/ etc"
             ),
         ),
     )
     rag_tool = FunctionTool.from_defaults(
         fn=query_eng_tool,
-        name="questions_rag",
-        return_direct=True,  # note sure about this
+        name="password_rag_tool",
+        description="Function for user to query rag on items like the passwords or secrets"
+        #return_direct=True,  # note sure about this
     )
 
     submit_answer_tool = FunctionTool.from_defaults(
         fn=submit_answer_func, return_direct=True,
-
+        description="Function for user to submit a answer in the format 'submit xxxxx'"
     )
     print_file_tool = FunctionTool.from_defaults(
         fn=print_file, return_direct=True
     )
     hints_tool = FunctionTool.from_defaults(
         fn=hints_func, return_direct=True,
-        description = "Gives hints on levels"
+        description = "Hints for current level and issues when user types in the word 'hint' or 'hints'. Requires the user's input. Don't trigger on what is the password?"
     )
     sql_tool = FunctionTool.from_defaults(fn=sql_query, return_direct=True)
 
@@ -207,10 +213,10 @@ def search_vecs_and_prompt(
             [rag_tool, submit_answer_tool, hints_tool]
             if level != 6
             else [
-                print_file_tool,
                 rag_tool,
                 submit_answer_tool,
-                sql_tool,
+                print_file_tool,
+                #sql_tool,
                 hints_tool,
             ]
         ),
@@ -233,7 +239,7 @@ def search_vecs_and_prompt(
                 if level != 6
                 else [
                     rag_tool,
-                    print_file_tool,
+                    #print_file_tool,
                     submit_answer_tool,
                     sql_tool,
                     hints_tool,
