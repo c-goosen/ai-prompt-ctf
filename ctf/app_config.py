@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     CTF_NAME: str = os.getenv(
         "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
     )
-    CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "aka Talk Dirty to me....")
+    CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "Agentic LLM CTF")
     CTF_DETAILS: str = os.getenv(
         "CTF_DETAILS",
         """This is a prompt injection

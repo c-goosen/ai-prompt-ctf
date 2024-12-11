@@ -52,6 +52,7 @@ async def load_level(
             f"levels/htmx_level_{_level}.html",
             {
                 "request": request,
+                "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
                 "chat_history": chat_history.chat_store.get_messages(
@@ -66,6 +67,7 @@ async def load_level(
             "levels/generic_level.html",
             {
                 "request": request,
+                "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
                 "chat_history": chat_history.chat_store.get_messages(

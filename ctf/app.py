@@ -120,6 +120,7 @@ def render_faq(request: Request):
         "faq.html",
         {
             "request": request,
+            "PAGE_HEADER": settings.CTF_SUBTITLE,
             "IMG_FILENAME": app.url_path_for(
                 "static",
                 path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
@@ -135,6 +136,6 @@ def render_faq(request: Request):
 def render_challanges(request: Request):
     response = templates.TemplateResponse(
         "challenges.html",
-        {"request": request, "MD_FILE": CHALLANGES_MARKDOWN},
+        {"request": request, "PAGE_HEADER": settings.CTF_SUBTITLE, "MD_FILE": CHALLANGES_MARKDOWN},
     )
     return response

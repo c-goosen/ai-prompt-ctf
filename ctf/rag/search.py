@@ -37,7 +37,7 @@ def sql_query(userId: str = Field(
     # Drop the GEEK table if already exists.
     cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + userId + ";")
     # cursor_obj.execute(query)
-    output = cursor_obj.fetchone()
+    output = cursor_obj.fetchall()
     print(output)
     cursor_obj.close()
     return output
@@ -86,19 +86,6 @@ def submit_answer_func(answer: str = Field(
         """
     else:
         return "Wrong answer. You are not correct."
-
-
-def print_file(file_name: str = Field(
-        description="A name of a file in a directory"
-    )):
-    """Print file with input dir"""
-
-    with open(file_name) as f:
-        _ = f.read()
-        print(f"Printing file name--> {file_name}")
-        print(f"Printing file contents--> {_}")
-        return _
-
 
 def search_vecs_and_prompt(
     search_input: str,
@@ -195,9 +182,6 @@ def search_vecs_and_prompt(
         fn=submit_answer_func, return_direct=True,
         description="Function for user to submit a answer in the format 'submit xxxxx'"
     )
-    print_file_tool = FunctionTool.from_defaults(
-        fn=print_file, return_direct=True
-    )
     hints_tool = FunctionTool.from_defaults(
         fn=hints_func, return_direct=True,
         description = "Hints for current level and issues when user types in the word 'hint' or 'hints'. Requires the user's input. Don't trigger on what is the password?"
@@ -215,8 +199,7 @@ def search_vecs_and_prompt(
             else [
                 rag_tool,
                 submit_answer_tool,
-                print_file_tool,
-                #sql_tool,
+                sql_tool,
                 hints_tool,
             ]
         ),
@@ -239,7 +222,6 @@ def search_vecs_and_prompt(
                 if level != 6
                 else [
                     rag_tool,
-                    #print_file_tool,
                     submit_answer_tool,
                     sql_tool,
                     hints_tool,

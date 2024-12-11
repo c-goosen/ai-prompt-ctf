@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="chat-bubble">
-            I am function-calling able, try the following functions: help, submit_answer, query users with sql and print file
+            I am function-calling able, try the following functions: help, submit_answer and sql_query users with sql
         </div>
     </div>
     <div class="chat chat-end">
@@ -49,14 +49,14 @@
     </div>
 {% endif %}
 {% if not chat_history and level == 0 %}
-    <div class="chat chat-end">
+ <div class="chat chat-end">
         <div class="chat-image avatar">
             <div class="w-10 rounded-full">
                 <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
         </div>
         <div class="chat-bubble">
-            Type into the input box below and ask questions until I divulge a secret or password. I have memory so try multiple prompts.
+            Welcome to the AI agentic prompt ctf challenge. Use fighting words. Try different things to break me and get my agent to divulge passwords.
         </div>
     </div>
     <div class="chat chat-end">
@@ -66,7 +66,7 @@
             </div>
         </div>
         <div class="chat-bubble">
-            Welcome to the AI prompt-ctf challenge. Use fighting words. Try different things to break me and get my passwords
+            Type into the input box below and ask questions until I divulge a secret or password. I have memory so try multiple prompts. I also have helper functions like hints or submit answer to check your hacks.
         </div>
     </div>
     <div class="chat chat-end">
@@ -88,7 +88,7 @@
                 <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
         </div>
-        <div class="chat-bubble">Fixed this challenge, try again!</div>
+        <div class="chat-bubble">Try uploading an image (png/jpg) and typing something!</div>
     </div>
 {% endif %}
 {% if not chat_history and level == 5 %}
@@ -98,7 +98,7 @@
                 <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
         </div>
-        <div class="chat-bubble">Fixed this challenge, try again!</div>
+        <div class="chat-bubble">Try uploading an audio file (mp3/wav) and typing something!</div>
     </div>
 {% endif %}
 {% if not chat_history and level == 10 %}
