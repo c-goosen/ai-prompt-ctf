@@ -1,10 +1,12 @@
-# PwnGPT -  BSIDES Cape Town CTF
+# PwnGPT -  Agentic LLM CTF
 
 
 ## Intro
 
 Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
 https://twitter.com/crypticg00se/status/1731578440166293643 / https://bsidescapetown.co.za.
+
+This is v2 and has been run at 3 events and counting.
 
 This project is an exploration of what it would take to build a Gandalf LLM prompt injection challenge as well as 
 train an LLM to protect various levels.
@@ -26,13 +28,14 @@ Tools
 * LLamaindex
 * RAG (Retrieval Augmented Generation) llamaindex
 * Function calling
+* Agentic abilities with llamaindex react agent
 * Htmx
 * Chromadb
-* GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, etc
-* Python 3.11+
+* Mutiple models poossible GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, llama3.2 1b etc
+* Python 3.12+
 * FastAPI  (async REST API framework)
 * Pydantic (types)
-* Huggingface finetuned model
+* Huggingface finetuned models
 
 ## API Docs
 API docs are located at ${URI}/docs
@@ -51,7 +54,7 @@ poetry install
 ## Database
 Requires chromadb running locally with persistence.
 
-All passwords get thrown in the same collection, but get filtered to make things simpleer
+All passwords get thrown in the same collection, but get filtered to make things simpler
 
 ## Loading documents into ChromaDB vector store
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
@@ -75,12 +78,12 @@ This will eventually be moved to start of app ^^
 
 ## Run locally
 ```bash
-uvicorn app:app --reload
+python ctf/main.py
 ```
 
 ## Run prod
 ```bash
-FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127.0.0.1:8000 --forwarded-allow-ips '*' --workers 2
+FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127.0.0.1:8000 --forwarded-allow-ips '*' --workers 4
 
 # or via docker
 docker build -t llm_challenge .
@@ -89,6 +92,8 @@ docker run -p 8000:8000  llm_challenge
 
 ## Auth 
 No longer uses auth. Flags to be placed in seperate area
+
+Anon users are tracked by cookie for chat history
 
 ## Memory requirements for Local LLM running
 ### Subject to change
@@ -133,3 +138,5 @@ All depends on your python hosting.
 OpenAI costs are low.
 
 If you want to use hugginface for Inference, also low costs.
+
+You can run this locally
