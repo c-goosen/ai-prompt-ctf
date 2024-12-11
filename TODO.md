@@ -37,3 +37,4 @@ Post Bsides Cpt 2024 TODO
 * ~~Better function calling, aka direct return~~
 * Move all levels to react agent
 * Move to llama3.2 1b by configuration, only openAI if asked
+* Add more evals
