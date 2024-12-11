@@ -183,12 +183,12 @@ def search_vecs_and_prompt(
     coa_agent = False
     openai_coa = False
     react_agent = True
-    if level < 8 and level not in [0, 4, 5]:
-        react_agent = True
-    elif level in [4, 5]:
-        react_agent = False
-        openai_coa = False
-        coa_agent = False
+    # if level < 8 and level not in [0, 4, 5]:
+    #     react_agent = True
+    # elif level in [4, 5]:
+    #     react_agent = False
+    #     openai_coa = False
+    #     coa_agent = False
 
     # elif level == 8 and level != 0:
     #     openai_coa = True
@@ -217,29 +217,7 @@ def search_vecs_and_prompt(
     )
     # response = agent.chat(prompt)
 
-    if openai_coa:
-        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.1),)
-        agent = ReActAgent.from_tools(
-            (
-                [submit_answer_tool, rag_tool, ask_for_help_tool]
-                if level != 6
-                else [
-                    print_file_tool,
-                    rag_tool,
-                    submit_answer_tool,
-                    sql_tool,
-                    ask_for_help_tool,
-                ]
-            ),
-            llm=llm,
-            verbose=True,
-            memory=memory,
-            max_iterations=10,
-            return_direct=True,
-        )
-        # response = agent.chat(prompt)
-
-    elif coa_agent:
+    if coa_agent:
         """
         Chain of Thought Agent
         """
