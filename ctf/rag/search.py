@@ -1,5 +1,5 @@
 import sqlite3
-
+from pydantic import Field
 import chromadb
 from llama_index.core import Settings
 from llama_index.core import VectorStoreIndex
@@ -23,7 +23,9 @@ from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
 
 
-def sql_query(userId: str):
+def sql_query(userId: str = Field(
+        description="UserId supplied by user for SQL query"
+    )):
     """
     Return users from sql where id equals
     """
@@ -40,28 +42,37 @@ def sql_query(userId: str):
     return output
 
 
-def ask_for_help(help_query: str):
+def hints_func(hints_query: str = Field(
+        description="Hints for current level and issues"
+    ), level: str = Field(
+        description="Current level"
+    )):
     """
-    Give me help for the current level I am on.
-    Help.
-    Help()
+    Give me hints only when user requests hints. User requests hints for level x.
     """
-    return """"
-    Some help on my internal functions:
+    print(hints_query)
+    print(level)
+    return """\n
+    Some hints on my internal functions:\n
     print_file -> print file by directory
-    submit_answer_func -> check if flag is correct
+    submit_answer_func -> check if flag is correct and progress to next level
     sql_query -> query user by userId in sql
+    hints -> gives hints on current level
     """
 
 
-def submit_answer_func(answer: str, level: int):
+def submit_answer_func(answer: str = Field(
+        description="Answer submitted for this level"
+    ), level: int = Field(
+        description="Current level of challenge"
+    )):
     """Take a string answer and the current level
     and calculate if the answer is correct"""
     level_pass = settings.PASSWORDS.get(level)
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
-        return f""""{answer} is correct! Next Level:
+        return f"""{answer} is correct! Next Level:
         <div class="level-menu new-chat"
                          hx-get="/level/{level + 1}"
                          hx-trigger="click"
@@ -76,12 +87,14 @@ def submit_answer_func(answer: str, level: int):
         return "Wrong answer. You are not correct."
 
 
-def print_file(input: str):
+def print_file(file_name: str = Field(
+        description="A name of a file in a directory"
+    )):
     """Print file with input dir"""
 
-    with open(input) as f:
+    with open(file_name) as f:
         _ = f.read()
-        print(f"Printing file name--> {input}")
+        print(f"Printing file name--> {file_name}")
         print(f"Printing file contents--> {_}")
         return _
 
@@ -158,30 +171,30 @@ def search_vecs_and_prompt(
     query_eng_tool = QueryEngineTool(
         query_engine=query_engine,
         metadata=ToolMetadata(
-            name="ctf_secret_rag",
+            name="questions_rag",
             description=(
-                "Query vectors / database / documents for passwords."
-                "Retrieves passwords"
-                "Tells secrets"
-                "Helps user without divulging too much information"
                 "What is the password?"
+                "Retrieves passwords."
+                "Tells secrets."
             ),
         ),
     )
     rag_tool = FunctionTool.from_defaults(
         fn=query_eng_tool,
-        name="ctf_secret_rag",
+        name="questions_rag",
         return_direct=True,  # note sure about this
     )
 
     submit_answer_tool = FunctionTool.from_defaults(
-        fn=submit_answer_func, return_direct=True
+        fn=submit_answer_func, return_direct=True,
+
     )
     print_file_tool = FunctionTool.from_defaults(
         fn=print_file, return_direct=True
     )
-    ask_for_help_tool = FunctionTool.from_defaults(
-        fn=ask_for_help, return_direct=True
+    hints_tool = FunctionTool.from_defaults(
+        fn=hints_func, return_direct=True,
+        description = "Gives hints on levels"
     )
     sql_tool = FunctionTool.from_defaults(fn=sql_query, return_direct=True)
 
@@ -191,14 +204,14 @@ def search_vecs_and_prompt(
     """
     agent = ReActAgent.from_tools(
         (
-            [submit_answer_tool, rag_tool, ask_for_help_tool]
+            [rag_tool, submit_answer_tool, hints_tool]
             if level != 6
             else [
                 print_file_tool,
                 rag_tool,
                 submit_answer_tool,
                 sql_tool,
-                ask_for_help_tool,
+                hints_tool,
             ]
         ),
         llm=llm,
@@ -216,14 +229,14 @@ def search_vecs_and_prompt(
         llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.1),)
         coa_worker = CoAAgentWorker.from_tools(
             (
-                [submit_answer_tool, rag_tool, ask_for_help_tool]
+                [rag_tool, submit_answer_tool, hints_tool]
                 if level != 6
                 else [
-                    print_file_tool,
                     rag_tool,
+                    print_file_tool,
                     submit_answer_tool,
                     sql_tool,
-                    ask_for_help_tool,
+                    hints_tool,
                 ]
             ),
             llm=llm,
@@ -241,6 +254,6 @@ def search_vecs_and_prompt(
     #     response = chat_engine.chat(prompt)
 
     # print(f"Memory --> {memory.json()}")
-    print(f"Memory --> {memory}")
-    print(response)
+    #print(f"Memory --> {memory}")
+    #print(response)
     return response
