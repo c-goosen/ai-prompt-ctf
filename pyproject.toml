@@ -49,7 +49,6 @@ huggingface-hub = "0.26.2"
 pytest-asyncio = "^0.24.0"
 djlint = "^1.36.1"
 anyio = "^4.6.2.post1"
-semgrep = "^1.99.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

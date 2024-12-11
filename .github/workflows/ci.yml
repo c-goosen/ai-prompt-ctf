@@ -33,4 +33,5 @@ jobs:
           make ci-semgrep
       - name: Check tests
         run: |
+          python3 -m pip install semgrep
           make ci-test
