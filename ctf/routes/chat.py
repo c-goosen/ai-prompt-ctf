@@ -188,6 +188,7 @@ async def chat_completion(
             system_prompt=decide_prompt(_level),
             request=request,
             memory=memory,
+            cookie_identity=cookie_identity
         )
 
     # messages = [

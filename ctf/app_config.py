@@ -98,6 +98,7 @@ class Settings(BaseSettings):
 
     chat_store: object = SimpleChatStore()
     token_limit: int = 20000
+    PLAYER_PROGRESS: dict = {}
 
 
 settings = Settings()

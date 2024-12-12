@@ -22,7 +22,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
 from rag.system_prompt import get_system_prompt_one, get_system_prompt
-
+from fastapi import Cookie
 
 def sql_query(
     userId: str = Field(description="UserId supplied by user for SQL query"),
@@ -63,29 +63,7 @@ def hints_func(
     """
 
 
-def submit_answer_func(
-    answer: str = Field(description="Answer submitted for this level"),
-    level: int = Field(description="Current level of challenge"),
-):
-    """Take a string answer and the current level
-    and calculate if the answer is correct"""
-    level_pass = settings.PASSWORDS.get(level)
-    print(f"level_pass {level_pass}")
-    print(f"answer {answer}")
-    if answer == level_pass:
-        return f"""{answer} is correct! Click for next Level:
-        <div class="level-menu new-chat"
-                         hx-get="/level/{level + 1}"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-params="*"
-                         hx-replace-url="true"
-                         hx-swap="innerHTML">
-                            <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
-        </div>
-        """
-    else:
-        return "Wrong answer. You are not correct."
+
 
 
 def search_vecs_and_prompt(
@@ -98,6 +76,7 @@ def search_vecs_and_prompt(
     system_prompt=None,
     request=None,
     memory=None,
+    cookie_identity: Cookie = ""
 ):
     # memory = request.app.chats.get(int(level))
     # memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
@@ -179,7 +158,43 @@ def search_vecs_and_prompt(
         # return_direct=True,  # note sure about this
     )
 
+    def submit_answer_func(
+            answer: str = Field(description="Answer submitted for this level"),
+            level: int = level,
+            cookie_identity=cookie_identity
+    ):
+        """Take a string answer and the current level
+        and calculate if the answer is correct"""
+        level_pass = settings.PASSWORDS.get(level)
+        print(f"level_pass {level_pass}")
+        print(f"answer {answer}")
+        print(f"cookie_identity --> {cookie_identity}")
+        if answer == level_pass:
+            try:
+                _progress = settings.PLAYER_PROGRESS.get(cookie_identity, {})
+                _progress = _progress.update({level: level_pass})
+                print(f"settings.PLAYER_PROGRESS --> {settings.PLAYER_PROGRESS}")
+            except Exception as e:
+                print(e)
+            return f"""{answer} is correct! Click for next Level:
+            <div class="level-menu new-chat"
+                             hx-get="/level/{level + 1}"
+                             hx-trigger="click"
+                             hx-target=".right-panel"
+                             hx-params="*"
+                             hx-replace-url="true"
+                             hx-swap="innerHTML">
+                                <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
+            </div>
+            """
+            # return True
+        else:
+            return "Wrong answer. You are not correct."
+            # return False
+
+    from functools import partial
     submit_answer_tool = FunctionTool.from_defaults(
+        #fn=partial(submit_answer_func, cookie_identity=cookie_identity),
         fn=submit_answer_func,
         return_direct=True,
         description="Function for user to submit a answer in the format 'submit xxxxx'",
@@ -240,6 +255,8 @@ def search_vecs_and_prompt(
 
         agent = coa_worker.as_agent()
     response = agent.chat(prompt)
+    print(f"response.sources --> {response.sources}")
+    print(f"response.metadata --> {response.metadata}")
 
     # else:
     #     response = chat_engine.chat(prompt)

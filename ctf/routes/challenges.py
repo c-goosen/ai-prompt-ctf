@@ -55,6 +55,7 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
+                "PROGRESS": len(settings.PLAYER_PROGRESS.get(cookie_identity, {}).keys()),
                 "chat_history": chat_history.chat_store.get_messages(
                     key=f"level-{_level}-{cookie_identity}"
                 ),
@@ -70,6 +71,7 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
+                "PROGRESS": len(settings.PLAYER_PROGRESS.get(cookie_identity, {}).keys()),
                 "chat_history": chat_history.chat_store.get_messages(
                     key=f"level-{_level}"
                 ),

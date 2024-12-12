@@ -73,6 +73,18 @@ app.include_router(
 )
 cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
 
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    response = await call_next(request)
+    if not request.cookies.get('anon_user_identity'):
+        user_anon_identity = str(uuid.uuid4())
+        response.set_cookie(key="anon_user_identity", value=user_anon_identity)
+        if not settings.PLAYER_PROGRESS.get(user_anon_identity):
+            settings.PLAYER_PROGRESS.update({user_anon_identity: {}})
+    #if not settings.PLAYER_PROGRESS.get(cookie_identity):
+    #    settings.PLAYER_PROGRESS.update({cookie_identity: {}})
+    return response
+
 PromptGuardGoose()
 PromptGuardMeta()
 
@@ -98,12 +110,10 @@ async def root(
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
             "_level": 0,
+            "PROGRESS": len(settings.PLAYER_PROGRESS.get(cookie_identity, {}).keys()),
             "THEME_MODE": "dark",
         },
     )
-    if not cookie_identity:
-        resp.set_cookie(key="anon_user_identity", value=str(uuid.uuid4()))
-    print(cookie_identity)
     return resp
 
 
