@@ -38,16 +38,26 @@ class Settings(BaseSettings):
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
+
+    # Open Source
+    # Run everything opensource the default
+    OPENSOURCE_LLM: bool= os.getenv("OPENSOURCE_LLM", True)
+    OPENSOURCE_REASONING_MODEL = os.getenv("OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b")
+    OPENSOURCE_VISION_MODEL = os.getenv("OPENSOURCE_VISION_MODEL", "")
+    OPENSOURCE_AUDIO_MODEL = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
+
     # OPENAI
+    # Not so open
+    OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     EMBED_MODEL: str = 'nomic-embed-text'
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL_3_5_TURBO: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_4: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_4_TURBO: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_4_VISION: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_4_O_MINI: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_0_ONE: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
-    OPENAI_MODEL_0_ONE_MINI: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_3_5_TURBO: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_TURBO: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_VISION: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_O_MINI: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_0_ONE: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_0_ONE_MINI: str = "deepseek-r1:1.5b"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]

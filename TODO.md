@@ -32,9 +32,15 @@
 * * ~~Level 8~~
 * * ~~Level 9~~
 * * ~~Level 10~~
-Post Bsides Cpt 2024 TODO
+~~Post Bsides Cpt 2024 TODO~~
 * ~~Fix per user history~~
 * ~~Better function calling, aka direct return~~
-* Move all levels to react agent
-* Move to llama3.2 1b by configuration, only openAI if asked
-* Add more evals
+* ~~Move all levels to react agent~~
+
+* ~~Add more evals~~
+* 2025
+* * Reasoning model (probably deepseek-r1 distilled)
+* * Open Source vision model
+* * Open source audio to text
+* * potential opensource multi-modal small model
+* * Document and develop openAI vs opensource switch
