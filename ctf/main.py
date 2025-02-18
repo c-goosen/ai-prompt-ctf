@@ -7,6 +7,9 @@ sys.path.append(
 import uvicorn  # noqa
 from llm_guard.llm_guard import PromptGuardMeta  # noqa
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["REQUESTS_CA_BUNDLE"] = ""
 if __name__ == "__main__":

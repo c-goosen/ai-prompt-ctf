@@ -114,37 +114,38 @@ async def chat_completion(
                 print(file_text)
 
         elif _level == 4:
+            from utils import image_to_text
             print("In image file")
-            client = OG_OPENAI()
+            # client = OG_OPENAI()
 
             # image_path = "path_to_your_image.jpg"
 
             # Getting the base64 string
             # base64_image = encode_image(image_path)
-            b64_img = base64.b64encode(data).decode("utf-8")
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "What is in this image?",
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{b64_img}"
-                                },
-                            },
-                        ],
-                    }
-                ],
-                max_tokens=500,
-            )
-            print(f"Image response: {response}")
-            file_text = response.choices[0].message
+            # b64_img = base64.b64encode(data).decode("utf-8")
+            # response = client.chat.completions.create(
+            #     model="gpt-4o-mini",
+            #     messages=[
+            #         {
+            #             "role": "user",
+            #             "content": [
+            #                 {
+            #                     "type": "text",
+            #                     "text": "What is in this image?",
+            #                 },
+            #                 {
+            #                     "type": "image_url",
+            #                     "image_url": {
+            #                         "url": f"data:image/jpeg;base64,{b64_img}"
+            #                     },
+            #                 },
+            #             ],
+            #         }
+            #     ],
+            #     max_tokens=500,
+            # )
+            # print(f"Image response: {response}")
+            file_text = image_to_text(data, prompt="What is in this image?")
             print(f"file_text -->{file_text}")
 
     if int(_level) == 1:

@@ -42,9 +42,9 @@ class Settings(BaseSettings):
     # Open Source
     # Run everything opensource the default
     OPENSOURCE_LLM: bool= os.getenv("OPENSOURCE_LLM", True)
-    OPENSOURCE_REASONING_MODEL = os.getenv("OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b")
-    OPENSOURCE_VISION_MODEL = os.getenv("OPENSOURCE_VISION_MODEL", "")
-    OPENSOURCE_AUDIO_MODEL = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
+    OPENSOURCE_REASONING_MODEL: str = os.getenv("OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b")
+    OPENSOURCE_VISION_MODEL: str = os.getenv("OPENSOURCE_VISION_MODEL", "")
+    OPENSOURCE_AUDIO_MODEL: str = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
 
     # OPENAI
     # Not so open
