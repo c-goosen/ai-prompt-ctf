@@ -39,15 +39,15 @@ class Settings(BaseSettings):
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
     # OPENAI
+    EMBED_MODEL: str = 'nomic-embed-text'
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL_DAVINCI: str = "text-davinci-003"
-    OPENAI_MODEL_3_5_TURBO: str = "gpt-3.5-turbo"
-    OPENAI_MODEL_4: str = "gpt-4"
-    OPENAI_MODEL_4_TURBO: str = "gpt-4-turbo"
-    OPENAI_MODEL_4_VISION: str = "gpt-4-turbo"
-    OPENAI_MODEL_4_O_MINI: str = "gpt-4o-mini"
-    OPENAI_MODEL_0_ONE: str = "o1-preview"
-    OPENAI_MODEL_0_ONE_MINI: str = "o1-mini"
+    OPENAI_MODEL_3_5_TURBO: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_4: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_4_TURBO: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_4_VISION: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_4_O_MINI: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_0_ONE: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
+    OPENAI_MODEL_0_ONE_MINI: str = "MFDoom/deepseek-r1-tool-calling:1.5b"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]

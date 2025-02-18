@@ -14,14 +14,15 @@ from llama_index.core.vector_stores import (
     MetadataFilters,
     FilterOperator,
 )
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
-from llama_index.packs.agents_coa.step import CoAAgentWorker
+# from llama_index.embeddings.openai import OpenAIEmbedding
+# from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from ctf.app_config import settings
 from ctf.rag.system_prompt import get_basic_prompt
 from rag.system_prompt import get_system_prompt_one, get_system_prompt
+from llama_index.llms.ollama import Ollama
+from llama_index.embeddings.ollama import OllamaEmbedding
 
 
 def sql_query(
@@ -94,7 +95,8 @@ def search_vecs_and_prompt(
     file_type: str = "",
     collection_name="ctf_levels",
     level: int = 0,
-    llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.1),
+    #llm: LLM = OpenAI(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.1),
+    llm: LLM = Ollama(model=settings.OPENAI_MODEL_3_5_TURBO, temperature=0.1),
     system_prompt=None,
     request=None,
     memory=None,
@@ -125,7 +127,8 @@ def search_vecs_and_prompt(
     """
     # prompt = search_input
     # print(prompt)
-    embed_model = OpenAIEmbedding(embed_batch_size=10)
+    #embed_model = OpenAIEmbedding(embed_batch_size=10)
+    embed_model = OllamaEmbedding(model_name=settings.EMBED_MODEL)
     Settings.embed_model = embed_model
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
 
@@ -191,7 +194,6 @@ def search_vecs_and_prompt(
     )
     sql_tool = FunctionTool.from_defaults(fn=sql_query, return_direct=True)
 
-    coa_agent = False
     """
     React Agent
     """
@@ -209,36 +211,11 @@ def search_vecs_and_prompt(
         llm=llm,
         verbose=True,
         memory=memory,
-        max_iterations=5,
+        max_iterations=10,
         return_direct=True,
     )
     # response = agent.chat(prompt)
 
-    if coa_agent:
-        """
-        Chain of Thought Agent
-        """
-        llm = (OpenAI(model=settings.OPENAI_MODEL_0_ONE_MINI, temperature=0.1),)
-        coa_worker = CoAAgentWorker.from_tools(
-            (
-                [rag_tool, submit_answer_tool, hints_tool]
-                if level != 6
-                else [
-                    rag_tool,
-                    submit_answer_tool,
-                    sql_tool,
-                    hints_tool,
-                ]
-            ),
-            llm=llm,
-            verbose=True,
-            memory=memory,
-            max_iterations=10,
-            # run_retrieve_sleep_time = 1.0,
-            return_direct=True,
-        )
-
-        agent = coa_worker.as_agent()
     response = agent.chat(prompt)
 
     # else:

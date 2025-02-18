@@ -11,7 +11,8 @@ from llama_index.core.vector_stores import (
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.chroma import ChromaVectorStore
-
+from llama_index.llms.ollama import Ollama
+from llama_index.embeddings.ollama import OllamaEmbedding
 try:
     from ctf.app_config import settings
 except Exception:
@@ -78,14 +79,13 @@ def prepare_flags():
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
 
-    embed_model = OpenAIEmbedding(embed_batch_size=10)
+    embed_model = OllamaEmbedding(model_name=settings.EMBED_MODEL)
 
     nodes = []
 
-    Settings.llm = OpenAI(
+    Settings.llm = Ollama(
         temperature=0.1,
-        model=settings.OPENAI_MODEL_DAVINCI,
-        api_key=settings.OPENAI_API_KEY,
+        model=settings.OPENAI_MODEL_4,
     )
 
     generic_password_text = [
