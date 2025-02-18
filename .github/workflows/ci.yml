@@ -24,7 +24,7 @@ jobs:
           virtualenvs-in-project: true
           virtualenvs-path: .venv/
           installer-parallel: true
-      - run: poetry install --with dev
+      - run: poetry install --with dev --no-root
       - name: Check linting
         run: |
           make ci-lint
