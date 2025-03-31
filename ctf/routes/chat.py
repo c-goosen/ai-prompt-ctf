@@ -27,6 +27,9 @@ from ctf.rag.system_prompt import (
     decide_prompt,
 )
 
+from llama_index.multi_modal_llms.ollama import OllamaMultiModal
+from llama_index.ollama import Ollama
+
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -171,12 +174,21 @@ async def chat_completion(
     else:
         Settings.llm.system_prompt = decide_prompt(level=_level)
 
-        _llm = OpenAI(
-            model=text_model,
-            temperature=0.1,
-            max_new_tokens=1500,
-            memory=memory,
-        )
+        if _level == 4:
+            _llm = OllamaMultiModal(
+                model="gemma3:1b",
+                temperature=0.1,
+                max_new_tokens=1500,
+                memory=memory,
+            )
+        else:
+            _llm = Ollama(
+                model="MFDoom/deepseek-r1-tool-calling:1.5b",
+                # model=text_model,
+                temperature=0.1,
+                max_new_tokens=1500,
+                memory=memory,
+            )
 
         print(text_input)
         response = search_vecs_and_prompt(
