@@ -26,6 +26,7 @@ openai-agents = "^0.0.7"
 transformers = "^4.51.0"
 nest-asyncio = "^1.6.0"
 torch = "^2.6.0"
+accelerate = "^1.6.0"
 
 
 [tool.poetry.group.dev.dependencies]

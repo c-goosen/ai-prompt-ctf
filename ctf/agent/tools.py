@@ -14,17 +14,20 @@ chroma_collection = chroma_client.get_collection(collection_name)
 
 @function_tool
 def sql_query(
-    userId: str = Field(description="UserId supplied by user for SQL query"),
+    user_id: str,
 ):
     """
     Return users from sql where id equals
+
+    Args:
+        user_id: UserId supplied by user for SQL query
     """
     connection_obj = sqlite3.connect("users.db")
 
     # cursor object
     cursor_obj = connection_obj.cursor()
     # Drop the GEEK table if already exists.
-    cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + userId + ";")
+    cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + user_id + ";")
     # cursor_obj.execute(query)
     output = cursor_obj.fetchall()
     print(output)
@@ -33,13 +36,15 @@ def sql_query(
 
 @function_tool
 def hints_func(
-    hint: str = Field(
-        description="Hint query from the user, must contain the word hint"
-    ),
-    level: int = Field(description="Current level"),
+    hint: str,
+    level: int
 ):
     """
     Give me hints only when user requests hints. User requests hints for level x.
+
+    Args:
+        hint: Hint query from the user, must contain the word hint
+        level: Current level
     """
     print(hint)
     print(level)
@@ -53,11 +58,17 @@ def hints_func(
 
 @function_tool
 def submit_answer_func(
-    answer: str = Field(description="Answer submitted for this level"),
-    level: int = Field(description="Current level of challenge"),
+    answer: str,
+    level: int,
 ):
     """Take a string answer and the current level
-    and calculate if the answer is correct"""
+    and calculate if the answer is correct
+
+    Args:
+        answer: Answer submitted for this level
+        level: Current level of challenge
+
+    """
     level_pass = settings.PASSWORDS.get(level)
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
@@ -79,11 +90,16 @@ def submit_answer_func(
 
 @function_tool
 def rag_tool_func(
-    question: str = Field(description="Question"),
-    level: int = Field(description="Current level of challenge"),
+    question: str,
+    level: int,
 ):
     """Take a string answer and the current level
-    and calculate if the answer is correct"""
+    and calculate if the answer is correct
+
+    Args:
+        question: Question/prompt for RAG query in chromadb
+        level: Current level of challenge
+    """
     results = chroma_collection.query(
         query_texts=[question],
         n_results=3,
