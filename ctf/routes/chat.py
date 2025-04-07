@@ -22,10 +22,20 @@ from ctf.llm_guard.protections import (
 from ctf.agent.search import search_vecs_and_prompt
 from ctf.agent.system_prompt import (
     decide_prompt,
+    get_system_prompt_one, 
+    get_basic_prompt, get_system_prompt
 )
 from ctf.memory import SimpleChatMemory
 
+from ctf.agent.search import run_agent
+from ctf.agent.tools import rag_tool_func, hints_func, sql_query, submit_answer_func
 
+import json
+
+
+from agents import Agent, FunctionTool, RunContextWrapper, function_tool
+
+from agents import Agent
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -86,11 +96,12 @@ async def chat_completion(
 ):
     _level = text_level
     file_text = ""
-    memory = SimpleChatMemory.from_defaults(
-        token_limit=settings.token_limit,
-        chat_store=settings.chat_store,
-        chat_store_key=f"level-{_level}-{cookie_identity}",
-    )
+    memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
+    # memory = SimpleChatMemory.from_defaults(
+    #     token_limit=settings.token_limit,
+    #     chat_store=settings.chat_store,
+    #     chat_store_key=f"level-{_level}-{cookie_identity}",
+    # )
 
     if file_input:
         data = await file_input.read()
@@ -168,32 +179,38 @@ async def chat_completion(
     if protect:
         return denied_response(text_input)
     else:
-        Settings.llm.system_prompt = decide_prompt(level=_level)
 
-        if _level == 4:
-            _llm = OllamaMultiModal(
-                model="gemma3:1b",
-                temperature=0.1,
-                max_new_tokens=1500,
-                memory=memory,
-            )
-        else:
-            _llm = Ollama(
-                model="MFDoom/deepseek-r1-tool-calling:1.5b",
-                # model=text_model,
-                temperature=0.1,
-                max_new_tokens=1500,
-                memory=memory,
-            )
-
+        # if _level == 4:
+        #     _llm = OllamaMultiModal(
+        #         model="gemma3:1b",
+        #         temperature=0.1,
+        #         max_new_tokens=1500,
+        #         memory=memory,
+        #     )
+        # else:
+        #     _llm = Ollama(
+        #         model="MFDoom/deepseek-r1-tool-calling:1.5b",
+        #         # model=text_model,
+        #         temperature=0.1,
+        #         max_new_tokens=1500,
+        #         memory=memory,
+        #     )
+        agent = Agent(
+        name="Prompt CTF Agent",
+        instructions=decide_prompt(_level),
+        tools=[hints_func,submit_answer_func, rag_tool_func],
+        )
         print(text_input)
+        text_input = memory + [{"role": "user", "content": text_input}]
+
         response = search_vecs_and_prompt(
-            search_input=str(text_input),
+            search_input=text_input,
             file_text=str(file_text),
             file_type=file_type,
             collection_name="ctf_levels",
             level=_level,
-            llm=_llm,
+            # llm=_llm,
+            agent=agent,
             system_prompt=decide_prompt(_level),
             request=request,
             memory=memory,

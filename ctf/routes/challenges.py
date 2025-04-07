@@ -83,12 +83,13 @@ def load_history(
     _level: int = 0,
     cookie_identity: Annotated[str | None, cookie] = None,
 ):
-    chat_history = SimpleChatMemory.from_defaults(
-        token_limit=settings.token_limit,
-        chat_store=settings.chat_store,
-        chat_store_key=f"level-{_level}-{cookie_identity}",
-    )
-    _messages = chat_history.chat_store.get_messages(
+    chat_history = settings.chat_history
+    # chat_history = SimpleChatMemory.from_defaults(
+    #     token_limit=settings.token_limit,
+    #     # chat_store=settings.chat_store,
+    #     chat_store_key=f"level-{_level}-{cookie_identity}",
+    # )
+    _messages = chat_history.get_messages(
         key=f"level-{_level}-{cookie_identity}"
     )
     # print(len(_messages))

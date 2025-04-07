@@ -22,7 +22,10 @@ class SimpleChatMemory:
         if self.chat_store_key:
             self.chat_store[self.chat_store_key] = self.messages
     
-    def get_messages(self) -> List[Dict[str, str]]:
+    def get_messages(self, key: str = None) -> List[Dict[str, str]]:
+        if key:
+            messages = self.chat_store.get(key, [])
+            return [{"role": msg.role, "content": msg.content} for msg in messages]
         return [{"role": msg.role, "content": msg.content} for msg in self.messages]
     
     def clear(self) -> None:

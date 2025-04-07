@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
+from memory import SimpleChatMemory
+
 load_dotenv()
 
 
@@ -105,7 +107,7 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
-
+    chat_history: SimpleChatMemory = SimpleChatMemory()
     # chat_store: object = SimpleChatStore()
     token_limit: int = 20000
 
