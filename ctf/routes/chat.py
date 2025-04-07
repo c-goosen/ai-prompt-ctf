@@ -10,9 +10,6 @@ from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from llama_index.core import Settings
-from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.llms.openai import OpenAI
 from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
@@ -22,13 +19,12 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
     llm_protection,
 )
-from ctf.rag.search import search_vecs_and_prompt
-from ctf.rag.system_prompt import (
+from ctf.agent.search import search_vecs_and_prompt
+from ctf.agent.system_prompt import (
     decide_prompt,
 )
+from ctf.memory import SimpleChatMemory
 
-from llama_index.multi_modal_llms.ollama import OllamaMultiModal
-from llama_index.ollama import Ollama
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -90,7 +86,7 @@ async def chat_completion(
 ):
     _level = text_level
     file_text = ""
-    memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
+    memory = SimpleChatMemory.from_defaults(
         token_limit=settings.token_limit,
         chat_store=settings.chat_store,
         chat_store_key=f"level-{_level}-{cookie_identity}",

@@ -2,7 +2,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from llama_index.core.storage.chat_store import SimpleChatStore
+# from llama_index.core.storage.chat_store import SimpleChatStore
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
@@ -106,7 +106,7 @@ class Settings(BaseSettings):
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
 
-    chat_store: object = SimpleChatStore()
+    # chat_store: object = SimpleChatStore()
     token_limit: int = 20000
 
 

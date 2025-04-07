@@ -6,10 +6,10 @@ from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
-from llama_index.core.memory import ChatMemoryBuffer
 from pydantic import BaseModel
 
 from ctf.app_config import settings
+from ctf.memory import SimpleChatMemory
 
 cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
 
@@ -40,8 +40,7 @@ async def load_level(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
 ):
-    # chat_history = settings.chats.get(int(_level))
-    chat_history = ChatMemoryBuffer.from_defaults(
+    chat_history = SimpleChatMemory.from_defaults(
         token_limit=settings.token_limit,
         chat_store=settings.chat_store,
         chat_store_key=f"level-{_level}-{cookie_identity}",
@@ -84,8 +83,7 @@ def load_history(
     _level: int = 0,
     cookie_identity: Annotated[str | None, cookie] = None,
 ):
-    # chat_history = settings.chats.get(int(_level))
-    chat_history = ChatMemoryBuffer.from_defaults(
+    chat_history = SimpleChatMemory.from_defaults(
         token_limit=settings.token_limit,
         chat_store=settings.chat_store,
         chat_store_key=f"level-{_level}-{cookie_identity}",

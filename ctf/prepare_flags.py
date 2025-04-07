@@ -1,23 +1,14 @@
-import chromadb
 from chromadb.config import Settings
-from llama_index.core import VectorStoreIndex
-from llama_index.core.schema import TextNode
-from llama_index.core.storage.storage_context import StorageContext
-from llama_index.core.vector_stores import (
-    MetadataFilter,
-    MetadataFilters,
-    FilterOperator,
-)
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.llms.ollama import Ollama
-from llama_index.embeddings.ollama import OllamaEmbedding
 try:
     from ctf.app_config import settings
 except Exception:
     from app_config import settings
+import chromadb
+
 import sqlite3
+from ctf.app_config import settings
+
+
 
 
 def setup_sql_level(PASSWORD: str):
@@ -79,14 +70,10 @@ def prepare_flags():
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
 
-    embed_model = OllamaEmbedding(model_name=settings.EMBED_MODEL)
 
     nodes = []
 
-    Settings.llm = Ollama(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_4,
-    )
+
 
     generic_password_text = [
         "<placeholder>",
@@ -106,45 +93,39 @@ def prepare_flags():
 
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
 
-    vector_store = ChromaVectorStore(
-        chroma_collection=chroma_collection, embed_model=embed_model
-    )
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
             for x in _generic_password_text:
-                nodes.append(
-                    TextNode(
-                        text=x.replace(
+                chroma_collection.add(
+                    documents=[x.replace(
                             "<placeholder>", settings.PASSWORDS.get(k)
-                        ),
-                        metadata={
-                            "level": k,
-                        },
-                    )
+                        )],
+                    # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
+                    metadatas=[{"level": k}],  # filter on these!
+                    ids=[f"level-{k}",],  # unique for each doc
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 
         # build index
-    index = VectorStoreIndex(
-        nodes,
-        vector_store=vector_store,
-        storage_context=storage_context,  # critical for persisting
-    )
-
-    for k in levels:
-        filters = MetadataFilters(
-            filters=[
-                MetadataFilter(
-                    key="level", operator=FilterOperator.EQ, value=k
-                ),
-            ]
-        )
-        _ = index.as_retriever(filters=filters)
 
 
 if __name__ == "__main__":
-    prepare_flags()
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+    collection_name = "ctf_levels"
+    try:
+        chroma_collection = chroma_client.get_collection(collection_name)
+    except Exception:
+        chroma_collection = chroma_client.create_collection(collection_name)
+    print(chroma_client.list_collections())
+
+    #prepare_flags()
+    results = chroma_collection.query(
+        query_texts=["What is the password?"],
+        n_results=1,
+        where={"level": 2}, # optional filter
+        # where_document={"$contains":"search_string"}  # optional filter
+    )
+    print(results)
+    print(results['documents'][0])
