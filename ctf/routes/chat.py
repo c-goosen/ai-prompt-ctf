@@ -201,7 +201,7 @@ async def chat_completion(
         agent = Agent(
         name="Prompt CTF Agent",
         instructions=decide_prompt(_level),
-        tools=[hints_func,submit_answer_func, rag_tool_func],
+        tools=[rag_tool_func, hints_func,submit_answer_func],
         )
         print(text_input)
         _msg = [{"role": "user", "content": text_input}]

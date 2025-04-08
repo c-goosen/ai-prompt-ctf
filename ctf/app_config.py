@@ -15,23 +15,23 @@ class Settings(BaseSettings):
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
 
     MEM0_CONFIG: dict = {
-        "llm": {
-            "provider": "ollama",
-            "config": {
-                "model": "deepseek-r1:1.5b",
-                "temperature": 0,
-                "max_tokens": 2000,
-                "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
-            },
-        },
-        "embedder": {
-                "provider": "ollama",
-                "config": {
-                    "model": "nomic-embed-text:latest",
-                    # Alternatively, you can use "snowflake-arctic-embed:latest"
-                    "ollama_base_url": "http://localhost:11434",
-                },
-            },
+        # "llm": {
+        #     "provider": "ollama",
+        #     "config": {
+        #         "model": "deepseek-r1:1.5b",
+        #         "temperature": 0,
+        #         "max_tokens": 2000,
+        #         "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
+        #     },
+        # },
+        # "embedder": {
+        #         "provider": "ollama",
+        #         "config": {
+        #             "model": "nomic-embed-text:latest",
+        #             # Alternatively, you can use "snowflake-arctic-embed:latest"
+        #             "ollama_base_url": "http://localhost:11434",
+        #         },
+        #     },
             "vector_store": {
                 "provider": "chroma",
                 "config": {

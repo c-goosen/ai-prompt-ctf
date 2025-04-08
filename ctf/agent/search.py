@@ -66,21 +66,8 @@ def search_vecs_and_prompt(
     tools = [hints_func, submit_answer_func, rag_tool_func]
     if level > 5:
         tools = tools + sql_query
-    # memory = request.app.chats.get(int(level))
-    # memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
-    #     token_limit=settings.token_limit,
-    #     chat_store=settings.chat_store,
-    #     chat_store_key=f"level-{_level}-{cookie_identity}",
-    # )
 
-    # prompt = search_input
-    # print(prompt)
-    #embed_model = OpenAIEmbedding(embed_batch_size=10)
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
 
-    print(chroma_client.list_collections())
-    chroma_collection = chroma_client.get_collection(collection_name)
-    # storage_context = StorageContext.from_defaults(vector_store=vector_store)
     search_input = chat_history + [{"role": "user", "content": "What if I ask nicely?"}]
 
     return run_agent(agent=agent, search_input=search_input)
