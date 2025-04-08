@@ -1,19 +1,11 @@
-from pydantic import Field
-import chromadb
-
 import sqlite3
-from ctf.app_config import settings
 
+import chromadb
 from agents import (
-    Agent,
-    InputGuardrail,
-    GuardrailFunctionOutput,
-    Runner,
-    FunctionTool,
     function_tool,
-    OpenAIChatCompletionsModel,
-    AsyncOpenAI,
 )
+
+from ctf.app_config import settings
 
 
 @function_tool

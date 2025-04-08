@@ -1,30 +1,22 @@
-from http.client import responses
-
-from pydantic import Field
-import chromadb
-
 # from llama_index.embeddings.openai import OpenAIEmbedding
 # from llama_index.llms.openai import OpenAI
 
-from ctf.app_config import settings
-from ctf.agent.system_prompt import get_basic_prompt
+from agents import (
+    Agent,
+    Runner,
+    OpenAIChatCompletionsModel,
+    AsyncOpenAI,
+)
+
 from agent.system_prompt import get_system_prompt_one, get_system_prompt
+from ctf.agent.system_prompt import get_basic_prompt
 from ctf.agent.tools import (
     hints_func,
     submit_answer_func,
     sql_query,
     rag_tool_func,
 )
-from agents import (
-    Agent,
-    InputGuardrail,
-    GuardrailFunctionOutput,
-    Runner,
-    FunctionTool,
-    function_tool,
-    OpenAIChatCompletionsModel,
-    AsyncOpenAI,
-)
+from ctf.app_config import settings
 
 
 def run_agent(

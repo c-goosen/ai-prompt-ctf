@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ai-prompt-ctf"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Christo Goosen <christogoosen@gmail.com>"]
 readme = "README.md"

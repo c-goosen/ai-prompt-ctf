@@ -5,6 +5,7 @@ from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
+from agents import Agent
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Form, UploadFile
@@ -13,6 +14,15 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from openai import OpenAI as OG_OPENAI
 
+from ctf.agent.search import search_vecs_and_prompt
+from ctf.agent.system_prompt import (
+    decide_prompt,
+)
+from ctf.agent.tools import (
+    rag_tool_func,
+    hints_func,
+    submit_answer_func,
+)
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.llm_guard.protections import (
@@ -20,27 +30,6 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
     llm_protection,
 )
-from ctf.agent.search import search_vecs_and_prompt
-from ctf.agent.system_prompt import (
-    decide_prompt,
-    get_system_prompt_one,
-    get_basic_prompt,
-    get_system_prompt,
-)
-from ctf.agent.search import run_agent
-from ctf.agent.tools import (
-    rag_tool_func,
-    hints_func,
-    sql_query,
-    submit_answer_func,
-)
-
-import json
-
-
-from agents import Agent, FunctionTool, RunContextWrapper, function_tool
-
-from agents import Agent
 
 # get root logger
 logger = logging.getLogger(__name__)

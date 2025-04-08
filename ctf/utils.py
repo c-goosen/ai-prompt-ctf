@@ -1,11 +1,9 @@
 # import random
 # from hashlib import sha256
 
+import torch
 # from app_config import settings
 from transformers import AutoModel, AutoProcessor
-import torch
-
-import torch
 from transformers import (
     Speech2TextProcessor,
     Speech2TextForConditionalGeneration,

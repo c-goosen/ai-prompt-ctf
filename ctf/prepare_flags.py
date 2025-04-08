@@ -1,12 +1,10 @@
-from chromadb.config import Settings
-
 try:
     from ctf.app_config import settings
 except Exception:
     from app_config import settings
-import chromadb
-
 import sqlite3
+
+import chromadb
 
 
 def setup_sql_level(PASSWORD: str):

@@ -1,8 +1,6 @@
 import os.path
 import sys
 
-from prepare_flags import prepare_flags
-
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 )

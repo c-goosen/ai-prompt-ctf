@@ -1,8 +1,9 @@
 import os
 
 from fastapi.testclient import TestClient
-from ctf.app_config import settings
+
 from app import app
+from ctf.app_config import settings
 from prepare_flags import prepare_flags
 
 os.environ["HUGGINGFACE_API_KEY"] = "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"

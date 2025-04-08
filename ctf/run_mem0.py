@@ -1,8 +1,7 @@
-import os
-
 # from mem0 import MemoryClient
-from mem0 import Memory
 from pprint import pprint
+
+from mem0 import Memory
 
 # client = Memory() # get api_key from https://app.mem0.ai/
 

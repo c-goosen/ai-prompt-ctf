@@ -2,10 +2,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from mem0 import Memory
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
-
-from mem0 import Memory
 
 load_dotenv()
 

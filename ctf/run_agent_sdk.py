@@ -1,22 +1,19 @@
+import json
+
+from agents import Agent
+from agents import FunctionTool
+
 from ctf.agent.search import run_agent
-from ctf.agent.tools import (
-    rag_tool_func,
-    hints_func,
-    sql_query,
-    submit_answer_func,
-)
 from ctf.agent.system_prompt import (
     get_system_prompt_one,
     get_basic_prompt,
     get_system_prompt,
 )
-
-import json
-
-
-from agents import Agent, FunctionTool, RunContextWrapper, function_tool
-
-from agents import Agent
+from ctf.agent.tools import (
+    rag_tool_func,
+    hints_func,
+    submit_answer_func,
+)
 
 system_prompt = get_basic_prompt()
 

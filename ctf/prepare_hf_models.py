@@ -1,6 +1,6 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
 import os
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 os.environ["CURL_CA_BUNDLE"] = ""
 
