@@ -27,6 +27,8 @@ transformers = "^4.51.0"
 nest-asyncio = "^1.6.0"
 torch = "^2.6.0"
 accelerate = "^1.6.0"
+mem0ai = "^0.1.86"
+ollama = "^0.4.7"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -6,7 +6,6 @@ except Exception:
 import chromadb
 
 import sqlite3
-from ctf.app_config import settings
 
 
 
@@ -90,8 +89,13 @@ def prepare_flags():
         print(e)
 
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
-
+    try:
+        chroma_client.delete_collection("ctf_levels")
+    except Exception:
+        pass
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
+
+
 
     for k in levels:
         if k != 6:
@@ -103,7 +107,7 @@ def prepare_flags():
                         )],
                     # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
                     metadatas=[{"level": k}],  # filter on these!
-                    ids=[f"level-{k}",],  # unique for each doc
+                    ids=[f"level-{k}-{x}",],  # unique for each doc
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
@@ -120,7 +124,7 @@ if __name__ == "__main__":
         chroma_collection = chroma_client.create_collection(collection_name)
     print(chroma_client.list_collections())
 
-    #prepare_flags()
+    prepare_flags()
     results = chroma_collection.query(
         query_texts=["What is the password?"],
         n_results=1,

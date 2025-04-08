@@ -2,11 +2,10 @@ import logging
 import os
 
 from dotenv import load_dotenv
-# from llama_index.core.storage.chat_store import SimpleChatStore
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
-from memory import SimpleChatMemory
+from mem0 import Memory
 
 load_dotenv()
 
@@ -14,6 +13,34 @@ load_dotenv()
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
+
+    MEM0_CONFIG: dict = {
+        "llm": {
+            "provider": "ollama",
+            "config": {
+                "model": "deepseek-r1:1.5b",
+                "temperature": 0,
+                "max_tokens": 2000,
+                "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
+            },
+        },
+        "embedder": {
+                "provider": "ollama",
+                "config": {
+                    "model": "nomic-embed-text:latest",
+                    # Alternatively, you can use "snowflake-arctic-embed:latest"
+                    "ollama_base_url": "http://localhost:11434",
+                },
+            },
+            "vector_store": {
+                "provider": "chroma",
+                "config": {
+                    "collection_name": "memory",
+                    "path": "chroma_db",
+                }
+            }
+        }
+
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
         "https://discord.com/channels/687602309395382282/1168515417514442834",
@@ -107,9 +134,8 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
-    chat_history: SimpleChatMemory = SimpleChatMemory()
-    # chat_store: object = SimpleChatStore()
     token_limit: int = 20000
+    MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
 
 
 settings = Settings()

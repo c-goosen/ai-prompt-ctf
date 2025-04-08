@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
@@ -25,8 +26,6 @@ from ctf.agent.system_prompt import (
     get_system_prompt_one, 
     get_basic_prompt, get_system_prompt
 )
-from ctf.memory import SimpleChatMemory
-
 from ctf.agent.search import run_agent
 from ctf.agent.tools import rag_tool_func, hints_func, sql_query, submit_answer_func
 
@@ -36,6 +35,7 @@ import json
 from agents import Agent, FunctionTool, RunContextWrapper, function_tool
 
 from agents import Agent
+
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,10 @@ async def chat_completion(
 ):
     _level = text_level
     file_text = ""
-    memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
+    mem = settings.MEMORY
+    # memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
+    memories = mem.get_all(run_id=f"{cookie_identity}-{_level}",
+                            ).get("results", [])
     # memory = SimpleChatMemory.from_defaults(
     #     token_limit=settings.token_limit,
     #     chat_store=settings.chat_store,
@@ -201,10 +204,14 @@ async def chat_completion(
         tools=[hints_func,submit_answer_func, rag_tool_func],
         )
         print(text_input)
-        text_input = memory + [{"role": "user", "content": text_input}]
+        _msg = [{"role": "user", "content": text_input}]
+        mem.add(_msg, infer=False,
+                            run_id=f"{cookie_identity}-{_level}",
+                            metadata={"level": _level, "role": "user"},
+                            prompt=_msg[0]['content'])
 
-        response = search_vecs_and_prompt(
-            search_input=text_input,
+        response_txt, response = search_vecs_and_prompt(
+            search_input=[x.get("memory") for x in memories] + _msg,
             file_text=str(file_text),
             file_type=file_type,
             collection_name="ctf_levels",
@@ -213,17 +220,25 @@ async def chat_completion(
             agent=agent,
             system_prompt=decide_prompt(_level),
             request=request,
-            memory=memory,
         )
 
+        _res = mem.add(
+            messages=[{"role": "assistant", "content": response_txt}],
+            infer=False,
+            run_id=f"{cookie_identity}-{_level}",
+                            metadata={"level": _level, "role": "assistant"},
+                            #prompt=_msg[0]['content']
+        )
+
+        print(f"settings.MEMORY.add\(['role': 'assistant', 'co' -->")
+        pprint(_res)
     # messages = [
     #   ChatMessage(content=text_input, role="user"),
     #    ChatMessage(content=str(response), role="assistant"),
     # ]
     # await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
-
     if _level in [3, 10] and input_and_output_checks(
-        input=text_input, output=response
+        input=text_input, output=response_txt
     ):
         return denied_response(text_input)
     return HTMLResponse(
@@ -242,7 +257,7 @@ async def chat_completion(
               <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
           </div>
-          <div class="chat-bubble">{response}</div>
+          <div class="chat-bubble">{response_txt}</div>
         </div>
         """,
         status_code=200,

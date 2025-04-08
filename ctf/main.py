@@ -1,6 +1,8 @@
 import os.path
 import sys
 
+from prepare_flags import prepare_flags
+
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 )
@@ -13,6 +15,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["REQUESTS_CA_BUNDLE"] = ""
 if __name__ == "__main__":
+    # if bool(os.getenv("PREPARE_FLAGS", False)):
+    #     prepare_flags()
     uvicorn.run(
         "app:app",
         host="0.0.0.0",

@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("passlib").setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
-if os.getenv("PREPARE_FLAGS", False):
+if bool(os.getenv("PREPARE_FLAGS", False)):
     prepare_flags()
 
 download_models()

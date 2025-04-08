@@ -1,6 +1,6 @@
 {% if chat_history %}
     {% for chat in chat_history %}
-        {% if chat.role.value == 'user' %}
+        {% if chat.get('metadata',{}).get('role','') in ['user'] %}
             <div class="chat chat-start">
                 <div class="chat-image avatar">
                     <div class="w-10 rounded-full">
@@ -8,12 +8,12 @@
                     </div>
                 </div>
                 <div class="chat-bubble">
-                    <md-block>{{ chat.content.split("Query:")[1] }}</md-block>
+                    <md-block>{{ chat.memory }}</md-block>
                 </div>
             </div>
         {% endif %}
-        {% if chat.role.value in ['assistant'] %}
-            {% if chat.content %}
+        {% if chat.get('metadata',{}).get('role','') in ['assistant'] %}
+            {% if chat.memory %}
                 <div class="chat chat-end">
                     <div class="chat-image avatar">
                         <div class="w-10 rounded-full">
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                     <div class="chat-bubble">
-                        <md-block>{{ chat.content }}</md-block>
+                        <md-block>{{ chat.memory }}</md-block>
                     </div>
                 </div>
             {% endif %}

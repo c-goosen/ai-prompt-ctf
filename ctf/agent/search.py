@@ -53,7 +53,7 @@ def setup_model():
 
 def search_vecs_and_prompt(
     agent: Agent,
-    search_input: str,
+    search_input: str | list,
     file_text: str | None,
     file_type: str = "",
     collection_name="ctf_levels",

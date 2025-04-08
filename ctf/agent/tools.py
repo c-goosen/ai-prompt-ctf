@@ -6,10 +6,7 @@ from ctf.app_config import settings
 
 from agents import Agent, InputGuardrail,GuardrailFunctionOutput, Runner, FunctionTool, function_tool, OpenAIChatCompletionsModel, AsyncOpenAI
 
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
-collection_name="ctf_levels"
-# print(chroma_client.list_collections())
-chroma_collection = chroma_client.get_collection(collection_name)
+
 
 
 @function_tool
@@ -93,6 +90,10 @@ def rag_tool_func(
     question: str,
     level: int,
 ):
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+    collection_name = "ctf_levels"
+    # print(chroma_client.list_collections())
+    chroma_collection = chroma_client.get_collection(collection_name)
     """Take a string answer and the current level
     and calculate if the answer is correct
 
