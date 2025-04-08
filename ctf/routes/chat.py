@@ -223,7 +223,7 @@ async def chat_completion(
             # prompt=_msg[0]['content']
         )
 
-        print(f"settings.MEMORY.add\(['role': 'assistant', 'co' -->")
+        print("settings.MEMORY.add(['role': 'assistant', 'co' -->")
         pprint(_res)
     # messages = [
     #   ChatMessage(content=text_input, role="user"),

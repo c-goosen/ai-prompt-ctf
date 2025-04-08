@@ -1,5 +1,3 @@
-from ctf.agent.utils import format_msg_history
-
 from agents import (
     Agent,
     Runner,
@@ -9,12 +7,7 @@ from agents import (
 
 from agent.system_prompt import get_system_prompt_one, get_system_prompt
 from ctf.agent.system_prompt import get_basic_prompt
-from ctf.agent.tools import (
-    hints_func,
-    submit_answer_func,
-    sql_query,
-    rag_tool_func,
-)
+from ctf.agent.utils import format_msg_history
 from ctf.app_config import settings
 
 
