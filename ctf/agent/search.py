@@ -1,5 +1,4 @@
-# from llama_index.embeddings.openai import OpenAIEmbedding
-# from llama_index.llms.openai import OpenAI
+from ctf.agent.utils import format_msg_history
 
 from agents import (
     Agent,
@@ -45,7 +44,11 @@ def run_agent(
        Level: {level}
        Query: {search_input}
        """
+    from pprint import pprint
+    pprint("search_input")
+    pprint(search_input)
     if isinstance(search_input, list):
+
         response = Runner.run_sync(agent, search_input)
     else:
         response = Runner.run_sync(agent, prompt)
@@ -61,23 +64,13 @@ def setup_model():
 
 
 def search_vecs_and_prompt(
+    search_input: list,
     agent: Agent,
-    search_input: str | list,
-    file_text: str | None,
-    file_type: str = "",
-    collection_name="ctf_levels",
-    level: int = 0,
-    system_prompt=None,
-    request=None,
-    memory=None,
-    chat_history: list = [],
+    chat_history: list,
+
 ):
-    tools = [hints_func, submit_answer_func, rag_tool_func]
-    if level > 5:
-        tools = tools + sql_query
 
-    search_input = chat_history + [
-        {"role": "user", "content": "What if I ask nicely?"}
-    ]
-
-    return run_agent(agent=agent, search_input=search_input)
+    if chat_history:
+        chat_history = format_msg_history(chat_history)
+    chat_history = chat_history + search_input
+    return run_agent(agent=agent, search_input=chat_history)

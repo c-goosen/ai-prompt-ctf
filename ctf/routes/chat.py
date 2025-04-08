@@ -5,7 +5,7 @@ from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
-from agents import Agent
+from agents import Agent, ModelSettings
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Form, UploadFile
@@ -93,14 +93,9 @@ async def chat_completion(
     file_text = ""
     mem = settings.MEMORY
     # memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
-    memories = mem.get_all(
+    message_history = mem.get_all(
         run_id=f"{cookie_identity}-{_level}",
     ).get("results", [])
-    # memory = SimpleChatMemory.from_defaults(
-    #     token_limit=settings.token_limit,
-    #     chat_store=settings.chat_store,
-    #     chat_store_key=f"level-{_level}-{cookie_identity}",
-    # )
 
     if file_input:
         data = await file_input.read()
@@ -199,27 +194,26 @@ async def chat_completion(
             name="Prompt CTF Agent",
             instructions=decide_prompt(_level),
             tools=[rag_tool_func, hints_func, submit_answer_func],
+            model_settings=ModelSettings(
+                temperature=0.2, max_tokens=2000,parallel_tool_calls=True,
+                tool_choice='required'
+            )
         )
         print(text_input)
         _msg = [{"role": "user", "content": text_input}]
+
+
+        response_txt, response = search_vecs_and_prompt(
+            search_input=_msg,
+            agent=agent,
+            chat_history=message_history
+        )
         mem.add(
             _msg,
             infer=False,
             run_id=f"{cookie_identity}-{_level}",
             metadata={"level": _level, "role": "user"},
             prompt=_msg[0]["content"],
-        )
-
-        response_txt, response = search_vecs_and_prompt(
-            search_input=[x.get("memory") for x in memories] + _msg,
-            file_text=str(file_text),
-            file_type=file_type,
-            collection_name="ctf_levels",
-            level=_level,
-            # llm=_llm,
-            agent=agent,
-            system_prompt=decide_prompt(_level),
-            request=request,
         )
 
         _res = mem.add(
