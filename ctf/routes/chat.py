@@ -195,18 +195,17 @@ async def chat_completion(
             instructions=decide_prompt(_level),
             tools=[rag_tool_func, hints_func, submit_answer_func],
             model_settings=ModelSettings(
-                temperature=0.2, max_tokens=2000,parallel_tool_calls=True,
-                tool_choice='required'
-            )
+                temperature=0.2,
+                max_tokens=2000,
+                parallel_tool_calls=True,
+                tool_choice="required",
+            ),
         )
         print(text_input)
         _msg = [{"role": "user", "content": text_input}]
 
-
         response_txt, response = search_vecs_and_prompt(
-            search_input=_msg,
-            agent=agent,
-            chat_history=message_history
+            search_input=_msg, agent=agent, chat_history=message_history
         )
         mem.add(
             _msg,

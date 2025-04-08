@@ -45,6 +45,7 @@ def run_agent(
        Query: {search_input}
        """
     from pprint import pprint
+
     pprint("search_input")
     pprint(search_input)
     if isinstance(search_input, list):
@@ -67,7 +68,6 @@ def search_vecs_and_prompt(
     search_input: list,
     agent: Agent,
     chat_history: list,
-
 ):
 
     if chat_history:
