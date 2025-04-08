@@ -23,11 +23,17 @@ from ctf.llm_guard.protections import (
 from ctf.agent.search import search_vecs_and_prompt
 from ctf.agent.system_prompt import (
     decide_prompt,
-    get_system_prompt_one, 
-    get_basic_prompt, get_system_prompt
+    get_system_prompt_one,
+    get_basic_prompt,
+    get_system_prompt,
 )
 from ctf.agent.search import run_agent
-from ctf.agent.tools import rag_tool_func, hints_func, sql_query, submit_answer_func
+from ctf.agent.tools import (
+    rag_tool_func,
+    hints_func,
+    sql_query,
+    submit_answer_func,
+)
 
 import json
 
@@ -98,8 +104,9 @@ async def chat_completion(
     file_text = ""
     mem = settings.MEMORY
     # memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
-    memories = mem.get_all(run_id=f"{cookie_identity}-{_level}",
-                            ).get("results", [])
+    memories = mem.get_all(
+        run_id=f"{cookie_identity}-{_level}",
+    ).get("results", [])
     # memory = SimpleChatMemory.from_defaults(
     #     token_limit=settings.token_limit,
     #     chat_store=settings.chat_store,
@@ -128,6 +135,7 @@ async def chat_completion(
 
         elif _level == 4:
             from utils import image_to_text
+
             print("In image file")
             # client = OG_OPENAI()
 
@@ -199,16 +207,19 @@ async def chat_completion(
         #         memory=memory,
         #     )
         agent = Agent(
-        name="Prompt CTF Agent",
-        instructions=decide_prompt(_level),
-        tools=[rag_tool_func, hints_func,submit_answer_func],
+            name="Prompt CTF Agent",
+            instructions=decide_prompt(_level),
+            tools=[rag_tool_func, hints_func, submit_answer_func],
         )
         print(text_input)
         _msg = [{"role": "user", "content": text_input}]
-        mem.add(_msg, infer=False,
-                            run_id=f"{cookie_identity}-{_level}",
-                            metadata={"level": _level, "role": "user"},
-                            prompt=_msg[0]['content'])
+        mem.add(
+            _msg,
+            infer=False,
+            run_id=f"{cookie_identity}-{_level}",
+            metadata={"level": _level, "role": "user"},
+            prompt=_msg[0]["content"],
+        )
 
         response_txt, response = search_vecs_and_prompt(
             search_input=[x.get("memory") for x in memories] + _msg,
@@ -226,8 +237,8 @@ async def chat_completion(
             messages=[{"role": "assistant", "content": response_txt}],
             infer=False,
             run_id=f"{cookie_identity}-{_level}",
-                            metadata={"level": _level, "role": "assistant"},
-                            #prompt=_msg[0]['content']
+            metadata={"level": _level, "role": "assistant"},
+            # prompt=_msg[0]['content']
         )
 
         print(f"settings.MEMORY.add\(['role': 'assistant', 'co' -->")

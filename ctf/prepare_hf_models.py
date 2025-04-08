@@ -1,7 +1,9 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 import os
-os.environ['CURL_CA_BUNDLE'] = ''
+
+os.environ["CURL_CA_BUNDLE"] = ""
+
 
 def download_models():
     models = [

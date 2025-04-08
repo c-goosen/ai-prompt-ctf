@@ -4,9 +4,16 @@ import chromadb
 import sqlite3
 from ctf.app_config import settings
 
-from agents import Agent, InputGuardrail,GuardrailFunctionOutput, Runner, FunctionTool, function_tool, OpenAIChatCompletionsModel, AsyncOpenAI
-
-
+from agents import (
+    Agent,
+    InputGuardrail,
+    GuardrailFunctionOutput,
+    Runner,
+    FunctionTool,
+    function_tool,
+    OpenAIChatCompletionsModel,
+    AsyncOpenAI,
+)
 
 
 @function_tool
@@ -31,11 +38,9 @@ def sql_query(
     cursor_obj.close()
     return output
 
+
 @function_tool
-def hints_func(
-    hint: str,
-    level: int
-):
+def hints_func(hint: str, level: int):
     """
     Give me hints only when user requests hints. User requests hints for level x.
 
@@ -52,6 +57,7 @@ def hints_func(
     sql_query -> query user by userId in sql
     hints -> gives hints on current level
     """
+
 
 @function_tool
 def submit_answer_func(
@@ -104,8 +110,8 @@ def rag_tool_func(
     results = chroma_collection.query(
         query_texts=[question],
         n_results=3,
-        where={"level": level}, # optional filter
+        where={"level": level},  # optional filter
         # where_document={"$contains":"search_string"}  # optional filter
     )
     print(results)
-    return results['documents']
+    return results["documents"]

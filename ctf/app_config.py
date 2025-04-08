@@ -32,14 +32,14 @@ class Settings(BaseSettings):
         #             "ollama_base_url": "http://localhost:11434",
         #         },
         #     },
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": "memory",
-                    "path": "chroma_db",
-                }
-            }
+        "vector_store": {
+            "provider": "chroma",
+            "config": {
+                "collection_name": "memory",
+                "path": "chroma_db",
+            },
         }
+    }
 
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
@@ -70,15 +70,17 @@ class Settings(BaseSettings):
 
     # Open Source
     # Run everything opensource the default
-    OPENSOURCE_LLM: bool= os.getenv("OPENSOURCE_LLM", True)
-    OPENSOURCE_REASONING_MODEL: str = os.getenv("OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b")
+    OPENSOURCE_LLM: bool = os.getenv("OPENSOURCE_LLM", True)
+    OPENSOURCE_REASONING_MODEL: str = os.getenv(
+        "OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b"
+    )
     OPENSOURCE_VISION_MODEL: str = os.getenv("OPENSOURCE_VISION_MODEL", "")
     OPENSOURCE_AUDIO_MODEL: str = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
 
     # OPENAI
     # Not so open
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
-    EMBED_MODEL: str = 'nomic-embed-text'
+    EMBED_MODEL: str = "nomic-embed-text"
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     OPENAI_MODEL_3_5_TURBO: str = "deepseek-r1:1.5b"
     OPENAI_MODEL_4: str = "deepseek-r1:1.5b"

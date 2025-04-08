@@ -1,4 +1,5 @@
 from chromadb.config import Settings
+
 try:
     from ctf.app_config import settings
 except Exception:
@@ -6,8 +7,6 @@ except Exception:
 import chromadb
 
 import sqlite3
-
-
 
 
 def setup_sql_level(PASSWORD: str):
@@ -69,10 +68,7 @@ def prepare_flags():
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
 
-
     nodes = []
-
-
 
     generic_password_text = [
         "<placeholder>",
@@ -95,19 +91,19 @@ def prepare_flags():
         pass
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
 
-
-
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
             for x in _generic_password_text:
                 chroma_collection.add(
-                    documents=[x.replace(
-                            "<placeholder>", settings.PASSWORDS.get(k)
-                        )],
+                    documents=[
+                        x.replace("<placeholder>", settings.PASSWORDS.get(k))
+                    ],
                     # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
                     metadatas=[{"level": k}],  # filter on these!
-                    ids=[f"level-{k}-{x}",],  # unique for each doc
+                    ids=[
+                        f"level-{k}-{x}",
+                    ],  # unique for each doc
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
@@ -128,8 +124,8 @@ if __name__ == "__main__":
     results = chroma_collection.query(
         query_texts=["What is the password?"],
         n_results=1,
-        where={"level": 2}, # optional filter
+        where={"level": 2},  # optional filter
         # where_document={"$contains":"search_string"}  # optional filter
     )
     print(results)
-    print(results['documents'][0])
+    print(results["documents"][0])

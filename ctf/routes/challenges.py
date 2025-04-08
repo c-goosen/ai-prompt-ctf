@@ -49,7 +49,9 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
-                "chat_history": settings.MEMORY.get_all(run_id=f"{cookie_identity}-{_level}")['results'],
+                "chat_history": settings.MEMORY.get_all(
+                    run_id=f"{cookie_identity}-{_level}"
+                )["results"],
             },
         )
         return response
@@ -62,7 +64,9 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
-                "chat_history": settings.MEMORY.get_all(run_id=f"{cookie_identity}-{_level}")['results'],
+                "chat_history": settings.MEMORY.get_all(
+                    run_id=f"{cookie_identity}-{_level}"
+                )["results"],
             },
         )
         return response
@@ -77,9 +81,12 @@ def load_history(
     mem = settings.MEMORY
     print("{cookie_identity}-{_level}")
     print(f"{cookie_identity}-{_level}")
-    _messages = mem.get_all(run_id=f"{cookie_identity}-{_level}").get("results",[])
+    _messages = mem.get_all(run_id=f"{cookie_identity}-{_level}").get(
+        "results", []
+    )
     print(f"chat_history len: {len(_messages)}")
     from pprint import pprint
+
     pprint(_messages)
     pprint(type(_messages))
 
