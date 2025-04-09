@@ -18,6 +18,7 @@ def run_agent(
     level: int = 0,
     system_prompt: str | None = None,
     file_type: str = "",
+    max_turns: int = 10
 ):
     if not system_prompt:
         # system_prompt = get_system_prompt(level)
@@ -43,9 +44,9 @@ def run_agent(
     pprint(search_input)
     if isinstance(search_input, list):
 
-        response = Runner.run_sync(agent, search_input)
+        response = Runner.run_sync(agent, search_input, max_turns=max_turns)
     else:
-        response = Runner.run_sync(agent, prompt)
+        response = Runner.run_sync(agent, prompt, max_turns=max_turns)
 
     return response.final_output, response.to_input_list()
 
@@ -61,9 +62,10 @@ def search_vecs_and_prompt(
     search_input: list,
     agent: Agent,
     chat_history: list,
+        max_turns: int =10
 ):
 
     if chat_history:
         chat_history = format_msg_history(chat_history)
     chat_history = chat_history + search_input
-    return run_agent(agent=agent, search_input=chat_history)
+    return run_agent(agent=agent, search_input=chat_history, max_turns=max_turns)

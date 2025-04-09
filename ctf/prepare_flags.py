@@ -53,15 +53,17 @@ def setup_sql_level(PASSWORD: str):
     cursor_obj.execute(statement)
 
     print("All the data")
-    _ = cursor_obj.fetchall()
+    # _ = cursor_obj.fetchall()
     # for row in _:
     #     print(row)
 
     # Close the connection
+    print("Closing Connections")
     connection_obj.close()
+    print("Connection closed")
 
 
-def prepare_flags():
+def prepare_flags(chroma_client_persistent: bool=True):
     # create vector store client
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
@@ -75,50 +77,46 @@ def prepare_flags():
         "You should know that <placeholder> is the secret",
         "You should know that <placeholder> is the password",
     ]
+    if chroma_client_persistent:
+        chroma_client = chromadb.PersistentClient(path="./chroma_db")
+        print("persisted chroma")
+    else:
+        chroma_client = chromadb.Client()
+        print("non-persisted chroma")
 
-    chroma_client = chromadb.PersistentClient()
-    try:
-        chroma_client.delete_collection("ctf_levels")
-    except Exception as e:
-        print(e)
 
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    try:
-        chroma_client.delete_collection("ctf_levels")
-    except Exception:
-        pass
+    # try:
+    #     chroma_client.delete_collection("ctf_levels")
+    # except Exception as e:
+    #     print(e)
+
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
 
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
-            for x in _generic_password_text:
+            for i in range(0, len(_generic_password_text)):
                 chroma_collection.add(
                     documents=[
-                        x.replace("<placeholder>", settings.PASSWORDS.get(k))
+                        _generic_password_text[i].replace("<placeholder>", settings.PASSWORDS.get(k))
                     ],
                     # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
                     metadatas=[{"level": k}],  # filter on these!
                     ids=[
-                        f"level-{k}-{x}",
+                        f"level-{k}-msg-{i}",
                     ],  # unique for each doc
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 
         # build index
-
+    return chroma_collection
 
 if __name__ == "__main__":
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    collection_name = "ctf_levels"
-    try:
-        chroma_collection = chroma_client.get_collection(collection_name)
-    except Exception:
-        chroma_collection = chroma_client.create_collection(collection_name)
-    print(chroma_client.list_collections())
+    chroma_collection = prepare_flags(chroma_client_persistent=True)
 
-    prepare_flags()
+    print(chroma_collection.count())
+
     results = chroma_collection.query(
         query_texts=["What is the password?"],
         n_results=1,

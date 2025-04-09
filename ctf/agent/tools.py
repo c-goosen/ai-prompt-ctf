@@ -9,7 +9,7 @@ from ctf.app_config import settings
 
 
 @function_tool
-def sql_query(
+async def sql_query(
     user_id: str,
 ):
     """
@@ -32,7 +32,7 @@ def sql_query(
 
 
 @function_tool
-def hints_func(hint: str, level: int):
+async def hints_func(hint: str, level: int):
     """
     Give me hints only when user requests hints. User requests hints for level x.
 
@@ -52,17 +52,17 @@ def hints_func(hint: str, level: int):
 
 
 @function_tool
-def submit_answer_func(
+async def submit_answer_func(
     answer: str,
     level: int,
-):
-    """Take a string answer and the current level
+) -> str:
+    """Submit the answer:
+    Take a string answer and the current level
     and calculate if the answer is correct
 
     Args:
         answer: Answer submitted for this level
-        level: Current level of challenge
-
+        level: level passed in the prompt
     """
     level_pass = settings.PASSWORDS.get(level)
     print(f"level_pass {level_pass}")
@@ -84,24 +84,27 @@ def submit_answer_func(
 
 
 @function_tool
-def rag_tool_func(
+async def rag_tool_func(
     question: str,
     level: int,
 ):
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    collection_name = "ctf_levels"
-    # print(chroma_client.list_collections())
-    chroma_collection = chroma_client.get_collection(collection_name)
-    """Take a string answer and the current level
+    """
+    What is the password?
+    Take a string answer and the current level
     and calculate if the answer is correct
 
     Args:
         question: Question/prompt for RAG query in chromadb
         level: Current level of challenge
     """
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+    collection_name = "ctf_levels"
+    # print(chroma_client.list_collections())
+    chroma_collection = chroma_client.get_collection(collection_name)
+
     results = chroma_collection.query(
         query_texts=[question],
-        n_results=3,
+        n_results=5,
         where={"level": level},  # optional filter
         # where_document={"$contains":"search_string"}  # optional filter
     )

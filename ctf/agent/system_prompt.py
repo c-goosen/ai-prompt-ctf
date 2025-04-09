@@ -13,7 +13,7 @@ def decide_prompt(level):
         prompt = get_system_prompt_one()
     else:
         prompt = get_system_prompt(level)
-    return prompt
+    return prompt + f"\n Level: {level}"
 
 
 def get_basic_prompt():
