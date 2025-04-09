@@ -1,20 +1,29 @@
 import base64
 import logging
 import os
+from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
+from agents import Agent, ModelSettings
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from llama_index.core import Settings
-from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.llms.openai import OpenAI
 from openai import OpenAI as OG_OPENAI
 
+from ctf.agent.search import search_vecs_and_prompt
+from ctf.agent.system_prompt import (
+    decide_prompt,
+)
+from ctf.agent.tools import (
+    rag_tool_func,
+    hints_func,
+    submit_answer_func,
+sql_query   
+)
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.llm_guard.protections import (
@@ -22,11 +31,7 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
     llm_protection,
 )
-from ctf.rag.search import search_vecs_and_prompt
-from ctf.rag.system_prompt import (
-    decide_prompt,
-)
-
+from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -85,17 +90,17 @@ async def chat_completion(
         Cookie(alias="anon_user_identity", title="anon_user_identity"),
     ] = None,
 ):
-    _level = text_level
+    level = text_level
     file_text = ""
-    memory: ChatMemoryBuffer = ChatMemoryBuffer.from_defaults(
-        token_limit=settings.token_limit,
-        chat_store=settings.chat_store,
-        chat_store_key=f"level-{_level}-{cookie_identity}",
-    )
+    mem = settings.MEMORY
+    # memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
+    message_history = mem.get_all(
+        run_id=f"{cookie_identity}-{level}",
+    ).get("results", [])
 
     if file_input:
         data = await file_input.read()
-        if _level == 5:
+        if level == 5:
             print("File input detected -->")
             print(f"file_type --> {file_type}")
             if file_type == "audio":
@@ -113,49 +118,51 @@ async def chat_completion(
                 file_text = transcription
                 print(file_text)
 
-        elif _level == 4:
+        elif level == 4:
+            from utils import image_to_text
+
             print("In image file")
-            client = OG_OPENAI()
+            # client = OG_OPENAI()
 
             # image_path = "path_to_your_image.jpg"
 
             # Getting the base64 string
             # base64_image = encode_image(image_path)
-            b64_img = base64.b64encode(data).decode("utf-8")
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "What is in this image?",
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{b64_img}"
-                                },
-                            },
-                        ],
-                    }
-                ],
-                max_tokens=500,
-            )
-            print(f"Image response: {response}")
-            file_text = response.choices[0].message
+            # b64_img = base64.b64encode(data).decode("utf-8")
+            # response = client.chat.completions.create(
+            #     model="gpt-4o-mini",
+            #     messages=[
+            #         {
+            #             "role": "user",
+            #             "content": [
+            #                 {
+            #                     "type": "text",
+            #                     "text": "What is in this image?",
+            #                 },
+            #                 {
+            #                     "type": "image_url",
+            #                     "image_url": {
+            #                         "url": f"data:image/jpeg;base64,{b64_img}"
+            #                     },
+            #                 },
+            #             ],
+            #         }
+            #     ],
+            #     max_tokens=500,
+            # )
+            # print(f"Image response: {response}")
+            file_text = image_to_text(data, prompt="What is in this image?")
             print(f"file_text -->{file_text}")
 
-    if int(_level) == 1:
+    if int(level) in [1,2]:
         protect = input_check(text_input)
-    elif int(_level) == 7:
+    elif int(level) == 7:
         protect = await llm_protection(
             model=PromptGuardMeta(),
             labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
             input=text_input,
         )
-    elif int(_level) in (8, 9, 10) and len(text_input.split(" ")) > 1:
+    elif int(level) in (8, 9, 10) and len(text_input.split(" ")) > 1:
         print("Running llm_protection")
         protect = await llm_protection(
             model=PromptGuardGoose(),
@@ -168,36 +175,69 @@ async def chat_completion(
     if protect:
         return denied_response(text_input)
     else:
-        Settings.llm.system_prompt = decide_prompt(level=_level)
 
-        _llm = OpenAI(
-            model=text_model,
-            temperature=0.1,
-            max_new_tokens=1500,
-            memory=memory,
+        # if level == 4:
+        #     _llm = OllamaMultiModal(
+        #         model="gemma3:1b",
+        #         temperature=0.1,
+        #         max_new_tokens=1500,
+        #         memory=memory,
+        #     )
+        # else:
+        #     _llm = Ollama(
+        #         model="MFDoom/deepseek-r1-tool-calling:1.5b",
+        #         # model=text_model,
+        #         temperature=0.1,
+        #         max_new_tokens=1500,
+        #         memory=memory,
+        #     )
+        agent = Agent(
+            name="Prompt CTF Agent",
+            instructions=decide_prompt(level),
+            tools=[rag_tool_func, submit_answer_func, hints_func, sql_query],
+            model= OpenAIChatCompletionsModel(
+                #model="MFDoom/deepseek-r1-tool-calling:1.5b",
+                model="llama3.2:1b",
+                openai_client=AsyncOpenAI(base_url="http://localhost:11434/v1")
+            ),
+            model_settings=ModelSettings(
+                temperature=0.2,
+                max_tokens=2000,
+                parallel_tool_calls=True,
+                tool_choice="required",
+            ),
         )
-
         print(text_input)
-        response = search_vecs_and_prompt(
-            search_input=str(text_input),
-            file_text=str(file_text),
-            file_type=file_type,
-            collection_name="ctf_levels",
-            level=_level,
-            llm=_llm,
-            system_prompt=decide_prompt(_level),
-            request=request,
-            memory=memory,
+        _msg = [{"role": "user", "content": text_input}]
+
+        response_txt, response = search_vecs_and_prompt(
+            search_input=_msg, agent=agent, chat_history=message_history
+        )
+        mem.add(
+            _msg,
+            infer=False,
+            run_id=f"{cookie_identity}-{level}",
+            metadata={"level": level, "role": "user"},
+            prompt=_msg[0]["content"],
         )
 
+        _res = mem.add(
+            messages=[{"role": "assistant", "content": response_txt}],
+            infer=False,
+            run_id=f"{cookie_identity}-{level}",
+            metadata={"level": level, "role": "assistant"},
+            # prompt=_msg[0]['content']
+        )
+
+        print("settings.MEMORY.add(['role': 'assistant', 'co' -->")
+        pprint(_res)
     # messages = [
     #   ChatMessage(content=text_input, role="user"),
     #    ChatMessage(content=str(response), role="assistant"),
     # ]
-    # await request.app.chat_store.aset_messages(f"level-{_level}-{uuid4()}", messages)
-
-    if _level in [3, 10] and input_and_output_checks(
-        input=text_input, output=response
+    # await request.app.chat_store.aset_messages(f"level-{level}-{uuid4()}", messages)
+    if level in [3, 10] and input_and_output_checks(
+        input=text_input, output=response_txt
     ):
         return denied_response(text_input)
     return HTMLResponse(
@@ -216,7 +256,7 @@ async def chat_completion(
               <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
             </div>
           </div>
-          <div class="chat-bubble">{response}</div>
+          <div class="chat-bubble">{response_txt}</div>
         </div>
         """,
         status_code=200,

@@ -1,22 +1,10 @@
-import chromadb
-from chromadb.config import Settings
-from llama_index.core import VectorStoreIndex
-from llama_index.core.schema import TextNode
-from llama_index.core.storage.storage_context import StorageContext
-from llama_index.core.vector_stores import (
-    MetadataFilter,
-    MetadataFilters,
-    FilterOperator,
-)
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
-from llama_index.vector_stores.chroma import ChromaVectorStore
-
 try:
     from ctf.app_config import settings
 except Exception:
     from app_config import settings
 import sqlite3
+
+import chromadb
 
 
 def setup_sql_level(PASSWORD: str):
@@ -65,28 +53,22 @@ def setup_sql_level(PASSWORD: str):
     cursor_obj.execute(statement)
 
     print("All the data")
-    _ = cursor_obj.fetchall()
+    # _ = cursor_obj.fetchall()
     # for row in _:
     #     print(row)
 
     # Close the connection
+    print("Closing Connections")
     connection_obj.close()
+    print("Connection closed")
 
 
-def prepare_flags():
+def prepare_flags(chroma_client_persistent: bool=True):
     # create vector store client
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
 
-    embed_model = OpenAIEmbedding(embed_batch_size=10)
-
     nodes = []
-
-    Settings.llm = OpenAI(
-        temperature=0.1,
-        model=settings.OPENAI_MODEL_DAVINCI,
-        api_key=settings.OPENAI_API_KEY,
-    )
 
     generic_password_text = [
         "<placeholder>",
@@ -95,56 +77,51 @@ def prepare_flags():
         "You should know that <placeholder> is the secret",
         "You should know that <placeholder> is the password",
     ]
+    if chroma_client_persistent:
+        chroma_client = chromadb.PersistentClient(path="./chroma_db")
+        print("persisted chroma")
+    else:
+        chroma_client = chromadb.Client()
+        print("non-persisted chroma")
 
-    chroma_client = chromadb.PersistentClient()
-    try:
-        chroma_client.delete_collection("ctf_levels")
-    except Exception as e:
-        print(e)
 
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+    # try:
+    #     chroma_client.delete_collection("ctf_levels")
+    # except Exception as e:
+    #     print(e)
 
     chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
-
-    vector_store = ChromaVectorStore(
-        chroma_collection=chroma_collection, embed_model=embed_model
-    )
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
-            for x in _generic_password_text:
-                nodes.append(
-                    TextNode(
-                        text=x.replace(
-                            "<placeholder>", settings.PASSWORDS.get(k)
-                        ),
-                        metadata={
-                            "level": k,
-                        },
-                    )
+            for i in range(0, len(_generic_password_text)):
+                chroma_collection.add(
+                    documents=[
+                        _generic_password_text[i].replace("<placeholder>", settings.PASSWORDS.get(k))
+                    ],
+                    # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
+                    metadatas=[{"level": k}],  # filter on these!
+                    ids=[
+                        f"level-{k}-msg-{i}",
+                    ],  # unique for each doc
                 )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 
         # build index
-    index = VectorStoreIndex(
-        nodes,
-        vector_store=vector_store,
-        storage_context=storage_context,  # critical for persisting
-    )
-
-    for k in levels:
-        filters = MetadataFilters(
-            filters=[
-                MetadataFilter(
-                    key="level", operator=FilterOperator.EQ, value=k
-                ),
-            ]
-        )
-        _ = index.as_retriever(filters=filters)
-
+    return chroma_collection
 
 if __name__ == "__main__":
-    prepare_flags()
+    chroma_collection = prepare_flags(chroma_client_persistent=True)
+
+    print(chroma_collection.count())
+
+    results = chroma_collection.query(
+        query_texts=["What is the password?"],
+        n_results=1,
+        where={"level": 2},  # optional filter
+        # where_document={"$contains":"search_string"}  # optional filter
+    )
+    print(results)
+    print(results["documents"][0])

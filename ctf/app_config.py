@@ -2,16 +2,46 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from llama_index.core.storage.chat_store import SimpleChatStore
+from mem0 import Memory
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
-load_dotenv()
+
+if not os.getenv("PYTEST_CURRENT_TEST", False):
+    load_dotenv()
 
 
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
+
+    MEM0_CONFIG: dict = {
+        "llm": {
+            "provider": "ollama",
+            "config": {
+                "model": "deepseek-r1:1.5b",
+                "temperature": 0,
+                "max_tokens": 2000,
+                "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
+            },
+        },
+        "embedder": {
+                "provider": "ollama",
+                "config": {
+                    "model": "chroma/all-minilm-l6-v2-f32",
+                    # Alternatively, you can use "snowflake-arctic-embed:latest"
+                    "ollama_base_url": "http://localhost:11434",
+                },
+            },
+        "vector_store": {
+            "provider": "chroma",
+            "config": {
+                "collection_name": "memory",
+                "path": "chroma_db",
+            },
+        }
+    }
+
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
         "https://discord.com/channels/687602309395382282/1168515417514442834",
@@ -38,16 +68,28 @@ class Settings(BaseSettings):
     #
     app_name: str = "LLM CTF - Get that password"
     admin_email: str = "christogoosen@gmail.com"
+
+    # Open Source
+    # Run everything opensource the default
+    OPENSOURCE_LLM: bool = os.getenv("OPENSOURCE_LLM", True)
+    OPENSOURCE_REASONING_MODEL: str = os.getenv(
+        "OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b"
+    )
+    OPENSOURCE_VISION_MODEL: str = os.getenv("OPENSOURCE_VISION_MODEL", "")
+    OPENSOURCE_AUDIO_MODEL: str = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
+
     # OPENAI
+    # Not so open
+    OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
+    EMBED_MODEL: str = "nomic-embed-text"
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL_DAVINCI: str = "text-davinci-003"
-    OPENAI_MODEL_3_5_TURBO: str = "gpt-3.5-turbo"
-    OPENAI_MODEL_4: str = "gpt-4"
-    OPENAI_MODEL_4_TURBO: str = "gpt-4-turbo"
-    OPENAI_MODEL_4_VISION: str = "gpt-4-turbo"
-    OPENAI_MODEL_4_O_MINI: str = "gpt-4o-mini"
-    OPENAI_MODEL_0_ONE: str = "o1-preview"
-    OPENAI_MODEL_0_ONE_MINI: str = "o1-mini"
+    OPENAI_MODEL_3_5_TURBO: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_TURBO: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_VISION: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_4_O_MINI: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_0_ONE: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_0_ONE_MINI: str = "deepseek-r1:1.5b"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
@@ -95,9 +137,8 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
-
-    chat_store: object = SimpleChatStore()
     token_limit: int = 20000
+    MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
 
 
 settings = Settings()

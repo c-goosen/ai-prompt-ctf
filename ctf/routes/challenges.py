@@ -6,7 +6,6 @@ from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
-from llama_index.core.memory import ChatMemoryBuffer
 from pydantic import BaseModel
 
 from ctf.app_config import settings
@@ -40,12 +39,6 @@ async def load_level(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
 ):
-    # chat_history = settings.chats.get(int(_level))
-    chat_history = ChatMemoryBuffer.from_defaults(
-        token_limit=settings.token_limit,
-        chat_store=settings.chat_store,
-        chat_store_key=f"level-{_level}-{cookie_identity}",
-    )
 
     if request.headers.get("hx-request"):
         response = templates.TemplateResponse(
@@ -55,9 +48,9 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
-                "chat_history": chat_history.chat_store.get_messages(
-                    key=f"level-{_level}-{cookie_identity}"
-                ),
+                "chat_history": settings.MEMORY.get_all(
+                    run_id=f"{cookie_identity}-{_level}"
+                )["results"],
             },
         )
         return response
@@ -70,9 +63,9 @@ async def load_level(
                 "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "_level": _level,
-                "chat_history": chat_history.chat_store.get_messages(
-                    key=f"level-{_level}"
-                ),
+                "chat_history": settings.MEMORY.get_all(
+                    run_id=f"{cookie_identity}-{_level}"
+                )["results"],
             },
         )
         return response
@@ -84,18 +77,17 @@ def load_history(
     _level: int = 0,
     cookie_identity: Annotated[str | None, cookie] = None,
 ):
-    # chat_history = settings.chats.get(int(_level))
-    chat_history = ChatMemoryBuffer.from_defaults(
-        token_limit=settings.token_limit,
-        chat_store=settings.chat_store,
-        chat_store_key=f"level-{_level}-{cookie_identity}",
+    mem = settings.MEMORY
+    print("{cookie_identity}-{_level}")
+    print(f"{cookie_identity}-{_level}")
+    _messages = mem.get_all(run_id=f"{cookie_identity}-{_level}").get(
+        "results", []
     )
-    _messages = chat_history.chat_store.get_messages(
-        key=f"level-{_level}-{cookie_identity}"
-    )
-    # print(len(_messages))
     print(f"chat_history len: {len(_messages)}")
-    # _messages = _messages.reverse()
+    from pprint import pprint
+
+    pprint(_messages)
+    pprint(type(_messages))
 
     response = templates.TemplateResponse(
         "levels/chat_history.html",
