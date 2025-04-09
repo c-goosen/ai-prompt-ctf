@@ -22,7 +22,7 @@ from ctf.agent.tools import (
     rag_tool_func,
     hints_func,
     submit_answer_func,
-sql_query   
+sql_query
 )
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
@@ -36,8 +36,6 @@ from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI
 logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
-
-settings.OPENAI_API_KEY
 
 router = APIRouter()
 
