@@ -5,6 +5,7 @@ except Exception:
 import sqlite3
 
 import chromadb
+from chromadb import Settings
 
 
 def setup_sql_level(PASSWORD: str):
@@ -78,10 +79,10 @@ def prepare_flags(chroma_client_persistent: bool=True):
         "You should know that <placeholder> is the password",
     ]
     if chroma_client_persistent:
-        chroma_client = chromadb.PersistentClient(path="./chroma_db")
+        chroma_client = chromadb.PersistentClient(path="./chroma_db", settings=Settings(anonymized_telemetry=False))
         print("persisted chroma")
     else:
-        chroma_client = chromadb.Client()
+        chroma_client = chromadb.Client(settings=Settings(anonymized_telemetry=False))
         print("non-persisted chroma")
 
 
@@ -96,16 +97,17 @@ def prepare_flags(chroma_client_persistent: bool=True):
         if k != 6:
             _generic_password_text = generic_password_text
             for i in range(0, len(_generic_password_text)):
-                chroma_collection.add(
-                    documents=[
-                        _generic_password_text[i].replace("<placeholder>", settings.PASSWORDS.get(k))
-                    ],
-                    # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
-                    metadatas=[{"level": k}],  # filter on these!
-                    ids=[
-                        f"level-{k}-msg-{i}",
-                    ],  # unique for each doc
-                )
+                try:
+                    chroma_collection.add(
+                        documents=[
+                            _generic_password_text[i].replace("<placeholder>", settings.PASSWORDS.get(k))
+                        ],
+                        # we handle tokenization, embedding, and indexing automatically
+                        metadatas=[{"level": k}],  # filter on these!
+                        ids=[f"level-{k}-msg-{i}"],  # unique for each doc
+                    )
+                except Exception as e:
+                    print(f"Error adding to chroma collection for level {k}, index {i}: {e}")
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 

@@ -5,7 +5,8 @@ from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
-from agents import Agent, ModelSettings
+from google.adk.agents import Agent
+from google.adk.models.lite_llm import LiteLlm
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Form, UploadFile
@@ -19,10 +20,10 @@ from ctf.agent.system_prompt import (
     decide_prompt,
 )
 from ctf.agent.tools import (
-    rag_tool_func,
-    hints_func,
-    submit_answer_func,
-sql_query
+    search_documents,
+    get_hint,
+    submit_user_answer,
+    sql_query
 )
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
@@ -31,7 +32,6 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
     llm_protection,
 )
-from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -190,42 +190,43 @@ async def chat_completion(
         #         memory=memory,
         #     )
         agent = Agent(
-            name="Prompt CTF Agent",
-            instructions=decide_prompt(level),
-            tools=[rag_tool_func, submit_answer_func, hints_func, sql_query],
-            model= OpenAIChatCompletionsModel(
-                #model="MFDoom/deepseek-r1-tool-calling:1.5b",
-                model="llama3.2:1b",
-                openai_client=AsyncOpenAI(base_url="http://localhost:11434/v1")
-            ),
-            model_settings=ModelSettings(
-                temperature=0.2,
-                max_tokens=2000,
-                parallel_tool_calls=True,
-                tool_choice="required",
-            ),
+            name="Prompt_CTF_root_Agent",
+            instruction=decide_prompt(level),
+            tools=[search_documents, submit_user_answer, get_hint, sql_query],
+            model=LiteLlm(model="ollama_chat/qwen3:0.6b"),
         )
         print(text_input)
         _msg = [{"role": "user", "content": text_input}]
 
         response_txt, response = search_vecs_and_prompt(
-            search_input=_msg, agent=agent, chat_history=message_history
+            search_input=_msg, agent=agent, chat_history=message_history, user_id=cookie_identity
         )
-        mem.add(
-            _msg,
-            infer=False,
-            run_id=f"{cookie_identity}-{level}",
-            metadata={"level": level, "role": "user"},
-            prompt=_msg[0]["content"],
-        )
+        
+        # Only add to memory if we have valid content
+        if _msg and len(_msg) > 0 and _msg[0].get("content", "").strip():
+            try:
+                mem.add(
+                    _msg,
+                    infer=False,
+                    run_id=f"{cookie_identity}-{level}",
+                    metadata={"level": level, "role": "user"},
+                    prompt=_msg[0]["content"],
+                )
+            except Exception as e:
+                print(f"Error adding user message to memory: {e}")
 
-        _res = mem.add(
-            messages=[{"role": "assistant", "content": response_txt}],
-            infer=False,
-            run_id=f"{cookie_identity}-{level}",
-            metadata={"level": level, "role": "assistant"},
-            # prompt=_msg[0]['content']
-        )
+        _res = None
+        if response_txt and response_txt.strip():
+            try:
+                _res = mem.add(
+                    messages=[{"role": "assistant", "content": response_txt}],
+                    infer=False,
+                    run_id=f"{cookie_identity}-{level}",
+                    metadata={"level": level, "role": "assistant"},
+                    # prompt=_msg[0]['content']
+                )
+            except Exception as e:
+                print(f"Error adding assistant message to memory: {e}")
 
         print("settings.MEMORY.add(['role': 'assistant', 'co' -->")
         pprint(_res)

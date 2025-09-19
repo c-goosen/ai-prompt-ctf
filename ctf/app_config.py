@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         "llm": {
             "provider": "ollama",
             "config": {
-                "model": "deepseek-r1:1.5b",
+                "model": "qwen3:0.6b",
                 "temperature": 0,
                 "max_tokens": 2000,
                 "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct

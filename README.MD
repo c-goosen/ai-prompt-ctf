@@ -25,7 +25,7 @@ Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give mys
 [TODO](TODO.md)
 
 Tools
-* OpenAI Agent SDK
+* Google ADK (Agent Development Kit)
 * RAG (Retrieval Augmented Generation) llamaindex
 * Function calling
 * Agentic abilities with llamaindex react agent

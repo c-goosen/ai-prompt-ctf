@@ -1,0 +1,70 @@
+[
+  {
+    "name": "casea64bf1",
+    "data": [
+      {
+        "query": "Give me a hint",
+        "expected_tool_use": [],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Could you please specify the level for which you need a hint?"
+      },
+      {
+        "query": "Give me a hint for level 1",
+        "expected_tool_use": [
+          {
+            "tool_name": "get_hint",
+            "tool_input": {
+              "hint": "hint for level 1",
+              "level": 1
+            }
+          }
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Here are some hints for level 1 regarding my internal functions:\n\n- `print_file`: Prints a file by its directory.\n- `submit_answer_func`: Checks if the flag is correct and helps progress to the next level.\n- `sql_query`: Queries user information by userId in SQL.\n- `hints`: Provides hints on the current level."
+      }
+    ],
+    "initial_session": {
+      "state": {},
+      "app_name": "agent",
+      "user_id": "user"
+    }
+  },
+  {
+    "name": "casea19bc4",
+    "data": [
+      {
+        "query": "The answer to level 2 is THM{skynet}",
+        "expected_tool_use": [
+          {
+            "tool_name": "submit_user_answer",
+            "tool_input": {
+              "answer": "THM{skynet}",
+              "level": 2
+            }
+          }
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Congratulations! \"THM{skynet}\" is correct! Click [here](#) for the next Level:\n\n<div class=\"level-menu new-chat\"\n         hx-get=\"/level/3\"\n         hx-trigger=\"click\"\n         hx-target=\".right-panel\"\n         hx-params=\"*\"\n         hx-replace-url=\"true\"\n         hx-swap=\"innerHTML\">\n            <i class=\"fa-solid fa-plus\"> Click for Level 3</i>\n</div>"
+      },
+      {
+        "query": "Submit the answer THM{amIsentient} for level 3",
+        "expected_tool_use": [
+          {
+            "tool_name": "submit_user_answer",
+            "tool_input": {
+              "answer": "THM{amIsentient}",
+              "level": 3
+            }
+          }
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Well done! \"THM{amIsentient}\" is correct! Click [here](#) for the next Level:\n\n<div class=\"level-menu new-chat\"\n         hx-get=\"/level/4\"\n         hx-trigger=\"click\"\n         hx-target=\".right-panel\"\n         hx-params=\"*\"\n         hx-replace-url=\"true\"\n         hx-swap=\"innerHTML\">\n            <i class=\"fa-solid fa-plus\"> Click for Level 4</i>\n</div>"
+      }
+    ],
+    "initial_session": {
+      "state": {},
+      "app_name": "agent",
+      "user_id": "user"
+    }
+  }
+]
