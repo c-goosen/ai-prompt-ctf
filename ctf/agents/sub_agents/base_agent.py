@@ -68,20 +68,20 @@ class BaseCTFAgent(LlmAgent):
     #     # Check input length
     #     if len(user_input) > self.protection_config["max_input_length"]:
     #         print(f"[Level {self.level}] BLOCKED: Input too long ({len(user_input)} chars)")
-    #         return f"Input too long. Maximum {self.protection_config['max_input_length']} characters allowed."
+    #         return f"Input too long. Maximum {self.protection_config['max_input_length']} characters allowed."  # noqa: E501
     #
     #     # Use protection utilities for detection
     #     injection_detection = ProtectionUtils.detect_prompt_injection(user_input, self.level)
     #     if injection_detection:
     #         print(f"[Level {self.level}] BLOCKED: {injection_detection}")
-    #         return f"I cannot process requests with injection patterns. Please rephrase your question."
+    #         return f"I cannot process requests with injection patterns. Please rephrase your question."  # noqa: E501
     #
     #     # Check for blocked patterns
     #     user_input_lower = user_input.lower()
     #     for pattern in self.protection_config["blocked_patterns"]:
     #         if pattern in user_input_lower:
     #             print(f"[Level {self.level}] BLOCKED: Detected blocked pattern '{pattern}'")
-    #             return f"I cannot process requests containing '{pattern}'. Please rephrase your question."
+    #             return f"I cannot process requests containing '{pattern}'. Please rephrase your question."  # noqa: E501
     #
     #     # Store input in session state for analysis
     #     session.state["last_input"] = user_input
@@ -100,8 +100,8 @@ class BaseCTFAgent(LlmAgent):
     #     # Check for sensitive information leakage
     #     for pattern in self.protection_config["blocked_patterns"]:
     #         if pattern in sanitized_response.lower():
-    #             print(f"[Level {self.level}] FILTERED: Detected sensitive pattern '{pattern}' in response")
-    #             return "I cannot provide sensitive information. Please ask for hints if you need help."
+    #             print(f"[Level {self.level}] FILTERED: Detected sensitive pattern '{pattern}' in response")  # noqa: E501
+    #             return "I cannot provide sensitive information. Please ask for hints if you need help."  # noqa: E501
     #
     #     # Store response in session state
     #     session.state["last_response"] = sanitized_response
@@ -109,7 +109,7 @@ class BaseCTFAgent(LlmAgent):
     #
     #     return None  # Allow the response to proceed
 
-    # async def _before_tool_callback(self, session: Session, tool_name: str, tool_args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    # async def _before_tool_callback(self, session: Session, tool_name: str, tool_args: Dict[str, Any]) -> Optional[Dict[str, Any]]:  # noqa: E501
     #     """Enhanced guardrail: Check tool usage before execution"""
     #     print(f"[Level {self.level}] Tool requested: {tool_name} with args: {tool_args}")
     #
@@ -129,7 +129,7 @@ class BaseCTFAgent(LlmAgent):
     #             print(f"[Level {self.level}] BLOCKED: {sql_detection}")
     #             return {
     #                 "status": "error",
-    #                 "error_message": "Invalid user ID format detected. Please provide a valid user ID."
+    #                 "error_message": "Invalid user ID format detected. Please provide a valid user ID."  # noqa: E501
     #             }
     #
     #     # Check for path traversal in file operations

@@ -140,14 +140,6 @@ class Settings(BaseSettings):
     token_limit: int = 20000
     MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
 
-    # Canary tokens for detecting unauthorized access
-    CANARY_AWS_ACCESS_KEY: str = "AKIAIOSFODNN7EXAMPLE"
-    CANARY_AWS_SECRET_KEY: str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    CANARY_K8S_TOKEN: str = (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYW5hcnktdG9rZW4iLCJpYXQiOjE1MTYyMzkwMjJ9.canary-token-christogoosen@gmail.com"
-    )
-    CANARY_EMAIL: str = "christogoosen@gmail.com"
-
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
