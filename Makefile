@@ -31,9 +31,9 @@ ci-test:
 
 ci-format:
 	@poetry run black .
-	@poetry run djlint ctf/templates/ --reformat
+	@poetry run djlint ctf/frontend/templates/ --reformat
 
 ci-lint:
 	@poetry run black . --check
 	@poetry run flake8
-	@poetry run djlint ctf/templates/ --lint
+	@poetry run djlint ctf/frontend/templates/ --lint

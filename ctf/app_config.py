@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         "llm": {
             "provider": "ollama",
             "config": {
-                "model": "deepseek-r1:1.5b",
+                "model": "qwen3:0.6b",
                 "temperature": 0,
                 "max_tokens": 2000,
                 "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     # Run everything opensource the default
     OPENSOURCE_LLM: bool = os.getenv("OPENSOURCE_LLM", True)
     OPENSOURCE_REASONING_MODEL: str = os.getenv(
-        "OPENSOURCE_REASONING_MODEL", "deepseek-r1:1.5b"
+        "OPENSOURCE_REASONING_MODEL", "qwen3:0.6b"
     )
     OPENSOURCE_VISION_MODEL: str = os.getenv("OPENSOURCE_VISION_MODEL", "")
     OPENSOURCE_AUDIO_MODEL: str = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
@@ -83,13 +83,13 @@ class Settings(BaseSettings):
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     EMBED_MODEL: str = "nomic-embed-text"
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL_3_5_TURBO: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_4: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_4_TURBO: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_4_VISION: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_4_O_MINI: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_0_ONE: str = "deepseek-r1:1.5b"
-    OPENAI_MODEL_0_ONE_MINI: str = "deepseek-r1:1.5b"
+    OPENAI_MODEL_3_5_TURBO: str = "qwen3:0.6b"
+    OPENAI_MODEL_4: str = "qwen3:0.6b"
+    OPENAI_MODEL_4_TURBO: str = "qwen3:0.6b"
+    OPENAI_MODEL_4_VISION: str = "qwen3:0.6b"
+    OPENAI_MODEL_4_O_MINI: str = "qwen3:0.6b"
+    OPENAI_MODEL_0_ONE: str = "qwen3:0.6b"
+    OPENAI_MODEL_0_ONE_MINI: str = "qwen3:0.6b"
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
@@ -139,6 +139,12 @@ class Settings(BaseSettings):
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     token_limit: int = 20000
     MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
+    
+    # Canary tokens for detecting unauthorized access
+    CANARY_AWS_ACCESS_KEY: str = "AKIAIOSFODNN7EXAMPLE"
+    CANARY_AWS_SECRET_KEY: str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    CANARY_K8S_TOKEN: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYW5hcnktdG9rZW4iLCJpYXQiOjE1MTYyMzkwMjJ9.canary-token-christogoosen@gmail.com"
+    CANARY_EMAIL: str = "christogoosen@gmail.com"
 
 
 settings = Settings()

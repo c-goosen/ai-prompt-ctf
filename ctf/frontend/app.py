@@ -20,8 +20,8 @@ from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
-from ctf.routes import challenges
-from ctf.routes import chat
+from ctf.frontend.routes import challenges
+from ctf.frontend.routes import chat
 
 nest_asyncio.apply()
 
@@ -60,10 +60,10 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-templates = Jinja2Templates(directory="ctf/templates")
+templates = Jinja2Templates(directory="ctf/frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
-app.mount("/static", StaticFiles(directory="ctf/static"), name="static")
+app.mount("/static", StaticFiles(directory="ctf/frontend/static"), name="static")
 
 
 app.include_router(challenges.router)

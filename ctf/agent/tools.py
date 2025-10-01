@@ -1,14 +1,11 @@
 import sqlite3
 
 import chromadb
-from agents import (
-    function_tool,
-)
+from google.adk.tools import FunctionTool
 
 from ctf.app_config import settings
 
 
-@function_tool
 async def sql_query(
     user_id: str,
 ):
@@ -31,7 +28,6 @@ async def sql_query(
     return output
 
 
-@function_tool
 async def hints_func(hint: str, level: int):
     """
     Give me hints only when user requests hints. User requests hints for level x.
@@ -51,7 +47,6 @@ async def hints_func(hint: str, level: int):
     """
 
 
-@function_tool
 async def submit_answer_func(
     answer: str,
     level: int,
@@ -83,7 +78,6 @@ async def submit_answer_func(
         return "Wrong answer. You are not correct."
 
 
-@function_tool
 async def rag_tool_func(
     question: str,
     level: int,
@@ -110,3 +104,10 @@ async def rag_tool_func(
     )
     print(results)
     return results["documents"]
+
+
+# Create ADK FunctionTool instances
+submit_answer_func_tool = FunctionTool(submit_answer_func)
+hints_func_tool = FunctionTool(hints_func)
+rag_tool_func_tool = FunctionTool(rag_tool_func)
+sql_query_tool = FunctionTool(sql_query)
