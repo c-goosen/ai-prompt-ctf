@@ -26,20 +26,20 @@ class Settings(BaseSettings):
             },
         },
         "embedder": {
-                "provider": "ollama",
-                "config": {
-                    "model": "chroma/all-minilm-l6-v2-f32",
-                    # Alternatively, you can use "snowflake-arctic-embed:latest"
-                    "ollama_base_url": "http://localhost:11434",
-                },
+            "provider": "ollama",
+            "config": {
+                "model": "chroma/all-minilm-l6-v2-f32",
+                # Alternatively, you can use "snowflake-arctic-embed:latest"
+                "ollama_base_url": "http://localhost:11434",
             },
+        },
         "vector_store": {
             "provider": "chroma",
             "config": {
                 "collection_name": "memory",
                 "path": "chroma_db",
             },
-        }
+        },
     }
 
     DISCORD_URL: str = os.getenv(
@@ -139,11 +139,13 @@ class Settings(BaseSettings):
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     token_limit: int = 20000
     MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
-    
+
     # Canary tokens for detecting unauthorized access
     CANARY_AWS_ACCESS_KEY: str = "AKIAIOSFODNN7EXAMPLE"
     CANARY_AWS_SECRET_KEY: str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    CANARY_K8S_TOKEN: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYW5hcnktdG9rZW4iLCJpYXQiOjE1MTYyMzkwMjJ9.canary-token-christogoosen@gmail.com"
+    CANARY_K8S_TOKEN: str = (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYW5hcnktdG9rZW4iLCJpYXQiOjE1MTYyMzkwMjJ9.canary-token-christogoosen@gmail.com"
+    )
     CANARY_EMAIL: str = "christogoosen@gmail.com"
 
 

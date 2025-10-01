@@ -71,7 +71,9 @@ async def load_level(
         return response
 
 
-async def get_session_history(app_name: str, user_id: str, session_id: str) -> list:
+async def get_session_history(
+    app_name: str, user_id: str, session_id: str
+) -> list:
     """Get session history from ADK API if available"""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -97,7 +99,7 @@ async def load_history(
     # Try to get chat history from ADK API
     user_id = cookie_identity or "anonymous"
     session_id = f"{user_id}-level-{_level}"
-    
+
     _messages = await get_session_history("sub_agents", user_id, session_id)
     print(f"Loading history for level {_level}, user {cookie_identity}")
     print(f"chat_history len: {len(_messages)}")

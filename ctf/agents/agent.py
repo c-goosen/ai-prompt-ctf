@@ -8,7 +8,11 @@ from google.adk.tools import FunctionTool
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from ctf.agents.tools import submit_answer_func_tool, hints_func_tool, rag_tool_func_tool
+from ctf.agents.tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+)
 from sub_agents.level_0_agent import Level0Agent
 from sub_agents.level_1_agent import Level1Agent
 from sub_agents.level_2_agent import Level2Agent
@@ -27,11 +31,11 @@ class CTFCoordinatorAgent(LlmAgent):
     Main coordinator agent that implements the Coordinator/Dispatcher Pattern
     Uses LLM-driven delegation to route users to appropriate level agents
     """
-    
+
     def __init__(self):
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
         model = LiteLlm(model="ollama_chat/qwen3:0.6b")
-        
+
         # Create all level agents as sub-agents
         level_agents = [
             Level0Agent(),
@@ -46,13 +50,13 @@ class CTFCoordinatorAgent(LlmAgent):
             Level9Agent(),
             Level10Agent(),
         ]
-        
+
         # Create session service
         session_service = InMemorySessionService()
-        
+
         # Create runner
         runner = Runner(session_service=session_service)
-        
+
         # Initialize the coordinator with sub-agents
         super().__init__(
             name="CTFCoordinator",
@@ -128,7 +132,7 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
                 hints_func_tool,
                 rag_tool_func_tool,
                 submit_answer_func_tool,
-            ]
+            ],
         )
 
 
