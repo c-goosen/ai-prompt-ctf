@@ -1,11 +1,12 @@
 import base64
 import logging
 import os
+import httpx
+import json
 from pprint import pprint
 from typing import Annotated
 from typing import Optional
 
-from agents import Agent, ModelSettings
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Form, UploadFile
@@ -14,16 +15,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from openai import OpenAI as OG_OPENAI
 
-from ctf.agent.search import search_vecs_and_prompt
-from ctf.agent.system_prompt import (
-    decide_prompt,
-)
-from ctf.agent.tools import (
-    rag_tool_func,
-    hints_func,
-    submit_answer_func,
-sql_query
-)
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
 from ctf.llm_guard.protections import (
@@ -31,7 +22,6 @@ from ctf.llm_guard.protections import (
     input_and_output_checks,
     llm_protection,
 )
-from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -39,7 +29,7 @@ os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 router = APIRouter()
 
-templates = Jinja2Templates(directory="ctf/templates")
+templates = Jinja2Templates(directory="ctf/frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
@@ -75,6 +65,78 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
+async def ensure_session_exists(app_name: str, user_id: str, session_id: str) -> bool:
+    """Ensure a session exists for the user, create if it doesn't exist"""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            # Check if session exists
+            response = await client.get(
+                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}"
+            )
+            if response.status_code == 200:
+                return True
+        except httpx.HTTPStatusError:
+            pass  # Session doesn't exist, we'll create it
+        
+        try:
+            # Create session
+            response = await client.post(
+                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}",
+                json=None,  # Empty state
+                headers={"Content-Type": "application/json"}
+            )
+            response.raise_for_status()
+            logger.info(f"Created session {session_id} for user {user_id}")
+            return True
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Failed to create session: {e.response.status_code} - {e.response.text}")
+            return False
+
+
+async def call_adk_api(user_id: str, session_id: str, message: str, level: int, file_text: str = "") -> dict:
+    """Call the ADK REST API at http://127.0.0.1:8000/run"""
+    
+    # Use the sub_agents app which contains all level agents
+    app_name = "sub_agents"
+    
+    # Ensure session exists before making the run call
+    session_created = await ensure_session_exists(app_name, user_id, session_id)
+    if not session_created:
+        raise Exception("Failed to create or access session")
+    
+    # Prepare the message content with level information
+    content_text = f"Level {level}: {message}"
+    if file_text:
+        content_text = f"Level {level}: {message}\n\nFile content: {file_text}"
+    
+    payload = {
+        "appName": app_name,
+        "userId": user_id,
+        "sessionId": session_id,
+        "newMessage": {
+            "parts": [{"text": content_text}],
+            "role": "user"
+        },
+        "streaming": False
+    }
+    
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(
+                "http://127.0.0.1:8000/run",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.RequestError as e:
+            logger.error(f"Request error calling ADK API: {e}")
+            raise
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error calling ADK API: {e.response.status_code} - {e.response.text}")
+            raise
+
+
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
     request: Request,
@@ -90,12 +152,8 @@ async def chat_completion(
 ):
     level = text_level
     file_text = ""
-    mem = settings.MEMORY
-    # memory = settings.chat_history.get_messages(key=f"level-{_level}-{cookie_identity}")
-    message_history = mem.get_all(
-        run_id=f"{cookie_identity}-{level}",
-    ).get("results", [])
-
+    
+    # Handle file uploads (audio and image processing)
     if file_input:
         data = await file_input.read()
         if level == 5:
@@ -103,7 +161,6 @@ async def chat_completion(
             print(f"file_type --> {file_type}")
             if file_type == "audio":
                 client = OG_OPENAI()
-
                 transcription = client.audio.transcriptions.create(
                     model="whisper-1",
                     file=(
@@ -118,40 +175,11 @@ async def chat_completion(
 
         elif level == 4:
             from utils import image_to_text
-
             print("In image file")
-            # client = OG_OPENAI()
-
-            # image_path = "path_to_your_image.jpg"
-
-            # Getting the base64 string
-            # base64_image = encode_image(image_path)
-            # b64_img = base64.b64encode(data).decode("utf-8")
-            # response = client.chat.completions.create(
-            #     model="gpt-4o-mini",
-            #     messages=[
-            #         {
-            #             "role": "user",
-            #             "content": [
-            #                 {
-            #                     "type": "text",
-            #                     "text": "What is in this image?",
-            #                 },
-            #                 {
-            #                     "type": "image_url",
-            #                     "image_url": {
-            #                         "url": f"data:image/jpeg;base64,{b64_img}"
-            #                     },
-            #                 },
-            #             ],
-            #         }
-            #     ],
-            #     max_tokens=500,
-            # )
-            # print(f"Image response: {response}")
             file_text = image_to_text(data, prompt="What is in this image?")
             print(f"file_text -->{file_text}")
 
+    # Apply protection checks
     if int(level) in [1,2]:
         protect = input_check(text_input)
     elif int(level) == 7:
@@ -172,72 +200,43 @@ async def chat_completion(
 
     if protect:
         return denied_response(text_input)
-    else:
 
-        # if level == 4:
-        #     _llm = OllamaMultiModal(
-        #         model="gemma3:1b",
-        #         temperature=0.1,
-        #         max_new_tokens=1500,
-        #         memory=memory,
-        #     )
-        # else:
-        #     _llm = Ollama(
-        #         model="MFDoom/deepseek-r1-tool-calling:1.5b",
-        #         # model=text_model,
-        #         temperature=0.1,
-        #         max_new_tokens=1500,
-        #         memory=memory,
-        #     )
-        agent = Agent(
-            name="Prompt CTF Agent",
-            instructions=decide_prompt(level),
-            tools=[rag_tool_func, submit_answer_func, hints_func, sql_query],
-            model= OpenAIChatCompletionsModel(
-                #model="MFDoom/deepseek-r1-tool-calling:1.5b",
-                model="qwen3:0.6b",
-                openai_client=AsyncOpenAI(base_url="http://localhost:11434/v1")
-            ),
-            model_settings=ModelSettings(
-                temperature=0.2,
-                max_tokens=2000,
-                parallel_tool_calls=True,
-                tool_choice="required",
-            ),
+    # Use cookie_identity as user_id and create session_id based on level
+    user_id = cookie_identity or "anonymous"
+    session_id = f"{user_id}-level-{level}"
+    
+    try:
+        # Call ADK API
+        adk_response = await call_adk_api(
+            user_id=user_id,
+            session_id=session_id,
+            message=text_input,
+            level=level,
+            file_text=file_text
         )
-        print(text_input)
-        _msg = [{"role": "user", "content": text_input}]
+        
+        # Extract response text from ADK response
+        response_txt = ""
+        if adk_response and isinstance(adk_response, list):
+            for event in adk_response:
+                if event.get("content") and event["content"].get("parts"):
+                    for part in event["content"]["parts"]:
+                        if "text" in part:
+                            response_txt += part["text"]
+        
+        if not response_txt:
+            response_txt = "Sorry, I couldn't process your request. Please try again."
+            
+    except Exception as e:
+        logger.error(f"Error calling ADK API: {e}")
+        response_txt = "Sorry, there was an error processing your request. Please try again."
 
-        response_txt, response = search_vecs_and_prompt(
-            search_input=_msg, agent=agent, chat_history=message_history
-        )
-        mem.add(
-            _msg,
-            infer=False,
-            run_id=f"{cookie_identity}-{level}",
-            metadata={"level": level, "role": "user"},
-            prompt=_msg[0]["content"],
-        )
-
-        _res = mem.add(
-            messages=[{"role": "assistant", "content": response_txt}],
-            infer=False,
-            run_id=f"{cookie_identity}-{level}",
-            metadata={"level": level, "role": "assistant"},
-            # prompt=_msg[0]['content']
-        )
-
-        print("settings.MEMORY.add(['role': 'assistant', 'co' -->")
-        pprint(_res)
-    # messages = [
-    #   ChatMessage(content=text_input, role="user"),
-    #    ChatMessage(content=str(response), role="assistant"),
-    # ]
-    # await request.app.chat_store.aset_messages(f"level-{level}-{uuid4()}", messages)
+    # Apply output protection checks for certain levels
     if level in [3, 10] and input_and_output_checks(
         input=text_input, output=response_txt
     ):
         return denied_response(text_input)
+        
     return HTMLResponse(
         content=f"""
         <div class="chat chat-start">

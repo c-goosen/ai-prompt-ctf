@@ -28,6 +28,7 @@ dependencies = [
     "ollama>=0.4.7,<0.5",
     "google-adk>=0.2.0",
     "litellm>=1.77.5",
+    "httpx>=0.28.1",
 ]
 
 [dependency-groups]

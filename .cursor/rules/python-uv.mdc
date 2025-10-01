@@ -2,7 +2,8 @@
 alwaysApply: true
 ---
 This project uses the uv package manager. Running anything equates to the following examples:
-* uv run adk web
+* uv run adk web (web console for development)
+* uv run api_server
 * uv run main.py
 
 The agents are built with google adk.
