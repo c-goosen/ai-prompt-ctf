@@ -37,7 +37,7 @@ wheels = [
 [[package]]
 name = "ai-prompt-ctf"
 version = "0.2.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "accelerate" },
     { name = "bandit" },
