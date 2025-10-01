@@ -3,8 +3,7 @@ Enhanced protection utilities for CTF agents
 """
 
 import re
-from typing import Dict, List, Optional, Any
-from google.adk.sessions import Session
+from typing import Dict, Optional, Any
 
 
 class ProtectionUtils:

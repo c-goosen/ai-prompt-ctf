@@ -2,8 +2,6 @@ import base64
 import logging
 import os
 import httpx
-import json
-from pprint import pprint
 from typing import Annotated
 from typing import Optional
 

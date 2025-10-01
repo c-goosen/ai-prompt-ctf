@@ -3,16 +3,9 @@ Base agent class for CTF challenges using Google ADK with Sequential Workflow an
 Compatible with ADK Multi-Agent Systems
 """
 
-from typing import Any, Dict, List, Optional
-from google.adk.agents import LlmAgent, SequentialAgent
-from google.adk.tools import FunctionTool
+from typing import Any, Dict
+from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.runners import Runner
-from google.adk.sessions import (
-    Session,
-    BaseSessionService,
-    InMemorySessionService,
-)
 from ctf.agents.tools import (
     submit_answer_func_tool,
     hints_func_tool,

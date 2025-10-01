@@ -4,7 +4,6 @@ This is the main agent.py file that ADK web will discover
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService

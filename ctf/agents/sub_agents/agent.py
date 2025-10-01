@@ -4,10 +4,7 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 from ctf.agents.tools import (
     submit_answer_func_tool,
     hints_func_tool,
