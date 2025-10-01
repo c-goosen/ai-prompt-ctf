@@ -2,7 +2,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from mem0 import Memory
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
@@ -14,33 +13,6 @@ if not os.getenv("PYTEST_CURRENT_TEST", False):
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
-
-    MEM0_CONFIG: dict = {
-        "llm": {
-            "provider": "ollama",
-            "config": {
-                "model": "qwen3:0.6b",
-                "temperature": 0,
-                "max_tokens": 2000,
-                "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
-            },
-        },
-        "embedder": {
-            "provider": "ollama",
-            "config": {
-                "model": "chroma/all-minilm-l6-v2-f32",
-                # Alternatively, you can use "snowflake-arctic-embed:latest"
-                "ollama_base_url": "http://localhost:11434",
-            },
-        },
-        "vector_store": {
-            "provider": "chroma",
-            "config": {
-                "collection_name": "memory",
-                "path": "chroma_db",
-            },
-        },
-    }
 
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
@@ -138,7 +110,6 @@ class Settings(BaseSettings):
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     token_limit: int = 20000
-    MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
 
 
 settings = Settings()
