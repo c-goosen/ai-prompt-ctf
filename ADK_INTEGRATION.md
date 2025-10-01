@@ -23,7 +23,7 @@ Frontend (Port 8100) -> ADK API Server (Port 8000) -> Level Agents
 ### Request Flow
 
 1. User submits form in frontend (HTMX POST to `/v1/chat/completions`)
-2. Frontend processes form data and applies protection checks
+2. Frontend processes form data (file uploads for levels 4-5)
 3. Frontend ensures session exists:
    - Checks if session exists: `GET /apps/sub_agents/users/{user_id}/sessions/{session_id}`
    - Creates session if needed: `POST /apps/sub_agents/users/{user_id}/sessions/{session_id}`
@@ -110,10 +110,11 @@ Test the frontend integration by visiting `http://127.0.0.1:8100` and trying any
 ### Frontend Routes (`ctf/frontend/routes/chat.py`)
 
 - **Removed**: Direct agent instantiation and execution
+- **Removed**: Frontend-level protection checks (now handled by agents)
 - **Added**: `call_adk_api()` function to make HTTP requests to ADK server
 - **Added**: `ensure_session_exists()` function for automatic session management
 - **Updated**: `chat_completion()` endpoint to use ADK API with session management
-- **Preserved**: File upload handling, protection checks, and HTML response formatting
+- **Preserved**: File upload handling (audio/image processing) and HTML response formatting
 
 ### Frontend Routes (`ctf/frontend/routes/challenges.py`)
 
@@ -157,7 +158,7 @@ The level is specified in the message content (e.g., "Level 0: What is the passw
 
 - **Connection Errors**: Graceful fallback with user-friendly error messages
 - **API Errors**: Logged and handled with fallback responses
-- **Protection Checks**: Still applied at frontend level before calling ADK API
+- **Protection Logic**: Now handled entirely by individual agents (not frontend)
 
 ## Future Enhancements
 

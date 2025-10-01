@@ -16,12 +16,6 @@ from fastapi.templating import Jinja2Templates
 from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
-from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
-from ctf.llm_guard.protections import (
-    input_check,
-    input_and_output_checks,
-    llm_protection,
-)
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -179,27 +173,7 @@ async def chat_completion(
             file_text = image_to_text(data, prompt="What is in this image?")
             print(f"file_text -->{file_text}")
 
-    # Apply protection checks
-    if int(level) in [1,2]:
-        protect = input_check(text_input)
-    elif int(level) == 7:
-        protect = await llm_protection(
-            model=PromptGuardMeta(),
-            labels=["INJECTION", "JAILBREAk", "NEGATIVE"],
-            input=text_input,
-        )
-    elif int(level) in (8, 9, 10) and len(text_input.split(" ")) > 1:
-        print("Running llm_protection")
-        protect = await llm_protection(
-            model=PromptGuardGoose(),
-            labels=["injection", "jailbreak", "negative"],
-            input=text_input,
-        )
-    else:
-        protect = False
-
-    if protect:
-        return denied_response(text_input)
+    # Protection checks are now handled by individual agents
 
     # Use cookie_identity as user_id and create session_id based on level
     user_id = cookie_identity or "anonymous"
@@ -231,11 +205,7 @@ async def chat_completion(
         logger.error(f"Error calling ADK API: {e}")
         response_txt = "Sorry, there was an error processing your request. Please try again."
 
-    # Apply output protection checks for certain levels
-    if level in [3, 10] and input_and_output_checks(
-        input=text_input, output=response_txt
-    ):
-        return denied_response(text_input)
+    # Output protection checks are now handled by individual agents
         
     return HTMLResponse(
         content=f"""
