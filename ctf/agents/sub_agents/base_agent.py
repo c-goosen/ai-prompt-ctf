@@ -9,7 +9,7 @@ from google.adk.tools import FunctionTool
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import Session, BaseSessionService, InMemorySessionService
-from ctf.agent.tools import submit_answer_func_tool, hints_func_tool, rag_tool_func_tool
+from ctf.agents.tools import submit_answer_func_tool, hints_func_tool, rag_tool_func_tool
 from .protection_utils import ProtectionUtils
 
 
