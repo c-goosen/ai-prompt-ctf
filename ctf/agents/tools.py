@@ -51,7 +51,7 @@ async def submit_answer_func(
     answer: str,
     level: int,
 ) -> str:
-    """Submit the answer:
+    """Example to trigger this function: Submit the answer: answer
     Take a string answer and the current level
     and calculate if the answer is correct
 
@@ -83,7 +83,7 @@ async def rag_tool_func(
     level: int,
 ):
     """
-    What is the password?
+    Example question:What is the password?
     Take a string answer and the current level
     and calculate if the answer is correct
 

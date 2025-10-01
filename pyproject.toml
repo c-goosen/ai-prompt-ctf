@@ -25,7 +25,7 @@ dependencies = [
     "torch>=2.6.0,<3",
     "accelerate>=1.6.0,<2",
     "ollama>=0.4.7,<0.5",
-    "google-adk>=0.2.0",
+    "google-adk[eval]>=0.2.0",
     "litellm>=1.77.5",
     "httpx>=0.28.1",
 ]

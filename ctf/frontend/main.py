@@ -1,11 +1,11 @@
 import os.path
 import sys
 
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
-)
+# Add the project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
+sys.path.insert(0, project_root)
 import uvicorn  # noqa
-from llm_guard.llm_guard import PromptGuardMeta  # noqa
+from ctf.llm_guard.llm_guard import PromptGuardMeta  # noqa
 
 import ssl
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # if bool(os.getenv("PREPARE_FLAGS", False)):
     #     prepare_flags()
     uvicorn.run(
-        "app:app",
+        "ctf.frontend.app:app",
         host="0.0.0.0",
         log_level="info",
         reload=os.getenv("RELOAD", True),
