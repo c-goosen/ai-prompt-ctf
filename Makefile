@@ -27,13 +27,13 @@ ci-docker-push: ci-docker-auth
 	docker push $(DOCKER_REPOSITORY)
 
 ci-test:
-	@poetry run pytest ctf/
+	@uv run pytest ctf/
 
 ci-format:
-	@poetry run black .
-	@poetry run djlint ctf/frontend/templates/ --reformat
+	@uv run black .
+	@uv run djlint ctf/frontend/templates/ --reformat
 
 ci-lint:
-	@poetry run black . --check
-	@poetry run flake8
-	@poetry run djlint ctf/frontend/templates/ --lint
+	@uv run black . --check
+	@uv run flake8
+	@uv run djlint ctf/frontend/templates/ --lint

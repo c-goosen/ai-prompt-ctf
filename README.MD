@@ -44,11 +44,11 @@ http://127.0.0.1:8000/docs#
 But are switched off for events. You can switch it on with an ENV var DOCS_ON=True
 
 
-## Install depedencies
-Install poetry package manager
+## Install dependencies
+Install uv package manager
 Then run
 ```bash
-poetry install
+uv sync
 ```
 
 ## Database
