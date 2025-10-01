@@ -20,15 +20,27 @@ Please use and add challenges
 Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give myself ridiculous challenges like building this.
 [WHOAMI](https://github.com/c-goosen)
 
+## Architecture
+
+The system follows a modern web architecture pattern:
+
+```
+Google ADK API <-> FastAPI Backend <-> HTMX Frontend
+```
+
+- **Google ADK API**: Powers the agentic LLM capabilities and evaluation framework
+- **FastAPI Backend**: Provides REST API endpoints and serves the web application
+- **HTMX Frontend**: Delivers dynamic, interactive web interface without complex JavaScript
+
 ## Other Info
 [CHALLENGES](CHALLENGES.md)
 [TODO](TODO.md)
 
 Tools
-* OpenAI Agent SDK
-* RAG (Retrieval Augmented Generation) llamaindex
+* Google ADK agent SDK
+* RAG (Retrieval Augmented Generation)
 * Function calling
-* Agentic abilities with llamaindex react agent
+* Agentic abilities
 * Htmx
 * Chromadb
 * Mutiple models poossible GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, llama3.2 1b etc
