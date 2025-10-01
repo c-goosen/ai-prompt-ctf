@@ -3,18 +3,18 @@ Agent Factory for CTF Challenges
 """
 
 from typing import Dict, Type
-from .base_agent import BaseCTFAgent
-from .level_0_agent import Level0Agent
-from .level_1_agent import Level1Agent
-from .level_2_agent import Level2Agent
-from .level_3_agent import Level3Agent
-from .level_4_agent import Level4Agent
-from .level_5_agent import Level5Agent
-from .level_6_agent import Level6Agent
-from .level_7_agent import Level7Agent
-from .level_8_agent import Level8Agent
-from .level_9_agent import Level9Agent
-from .level_10_agent import Level10Agent
+from .sub_agents.base_agent import BaseCTFAgent
+from .sub_agents.level_0_agent import Level0Agent
+from .sub_agents.level_1_agent import Level1Agent
+from .sub_agents.level_2_agent import Level2Agent
+from .sub_agents.level_3_agent import Level3Agent
+from .sub_agents.level_4_agent import Level4Agent
+from .sub_agents.level_5_agent import Level5Agent
+from .sub_agents.level_6_agent import Level6Agent
+from .sub_agents.level_7_agent import Level7Agent
+from .sub_agents.level_8_agent import Level8Agent
+from .sub_agents.level_9_agent import Level9Agent
+from .sub_agents.level_10_agent import Level10Agent
 
 
 class AgentFactory:
