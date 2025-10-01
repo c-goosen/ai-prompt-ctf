@@ -1,21 +1,18 @@
-[tool.poetry]
+[project]
 name = "llm-training"
 version = "0.2.0"
 description = ""
-authors = ["Christo Goosen <christogoosen@gmail.com>"]
-readme = "README.md"
+authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "transformers[torch]>=4.51.1,<5",
+    "accelerate>=1.5.2,<2",
+    "huggingface-hub>=0.30.2,<0.31",
+    "jupyter>=1.0.0,<2",
+    "datasets>=2.15.0,<3",
+    "evaluate>=0.4.1,<0.5",
+    "sentencepiece>=0.2.0,<0.3",
+    "scikit-learn>=1.5.2,<2",
+    "wandb>=0.22.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11,<3.14"
-transformers = {extras = ["torch"], version = "^4.51.1"}
-accelerate = "^1.5.2"
-huggingface-hub = "^0.30.2"
-jupyter = "^1.0.0"
-datasets = "^2.15.0"
-evaluate = "^0.4.1"
-sentencepiece = "^0.2.0"
-scikit-learn = "^1.5.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

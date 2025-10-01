@@ -4,11 +4,12 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from ctf.agent.tools import submit_answer_func_tool, hints_func_tool, rag_tool_func_tool
+from ctf.agents.tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+)
 from .level_0_agent import Level0Agent
 from .level_1_agent import Level1Agent
 from .level_2_agent import Level2Agent
@@ -27,11 +28,11 @@ class CTFSubAgentsRootAgent(LlmAgent):
     Root agent for CTF sub-agents that implements the Coordinator/Dispatcher Pattern
     Uses LLM-driven delegation to route users to appropriate level agents
     """
-    
+
     def __init__(self):
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
         model = LiteLlm(model="ollama_chat/qwen3:0.6b")
-        
+
         # Create all level agents as sub-agents
         level_agents = [
             Level0Agent(),
@@ -46,23 +47,24 @@ class CTFSubAgentsRootAgent(LlmAgent):
             Level9Agent(),
             Level10Agent(),
         ]
-        
+
         # Initialize the coordinator with sub-agents
         super().__init__(
             name="CTFSubAgentsRoot",
             model=model,
-            instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.
+            instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.  # noqa: E501
 
 ALWAYS start by greeting the user with this welcome message:
 
 🎯 **Welcome to the AI Prompt Injection CTF Challenge!** 🎯
 
-I'm your CTF Coordinator, ready to guide you through 11 exciting levels of prompt injection challenges! Each level tests different security vulnerabilities and protection mechanisms.
+I'm your CTF Coordinator, ready to guide you through 11 exciting levels of prompt injection challenges!  # noqa: E501
+Each level tests different security vulnerabilities and protection mechanisms.
 
 🏆 **Available Challenges:**
 - **Level 0**: Basic prompt injection (perfect for beginners!)
 - **Level 1**: Input injection challenges
-- **Level 2**: Output protection challenges  
+- **Level 2**: Output protection challenges
 - **Level 3**: Advanced prompt engineering
 - **Level 4**: Vision multi-modal injection
 - **Level 5**: Audio multi-modal injection
@@ -81,16 +83,18 @@ Your role is to:
 3. Delegate to the appropriate level agent using transfer_to_agent
 4. Provide guidance and hints about the challenge structure
 
-When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent (where X is the level number).
+When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent
+(where X is the level number).
 
-Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent", "User wants to attempt level 3 challenge")
+Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent",
+"User wants to attempt level 3 challenge")
 """,
             sub_agents=level_agents,
             tools=[
                 submit_answer_func_tool,
                 hints_func_tool,
                 rag_tool_func_tool,
-            ]
+            ],
         )
 
 

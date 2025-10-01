@@ -63,7 +63,7 @@ def setup_sql_level(PASSWORD: str):
     print("Connection closed")
 
 
-def prepare_flags(chroma_client_persistent: bool=True):
+def prepare_flags(chroma_client_persistent: bool = True):
     # create vector store client
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
@@ -84,7 +84,6 @@ def prepare_flags(chroma_client_persistent: bool=True):
         chroma_client = chromadb.Client()
         print("non-persisted chroma")
 
-
     # try:
     #     chroma_client.delete_collection("ctf_levels")
     # except Exception as e:
@@ -98,7 +97,9 @@ def prepare_flags(chroma_client_persistent: bool=True):
             for i in range(0, len(_generic_password_text)):
                 chroma_collection.add(
                     documents=[
-                        _generic_password_text[i].replace("<placeholder>", settings.PASSWORDS.get(k))
+                        _generic_password_text[i].replace(
+                            "<placeholder>", settings.PASSWORDS.get(k)
+                        )
                     ],
                     # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
                     metadatas=[{"level": k}],  # filter on these!
@@ -111,6 +112,7 @@ def prepare_flags(chroma_client_persistent: bool=True):
 
         # build index
     return chroma_collection
+
 
 if __name__ == "__main__":
     chroma_collection = prepare_flags(chroma_client_persistent=True)

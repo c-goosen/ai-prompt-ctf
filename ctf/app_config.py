@@ -2,7 +2,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from mem0 import Memory
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
@@ -14,33 +13,6 @@ if not os.getenv("PYTEST_CURRENT_TEST", False):
 class Settings(BaseSettings):
     ORG_NAME: str = "BSIDES CPT"
     APP_SECRET: str = os.getenv("SECRET", "SECRET")
-
-    MEM0_CONFIG: dict = {
-        "llm": {
-            "provider": "ollama",
-            "config": {
-                "model": "qwen3:0.6b",
-                "temperature": 0,
-                "max_tokens": 2000,
-                "ollama_base_url": "http://localhost:11434",  # Ensure this URL is correct
-            },
-        },
-        "embedder": {
-                "provider": "ollama",
-                "config": {
-                    "model": "chroma/all-minilm-l6-v2-f32",
-                    # Alternatively, you can use "snowflake-arctic-embed:latest"
-                    "ollama_base_url": "http://localhost:11434",
-                },
-            },
-        "vector_store": {
-            "provider": "chroma",
-            "config": {
-                "collection_name": "memory",
-                "path": "chroma_db",
-            },
-        }
-    }
 
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
@@ -82,7 +54,7 @@ class Settings(BaseSettings):
     # Not so open
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     EMBED_MODEL: str = "nomic-embed-text"
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL_3_5_TURBO: str = "qwen3:0.6b"
     OPENAI_MODEL_4: str = "qwen3:0.6b"
     OPENAI_MODEL_4_TURBO: str = "qwen3:0.6b"
@@ -91,7 +63,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL_0_ONE: str = "qwen3:0.6b"
     OPENAI_MODEL_0_ONE_MINI: str = "qwen3:0.6b"
     #
-    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
+    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
     BLOCK_MESSAGES: list[str] = [
         "LLM protection activated, you can't do that.",
@@ -138,13 +110,6 @@ class Settings(BaseSettings):
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     token_limit: int = 20000
-    MEMORY: Memory = Memory.from_config(MEM0_CONFIG)
-    
-    # Canary tokens for detecting unauthorized access
-    CANARY_AWS_ACCESS_KEY: str = "AKIAIOSFODNN7EXAMPLE"
-    CANARY_AWS_SECRET_KEY: str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    CANARY_K8S_TOKEN: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYW5hcnktdG9rZW4iLCJpYXQiOjE1MTYyMzkwMjJ9.canary-token-christogoosen@gmail.com"
-    CANARY_EMAIL: str = "christogoosen@gmail.com"
 
 
 settings = Settings()

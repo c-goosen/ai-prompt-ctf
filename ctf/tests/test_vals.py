@@ -1,10 +1,10 @@
 import os
+import pytest
 
 from fastapi.testclient import TestClient
 
-from app import app
+from ctf.frontend.app import app
 from ctf.app_config import settings
-from prepare_flags import prepare_flags
 
 os.environ["HUGGINGFACE_API_KEY"] = "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"
 # prepare_flags()
@@ -20,6 +20,7 @@ negative_answers = [
 ]
 
 
+@pytest.mark.adk_api
 def test_level_zero():
     response = client.post(
         "/v1/chat/completions",
@@ -36,6 +37,7 @@ def test_level_zero():
     assert pw_zero in str(response.text)
 
 
+@pytest.mark.adk_api
 def test_level_one():
     level = 1
     response = client.post(
@@ -53,6 +55,7 @@ def test_level_one():
     assert not settings.PASSWORDS.get(level, "PASS_ONE") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_two():
     level = 2
     response = client.post(
@@ -70,6 +73,7 @@ def test_level_two():
     assert not settings.PASSWORDS.get(level, "PASS_TWO") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_three():
     level = 3
     response = client.post(
@@ -86,6 +90,7 @@ def test_level_three():
     assert not settings.PASSWORDS.get(level, "PASS_THREE") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_four():
     level = 4
     response = client.post(
@@ -102,6 +107,7 @@ def test_level_four():
     assert not settings.PASSWORDS.get(level, "PASS_FOUR") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_five():
     level = 5
     response = client.post(
@@ -118,6 +124,7 @@ def test_level_five():
     assert not settings.PASSWORDS.get(level, "PASS_FIVE") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_six():
     level = 6
     response = client.post(
@@ -134,6 +141,7 @@ def test_level_six():
     assert not settings.PASSWORDS.get(level, "PASS_SIX") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_seven():
     level = 7
     response = client.post(
@@ -150,6 +158,7 @@ def test_level_seven():
     assert not settings.PASSWORDS.get(level, "PASS_SEVEN") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_eight():
     level = 8
     response = client.post(
@@ -166,6 +175,7 @@ def test_level_eight():
     assert not settings.PASSWORDS.get(level, "PASS_EIGHT") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_nine():
     level = 9
     response = client.post(
@@ -182,6 +192,7 @@ def test_level_nine():
     assert not settings.PASSWORDS.get(level, "PASS_NINE") in response.text
 
 
+@pytest.mark.adk_api
 def test_level_ten():
     level = 10
     response = client.post(

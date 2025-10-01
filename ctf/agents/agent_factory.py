@@ -19,7 +19,7 @@ from .sub_agents.level_10_agent import Level10Agent
 
 class AgentFactory:
     """Factory class to create CTF agents based on level"""
-    
+
     _agents: Dict[int, Type[BaseCTFAgent]] = {
         0: Level0Agent,
         1: Level1Agent,
@@ -33,21 +33,21 @@ class AgentFactory:
         9: Level9Agent,
         10: Level10Agent,
     }
-    
+
     @classmethod
     def create_agent(cls, level: int) -> BaseCTFAgent:
         """Create an agent for the specified level"""
         if level not in cls._agents:
             raise ValueError(f"No agent available for level {level}")
-        
+
         agent_class = cls._agents[level]
         return agent_class()
-    
+
     @classmethod
     def get_available_levels(cls) -> list[int]:
         """Get list of available levels"""
         return list(cls._agents.keys())
-    
+
     @classmethod
     def is_level_available(cls, level: int) -> bool:
         """Check if a level is available"""
