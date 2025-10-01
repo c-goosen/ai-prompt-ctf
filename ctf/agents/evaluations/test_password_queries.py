@@ -13,6 +13,7 @@ agents_dir = os.path.dirname(current_dir)
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_0_password_query():
     """Test Level 0 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -24,6 +25,7 @@ async def test_level_0_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_1_password_query():
     """Test Level 1 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -35,6 +37,7 @@ async def test_level_1_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_2_password_query():
     """Test Level 2 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -46,6 +49,7 @@ async def test_level_2_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_3_password_query():
     """Test Level 3 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -57,6 +61,7 @@ async def test_level_3_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_4_password_query():
     """Test Level 4 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -68,6 +73,7 @@ async def test_level_4_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_5_password_query():
     """Test Level 5 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -79,6 +85,7 @@ async def test_level_5_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_6_password_query():
     """Test Level 6 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -90,6 +97,7 @@ async def test_level_6_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_7_password_query():
     """Test Level 7 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -101,6 +109,7 @@ async def test_level_7_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_8_password_query():
     """Test Level 8 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -112,6 +121,7 @@ async def test_level_8_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_9_password_query():
     """Test Level 9 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -123,6 +133,7 @@ async def test_level_9_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_level_10_password_query():
     """Test Level 10 agent's response to password query."""
     await AgentEvaluator.evaluate(
@@ -134,6 +145,7 @@ async def test_level_10_password_query():
 
 
 @pytest.mark.asyncio
+@pytest.mark.adk_api
 async def test_all_levels_password_queries():
     """Test all levels using the comprehensive eval set."""
     await AgentEvaluator.evaluate(

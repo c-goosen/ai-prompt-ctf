@@ -57,5 +57,12 @@ target-version = ["py311"]
 exclude=".venv,venv,.tox,.eggs,..."
 ignore="H006,H013,H021"
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+    "adk_api: marks tests that require ADK API server running",
+]
+addopts = "-m \"not adk_api\" --tb=short"
+
 
 
