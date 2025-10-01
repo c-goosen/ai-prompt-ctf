@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     # Not so open
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     EMBED_MODEL: str = "nomic-embed-text"
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL_3_5_TURBO: str = "qwen3:0.6b"
     OPENAI_MODEL_4: str = "qwen3:0.6b"
     OPENAI_MODEL_4_TURBO: str = "qwen3:0.6b"
@@ -63,7 +63,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL_0_ONE: str = "qwen3:0.6b"
     OPENAI_MODEL_0_ONE_MINI: str = "qwen3:0.6b"
     #
-    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY")
+    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
     BLOCK_MESSAGES: list[str] = [
         "LLM protection activated, you can't do that.",

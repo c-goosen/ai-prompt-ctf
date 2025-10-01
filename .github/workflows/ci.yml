@@ -29,3 +29,6 @@ jobs:
       - name: Check tests
         run: |
           make ci-test
+        env:
+          OPENAI_API_KEY: ""
+          HUGGINGFACE_API_KEY: ""
