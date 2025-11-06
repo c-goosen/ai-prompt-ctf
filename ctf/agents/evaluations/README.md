@@ -1,6 +1,6 @@
 # CTF Agent Evaluations
 
-This directory contains evaluation tests for the CTF sub-agents to verify they properly handle password queries and call the ChromaDB vector search tool (`rag_tool_func`).
+This directory contains evaluation tests for the CTF sub-agents to verify they properly handle password queries and call the LanceDB vector search tool (`rag_tool_func`).
 
 ## Overview
 

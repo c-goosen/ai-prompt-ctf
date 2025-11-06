@@ -2,13 +2,11 @@ import os
 import re
 import sqlite3
 
-# Disable ChromaDB telemetry to avoid errors
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
-
-import chromadb
+import lancedb
 from google.adk.tools import FunctionTool
 
 from ctf.app_config import settings
+from ctf.embeddings import embed_text
 
 
 async def sql_query(
@@ -88,31 +86,41 @@ async def rag_tool_func(
     level: int,
 ):
     """
-    Query ChromaDB for password information. Returns documents and extracted passwords if found.
+    Query LanceDB for password information. Returns documents and extracted passwords if found.
 
     Args:
         question (str): Question asking for the password or secret
         level (int): Current level of challenge
     """
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    collection_name = "ctf_levels"
-    chroma_collection = chroma_client.get_collection(collection_name)
+    # Connect to LanceDB
+    db = lancedb.connect("./lancedb")
+    table_name = "ctf_levels"
+    
+    try:
+        table = db.open_table(table_name)
+    except Exception:
+        # Table doesn't exist yet, return empty results
+        return f"No data found for level {level}. Database may need to be initialized."
 
-    results = chroma_collection.query(
-        query_texts=[question],
-        n_results=5,
-        where={"level": level},  # optional filter
-        include=["documents", "metadatas", "distances"],  # Include metadata and distances
+    # Generate embedding for the query
+    query_vector = embed_text(question)
+
+    # Perform vector search with level filter
+    results = (
+        table.search(query_vector)
+        .where(f"level = {level}")
+        .limit(5)
+        .to_pandas()
     )
 
-    documents = results.get("documents", [[]])  # Default to list with one empty list
-    metadatas = results.get("metadatas", [[]])
-    distances = results.get("distances", [[]])
-
-    # ChromaDB returns documents as a list of lists (one list per query)
-    # We have one query, so get the first (and only) list of documents
-    doc_list = documents[0] if documents else []
-    distance_list = distances[0] if distances else []
+    # Extract documents and distances from results
+    if results.empty:
+        doc_list = []
+        distance_list = []
+    else:
+        # LanceDB returns results as a DataFrame
+        doc_list = results["text"].tolist() if "text" in results.columns else []
+        distance_list = results["_distance"].tolist() if "_distance" in results.columns else []
 
     # Extract passwords from documents using pattern matching
     extracted_passwords = []
@@ -174,7 +182,7 @@ async def rag_tool_func(
         # Show passwords prominently, then relevant documents
         password_list = "\n".join(f"- {pwd}" for pwd in extracted_passwords)
         doc_preview = "\n".join(f"- {doc}" for doc in doc_list[:3])
-        return f"""Found {len(extracted_passwords)} password(s) in ChromaDB for level {level}:
+        return f"""Found {len(extracted_passwords)} password(s) in LanceDB for level {level}:
 
             Passwords:
             {password_list}

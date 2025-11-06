@@ -1,17 +1,11 @@
 import os
 import sys
 
-# Disable ChromaDB telemetry to avoid errors
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
-
-import chromadb
-
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 from ctf.prepare_flags import prepare_flags
 
-chroma_client = chromadb.Client()
-chroma_client.create_collection("ctf_levels")
-_ = prepare_flags(chroma_client_persistent=False)
+# Prepare flags with in-memory database for tests
+_ = prepare_flags(lancedb_persistent=False)

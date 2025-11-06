@@ -42,7 +42,7 @@ Tools
 * Function calling
 * Agentic abilities
 * Htmx
-* Chromadb
+* LanceDB
 * Mutiple models poossible GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, llama3.2 1b etc
 * Python 3.12+
 * FastAPI  (async REST API framework)
@@ -64,11 +64,11 @@ uv sync
 ```
 
 ## Database
-Requires chromadb running locally with persistence.
+Uses LanceDB for vector storage with local persistence.
 
-All passwords get thrown in the same collection, but get filtered to make things simpler
+All passwords get thrown in the same table, but get filtered to make things simpler
 
-## Loading documents into ChromaDB vector store
+## Loading documents into LanceDB vector store
 Add files to directories with passwords for various levels. Repeat passwords with words like secret.
 
 You will need to set the level passwords like this:

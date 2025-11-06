@@ -45,7 +45,7 @@ logging.getLogger("passlib").setLevel(logging.ERROR)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 if bool(os.getenv("PREPARE_FLAGS", False)):
-    _ = prepare_flags(chroma_client_persistent=True)
+    _ = prepare_flags(lancedb_persistent=True)
 
 download_models()
 

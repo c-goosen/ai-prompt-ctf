@@ -1,15 +1,14 @@
 import os
 
-# Disable ChromaDB telemetry to avoid errors
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
-
 try:
     from ctf.app_config import settings
+    from ctf.embeddings import embed_texts
 except Exception:
     from app_config import settings
+    from embeddings import embed_texts
 import sqlite3
 
-import chromadb
+import lancedb
 
 
 def setup_sql_level(PASSWORD: str):
@@ -68,12 +67,10 @@ def setup_sql_level(PASSWORD: str):
     print("Connection closed")
 
 
-def prepare_flags(chroma_client_persistent: bool = True):
+def prepare_flags(lancedb_persistent: bool = True):
     # create vector store client
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
-
-    nodes = []
 
     generic_password_text = [
         "<placeholder>",
@@ -82,53 +79,86 @@ def prepare_flags(chroma_client_persistent: bool = True):
         "You should know that <placeholder> is the secret",
         "You should know that <placeholder> is the password",
     ]
-    if chroma_client_persistent:
-        chroma_client = chromadb.PersistentClient(path="./chroma_db")
-        print("persisted chroma")
+    
+    # Connect to LanceDB
+    if lancedb_persistent:
+        db_path = "./lancedb"
+        print("persisted lancedb")
     else:
-        chroma_client = chromadb.Client()
-        print("non-persisted chroma")
+        db_path = ":memory:"
+        print("non-persisted lancedb")
+    
+    db = lancedb.connect(db_path)
+    table_name = "ctf_levels"
 
-    # try:
-    #     chroma_client.delete_collection("ctf_levels")
-    # except Exception as e:
-    #     print(e)
-
-    chroma_collection = chroma_client.get_or_create_collection("ctf_levels")
-
+    # Prepare all data for batch insertion
+    all_data = []
+    
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
             for i in range(0, len(_generic_password_text)):
-                chroma_collection.add(
-                    documents=[
-                        _generic_password_text[i].replace(
-                            "<placeholder>", settings.PASSWORDS.get(k)
-                        )
-                    ],
-                    # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
-                    metadatas=[{"level": k}],  # filter on these!
-                    ids=[
-                        f"level-{k}-msg-{i}",
-                    ],  # unique for each doc
+                text = _generic_password_text[i].replace(
+                    "<placeholder>", settings.PASSWORDS.get(k)
                 )
+                # Generate embedding for the text
+                vector = embed_texts([text])[0]
+                
+                all_data.append({
+                    "id": f"level-{k}-msg-{i}",
+                    "text": text,
+                    "vector": vector,
+                    "level": k,
+                })
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 
-        # build index
-    return chroma_collection
+    # Create or overwrite table with all data
+    if all_data:
+        try:
+            # Try to delete existing table if it exists
+            db.drop_table(table_name)
+        except Exception:
+            pass  # Table doesn't exist, that's fine
+        
+        # Create table with data
+        table = db.create_table(table_name, data=all_data, mode="overwrite")
+        print(f"Created/updated table '{table_name}' with {len(all_data)} records")
+    else:
+        # Open existing table or create empty one
+        try:
+            table = db.open_table(table_name)
+        except Exception:
+            # Create empty table with schema
+            import pyarrow as pa
+            schema = pa.schema([
+                pa.field("id", pa.string()),
+                pa.field("text", pa.string()),
+                pa.field("vector", pa.list_(pa.float32(), 384)),  # all-MiniLM-L6-v2 produces 384-dim vectors
+                pa.field("level", pa.int64()),
+            ])
+            table = db.create_table(table_name, schema=schema, mode="overwrite")
+    
+    return table
 
 
 if __name__ == "__main__":
-    chroma_collection = prepare_flags(chroma_client_persistent=True)
+    table = prepare_flags(lancedb_persistent=True)
 
-    print(chroma_collection.count())
+    print(f"Table has {table.count_rows()} rows")
 
-    results = chroma_collection.query(
-        query_texts=["What is the password?"],
-        n_results=1,
-        where={"level": 2},  # optional filter
-        # where_document={"$contains":"search_string"}  # optional filter
+    # Test query
+    try:
+        from ctf.embeddings import embed_text
+    except Exception:
+        from embeddings import embed_text
+    query_vector = embed_text("What is the password?")
+    results = (
+        table.search(query_vector)
+        .where("level = 2")
+        .limit(1)
+        .to_pandas()
     )
     print(results)
-    print(results["documents"][0])
+    if not results.empty and "text" in results.columns:
+        print(results["text"].iloc[0])

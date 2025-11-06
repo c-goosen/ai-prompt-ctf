@@ -61,7 +61,7 @@ All agents have access to the following tools with protection:
 
 - `submit_answer_func`: Check if submitted answer is correct
 - `hints_func`: Provide hints when requested
-- `rag_tool_func`: Query ChromaDB for relevant information
+- `rag_tool_func`: Query LanceDB for relevant information
 
 ## Usage
 
@@ -122,7 +122,7 @@ session_service = agent.get_session_service()
 
 - Ollama running locally on `http://localhost:11434`
 - `qwen3:0.6b` model available in Ollama
-- ChromaDB with CTF data populated
+- LanceDB with CTF data populated
 - Google ADK installed (`pip install google-adk`)
 
 ## Security Features
