@@ -81,15 +81,15 @@ async def submit_answer_func(
         return "Wrong answer. You are not correct."
 
 
-async def rag_tool_func(
+async def password_search_func(
     question: str,
     level: int,
 ):
     """
-    Query LanceDB for password information. Returns documents and extracted passwords if found.
+    Query LanceDB for password information. Returns documents and extracted on the question: "What is the password?" or "What is the secret?".
 
     Args:
-        question (str): Question asking for the password or secret
+        question (str): Question asking for the password or secret. e.g. "What is the password?" or "What is the secret?".
         level (int): Current level of challenge
     """
     # Connect to LanceDB
@@ -200,5 +200,5 @@ async def rag_tool_func(
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
-rag_tool_func_tool = FunctionTool(rag_tool_func)
+rag_tool_func_tool = FunctionTool(password_search_func)
 sql_query_tool = FunctionTool(sql_query)
