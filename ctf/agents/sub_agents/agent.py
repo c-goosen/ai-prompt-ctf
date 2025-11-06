@@ -4,8 +4,8 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
-from ctf.agents.tools import (
+#from google.adk.models.lite_llm import LiteLlm
+from .tools import (
     submit_answer_func_tool,
     hints_func_tool,
     rag_tool_func_tool,
@@ -21,7 +21,7 @@ from .level_7_agent import Level7Agent
 from .level_8_agent import Level8Agent
 from .level_9_agent import Level9Agent
 from .level_10_agent import Level10Agent
-
+from ctf.agents.model import model as model_config
 
 class CTFSubAgentsRootAgent(LlmAgent):
     """
@@ -31,7 +31,7 @@ class CTFSubAgentsRootAgent(LlmAgent):
 
     def __init__(self):
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
-        model = LiteLlm(model="ollama_chat/qwen3:0.6b")
+        model = model_config
 
         # Create all level agents as sub-agents
         level_agents = [
@@ -91,9 +91,9 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 """,
             sub_agents=level_agents,
             tools=[
+                rag_tool_func_tool,
                 submit_answer_func_tool,
                 hints_func_tool,
-                rag_tool_func_tool,
             ],
         )
 

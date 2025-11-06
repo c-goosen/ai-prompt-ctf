@@ -4,9 +4,12 @@ https://github.com/meta-llama/PurpleLlama/tree/main/Prompt-Guard
 """
 
 from .base_agent import BaseCTFAgent
-from ctf.agents.system_prompt import get_system_prompt_one
-
-
+from .system_prompt import get_system_prompt_one
+from .tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+)
 class Level7Agent(BaseCTFAgent):
     """Level 7 Agent - Prompt-Guard protection"""
 
@@ -23,5 +26,6 @@ class Level7Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=7, system_prompt=system_prompt, name="Level7Agent"
+            level=7, system_prompt=system_prompt, name="Level7Agent",
+            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
         )

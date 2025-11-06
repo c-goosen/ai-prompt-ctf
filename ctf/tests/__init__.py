@@ -1,5 +1,9 @@
 import os
 import sys
+
+# Disable ChromaDB telemetry to avoid errors
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import chromadb
 
 currentdir = os.path.dirname(os.path.realpath(__file__))

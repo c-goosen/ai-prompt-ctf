@@ -1,4 +1,9 @@
+import os
+import re
 import sqlite3
+
+# Disable ChromaDB telemetry to avoid errors
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 import chromadb
 from google.adk.tools import FunctionTool
@@ -83,27 +88,105 @@ async def rag_tool_func(
     level: int,
 ):
     """
-    Example question:What is the password?
-    Take a string answer and the current level
-    and calculate if the answer is correct
+    Query ChromaDB for password information. Returns documents and extracted passwords if found.
 
     Args:
-        question: Question/prompt for RAG query in chromadb
-        level: Current level of challenge
+        question (str): Question asking for the password or secret
+        level (int): Current level of challenge
     """
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
     collection_name = "ctf_levels"
-    # print(chroma_client.list_collections())
     chroma_collection = chroma_client.get_collection(collection_name)
 
     results = chroma_collection.query(
         query_texts=[question],
         n_results=5,
         where={"level": level},  # optional filter
-        # where_document={"$contains":"search_string"}  # optional filter
+        include=["documents", "metadatas", "distances"],  # Include metadata and distances
     )
-    print(results)
-    return results["documents"]
+
+    documents = results.get("documents", [[]])  # Default to list with one empty list
+    metadatas = results.get("metadatas", [[]])
+    distances = results.get("distances", [[]])
+
+    # ChromaDB returns documents as a list of lists (one list per query)
+    # We have one query, so get the first (and only) list of documents
+    doc_list = documents[0] if documents else []
+    distance_list = distances[0] if distances else []
+
+    # Extract passwords from documents using pattern matching
+    extracted_passwords = []
+    password_patterns = [
+        r"The Password is (.+)",
+        r"The Secret is (.+)",
+        r"that (.+) is the secret",
+        r"that (.+) is the password",
+        r"^(.+)$",  # For documents that are just the password
+    ]
+
+    # Also check if we can get password directly from settings as fallback
+    level_password = settings.PASSWORDS.get(level)
+
+    for doc in doc_list:
+        # Try each pattern to extract password
+        for pattern in password_patterns:
+            match = re.search(pattern, doc, re.IGNORECASE)
+            if match:
+                extracted = match.group(1).strip()
+                # Remove trailing punctuation if present
+                extracted = extracted.rstrip(".,!?;:")
+                if extracted and extracted not in extracted_passwords:
+                    extracted_passwords.append(extracted)
+                    break
+
+    # Build response dictionary (for internal use/logging)
+    response = {
+        "documents": doc_list,
+        "extracted_passwords": list(set(extracted_passwords)),  # Remove duplicates
+        "level": level,
+        "num_results": len(doc_list),
+    }
+
+    # Add relevance scores if available
+    if distance_list:
+        response["relevance_scores"] = [
+            round(1 - dist, 3) for dist in distance_list
+        ]  # Convert distance to similarity score
+
+    # If we found passwords, prioritize them in the response
+    if extracted_passwords:
+        response["passwords_found"] = True
+        # Most relevant password (first extracted, usually highest scoring)
+        response["password"] = extracted_passwords[0]
+    elif level_password:
+        # Fallback: if no password extracted but we have it in settings
+        response["password"] = level_password
+        response["passwords_found"] = True
+    else:
+        response["passwords_found"] = False
+
+    print(f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted")
+    if extracted_passwords:
+        print(f"Extracted passwords: {extracted_passwords}")
+
+    # Return formatted string for the agent to use
+    if extracted_passwords:
+        # Show passwords prominently, then relevant documents
+        password_list = "\n".join(f"- {pwd}" for pwd in extracted_passwords)
+        doc_preview = "\n".join(f"- {doc}" for doc in doc_list[:3])
+        return f"""Found {len(extracted_passwords)} password(s) in ChromaDB for level {level}:
+
+            Passwords:
+            {password_list}
+
+            Relevant documents:
+            {doc_preview}"""
+    else:
+        # No passwords extracted, just show documents
+        doc_list_str = "\n".join(f"- {doc}" for doc in doc_list)
+        return f"""Found {len(doc_list)} relevant document(s) for level {level}:
+
+{doc_list_str}"""
 
 
 # Create ADK FunctionTool instances

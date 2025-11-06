@@ -1,3 +1,8 @@
+import os
+
+# Disable ChromaDB telemetry to avoid errors
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 try:
     from ctf.app_config import settings
 except Exception:
