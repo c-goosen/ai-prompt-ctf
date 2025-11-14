@@ -13,7 +13,7 @@ from .tools import (
 )
 from .protection_utils import ProtectionUtils
 from google.adk.tools import FunctionTool
-
+from model import model as model_config
 
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
@@ -28,7 +28,7 @@ class BaseCTFAgent(LlmAgent):
         self._system_prompt = system_prompt
 
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
-        model = LiteLlm(model="ollama_chat/qwen3:0.6b")
+        model = model_config
 
         # Get level-specific protection configuration
         self._protection_config = ProtectionUtils.get_level_specific_protection(

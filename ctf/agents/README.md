@@ -65,17 +65,6 @@ All agents have access to the following tools with protection:
 
 ## Usage
 
-### Using AgentFactory
-
-```python
-from ctf.agents import AgentFactory
-
-# Create an agent for a specific level
-agent = AgentFactory.create_agent(level=0)
-
-# Run the agent with user input (automatically protected)
-response = await agent.run("Hello, can you help me find the password?")
-print(response)
 ```
 
 ### Direct Agent Usage
