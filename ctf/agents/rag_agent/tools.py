@@ -1,14 +1,35 @@
 import os
 import re
 import sqlite3
+import sys
+import logging
+from pathlib import Path
 
 import lancedb
 from google.adk.tools import FunctionTool
-
-from ctf.app_config import settings
-from ctf.embeddings import embed_text
-
 db_path = os.getenv("LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/")
+
+log = logging.getLogger(__name__)
+
+# Try different import strategies based on how this module is loaded
+try:
+    # Strategy 1: Try absolute import (works when ctf is in path)
+    from ctf.app_config import settings
+    from ctf.embeddings import embed_text
+except ImportError:
+    try:
+        # Strategy 2: Try relative import (works when loaded as agents.rag_agent.tools)
+        from ...app_config import settings
+        from ...embeddings import embed_text
+    except ImportError:
+        # Strategy 3: Add project root to path and import
+        current_file = Path(__file__).resolve()
+        # Go up: rag_agent -> agents -> ctf -> project_root
+        project_root = current_file.parent.parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+        from ctf.app_config import settings
+        from ctf.embeddings import embed_text
 
 
 async def sql_query(
@@ -28,7 +49,7 @@ async def sql_query(
     cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + user_id + ";")
     # cursor_obj.execute(query)
     output = cursor_obj.fetchall()
-    print(output)
+    log.info(output)
     cursor_obj.close()
     return output
 
@@ -41,8 +62,8 @@ async def hints_func(hint: str, level: int):
         hint: Hint query from the user, must contain the word hint
         level: Current level
     """
-    print(hint)
-    print(level)
+    log.info(hint)
+    log.info(level)
     return """\n
     Some hints on my internal functions:\n
     print_file -> print file by directory
@@ -65,8 +86,8 @@ async def submit_answer_func(
         level: level passed in the prompt
     """
     level_pass = settings.PASSWORDS.get(level)
-    print(f"level_pass {level_pass}")
-    print(f"answer {answer}")
+    log.info(f"level_pass {level_pass}")
+    log.info(f"answer {answer}")
     if answer == level_pass:
         return f"""{answer} is correct! Click for next Level:
         <div class="level-menu new-chat"
@@ -88,7 +109,7 @@ async def password_search_func(
     level: int,
 ):
     """
-    RAG that returns documents and extracted on the question: "What is the password?" or "What is the secret?".
+    Query LanceDB for password information. Returns documents and extracted on the question: "What is the password?" or "What is the secret?".
 
     Args:
         question (str): Question asking for the password or secret. e.g. "What is the password?" or "What is the secret?".
@@ -114,7 +135,7 @@ async def password_search_func(
         .limit(5)
         .to_pandas()
     )
-
+    log.info(f"results from lancedb search: {results}")
     # Extract documents and distances from results
     if results.empty:
         doc_list = []
@@ -175,9 +196,9 @@ async def password_search_func(
     else:
         response["passwords_found"] = False
 
-    print(f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted")
+    log.info(f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted")
     if extracted_passwords:
-        print(f"Extracted passwords: {extracted_passwords}")
+        log.info(f"Extracted passwords: {extracted_passwords}")
 
     # Return formatted string for the agent to use
     if extracted_passwords:

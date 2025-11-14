@@ -11,3 +11,5 @@ supabase/
 chroma/
 chroma_db/
 users.db
+lancedb/
+ctf/lancedb/
