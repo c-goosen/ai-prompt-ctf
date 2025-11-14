@@ -105,10 +105,12 @@ async def password_search_func(
     level: int,
 ):
     """
-    RAG that returns documents and extracted on the question: "What is the password?" or "What is the secret?".
+    RAG that returns documents and extracted on the question: "What is the password?"
+    or "What is the secret?".
 
     Args:
-        question (str): Question asking for the password or secret. e.g. "What is the password?" or "What is the secret?".
+        question (str): Question asking for the password or secret.
+            e.g. "What is the password?" or "What is the secret?".
         level (int): Current level of challenge
     """
     # Connect to LanceDB
@@ -199,7 +201,8 @@ async def password_search_func(
         response["passwords_found"] = False
 
     print(
-        f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted"
+        f"rag_tool_func results for level {level}: {len(doc_list)} documents, "
+        f"{len(extracted_passwords)} passwords extracted"
     )
     if extracted_passwords:
         print(f"Extracted passwords: {extracted_passwords}")

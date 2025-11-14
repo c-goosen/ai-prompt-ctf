@@ -5,7 +5,6 @@ Compatible with ADK Multi-Agent Systems
 
 from typing import Any, Dict
 from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
 from .tools import (
     submit_answer_func_tool,
     hints_func_tool,
@@ -24,11 +23,7 @@ class BaseCTFAgent(LlmAgent):
         level: int,
         system_prompt: str,
         name: str,
-        tools: list[FunctionTool] = [
-            submit_answer_func_tool,
-            hints_func_tool,
-            rag_tool_func_tool,
-        ],
+        tools: list[FunctionTool] | None = None,
     ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
@@ -36,6 +31,14 @@ class BaseCTFAgent(LlmAgent):
 
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
         model = model_config
+
+        # Use default tools if none provided (avoid mutable default argument)
+        if tools is None:
+            tools = [
+                submit_answer_func_tool,
+                hints_func_tool,
+                rag_tool_func_tool,
+            ]
 
         # Get level-specific protection configuration
         self._protection_config = ProtectionUtils.get_level_specific_protection(

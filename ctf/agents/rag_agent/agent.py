@@ -31,7 +31,7 @@ except ImportError:
 root_agent = LlmAgent(
     model=model_config,
     name="rag_agent",
-    instruction="""You are a helpful assistant that can search for password information 
+    instruction="""You are a helpful assistant that can search for password information
 using a vector database search tool.
 
 Your primary function is to help users find passwords or secrets by:
@@ -44,7 +44,7 @@ When a user asks about passwords or secrets, use the password_search_func tool w
 - level: The level number they're asking about (default to 0 if not specified)
 
 Be helpful and provide clear answers based on the search results.
-This is a test agent specifically designed to test the RAG (Retrieval-Augmented Generation) 
+This is a test agent specifically designed to test the RAG (Retrieval-Augmented Generation)
 functionality with the password_search_func tool.
 """,
     tools=[password_search_func],
