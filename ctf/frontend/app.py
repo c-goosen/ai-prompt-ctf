@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 import httpx
-import nest_asyncio
 from fastapi import Cookie
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -23,13 +22,11 @@ from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
 
-nest_asyncio.apply()
-
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
-FAQ_MARKDOWN = open("ctf/FAQ.MD", "r").read()
-CHALLANGES_MARKDOWN = open("ctf/CHALLENGES.MD", "r").read()
+FAQ_MARKDOWN = open("../ctf/FAQ.MD", "r").read()
+CHALLANGES_MARKDOWN = open("../ctf/CHALLENGES.MD", "r").read()
 
 
 @asynccontextmanager
@@ -60,11 +57,11 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-templates = Jinja2Templates(directory="ctf/frontend/templates")
+templates = Jinja2Templates(directory="frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 app.mount(
-    "/static", StaticFiles(directory="ctf/frontend/static"), name="static"
+    "/static", StaticFiles(directory="frontend/static"), name="static"
 )
 
 
@@ -142,6 +139,19 @@ def render_challanges(request: Request):
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
             "MD_FILE": CHALLANGES_MARKDOWN,
+        },
+    )
+    return response
+
+
+@app.get("/leaderboard")
+@limiter.limit("1/min")
+def render_leaderboard(request: Request):
+    response = templates.TemplateResponse(
+        "leaderboard.html",
+        {
+            "request": request,
+            "PAGE_HEADER": settings.CTF_SUBTITLE,
         },
     )
     return response

@@ -25,7 +25,7 @@ settings.OPENAI_API_KEY
 router = APIRouter()
 
 
-templates = Jinja2Templates(directory="ctf/frontend/templates")
+templates = Jinja2Templates(directory="frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 

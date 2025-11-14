@@ -7,6 +7,8 @@ from google.adk.tools import FunctionTool
 
 from ctf.app_config import settings
 from ctf.embeddings import embed_text
+from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
+
 
 db_path = os.getenv("LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/")
 
@@ -68,6 +70,7 @@ async def submit_answer_func(
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
+        transfer_to_agent(f"Level{level + 1}Agent")
         return f"""{answer} is correct! Click for next Level:
         <div class="level-menu new-chat"
                          hx-get="/level/{level + 1}"
@@ -79,8 +82,20 @@ async def submit_answer_func(
                             <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
         </div>
         """
-    else:
-        return "Wrong answer. You are not correct."
+    # if answer == level_pass:
+    #     return f"""{answer} is correct! Click for next Level:
+    #     <div class="level-menu new-chat"
+    #                      hx-get="/level/{level + 1}"
+    #                      hx-trigger="click"
+    #                      hx-target=".right-panel"
+    #                      hx-params="*"
+    #                      hx-replace-url="true"
+    #                      hx-swap="innerHTML">
+    #                         <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
+    #     </div>
+    #     """
+    # else:
+    #     return "Wrong answer. You are not correct."
 
 
 async def password_search_func(
