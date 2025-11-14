@@ -5,7 +5,9 @@ This is the main agent.py file that ADK web will discover
 
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
+#from google.adk.sessions import InMemorySessionService
+
+from google.adk.sessions import DatabaseSessionService
 from ctf.agents.tools import (
     submit_answer_func_tool,
     hints_func_tool,
@@ -50,7 +52,9 @@ class CTFCoordinatorAgent(LlmAgent):
         ]
 
         # Create session service
-        session_service = InMemorySessionService()
+        db_url = "sqlite:///./my_agent_data.db"
+        session_service = DatabaseSessionService(db_url=db_url)
+        #session_service = InMemorySessionService()
 
         # Create runner
         runner = Runner(session_service=session_service)

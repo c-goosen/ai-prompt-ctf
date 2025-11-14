@@ -108,12 +108,15 @@ async def call_adk_api(
     if file_text:
         content_text = f"Level {level}: {message}\n\nFile content: {file_text}"
 
+    # Use the format from Google ADK docs
     payload = {
         "appName": app_name,
         "userId": user_id,
         "sessionId": session_id,
-        "newMessage": {"parts": [{"text": content_text}], "role": "user"},
-        "streaming": False,
+        "newMessage": {
+            "role": "user",
+            "parts": [{"text": content_text}]
+        },
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -146,6 +149,10 @@ async def chat_completion(
     cookie_identity: Annotated[
         str | None,
         Cookie(alias="anon_user_identity", title="anon_user_identity"),
+    ] = None,
+    session_id: Annotated[
+        str | None,
+        Cookie(alias="session_id", title="session_id"),
     ] = None,
 ):
     level = text_level
@@ -180,9 +187,35 @@ async def chat_completion(
 
     # Protection checks are now handled by individual agents
 
-    # Use cookie_identity as user_id and create session_id based on level
-    user_id = cookie_identity or "anonymous"
-    session_id = f"{user_id}-level-{level}"
+    # Use username and session_id from cookies (set during registration)
+    user_id = cookie_identity
+    if not user_id:
+        return HTMLResponse(
+            content="""
+            <div class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <div>
+                    <h4>No user session found</h4>
+                    <p>Please register first before chatting.</p>
+                </div>
+            </div>
+            """,
+            status_code=200,
+        )
+    
+    if not session_id:
+        return HTMLResponse(
+            content="""
+            <div class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <div>
+                    <h4>No session found</h4>
+                    <p>Please register first to create a session.</p>
+                </div>
+            </div>
+            """,
+            status_code=200,
+        )
 
     try:
         # Call ADK API

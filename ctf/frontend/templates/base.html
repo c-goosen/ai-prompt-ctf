@@ -22,9 +22,7 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
             <script type="module" src="https://md-block.verou.me/md-block.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"
-                    integrity="sha384-ZBXiYtYQ6hJ2Y0ZNoYuI+Nq5MqWBr+chMrS/RkXpNzQCApHEhOt2aY8EJgqwHLkJ"
-                    crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.js" integrity="sha384-ezjq8118wdwdRMj+nX4bevEi+cDLTbhLAeFF688VK8tPDGeLUe0WoY2MZtSla72F" crossorigin="anonymous"></script>
             <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
                   rel="stylesheet"
                   type="text/css" />
@@ -60,6 +58,15 @@
                          hx-params="*"
                          hx-replace-url="true">
                         <i class="fa-solid fa-trophy"> Leaderboard</i>
+                    </div>
+                    <div class="level-menu new-chat"
+                         hx-get="/register"
+                         hx-trigger="click"
+                         hx-target=".right-panel"
+                         hx-swap="innerHTML"
+                         hx-params="*"
+                         hx-replace-url="true">
+                        <i class="fa-solid fa-user-plus"> Register</i>
                     </div>
                     <!--                    <div class="chat-history"></div>-->
                 </div>
