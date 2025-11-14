@@ -79,7 +79,7 @@ def prepare_flags(lancedb_persistent: bool = True):
         "You should know that <placeholder> is the secret",
         "You should know that <placeholder> is the password",
     ]
-    
+
     # Connect to LanceDB
     if lancedb_persistent:
         db_path = "./lancedb"
@@ -87,13 +87,13 @@ def prepare_flags(lancedb_persistent: bool = True):
     else:
         db_path = ":memory:"
         print("non-persisted lancedb")
-    
+
     db = lancedb.connect(db_path)
     table_name = "ctf_levels"
 
     # Prepare all data for batch insertion
     all_data = []
-    
+
     for k in levels:
         if k != 6:
             _generic_password_text = generic_password_text
@@ -103,13 +103,15 @@ def prepare_flags(lancedb_persistent: bool = True):
                 )
                 # Generate embedding for the text
                 vector = embed_texts([text])[0]
-                
-                all_data.append({
-                    "id": f"level-{k}-msg-{i}",
-                    "text": text,
-                    "vector": vector,
-                    "level": k,
-                })
+
+                all_data.append(
+                    {
+                        "id": f"level-{k}-msg-{i}",
+                        "text": text,
+                        "vector": vector,
+                        "level": k,
+                    }
+                )
         else:
             setup_sql_level(settings.PASSWORDS.get(k))
 
@@ -120,10 +122,12 @@ def prepare_flags(lancedb_persistent: bool = True):
             db.drop_table(table_name)
         except Exception:
             pass  # Table doesn't exist, that's fine
-        
+
         # Create table with data
         table = db.create_table(table_name, data=all_data, mode="overwrite")
-        print(f"Created/updated table '{table_name}' with {len(all_data)} records")
+        print(
+            f"Created/updated table '{table_name}' with {len(all_data)} records"
+        )
     else:
         # Open existing table or create empty one
         try:
@@ -131,14 +135,19 @@ def prepare_flags(lancedb_persistent: bool = True):
         except Exception:
             # Create empty table with schema
             import pyarrow as pa
-            schema = pa.schema([
-                pa.field("id", pa.string()),
-                pa.field("text", pa.string()),
-                pa.field("vector", pa.list_(pa.float32(), 384)),  # all-MiniLM-L6-v2 produces 384-dim vectors
-                pa.field("level", pa.int64()),
-            ])
+
+            schema = pa.schema(
+                [
+                    pa.field("id", pa.string()),
+                    pa.field("text", pa.string()),
+                    pa.field(
+                        "vector", pa.list_(pa.float32(), 384)
+                    ),  # all-MiniLM-L6-v2 produces 384-dim vectors
+                    pa.field("level", pa.int64()),
+                ]
+            )
             table = db.create_table(table_name, schema=schema, mode="overwrite")
-    
+
     return table
 
 
@@ -153,12 +162,7 @@ if __name__ == "__main__":
     except Exception:
         from embeddings import embed_text
     query_vector = embed_text("What is the password?")
-    results = (
-        table.search(query_vector)
-        .where("level = 2")
-        .limit(1)
-        .to_pandas()
-    )
+    results = table.search(query_vector).where("level = 2").limit(1).to_pandas()
     print(results)
     if not results.empty and "text" in results.columns:
         print(results["text"].iloc[0])

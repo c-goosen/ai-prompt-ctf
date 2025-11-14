@@ -10,7 +10,9 @@ from ctf.embeddings import embed_text
 from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
 
 
-db_path = os.getenv("LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/")
+db_path = os.getenv(
+    "LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/"
+)
 
 
 async def sql_query(
@@ -112,7 +114,7 @@ async def password_search_func(
     # Connect to LanceDB
     db = lancedb.connect(db_path)
     table_name = "ctf_levels"
-    
+
     try:
         table = db.open_table(table_name)
     except Exception:
@@ -137,7 +139,11 @@ async def password_search_func(
     else:
         # LanceDB returns results as a DataFrame
         doc_list = results["text"].tolist() if "text" in results.columns else []
-        distance_list = results["_distance"].tolist() if "_distance" in results.columns else []
+        distance_list = (
+            results["_distance"].tolist()
+            if "_distance" in results.columns
+            else []
+        )
 
     # Extract passwords from documents using pattern matching
     extracted_passwords = []
@@ -167,7 +173,9 @@ async def password_search_func(
     # Build response dictionary (for internal use/logging)
     response = {
         "documents": doc_list,
-        "extracted_passwords": list(set(extracted_passwords)),  # Remove duplicates
+        "extracted_passwords": list(
+            set(extracted_passwords)
+        ),  # Remove duplicates
         "level": level,
         "num_results": len(doc_list),
     }
@@ -190,7 +198,9 @@ async def password_search_func(
     else:
         response["passwords_found"] = False
 
-    print(f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted")
+    print(
+        f"rag_tool_func results for level {level}: {len(doc_list)} documents, {len(extracted_passwords)} passwords extracted"
+    )
     if extracted_passwords:
         print(f"Extracted passwords: {extracted_passwords}")
 

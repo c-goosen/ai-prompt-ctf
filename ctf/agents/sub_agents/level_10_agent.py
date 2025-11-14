@@ -10,6 +10,7 @@ from .tools import (
     rag_tool_func_tool,
 )
 
+
 class Level10Agent(BaseCTFAgent):
     """Level 10 Agent - Hold the fort with all protections"""
 
@@ -27,6 +28,12 @@ class Level10Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=10, system_prompt=system_prompt, name="Level10Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=10,
+            system_prompt=system_prompt,
+            name="Level10Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

@@ -8,14 +8,17 @@
         <i class="fa-solid fa-check-circle"></i>
         <div>
             <h4>User registered successfully!</h4>
-            <p><strong>User ID:</strong> {{ user_id }}</p>
-            <p><strong>Session ID:</strong> {{ session_id }}</p>
+            <p>
+                <strong>User ID:</strong> {{ user_id }}
+            </p>
+            <p>
+                <strong>Session ID:</strong> {{ session_id }}
+            </p>
             <p class="mt-2">Your session has been saved as a cookie. You can now start chatting!</p>
         </div>
     </div>
-    
     <div class="mt-4">
-        <a href="/level/0" 
+        <a href="/level/0"
            class="btn btn-primary"
            hx-get="/level/0"
            hx-target=".right-panel"
@@ -28,4 +31,3 @@
 <div class="disclaimer">
     <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
 </div>
-

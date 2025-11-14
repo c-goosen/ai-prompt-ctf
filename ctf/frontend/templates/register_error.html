@@ -8,15 +8,18 @@
         <i class="fa-solid fa-exclamation-circle"></i>
         <div>
             <h4>Registration Failed</h4>
-            <p><strong>Error:</strong> {{ error }}</p>
+            <p>
+                <strong>Error:</strong> {{ error }}
+            </p>
             {% if error_detail %}
-            <p class="text-sm mt-2"><strong>Details:</strong> {{ error_detail }}</p>
+                <p class="text-sm mt-2">
+                    <strong>Details:</strong> {{ error_detail }}
+                </p>
             {% endif %}
         </div>
     </div>
-    
     <div class="mt-4">
-        <a href="/register" 
+        <a href="/register"
            class="btn btn-primary"
            hx-get="/register"
            hx-target=".right-panel"
@@ -29,4 +32,3 @@
 <div class="disclaimer">
     <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
 </div>
-

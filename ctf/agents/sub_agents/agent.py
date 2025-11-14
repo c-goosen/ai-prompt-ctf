@@ -4,7 +4,8 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 """
 
 from google.adk.agents import LlmAgent
-#from google.adk.models.lite_llm import LiteLlm
+
+# from google.adk.models.lite_llm import LiteLlm
 from .tools import (
     submit_answer_func_tool,
     hints_func_tool,
@@ -22,6 +23,7 @@ from .level_8_agent import Level8Agent
 from .level_9_agent import Level9Agent
 from .level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
+
 
 class CTFSubAgentsRootAgent(LlmAgent):
     """

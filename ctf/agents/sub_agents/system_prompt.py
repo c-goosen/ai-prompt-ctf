@@ -2,6 +2,7 @@
 Wrapper module for system_prompt that works when sub_agents is loaded as a top-level package.
 This module imports from the parent agents directory.
 """
+
 import sys
 from pathlib import Path
 
@@ -43,4 +44,3 @@ __all__ = [
     "get_system_prompt",
     "decide_prompt",
 ]
-

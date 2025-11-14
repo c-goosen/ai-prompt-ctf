@@ -10,6 +10,8 @@ from .tools import (
     hints_func_tool,
     rag_tool_func_tool,
 )
+
+
 class Level4Agent(BaseCTFAgent):
     """Level 4 Agent - Vision multi-modal prompt injection"""
 
@@ -26,6 +28,12 @@ class Level4Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=4, system_prompt=system_prompt, name="Level4Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=4,
+            system_prompt=system_prompt,
+            name="Level4Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

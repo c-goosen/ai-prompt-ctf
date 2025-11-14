@@ -2,6 +2,7 @@
 Wrapper module for tools that works when sub_agents is loaded as a top-level package.
 This module imports from the parent agents directory.
 """
+
 import sys
 from pathlib import Path
 
@@ -43,4 +44,3 @@ __all__ = [
     "rag_tool_func_tool",
     "sql_query_tool",
 ]
-

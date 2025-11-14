@@ -10,6 +10,7 @@ from .tools import (
     rag_tool_func_tool,
 )
 
+
 class Level8Agent(BaseCTFAgent):
     """Level 8 Agent - Prompt-Goose fine-tuned protection"""
 
@@ -26,6 +27,12 @@ class Level8Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=8, system_prompt=system_prompt, name="Level8Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=8,
+            system_prompt=system_prompt,
+            name="Level8Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

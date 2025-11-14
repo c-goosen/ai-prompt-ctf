@@ -67,9 +67,7 @@ app.add_middleware(SlowAPIMiddleware)
 templates = Jinja2Templates(directory="frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
-app.mount(
-    "/static", StaticFiles(directory="frontend/static"), name="static"
-)
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 
 app.include_router(challenges.router)
@@ -169,7 +167,9 @@ def render_leaderboard(request: Request):
 def render_register(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
-    session_id: Annotated[str | None, Cookie(alias="session_id", title="session_id")] = None,
+    session_id: Annotated[
+        str | None, Cookie(alias="session_id", title="session_id")
+    ] = None,
 ):
     """Render the register page, check if user already has a session"""
     # Check if user has a session
@@ -177,7 +177,7 @@ def render_register(
     if cookie_identity and session_id:
         # Could add async check here, but for now just check if cookies exist
         has_session = True
-    
+
     response = templates.TemplateResponse(
         "register.html",
         {
@@ -202,7 +202,7 @@ async def register(
     """Register a user and session with the ADK API"""
     # Handle both form data (HTMX) and JSON (API)
     is_htmx = request.headers.get("hx-request")
-    
+
     if is_htmx:
         # Form submission from HTMX
         if not username:
@@ -224,16 +224,20 @@ async def register(
             user_id = body.get("username")
             session_id = body.get("session_id") or str(uuid.uuid4())
             if not user_id:
-                raise HTTPException(status_code=400, detail="Username is required")
+                raise HTTPException(
+                    status_code=400, detail="Username is required"
+                )
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid request: {str(e)}")
-    
+            raise HTTPException(
+                status_code=400, detail=f"Invalid request: {str(e)}"
+            )
+
     app_name = "sub_agents"
-    
+
     # Prepare the payload for ADK API
     # Using empty dict as initial state, matching the pattern from ensure_session_exists
     payload = {}
-    
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             # Register the user/session with ADK API
@@ -245,7 +249,7 @@ async def register(
             )
             response.raise_for_status()
             logger.info(f"Registered user {user_id} with session {session_id}")
-            
+
             # Check if this is an HTMX request
             if is_htmx:
                 # Return HTML response with cookies set
@@ -259,7 +263,9 @@ async def register(
                     },
                 )
                 # Set cookies
-                html_response.set_cookie(key="anon_user_identity", value=user_id)
+                html_response.set_cookie(
+                    key="anon_user_identity", value=user_id
+                )
                 html_response.set_cookie(key="session_id", value=session_id)
                 return html_response
             else:
@@ -323,7 +329,7 @@ async def get_session(request: Request, username: str, session_id: str):
     """Check if a user has an existing session with the ADK API"""
     app_name = "sub_agents"
     user_id = username
-    
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             # Get session from ADK API
@@ -341,7 +347,9 @@ async def get_session(request: Request, username: str, session_id: str):
             }
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
-                logger.info(f"Session {session_id} not found for user {user_id}")
+                logger.info(
+                    f"Session {session_id} not found for user {user_id}"
+                )
                 return {
                     "status": "success",
                     "exists": False,

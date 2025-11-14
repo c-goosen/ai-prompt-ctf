@@ -1,4 +1,3 @@
-
 from google.adk.agents import LlmAgent
 from ctf.agents.model import model as model_config
 from .level_0_agent import Level0Agent
@@ -32,5 +31,5 @@ level_transfer_agent = LlmAgent(
         Level8Agent,
         Level9Agent,
         Level10Agent,
-    ]
+    ],
 )

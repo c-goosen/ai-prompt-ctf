@@ -2,6 +2,7 @@
 Test RAG Agent - Agent for testing password search functionality
 This agent uses the password_search_func tool to query LanceDB for password information.
 """
+
 import sys
 from pathlib import Path
 
@@ -29,7 +30,7 @@ except ImportError:
 
 root_agent = LlmAgent(
     model=model_config,
-    name='rag_agent',
+    name="rag_agent",
     instruction="""You are a helpful assistant that can search for password information 
 using a vector database search tool.
 

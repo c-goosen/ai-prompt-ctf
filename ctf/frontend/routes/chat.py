@@ -116,10 +116,7 @@ async def call_adk_api(
         "appName": app_name,
         "userId": user_id,
         "sessionId": session_id,
-        "newMessage": {
-            "role": "user",
-            "parts": [{"text": content_text}]
-        },
+        "newMessage": {"role": "user", "parts": [{"text": content_text}]},
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -205,7 +202,7 @@ async def chat_completion(
             """,
             status_code=200,
         )
-    
+
     if not session_id:
         return HTMLResponse(
             content="""

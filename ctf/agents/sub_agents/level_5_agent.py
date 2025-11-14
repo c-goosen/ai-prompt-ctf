@@ -11,6 +11,7 @@ from .tools import (
     rag_tool_func_tool,
 )
 
+
 class Level5Agent(BaseCTFAgent):
     """Level 5 Agent - Audio multi-modal prompt injection"""
 
@@ -27,6 +28,12 @@ class Level5Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=5, system_prompt=system_prompt, name="Level5Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=5,
+            system_prompt=system_prompt,
+            name="Level5Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

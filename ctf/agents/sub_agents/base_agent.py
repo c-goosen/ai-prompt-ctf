@@ -15,14 +15,21 @@ from .protection_utils import ProtectionUtils
 from google.adk.tools import FunctionTool
 from model import model as model_config
 
+
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
 
-    def __init__(self, level: int, system_prompt: str, name: str, tools: list[FunctionTool] = [
+    def __init__(
+        self,
+        level: int,
+        system_prompt: str,
+        name: str,
+        tools: list[FunctionTool] = [
             submit_answer_func_tool,
             hints_func_tool,
             rag_tool_func_tool,
-        ]):
+        ],
+    ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
         self._system_prompt = system_prompt

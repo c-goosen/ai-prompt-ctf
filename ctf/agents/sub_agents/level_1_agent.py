@@ -11,6 +11,8 @@ from .tools import (
     hints_func_tool,
     rag_tool_func_tool,
 )
+
+
 class Level1Agent(BaseCTFAgent):
     """Level 1 Agent - Input injection challenge"""
 
@@ -26,6 +28,12 @@ class Level1Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=1, system_prompt=system_prompt, name="Level1Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=1,
+            system_prompt=system_prompt,
+            name="Level1Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

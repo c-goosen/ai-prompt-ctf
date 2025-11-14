@@ -5,7 +5,8 @@ This is the main agent.py file that ADK web will discover
 
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
-#from google.adk.sessions import InMemorySessionService
+
+# from google.adk.sessions import InMemorySessionService
 
 from google.adk.sessions import DatabaseSessionService
 from ctf.agents.tools import (
@@ -26,6 +27,7 @@ from sub_agents.level_9_agent import Level9Agent
 from sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
 
+
 class CTFCoordinatorAgent(LlmAgent):
     """
     Main coordinator agent that implements the Coordinator/Dispatcher Pattern
@@ -41,11 +43,11 @@ class CTFCoordinatorAgent(LlmAgent):
             Level0Agent,
             Level1Agent,
             Level2Agent,
-            Level3Agent    ,
+            Level3Agent,
             Level4Agent,
             Level5Agent,
             Level6Agent,
-            Level7Agent, 
+            Level7Agent,
             Level8Agent,
             Level9Agent,
             Level10Agent,
@@ -54,7 +56,7 @@ class CTFCoordinatorAgent(LlmAgent):
         # Create session service
         db_url = "sqlite:///./my_agent_data.db"
         session_service = DatabaseSessionService(db_url=db_url)
-        #session_service = InMemorySessionService()
+        # session_service = InMemorySessionService()
 
         # Create runner
         runner = Runner(session_service=session_service)

@@ -29,6 +29,12 @@ class Level2Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=2, system_prompt=system_prompt, name="Level2Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool]
+            level=2,
+            system_prompt=system_prompt,
+            name="Level2Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

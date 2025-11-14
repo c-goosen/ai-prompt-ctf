@@ -16,6 +16,7 @@ from .tools import (
     sql_query_tool,
 )
 
+
 class Level6Agent(BaseCTFAgent):
     """Level 6 Agent - Function calling prompt injection"""
 
@@ -33,6 +34,13 @@ class Level6Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=6, system_prompt=system_prompt, name="Level6Agent",
-            tools=[rag_tool_func_tool, hints_func_tool, submit_answer_func_tool,sql_query_tool]
+            level=6,
+            system_prompt=system_prompt,
+            name="Level6Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+                sql_query_tool,
+            ],
         )
