@@ -109,6 +109,7 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
+    ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     token_limit: int = 20000
 
 

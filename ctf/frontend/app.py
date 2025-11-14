@@ -237,8 +237,9 @@ async def register(
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             # Register the user/session with ADK API
+            adk_api_url = settings.ADK_API_URL
             response = await client.post(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}",
+                f"{adk_api_url}/apps/{app_name}/users/{user_id}/sessions/{session_id}",
                 json=payload,
                 headers={"Content-Type": "application/json"},
             )
@@ -326,8 +327,9 @@ async def get_session(request: Request, username: str, session_id: str):
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             # Get session from ADK API
+            adk_api_url = settings.ADK_API_URL
             response = await client.get(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}",
+                f"{adk_api_url}/apps/{app_name}/users/{user_id}/sessions/{session_id}",
             )
             response.raise_for_status()
             session_data = response.json()

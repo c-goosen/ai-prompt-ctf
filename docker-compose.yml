@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  adk-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.adk
+    container_name: ai-prompt-ctf-adk
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Add any required environment variables here
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+    volumes:
+      # Mount data directories if needed
+      - ./ctf/lancedb:/app/ctf/lancedb
+      - ./ctf/agents/lancedb:/app/ctf/agents/lancedb
+    networks:
+      - ctf-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ai-prompt-ctf-frontend
+    ports:
+      - "8100:8100"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FASTAPI_ENV=production
+      - CURL_CA_BUNDLE=""
+      - REQUESTS_CA_BUNDLE=""
+      # ADK API URL - use service name for internal communication
+      - ADK_API_URL=http://adk-api:8000
+      # Add other environment variables as needed
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+    volumes:
+      # Mount static files and templates
+      - ./ctf/frontend/static:/app/ctf/frontend/static
+      - ./ctf/frontend/templates:/app/ctf/frontend/templates
+      - ./ctf/lancedb:/app/ctf/lancedb
+    depends_on:
+      adk-api:
+        condition: service_healthy
+    networks:
+      - ctf-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  ctf-network:
+    driver: bridge
+

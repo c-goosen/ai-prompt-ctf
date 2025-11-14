@@ -15,6 +15,9 @@ from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
 
+# ADK API base URL
+ADK_API_BASE_URL = settings.ADK_API_URL
+
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -66,7 +69,7 @@ async def ensure_session_exists(
         try:
             # Check if session exists
             response = await client.get(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}"
+                f"{ADK_API_BASE_URL}/apps/{app_name}/users/{user_id}/sessions/{session_id}"
             )
             if response.status_code == 200:
                 return True
@@ -76,7 +79,7 @@ async def ensure_session_exists(
         try:
             # Create session
             response = await client.post(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}",
+                f"{ADK_API_BASE_URL}/apps/{app_name}/users/{user_id}/sessions/{session_id}",
                 json=None,  # Empty state
                 headers={"Content-Type": "application/json"},
             )
@@ -122,7 +125,7 @@ async def call_adk_api(
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(
-                "http://127.0.0.1:8000/run",
+                f"{ADK_API_BASE_URL}/run",
                 json=payload,
                 headers={"Content-Type": "application/json"},
             )

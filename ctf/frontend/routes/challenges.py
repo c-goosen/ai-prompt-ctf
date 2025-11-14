@@ -77,8 +77,9 @@ async def get_session_history(
     """Get session history from ADK API if available"""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            adk_api_url = settings.ADK_API_URL
             response = await client.get(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}"
+                f"{adk_api_url}/apps/{app_name}/users/{user_id}/sessions/{session_id}"
             )
             if response.status_code == 200:
                 session_data = response.json()
