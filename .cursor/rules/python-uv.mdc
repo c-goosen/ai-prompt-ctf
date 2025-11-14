@@ -8,7 +8,7 @@ This project uses the uv package manager. Running anything equates to the follow
 
 The agents are built with google adk.
 The frontend is built with fastapi + htmx
-The vector DB is chromaDB
+The vector DB is lancedb
 LLMS used are via OLLAM and are qwen3:0.6b
 
 @docs https://google.github.io/adk-docs/

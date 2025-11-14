@@ -32,6 +32,17 @@ Google ADK API <-> FastAPI Backend <-> HTMX Frontend
 - **FastAPI Backend**: Provides REST API endpoints and serves the web application
 - **HTMX Frontend**: Delivers dynamic, interactive web interface without complex JavaScript
 
+### Agent Design
+
+The CTF uses a multi-agent architecture with a coordinator pattern, where a root agent delegates to level-specific agents:
+
+![Agent Design Map](agent-design-map.png)
+
+The system consists of:
+- **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
+- **Level0Agent through Level10Agent**: Individual challenge agents with progressive security measures
+- **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, and `sql_query` that agents can call
+
 ## Other Info
 [CHALLENGES](CHALLENGES.md)
 [TODO](TODO.md)
