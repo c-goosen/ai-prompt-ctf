@@ -3,6 +3,7 @@ import os
 import random
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated, Optional
 
 import httpx
@@ -26,8 +27,12 @@ from ctf.frontend.routes import chat
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
 
-FAQ_MARKDOWN = open("../ctf/FAQ.MD", "r").read()
-CHALLANGES_MARKDOWN = open("../ctf/CHALLENGES.MD", "r").read()
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+TEMPLATES_DIR = FRONTEND_DIR / "templates"
+STATIC_DIR = FRONTEND_DIR / "static"
+FAQ_MARKDOWN = (BASE_DIR / "FAQ.MD").read_text()
+CHALLANGES_MARKDOWN = (BASE_DIR / "CHALLENGES.MD").read_text()
 
 
 class RegisterRequest(BaseModel):
@@ -63,10 +68,10 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-templates = Jinja2Templates(directory="frontend/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 app.include_router(challenges.router)
@@ -100,7 +105,6 @@ async def root(
             ),
             "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
-            "_level": 0,
             "THEME_MODE": "dark",
         },
     )

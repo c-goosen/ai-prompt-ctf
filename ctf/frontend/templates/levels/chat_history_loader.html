@@ -1,0 +1,18 @@
+{% set _has_history = chat_history and chat_history|length > 0 %}
+<div class="chat-history-wrapper">
+    <div class="chat-history"
+         {% if not _has_history %}
+         hx-get="/chat/history"
+         hx-trigger="load"
+         hx-swap="innerHTML"
+         {% endif %}>
+        {% include "levels/chat_history.html" %}
+    </div>
+    <div class="chat-loader htmx-indicator" aria-live="polite">
+        <div class="chat-bubble">
+            <i class="fa-solid fa-comment-dots fa-bounce"></i>
+            <span>Sending…</span>
+        </div>
+    </div>
+</div>
+

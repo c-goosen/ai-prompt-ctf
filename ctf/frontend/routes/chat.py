@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import os
 import httpx
@@ -94,7 +95,7 @@ async def ensure_session_exists(
 
 
 async def call_adk_api(
-    user_id: str, session_id: str, message: str, level: int, file_text: str = ""
+    user_id: str, session_id: str, message: str, file_text: str = ""
 ) -> dict:
     """Call the ADK REST API at http://127.0.0.1:8000/run"""
 
@@ -106,10 +107,10 @@ async def call_adk_api(
     if not session_created:
         raise Exception("Failed to create or access session")
 
-    # Prepare the message content with level information
-    content_text = f"Level {level}: {message}"
+    # Prepare the message content
+    content_text = message
     if file_text:
-        content_text = f"Level {level}: {message}\n\nFile content: {file_text}"
+        content_text = f"{message}\n\nFile content: {file_text}"
 
     # Use the format from Google ADK docs
     payload = {
@@ -143,7 +144,7 @@ async def chat_completion(
     request: Request,
     file_input: UploadFile | None = None,
     text_input: str = Form(...),
-    text_level: int = Form(...),
+    text_level: Optional[int] = Form(None),
     text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
     cookie_identity: Annotated[
@@ -155,30 +156,28 @@ async def chat_completion(
         Cookie(alias="session_id", title="session_id"),
     ] = None,
 ):
-    level = text_level
     file_text = ""
 
     # Handle file uploads (audio and image processing)
     if file_input:
         data = await file_input.read()
-        if level == 5:
+        if file_type == "audio":
             print("File input detected -->")
             print(f"file_type --> {file_type}")
-            if file_type == "audio":
-                client = OG_OPENAI()
-                transcription = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=(
-                        "temp." + file_input.filename.split(".")[1],
-                        file_input.file,
-                        file_input.content_type,
-                    ),
-                    response_format="text",
-                )
-                file_text = transcription
-                print(file_text)
+            client = OG_OPENAI()
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=(
+                    "temp." + file_input.filename.split(".")[1],
+                    file_input.file,
+                    file_input.content_type,
+                ),
+                response_format="text",
+            )
+            file_text = transcription
+            print(file_text)
 
-        elif level == 4:
+        elif file_type == "image":
             from utils import image_to_text
 
             print("In image file")
@@ -223,32 +222,82 @@ async def chat_completion(
             user_id=user_id,
             session_id=session_id,
             message=text_input,
-            level=level,
             file_text=file_text,
         )
 
-        # Extract response text from ADK response
-        response_txt = ""
+        def _normalize_role(role: Optional[str]) -> str:
+            if not role:
+                return "assistant"
+            role = role.lower()
+            if role in {"assistant", "model", "ctfsubagentsroot"}:
+                return "assistant"
+            if role in {"tool"}:
+                return "tool"
+            if role in {"user"}:
+                return "user"
+            return "assistant"
+
+        response_messages: list[dict[str, str]] = []
         if adk_response and isinstance(adk_response, list):
             for event in adk_response:
-                if event.get("content") and event["content"].get("parts"):
-                    for part in event["content"]["parts"]:
-                        if "text" in part:
-                            response_txt += part["text"]
+                content = event.get("content") or {}
+                parts = content.get("parts") or []
+                role_hint = content.get("role") or event.get("author")
+                text_chunks: list[str] = []
 
-        if not response_txt:
-            response_txt = (
-                "Sorry, I couldn't process your request. Please try again."
-            )
+                for part in parts:
+                    if isinstance(part, dict):
+                        if "text" in part:
+                            text_chunks.append(str(part["text"]))
+                        elif "functionCall" in part:
+                            call = part["functionCall"]
+                            args = call.get("args") or {}
+                            args_str = json.dumps(args, indent=2, sort_keys=True)
+                            text_chunks.append(
+                                f"Function call `{call.get('name', 'unknown')}`"
+                                f"\n```json\n{args_str}\n```"
+                            )
+                            role_hint = "assistant"
+                        elif "functionResponse" in part:
+                            fn_resp = part["functionResponse"]
+                            resp = fn_resp.get("response") or {}
+                            resp_str = json.dumps(resp, indent=2, sort_keys=True)
+                            text_chunks.append(
+                                f"Tool response `{fn_resp.get('name', 'unknown')}`"
+                                f"\n```json\n{resp_str}\n```"
+                            )
+                            role_hint = "tool"
+                    elif isinstance(part, str):
+                        text_chunks.append(part)
+
+                text = "\n".join(chunk for chunk in text_chunks if chunk).strip()
+                if not text:
+                    continue
+
+                role = _normalize_role(role_hint)
+                response_messages.append({"role": role, "text": text})
+
+        if not response_messages:
+            response_messages = [
+                {
+                    "role": "assistant",
+                    "text": "Sorry, I couldn't process your request. Please try again.",
+                }
+            ]
 
     except Exception as e:
         logger.error(f"Error calling ADK API: {e}")
-        response_txt = "Sorry, there was an error processing your request. Please try again."
+        response_messages = [
+            {
+                "role": "assistant",
+                "text": "Sorry, there was an error processing your request. Please try again.",
+            }
+        ]
 
     # Output protection checks are now handled by individual agents
 
-    return HTMLResponse(
-        content=f"""
+    chat_segments = [
+        f"""
         <div class="chat chat-start">
           <div class="chat-image avatar">
             <div class="w-10 rounded-full">
@@ -257,14 +306,35 @@ async def chat_completion(
           </div>
           <div class="chat-bubble"><md-block>{text_input}</md-block></div>
         </div>
-        <div class="chat chat-end">
-          <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
-              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
-            </div>
-          </div>
-          <div class="chat-bubble">{response_txt}</div>
-        </div>
-        """,
-        status_code=200,
-    )
+        """
+    ]
+
+    for message in response_messages:
+        if message["role"] == "assistant":
+            chat_segments.append(
+                f"""
+                <div class="chat chat-end">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                    </div>
+                  </div>
+                  <div class="chat-bubble"><md-block>{message['text']}</md-block></div>
+                </div>
+                """
+            )
+        elif message["role"] == "tool":
+            chat_segments.append(
+                f"""
+                <div class="chat chat-end">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <i class="fa-solid fa-wrench" style="margin-right: 8px;"></i>
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary"><md-block>{message['text']}</md-block></div>
+                </div>
+                """
+            )
+
+    return HTMLResponse(content="".join(chat_segments), status_code=200)
