@@ -32,11 +32,22 @@ templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
+@router.get("/ctf", include_in_schema=False)
+async def render_ctf(request: Request):
+    """Serve the chat screen template at /ctf."""
+    return templates.TemplateResponse(
+        "levels/chat_screen.html",
+        {
+            "request": request,
+        },
+    )
+
+
 class Input(BaseModel):
     query: str
 
 
-@router.get("/chat", include_in_schema=False)
+@router.get("/challenges", include_in_schema=False)
 async def load_chat(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
