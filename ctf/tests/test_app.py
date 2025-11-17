@@ -24,9 +24,7 @@ def test_challenge_description():
     # assert response.json() == {"health": "ok"}
 
 
-@pytest.mark.parametrize("level", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-def test_challenges(level):
-    response = client.get(f"/level/{level}")
+def test_chat_screen():
+    response = client.get("/chat")
     assert response.status_code == 200
-    assert f"Level {level}" in response.text
-    # assert response.json() == {"health": "ok"}
+    assert "Agent Arena" in response.text

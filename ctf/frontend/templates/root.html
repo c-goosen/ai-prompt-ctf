@@ -6,7 +6,5 @@
     {% include "levels/auto_fill_chat.html" %}
 {% endblock %}
 {% block content %}
-    {% with _level=0 %}
-        {% include "levels/htmx_level_0.html" %}
-    {% endwith %}
+    {% include "levels/chat_screen.html" %}
 {% endblock %}

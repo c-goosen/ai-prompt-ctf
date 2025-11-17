@@ -3,7 +3,6 @@
            name="text_input"
            id="text_input"
            value="{{ suggestion }}">
-    <input type="hidden" name="text_level" id="text_level" value="{{ _level }}">
     <input type="hidden"
            name="text_model"
            id="text_model"
@@ -13,8 +12,8 @@
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-trigger="keyup[key=='Enter'] from:body, click"
-       hx-include="#text_input,#text_model,#text_level"
+       hx-include="#text_input,#text_model"
        hx-target=".chat-history"
        hx-swap="beforeend scroll:bottom"
-       hx-indicator="#spinner"></i>
+       hx-indicator=".chat-loader"></i>
 </div>
