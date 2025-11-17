@@ -9,6 +9,12 @@ NAMESPACE=$(DOCKER_REGISTRY_NAME)
 DOCKER_REGISTRY=955244480243.dkr.ecr.us-east-1.amazonaws.com
 DOCKER_CONTAINER_NAME=bsides-llm-ctf
 DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
+COMPOSE_CMD ?= docker compose
+COMPOSE_SERVICES ?= adk-api frontend
+
+.PHONY: run
+run:
+	$(COMPOSE_CMD) up --build $(COMPOSE_SERVICES)
 
 docker-image:
 	docker build -f ctf/Dockerfile --rm -t $(DOCKER_REPOSITORY):local .

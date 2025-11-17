@@ -38,6 +38,8 @@ EXPOSE 8100/tcp
 
 # Copy the virtual environment from the builder stage
 COPY --from=builder-base /opt/venv /opt/venv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Create user
