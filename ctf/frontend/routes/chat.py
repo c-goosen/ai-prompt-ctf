@@ -338,7 +338,9 @@ async def chat_completion(
                       <i class="fa-solid fa-wrench" style="margin-right: 8px;"></i>
                     </div>
                   </div>
-                  <div class="chat-bubble chat-bubble-secondary"><md-block>{message['text']}</md-block></div>
+                  <div class="chat-bubble chat-bubble-secondary">
+                    <md-block>{message['text']}</md-block>
+                  </div>
                 </div>
                 """
             )
