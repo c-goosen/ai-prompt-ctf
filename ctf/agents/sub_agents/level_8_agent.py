@@ -3,7 +3,12 @@ Level 8 Agent - Open Source prompt protection - Prompt-Guard Fine-tuned named Pr
 """
 
 from .base_agent import BaseCTFAgent
-from ctf.agents.system_prompt import get_system_prompt
+from .system_prompt import get_system_prompt
+from .tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+)
 
 
 class Level8Agent(BaseCTFAgent):
@@ -22,5 +27,12 @@ class Level8Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=8, system_prompt=system_prompt, name="Level8Agent"
+            level=8,
+            system_prompt=system_prompt,
+            name="Level8Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

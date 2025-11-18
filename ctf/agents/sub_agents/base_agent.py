@@ -5,48 +5,50 @@ Compatible with ADK Multi-Agent Systems
 
 from typing import Any, Dict
 from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
-from ctf.agents.tools import (
+from .tools import (
     submit_answer_func_tool,
     hints_func_tool,
     rag_tool_func_tool,
 )
 from .protection_utils import ProtectionUtils
+from google.adk.tools import FunctionTool
+from model import model as model_config
 
 
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
 
-    def __init__(self, level: int, system_prompt: str, name: str):
+    def __init__(
+        self,
+        level: int,
+        system_prompt: str,
+        name: str,
+        tools: list[FunctionTool] | None = None,
+    ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
         self._system_prompt = system_prompt
 
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
-        model = LiteLlm(model="ollama_chat/qwen3:0.6b")
+        model = model_config
+
+        # Use default tools if none provided (avoid mutable default argument)
+        if tools is None:
+            tools = [
+                submit_answer_func_tool,
+                hints_func_tool,
+                rag_tool_func_tool,
+            ]
 
         # Get level-specific protection configuration
         self._protection_config = ProtectionUtils.get_level_specific_protection(
             level
         )
 
-        # Define tools available to all agents
-        # Using ADK FunctionTool instances from tools.py
-        tools = [
-            submit_answer_func_tool,
-            hints_func_tool,
-            rag_tool_func_tool,
-        ]
-
         # Initialize as LlmAgent with protection
+        # Tools are passed to parent __init__ which handles them properly
         super().__init__(
             name=name, model=model, instruction=system_prompt, tools=tools
-        )
-
-        # Store level and protection config after initialization
-        self._level = level
-        self._protection_config = ProtectionUtils.get_level_specific_protection(
-            level
         )
 
     @property

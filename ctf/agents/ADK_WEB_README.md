@@ -75,7 +75,7 @@ The system implements the **Coordinator/Dispatcher Pattern** from [ADK Multi-Age
 - Ollama running on `http://localhost:11434`
 - `qwen3:0.6b` model available in Ollama
 - Google ADK installed (`pip install google-adk`)
-- ChromaDB with CTF data populated
+- LanceDB with CTF data populated
 
 ## Troubleshooting
 

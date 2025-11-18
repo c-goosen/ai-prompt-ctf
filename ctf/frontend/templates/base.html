@@ -22,8 +22,8 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
             <script type="module" src="https://md-block.verou.me/md-block.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"
-                    integrity="sha384-ZBXiYtYQ6hJ2Y0ZNoYuI+Nq5MqWBr+chMrS/RkXpNzQCApHEhOt2aY8EJgqwHLkJ"
+            <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.js"
+                    integrity="sha384-ezjq8118wdwdRMj+nX4bevEi+cDLTbhLAeFF688VK8tPDGeLUe0WoY2MZtSla72F"
                     crossorigin="anonymous"></script>
             <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
                   rel="stylesheet"
@@ -42,133 +42,63 @@
     <body id="body" data-theme="light">
         <div class="content-box">
             <div class="left-panel">
+                <div class="header brand-name">PwnGPT</div>
+                <div class="header">Agent Arena</div>
                 <div class="chats-levels">
                     <div class="level-menu new-chat"
-                         hx-get="/level/0"
+                         hx-get="/ctf"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-params="*"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 0</i>
+                        <i class="fa-solid fa-plus"> Chat</i>
                     </div>
                     <div class="level-menu new-chat"
-                         hx-get="/level/1"
+                         hx-get="/leaderboard"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-params="*"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 1</i>
+                        <i class="fa-solid fa-trophy"> Leaderboard</i>
                     </div>
                     <div class="level-menu new-chat"
-                         hx-get="/level/2"
+                         hx-get="/register"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-params="*"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 2</i>
+                        <i class="fa-solid fa-user-plus"> Register</i>
                     </div>
                     <div class="level-menu new-chat"
-                         hx-get="/level/3"
+                         hx-get="/faq"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-params="*"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 3</i>
+                        <i class="fa-solid fa-circle-question"> FAQ</i>
                     </div>
                     <div class="level-menu new-chat"
-                         hx-get="/level/4"
+                         hx-get="/challenges"
                          hx-trigger="click"
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-params="*"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 4</i>
+                        <i class="fa-solid fa-arrow-up-right-from-square"> Challenges</i>
                     </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/5"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 5</i>
-                    </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/6"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 6</i>
-                    </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/7"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 7</i>
-                    </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/8"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 8</i>
-                    </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/9"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 9</i>
-                    </div>
-                    <div class="level-menu new-chat"
-                         hx-get="/level/10"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Level 10</i>
+                    <div class="level-menu new-chat">
+                        <a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord">Discord</i></a>
                     </div>
                     <!--                    <div class="chat-history"></div>-->
                 </div>
-                <div class="control-menus">
-                    <div hx-get="/challenges"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-swap="innerHTML"
-                         hx-params="*"
-                         hx-replace-url="true">
-                        <i class="fa-solid fa-arrow-up-right-from-square">
-                        </i> Challenges
-                    </div>
-                    <div>
-                        <a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord"></i>Discord</a>
-                    </div>
-                    <!--                    <div hx-get="/faq"-->
-                    <!--                         hx-trigger="click"-->
-                    <!--                         hx-target=".right-panel"-->
-                    <!--                         hx-swap="innerHTML"-->
-                    <!--                         hx-params="*"-->
-                    <!--                         hx-replace-url="true">-->
-                    <!--                        <i class="fa-solid fa-arrow-up-right-from-square">-->
-                    <!--                        </i> Updates & FAQ-->
-                    <!--                    </div>-->
-                    <!--                    <div>-->
-                    <!--                        <a href="{{ SUBMIT_FLAGS_URL }}" target="_blank"><i class="fa-solid fa-arrow-right-from-bracket"></i> Submit flags</a>-->
-                    <!--                    </div>-->
+                <div class="logo mt-2 mb-4 flex justify-center">
+                    <img src="{{ url_for('static', path='/images/pwn_gpt_logo.png') }}"
+                         alt="PwnGPT Logo"
+                         class="max-w-xs w-full">
                 </div>
             </div>
             <div class="right-panel">

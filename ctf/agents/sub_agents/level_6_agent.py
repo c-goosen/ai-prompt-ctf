@@ -8,7 +8,13 @@ Think SQL injection
 """
 
 from .base_agent import BaseCTFAgent
-from ctf.agents.system_prompt import get_system_prompt_one
+from .system_prompt import get_system_prompt_one
+from .tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+    sql_query_tool,
+)
 
 
 class Level6Agent(BaseCTFAgent):
@@ -28,5 +34,13 @@ class Level6Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=6, system_prompt=system_prompt, name="Level6Agent"
+            level=6,
+            system_prompt=system_prompt,
+            name="Level6Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+                sql_query_tool,
+            ],
         )

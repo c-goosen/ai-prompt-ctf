@@ -2,7 +2,9 @@ import os.path
 import sys
 
 # Add the project root to Python path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
+project_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)
+)
 sys.path.insert(0, project_root)
 import uvicorn  # noqa
 from ctf.llm_guard.llm_guard import PromptGuardMeta  # noqa

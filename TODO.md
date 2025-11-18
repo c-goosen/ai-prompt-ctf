@@ -39,8 +39,10 @@
 
 * ~~Add more evals~~
 * 2025
-* * Reasoning model (probably deepseek-r1 distilled)
+* * ~~Reasoning model (probably qen3:0.6b distilled)~~
 * * Open Source vision model
 * * Open source audio to text
-* * potential opensource multi-modal small model
-* * Document and develop openAI vs opensource switch
+* * ~~potential opensource multi-modal small model~~
+* * ~~Google adk~~
+* * ~~Sessions~~
+* * ~~Lancedb~~

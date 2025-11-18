@@ -1,0 +1,65 @@
+<div>
+    <h3>Register User</h3>
+</div>
+{% if has_session %}
+    <div class="faq">
+        <div class="alert alert-info">
+            <i class="fa-solid fa-info-circle"></i>
+            <div>
+                <h4>You already have a session!</h4>
+                <p>User: {{ cookie_identity }}</p>
+                <p>Session: {{ session_id }}</p>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="faq">
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <div>
+                <h4>No session found</h4>
+                <p>Please register to create a new session.</p>
+            </div>
+        </div>
+        <form id="register-form"
+              hx-post="/register"
+              hx-target=".right-panel"
+              hx-swap="innerHTML"
+              hx-indicator="#register-spinner">
+            <div class="form-control">
+                <label class="label" for="username">
+                    <span class="label-text">Username *</span>
+                </label>
+                <input type="text"
+                       name="username"
+                       id="username"
+                       placeholder="Enter your username"
+                       class="input input-bordered"
+                       required>
+            </div>
+            <div class="form-control">
+                <label class="label" for="session_id">
+                    <span class="label-text">Session ID (optional)</span>
+                </label>
+                <input type="text"
+                       name="session_id"
+                       id="session_id"
+                       placeholder="Leave empty to auto-generate"
+                       class="input input-bordered">
+                <label class="label">
+                    <span class="label-text-alt">If not provided, a unique session ID will be generated</span>
+                </label>
+            </div>
+            <div class="form-control mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <span id="register-spinner"
+                          class="loading loading-spinner loading-sm htmx-indicator"></span>
+                    Register
+                </button>
+            </div>
+        </form>
+    </div>
+{% endif %}
+<div class="disclaimer">
+    <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
+</div>

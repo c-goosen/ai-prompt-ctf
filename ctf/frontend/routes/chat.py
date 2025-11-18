@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import os
 import httpx
@@ -15,6 +16,9 @@ from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
 
+# ADK API base URL
+ADK_API_BASE_URL = settings.ADK_API_URL
+
 # get root logger
 logger = logging.getLogger(__name__)
 
@@ -22,7 +26,7 @@ os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 router = APIRouter()
 
-templates = Jinja2Templates(directory="ctf/frontend/templates")
+templates = Jinja2Templates(directory="frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
@@ -66,7 +70,7 @@ async def ensure_session_exists(
         try:
             # Check if session exists
             response = await client.get(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}"
+                f"{ADK_API_BASE_URL}/apps/{app_name}/users/{user_id}/sessions/{session_id}"
             )
             if response.status_code == 200:
                 return True
@@ -76,7 +80,7 @@ async def ensure_session_exists(
         try:
             # Create session
             response = await client.post(
-                f"http://127.0.0.1:8000/apps/{app_name}/users/{user_id}/sessions/{session_id}",
+                f"{ADK_API_BASE_URL}/apps/{app_name}/users/{user_id}/sessions/{session_id}",
                 json=None,  # Empty state
                 headers={"Content-Type": "application/json"},
             )
@@ -91,7 +95,7 @@ async def ensure_session_exists(
 
 
 async def call_adk_api(
-    user_id: str, session_id: str, message: str, level: int, file_text: str = ""
+    user_id: str, session_id: str, message: str, file_text: str = ""
 ) -> dict:
     """Call the ADK REST API at http://127.0.0.1:8000/run"""
 
@@ -103,23 +107,23 @@ async def call_adk_api(
     if not session_created:
         raise Exception("Failed to create or access session")
 
-    # Prepare the message content with level information
-    content_text = f"Level {level}: {message}"
+    # Prepare the message content
+    content_text = message
     if file_text:
-        content_text = f"Level {level}: {message}\n\nFile content: {file_text}"
+        content_text = f"{message}\n\nFile content: {file_text}"
 
+    # Use the format from Google ADK docs
     payload = {
         "appName": app_name,
         "userId": user_id,
         "sessionId": session_id,
-        "newMessage": {"parts": [{"text": content_text}], "role": "user"},
-        "streaming": False,
+        "newMessage": {"role": "user", "parts": [{"text": content_text}]},
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(
-                "http://127.0.0.1:8000/run",
+                f"{ADK_API_BASE_URL}/run",
                 json=payload,
                 headers={"Content-Type": "application/json"},
             )
@@ -140,38 +144,40 @@ async def chat_completion(
     request: Request,
     file_input: UploadFile | None = None,
     text_input: str = Form(...),
-    text_level: int = Form(...),
+    text_level: Optional[int] = Form(None),
     text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
     cookie_identity: Annotated[
         str | None,
         Cookie(alias="anon_user_identity", title="anon_user_identity"),
     ] = None,
+    session_id: Annotated[
+        str | None,
+        Cookie(alias="session_id", title="session_id"),
+    ] = None,
 ):
-    level = text_level
     file_text = ""
 
     # Handle file uploads (audio and image processing)
     if file_input:
         data = await file_input.read()
-        if level == 5:
+        if file_type == "audio":
             print("File input detected -->")
             print(f"file_type --> {file_type}")
-            if file_type == "audio":
-                client = OG_OPENAI()
-                transcription = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=(
-                        "temp." + file_input.filename.split(".")[1],
-                        file_input.file,
-                        file_input.content_type,
-                    ),
-                    response_format="text",
-                )
-                file_text = transcription
-                print(file_text)
+            client = OG_OPENAI()
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=(
+                    "temp." + file_input.filename.split(".")[1],
+                    file_input.file,
+                    file_input.content_type,
+                ),
+                response_format="text",
+            )
+            file_text = transcription
+            print(file_text)
 
-        elif level == 4:
+        elif file_type == "image":
             from utils import image_to_text
 
             print("In image file")
@@ -180,9 +186,35 @@ async def chat_completion(
 
     # Protection checks are now handled by individual agents
 
-    # Use cookie_identity as user_id and create session_id based on level
-    user_id = cookie_identity or "anonymous"
-    session_id = f"{user_id}-level-{level}"
+    # Use username and session_id from cookies (set during registration)
+    user_id = cookie_identity
+    if not user_id:
+        return HTMLResponse(
+            content="""
+            <div class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <div>
+                    <h4>No user session found</h4>
+                    <p>Please register first before chatting.</p>
+                </div>
+            </div>
+            """,
+            status_code=200,
+        )
+
+    if not session_id:
+        return HTMLResponse(
+            content="""
+            <div class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <div>
+                    <h4>No session found</h4>
+                    <p>Please register first to create a session.</p>
+                </div>
+            </div>
+            """,
+            status_code=200,
+        )
 
     try:
         # Call ADK API
@@ -190,32 +222,88 @@ async def chat_completion(
             user_id=user_id,
             session_id=session_id,
             message=text_input,
-            level=level,
             file_text=file_text,
         )
 
-        # Extract response text from ADK response
-        response_txt = ""
+        def _normalize_role(role: Optional[str]) -> str:
+            if not role:
+                return "assistant"
+            role = role.lower()
+            if role in {"assistant", "model", "ctfsubagentsroot"}:
+                return "assistant"
+            if role in {"tool"}:
+                return "tool"
+            if role in {"user"}:
+                return "user"
+            return "assistant"
+
+        response_messages: list[dict[str, str]] = []
         if adk_response and isinstance(adk_response, list):
             for event in adk_response:
-                if event.get("content") and event["content"].get("parts"):
-                    for part in event["content"]["parts"]:
-                        if "text" in part:
-                            response_txt += part["text"]
+                content = event.get("content") or {}
+                parts = content.get("parts") or []
+                role_hint = content.get("role") or event.get("author")
+                text_chunks: list[str] = []
 
-        if not response_txt:
-            response_txt = (
-                "Sorry, I couldn't process your request. Please try again."
-            )
+                for part in parts:
+                    if isinstance(part, dict):
+                        if "text" in part:
+                            text_chunks.append(str(part["text"]))
+                        elif "functionCall" in part:
+                            call = part["functionCall"]
+                            args = call.get("args") or {}
+                            args_str = json.dumps(
+                                args, indent=2, sort_keys=True
+                            )
+                            text_chunks.append(
+                                f"Function call `{call.get('name', 'unknown')}`"
+                                f"\n```json\n{args_str}\n```"
+                            )
+                            role_hint = "assistant"
+                        elif "functionResponse" in part:
+                            fn_resp = part["functionResponse"]
+                            resp = fn_resp.get("response") or {}
+                            resp_str = json.dumps(
+                                resp, indent=2, sort_keys=True
+                            )
+                            text_chunks.append(
+                                f"Tool response `{fn_resp.get('name', 'unknown')}`"
+                                f"\n```json\n{resp_str}\n```"
+                            )
+                            role_hint = "tool"
+                    elif isinstance(part, str):
+                        text_chunks.append(part)
+
+                text = "\n".join(
+                    chunk for chunk in text_chunks if chunk
+                ).strip()
+                if not text:
+                    continue
+
+                role = _normalize_role(role_hint)
+                response_messages.append({"role": role, "text": text})
+
+        if not response_messages:
+            response_messages = [
+                {
+                    "role": "assistant",
+                    "text": "Sorry, I couldn't process your request. Please try again.",
+                }
+            ]
 
     except Exception as e:
         logger.error(f"Error calling ADK API: {e}")
-        response_txt = "Sorry, there was an error processing your request. Please try again."
+        response_messages = [
+            {
+                "role": "assistant",
+                "text": "Sorry, there was an error processing your request. Please try again.",
+            }
+        ]
 
     # Output protection checks are now handled by individual agents
 
-    return HTMLResponse(
-        content=f"""
+    chat_segments = [
+        f"""
         <div class="chat chat-start">
           <div class="chat-image avatar">
             <div class="w-10 rounded-full">
@@ -224,14 +312,37 @@ async def chat_completion(
           </div>
           <div class="chat-bubble"><md-block>{text_input}</md-block></div>
         </div>
-        <div class="chat chat-end">
-          <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
-              <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
-            </div>
-          </div>
-          <div class="chat-bubble">{response_txt}</div>
-        </div>
-        """,
-        status_code=200,
-    )
+        """
+    ]
+
+    for message in response_messages:
+        if message["role"] == "assistant":
+            chat_segments.append(
+                f"""
+                <div class="chat chat-end">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
+                    </div>
+                  </div>
+                  <div class="chat-bubble"><md-block>{message['text']}</md-block></div>
+                </div>
+                """
+            )
+        elif message["role"] == "tool":
+            chat_segments.append(
+                f"""
+                <div class="chat chat-end">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <i class="fa-solid fa-wrench" style="margin-right: 8px;"></i>
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary">
+                    <md-block>{message['text']}</md-block>
+                  </div>
+                </div>
+                """
+            )
+
+    return HTMLResponse(content="".join(chat_segments), status_code=200)

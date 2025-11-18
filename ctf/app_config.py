@@ -55,13 +55,7 @@ class Settings(BaseSettings):
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     EMBED_MODEL: str = "nomic-embed-text"
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    OPENAI_MODEL_3_5_TURBO: str = "qwen3:0.6b"
-    OPENAI_MODEL_4: str = "qwen3:0.6b"
-    OPENAI_MODEL_4_TURBO: str = "qwen3:0.6b"
-    OPENAI_MODEL_4_VISION: str = "qwen3:0.6b"
-    OPENAI_MODEL_4_O_MINI: str = "qwen3:0.6b"
-    OPENAI_MODEL_0_ONE: str = "qwen3:0.6b"
-    OPENAI_MODEL_0_ONE_MINI: str = "qwen3:0.6b"
+    OPENSOURCE_LLM_MODEL: str = os.getenv("OPENSOURCE_LLM_MODEL", "qwen3:0.6b")
     #
     HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
@@ -109,6 +103,7 @@ class Settings(BaseSettings):
     LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
+    ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     token_limit: int = 20000
 
 

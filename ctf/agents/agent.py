@@ -4,9 +4,11 @@ This is the main agent.py file that ADK web will discover
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
+
+# from google.adk.sessions import InMemorySessionService
+
+from google.adk.sessions import DatabaseSessionService
 from ctf.agents.tools import (
     submit_answer_func_tool,
     hints_func_tool,
@@ -23,6 +25,7 @@ from sub_agents.level_7_agent import Level7Agent
 from sub_agents.level_8_agent import Level8Agent
 from sub_agents.level_9_agent import Level9Agent
 from sub_agents.level_10_agent import Level10Agent
+from ctf.agents.model import model as model_config
 
 
 class CTFCoordinatorAgent(LlmAgent):
@@ -33,25 +36,27 @@ class CTFCoordinatorAgent(LlmAgent):
 
     def __init__(self):
         # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
-        model = LiteLlm(model="ollama_chat/qwen3:0.6b")
+        model = model_config
 
         # Create all level agents as sub-agents
         level_agents = [
-            Level0Agent(),
-            Level1Agent(),
-            Level2Agent(),
-            Level3Agent(),
-            Level4Agent(),
-            Level5Agent(),
-            Level6Agent(),
-            Level7Agent(),
-            Level8Agent(),
-            Level9Agent(),
-            Level10Agent(),
+            Level0Agent,
+            Level1Agent,
+            Level2Agent,
+            Level3Agent,
+            Level4Agent,
+            Level5Agent,
+            Level6Agent,
+            Level7Agent,
+            Level8Agent,
+            Level9Agent,
+            Level10Agent,
         ]
 
         # Create session service
-        session_service = InMemorySessionService()
+        db_url = "sqlite:///./my_agent_data.db"
+        session_service = DatabaseSessionService(db_url=db_url)
+        # session_service = InMemorySessionService()
 
         # Create runner
         runner = Runner(session_service=session_service)
@@ -132,8 +137,8 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
             sub_agents=level_agents,
             runner=runner,
             tools=[
-                hints_func_tool,
                 rag_tool_func_tool,
+                hints_func_tool,
                 submit_answer_func_tool,
             ],
         )

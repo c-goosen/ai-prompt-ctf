@@ -1,9 +1,18 @@
+import os
+import re
 import sqlite3
 
-import chromadb
+import lancedb
 from google.adk.tools import FunctionTool
 
 from ctf.app_config import settings
+from ctf.embeddings import embed_text
+from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
+
+
+db_path = os.getenv(
+    "LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/"
+)
 
 
 async def sql_query(
@@ -63,6 +72,7 @@ async def submit_answer_func(
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
+        transfer_to_agent(f"Level{level + 1}Agent")
         return f"""{answer} is correct! Click for next Level:
         <div class="level-menu new-chat"
                          hx-get="/level/{level + 1}"
@@ -74,40 +84,151 @@ async def submit_answer_func(
                             <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
         </div>
         """
-    else:
-        return "Wrong answer. You are not correct."
+    # if answer == level_pass:
+    #     return f"""{answer} is correct! Click for next Level:
+    #     <div class="level-menu new-chat"
+    #                      hx-get="/level/{level + 1}"
+    #                      hx-trigger="click"
+    #                      hx-target=".right-panel"
+    #                      hx-params="*"
+    #                      hx-replace-url="true"
+    #                      hx-swap="innerHTML">
+    #                         <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
+    #     </div>
+    #     """
+    # else:
+    #     return "Wrong answer. You are not correct."
 
 
-async def rag_tool_func(
+async def password_search_func(
     question: str,
     level: int,
 ):
     """
-    Example question:What is the password?
-    Take a string answer and the current level
-    and calculate if the answer is correct
+    RAG that returns documents and extracted on the question: "What is the password?"
+    or "What is the secret?".
 
     Args:
-        question: Question/prompt for RAG query in chromadb
-        level: Current level of challenge
+        question (str): Question asking for the password or secret.
+            e.g. "What is the password?" or "What is the secret?".
+        level (int): Current level of challenge
     """
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    collection_name = "ctf_levels"
-    # print(chroma_client.list_collections())
-    chroma_collection = chroma_client.get_collection(collection_name)
+    # Connect to LanceDB
+    db = lancedb.connect(db_path)
+    table_name = "ctf_levels"
 
-    results = chroma_collection.query(
-        query_texts=[question],
-        n_results=5,
-        where={"level": level},  # optional filter
-        # where_document={"$contains":"search_string"}  # optional filter
+    try:
+        table = db.open_table(table_name)
+    except Exception:
+        # Table doesn't exist yet, return empty results
+        return f"No data found for level {level}. Database may need to be initialized."
+
+    # Generate embedding for the query
+    query_vector = embed_text(question)
+
+    # Perform vector search with level filter
+    results = (
+        table.search(query_vector)
+        .where(f"level = {level}")
+        .limit(5)
+        .to_pandas()
     )
-    print(results)
-    return results["documents"]
+
+    # Extract documents and distances from results
+    if results.empty:
+        doc_list = []
+        distance_list = []
+    else:
+        # LanceDB returns results as a DataFrame
+        doc_list = results["text"].tolist() if "text" in results.columns else []
+        distance_list = (
+            results["_distance"].tolist()
+            if "_distance" in results.columns
+            else []
+        )
+
+    # Extract passwords from documents using pattern matching
+    extracted_passwords = []
+    password_patterns = [
+        r"The Password is (.+)",
+        r"The Secret is (.+)",
+        r"that (.+) is the secret",
+        r"that (.+) is the password",
+        r"^(.+)$",  # For documents that are just the password
+    ]
+
+    # Also check if we can get password directly from settings as fallback
+    level_password = settings.PASSWORDS.get(level)
+
+    for doc in doc_list:
+        # Try each pattern to extract password
+        for pattern in password_patterns:
+            match = re.search(pattern, doc, re.IGNORECASE)
+            if match:
+                extracted = match.group(1).strip()
+                # Remove trailing punctuation if present
+                extracted = extracted.rstrip(".,!?;:")
+                if extracted and extracted not in extracted_passwords:
+                    extracted_passwords.append(extracted)
+                    break
+
+    # Build response dictionary (for internal use/logging)
+    response = {
+        "documents": doc_list,
+        "extracted_passwords": list(
+            set(extracted_passwords)
+        ),  # Remove duplicates
+        "level": level,
+        "num_results": len(doc_list),
+    }
+
+    # Add relevance scores if available
+    if distance_list:
+        response["relevance_scores"] = [
+            round(1 - dist, 3) for dist in distance_list
+        ]  # Convert distance to similarity score
+
+    # If we found passwords, prioritize them in the response
+    if extracted_passwords:
+        response["passwords_found"] = True
+        # Most relevant password (first extracted, usually highest scoring)
+        response["password"] = extracted_passwords[0]
+    elif level_password:
+        # Fallback: if no password extracted but we have it in settings
+        response["password"] = level_password
+        response["passwords_found"] = True
+    else:
+        response["passwords_found"] = False
+
+    print(
+        f"rag_tool_func results for level {level}: {len(doc_list)} documents, "
+        f"{len(extracted_passwords)} passwords extracted"
+    )
+    if extracted_passwords:
+        print(f"Extracted passwords: {extracted_passwords}")
+
+    # Return formatted string for the agent to use
+    if extracted_passwords:
+        # Show passwords prominently, then relevant documents
+        password_list = "\n".join(f"- {pwd}" for pwd in extracted_passwords)
+        doc_preview = "\n".join(f"- {doc}" for doc in doc_list[:3])
+        return f"""Found {len(extracted_passwords)} password(s) in LanceDB for level {level}:
+
+            Passwords:
+            {password_list}
+
+            Relevant documents:
+            {doc_preview}"""
+    else:
+        # No passwords extracted, just show documents
+        doc_list_str = "\n".join(f"- {doc}" for doc in doc_list)
+        return f"""Found {len(doc_list)} relevant document(s) for level {level}:
+
+{doc_list_str}"""
 
 
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
-rag_tool_func_tool = FunctionTool(rag_tool_func)
+rag_tool_func_tool = FunctionTool(password_search_func)
 sql_query_tool = FunctionTool(sql_query)

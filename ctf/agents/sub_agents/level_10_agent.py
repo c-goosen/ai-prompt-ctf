@@ -3,7 +3,12 @@ Level 10 Agent - Hold the fort - all protections
 """
 
 from .base_agent import BaseCTFAgent
-from ctf.agents.system_prompt import get_system_prompt
+from .system_prompt import get_system_prompt
+from .tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+)
 
 
 class Level10Agent(BaseCTFAgent):
@@ -23,5 +28,12 @@ class Level10Agent(BaseCTFAgent):
         )
 
         super().__init__(
-            level=10, system_prompt=system_prompt, name="Level10Agent"
+            level=10,
+            system_prompt=system_prompt,
+            name="Level10Agent",
+            tools=[
+                rag_tool_func_tool,
+                hints_func_tool,
+                submit_answer_func_tool,
+            ],
         )

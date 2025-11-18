@@ -3,7 +3,7 @@ name = "ai-prompt-ctf"
 version = "0.2.0"
 description = ""
 authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.13,<3.15"
 readme = "README.md"
 dependencies = [
     "fastapi==0.118.0",
@@ -16,7 +16,6 @@ dependencies = [
     "openai>=1.1.1,<2",
     "bandit>=1.7.5,<2",
     "gunicorn==23.0.0",
-    "chromadb>=0.5.7,<0.6",
     "jinja-markdown~=1.210911",
     "slowapi>=0.1.9,<0.2",
     "certifi>=2025.1.31,<2026",
@@ -28,6 +27,7 @@ dependencies = [
     "google-adk[eval]>=0.2.0",
     "litellm>=1.77.5",
     "httpx>=0.28.1",
+    "lancedb>=0.25.2",
 ]
 
 [dependency-groups]
@@ -47,6 +47,7 @@ dev = [
     "pytest-asyncio>=0.24.0,<0.25",
     "djlint>=1.36.1,<2",
     "anyio>=4.6.2.post1,<5",
+    "vulture>=2.14",
 ]
 
 [tool.black]
