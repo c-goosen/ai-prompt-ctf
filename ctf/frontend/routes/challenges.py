@@ -87,6 +87,7 @@ async def load_chat_alias(
         session_cookie=session_cookie,
     )
 
+
 async def get_session_history(
     app_name: str, user_id: str, session_id: str
 ) -> list:
