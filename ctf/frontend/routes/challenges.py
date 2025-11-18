@@ -72,6 +72,21 @@ async def load_chat(
     return templates.TemplateResponse(template_name, context)
 
 
+@router.get("/chat", include_in_schema=False)
+async def load_chat_alias(
+    request: Request,
+    cookie_identity: Annotated[str | None, cookie] = None,
+    session_cookie: Annotated[
+        str | None, Cookie(alias="session_id", title="session_id")
+    ] = None,
+):
+    """Backward-compatible alias for /ctf."""
+    return await load_chat(
+        request=request,
+        cookie_identity=cookie_identity,
+        session_cookie=session_cookie,
+    )
+
 async def get_session_history(
     app_name: str, user_id: str, session_id: str
 ) -> list:
