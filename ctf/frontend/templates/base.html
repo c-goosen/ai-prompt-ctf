@@ -42,8 +42,13 @@
     <body id="body" data-theme="light">
         <div class="content-box">
             <div class="left-panel">
-                <div class="header brand-name">PwnGPT</div>
-                <div class="header">Agent Arena</div>
+                <div class="logo mt-1 mb-2 flex justify-center">
+                    <img src="{{ url_for('static', path='/images/pwn_gpt_logo.png') }}"
+                         alt="PwnGPT Logo"
+                         class="max-w-xs w-full">
+                </div>
+                <!-- <div class="header brand-name">PwnGPT</div> -->
+                <!-- <div class="header">Agent Arena</div> -->
                 <div class="chats-levels">
                     <div class="level-menu new-chat"
                          hx-get="/ctf"
@@ -95,11 +100,7 @@
                     </div>
                     <!--                    <div class="chat-history"></div>-->
                 </div>
-                <div class="logo mt-2 mb-4 flex justify-center">
-                    <img src="{{ url_for('static', path='/images/pwn_gpt_logo.png') }}"
-                         alt="PwnGPT Logo"
-                         class="max-w-xs w-full">
-                </div>
+                
             </div>
             <div class="right-panel">
                 {% block content %}{% endblock %}

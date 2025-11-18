@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from pydantic import AnyUrl
@@ -105,6 +106,10 @@ class Settings(BaseSettings):
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     token_limit: int = 20000
+    LEADERBOARD_DB_PATH: str = os.getenv(
+        "LEADERBOARD_DB_PATH",
+        str(Path(__file__).resolve().parent / "leaderboard.db"),
+    )
 
 
 settings = Settings()

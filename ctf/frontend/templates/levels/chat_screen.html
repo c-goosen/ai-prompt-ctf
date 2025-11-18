@@ -47,7 +47,7 @@
 </div>
 {% include "levels/chat_history_loader.html" %}
 <!--<div class="chat-input absolute">-->
-<div class="chat-input">
+<div class="chat-input chat-input-fixed">
     {% with _text_model="gpt-3.5-turbo" %}
         {% include "levels/suggestion_chatbox.html" %}
     {% endwith %}
@@ -55,3 +55,39 @@
         <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
     </div>
 </div>
+<script>
+    (function () {
+        if (window.__chatScrollInitialized) {
+            return;
+        }
+        window.__chatScrollInitialized = true;
+
+        function scrollChatToBottom() {
+            const history = document.querySelector(".chat-history");
+            if (history) {
+                history.scrollTop = history.scrollHeight;
+            }
+            const panel = document.querySelector(".right-panel");
+            if (panel) {
+                panel.scrollTop = panel.scrollHeight;
+            }
+        }
+
+        function maybeScroll(evt) {
+            const trigger = evt.target;
+            if (trigger && trigger.closest(".input-box")) {
+                requestAnimationFrame(scrollChatToBottom);
+            }
+        }
+
+        document.addEventListener("htmx:beforeRequest", maybeScroll);
+        document.addEventListener("htmx:afterSwap", function (evt) {
+            const target = evt.detail && evt.detail.target;
+            if (target && target.matches(".chat-history")) {
+                requestAnimationFrame(scrollChatToBottom);
+            }
+        });
+
+        window.scrollChatToBottom = scrollChatToBottom;
+    })();
+</script>

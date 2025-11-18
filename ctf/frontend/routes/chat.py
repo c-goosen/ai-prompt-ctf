@@ -15,6 +15,7 @@ from fastapi.templating import Jinja2Templates
 from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
+from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -315,7 +316,15 @@ async def chat_completion(
         """
     ]
 
+    completed_levels: set[int] = set()
     for message in response_messages:
+        cleaned_text, markers = strip_leaderboard_markers(message["text"])
+        message["text"] = cleaned_text
+        for marker in markers:
+            if marker.get("status") == "correct":
+                level = marker.get("level")
+                if isinstance(level, int):
+                    completed_levels.add(level)
         if message["role"] == "assistant":
             chat_segments.append(
                 f"""
@@ -343,6 +352,13 @@ async def chat_completion(
                   </div>
                 </div>
                 """
+            )
+
+    if completed_levels and cookie_identity:
+        for level in sorted(completed_levels):
+            record_level_completion(
+                username=cookie_identity,
+                level=level,
             )
 
     return HTMLResponse(content="".join(chat_segments), status_code=200)

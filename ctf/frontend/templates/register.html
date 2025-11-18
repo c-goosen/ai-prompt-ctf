@@ -1,3 +1,4 @@
+{% set form_enabled = show_form|default(not has_session) %}
 <div>
     <h3>Register User</h3>
 </div>
@@ -11,14 +12,32 @@
                 <p>Session: {{ session_id }}</p>
             </div>
         </div>
+        <div class="mt-4 flex flex-col gap-2 md:flex-row md:items-center">
+            <a class="btn btn-secondary"
+               href="/register?force_new=1"
+               hx-get="/register?force_new=1"
+               hx-target=".right-panel"
+               hx-swap="innerHTML">
+                Create a new session
+            </a>
+            <p class="text-sm opacity-80">
+                Need a fresh conversation thread? Generate a brand new session ID.
+            </p>
+        </div>
     </div>
-{% else %}
+{% endif %}
+{% if form_enabled %}
     <div class="faq">
-        <div class="alert alert-warning">
-            <i class="fa-solid fa-exclamation-triangle"></i>
+        <div class="alert {% if has_session %}alert-info{% else %}alert-warning{% endif %}">
+            <i class="fa-solid {% if has_session %}fa-repeat{% else %}fa-exclamation-triangle{% endif %}"></i>
             <div>
-                <h4>No session found</h4>
-                <p>Please register to create a new session.</p>
+                {% if has_session %}
+                    <h4>Create another session</h4>
+                    <p>Your existing cookies stay intact—we'll register a fresh session below.</p>
+                {% else %}
+                    <h4>No session found</h4>
+                    <p>Please register to create a new session.</p>
+                {% endif %}
             </div>
         </div>
         <form id="register-form"
@@ -34,6 +53,7 @@
                        name="username"
                        id="username"
                        placeholder="Enter your username"
+                       value="{{ cookie_identity or '' }}"
                        class="input input-bordered"
                        required>
             </div>

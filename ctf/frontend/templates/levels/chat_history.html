@@ -8,7 +8,7 @@
                     </div>
                 </div>
                 <div class="chat-bubble">
-                    <md-block>{{ chat.memory }}</md-block>
+                    <md-block>{{ chat.memory | safe }}</md-block>
                 </div>
             </div>
         {% endif %}
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                     <div class="chat-bubble">
-                        <md-block>{{ chat.memory }}</md-block>
+                        <md-block>{{ chat.memory | safe }}</md-block>
                     </div>
                 </div>
             {% endif %}
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="chat-bubble chat-bubble-secondary">
-                    <md-block>{{ chat.memory }}</md-block>
+                    <md-block>{{ chat.memory | safe }}</md-block>
                 </div>
             </div>
         {% endif %}

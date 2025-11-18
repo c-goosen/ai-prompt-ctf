@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import httpx
-from fastapi import Cookie, HTTPException, Form
+from fastapi import Cookie, HTTPException, Form, Query
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -23,6 +23,11 @@ from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
+from ctf.leaderboard import (
+    get_leaderboard,
+    get_leaderboard_summary,
+    get_recent_completions,
+)
 
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
@@ -164,11 +169,19 @@ def render_leaderboard(request: Request):
     is_htmx = request.headers.get("HX-Request")
     template_name = "leaderboard.html" if is_htmx else "leaderboard_page.html"
 
+    leaderboard_rows = get_leaderboard()
+    recent = get_recent_completions()
+    summary = get_leaderboard_summary()
+
     response = templates.TemplateResponse(
         template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
+            "leaderboard": leaderboard_rows,
+            "recent_completions": recent,
+            "leaderboard_summary": summary,
+            "total_levels": settings.FINAL_LEVEL + 1,
         },
     )
     return response
@@ -182,6 +195,7 @@ def render_register(
     session_id: Annotated[
         str | None, Cookie(alias="session_id", title="session_id")
     ] = None,
+    force_new: bool = Query(False, alias="force_new"),
 ):
     """Render the register page, check if user already has a session"""
     # Check if user has a session
@@ -189,6 +203,8 @@ def render_register(
     if cookie_identity and session_id:
         # Could add async check here, but for now just check if cookies exist
         has_session = True
+
+    show_form = force_new or not has_session
 
     is_htmx = request.headers.get("HX-Request")
     template_name = "register.html" if is_htmx else "register_page.html"
@@ -201,6 +217,8 @@ def render_register(
             "has_session": has_session,
             "cookie_identity": cookie_identity,
             "session_id": session_id,
+            "show_form": show_form,
+            "force_new": force_new,
         },
     )
     return response
