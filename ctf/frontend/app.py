@@ -145,11 +145,7 @@ def render_faq(request: Request):
 @limiter.limit("60/min")
 def render_challanges(request: Request):
     is_htmx = request.headers.get("HX-Request")
-    template_name = (
-        "challenges.html"
-        if is_htmx
-        else "challenges_page.html"
-    )
+    template_name = "challenges.html" if is_htmx else "challenges_page.html"
 
     response = templates.TemplateResponse(
         template_name,

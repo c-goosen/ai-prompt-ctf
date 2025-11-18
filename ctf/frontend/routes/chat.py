@@ -252,7 +252,9 @@ async def chat_completion(
                         elif "functionCall" in part:
                             call = part["functionCall"]
                             args = call.get("args") or {}
-                            args_str = json.dumps(args, indent=2, sort_keys=True)
+                            args_str = json.dumps(
+                                args, indent=2, sort_keys=True
+                            )
                             text_chunks.append(
                                 f"Function call `{call.get('name', 'unknown')}`"
                                 f"\n```json\n{args_str}\n```"
@@ -261,7 +263,9 @@ async def chat_completion(
                         elif "functionResponse" in part:
                             fn_resp = part["functionResponse"]
                             resp = fn_resp.get("response") or {}
-                            resp_str = json.dumps(resp, indent=2, sort_keys=True)
+                            resp_str = json.dumps(
+                                resp, indent=2, sort_keys=True
+                            )
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"
@@ -270,7 +274,9 @@ async def chat_completion(
                     elif isinstance(part, str):
                         text_chunks.append(part)
 
-                text = "\n".join(chunk for chunk in text_chunks if chunk).strip()
+                text = "\n".join(
+                    chunk for chunk in text_chunks if chunk
+                ).strip()
                 if not text:
                     continue
 
