@@ -123,8 +123,11 @@ async def health(request: Request):
 @app.get("/faq")
 @limiter.limit("1/min")
 def render_faq(request: Request):
+    is_htmx = request.headers.get("HX-Request")
+    template_name = "faq.html" if is_htmx else "faq_page.html"
+
     response = templates.TemplateResponse(
-        "faq.html",
+        template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
@@ -139,10 +142,17 @@ def render_faq(request: Request):
 
 
 @app.get("/challenges")
-@limiter.limit("1/min")
+@limiter.limit("60/min")
 def render_challanges(request: Request):
+    is_htmx = request.headers.get("HX-Request")
+    template_name = (
+        "challenges.html"
+        if is_htmx
+        else "challenges_page.html"
+    )
+
     response = templates.TemplateResponse(
-        "challenges.html",
+        template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
@@ -155,8 +165,11 @@ def render_challanges(request: Request):
 @app.get("/leaderboard")
 @limiter.limit("5/min")
 def render_leaderboard(request: Request):
+    is_htmx = request.headers.get("HX-Request")
+    template_name = "leaderboard.html" if is_htmx else "leaderboard_page.html"
+
     response = templates.TemplateResponse(
-        "leaderboard.html",
+        template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
@@ -181,8 +194,11 @@ def render_register(
         # Could add async check here, but for now just check if cookies exist
         has_session = True
 
+    is_htmx = request.headers.get("HX-Request")
+    template_name = "register.html" if is_htmx else "register_page.html"
+
     response = templates.TemplateResponse(
-        "register.html",
+        template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,

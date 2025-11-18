@@ -32,22 +32,22 @@ templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
-@router.get("/ctf", include_in_schema=False)
-async def render_ctf(request: Request):
-    """Serve the chat screen template at /ctf."""
-    return templates.TemplateResponse(
-        "levels/chat_screen.html",
-        {
-            "request": request,
-        },
-    )
+# @router.get("/ctf", include_in_schema=False)
+# async def render_ctf(request: Request):
+#     """Serve the chat screen template at /ctf."""
+#     return templates.TemplateResponse(
+#         "levels/chat_screen.html",
+#         {
+#             "request": request,
+#         },
+#     )
 
 
 class Input(BaseModel):
     query: str
 
 
-@router.get("/challenges", include_in_schema=False)
+@router.get("/ctf", include_in_schema=False)
 async def load_chat(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
@@ -62,12 +62,12 @@ async def load_chat(
             "sub_agents", cookie_identity, session_cookie
         )
 
+    is_htmx = request.headers.get("HX-Request")
     template_name = (
-        "levels/chat_screen.html"
+        "levels/chat_screen.html" if is_htmx else "chat_page.html"
     )
     context = {
                 "request": request,
-                "PAGE_HEADER": settings.CTF_SUBTITLE,
                 "message": "",
                 "chat_history": chat_history,
     }
