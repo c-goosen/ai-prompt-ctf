@@ -145,8 +145,6 @@ async def chat_completion(
     request: Request,
     file_input: UploadFile | None = None,
     text_input: str = Form(...),
-    text_level: Optional[int] = Form(None),
-    text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
     cookie_identity: Annotated[
         str | None,

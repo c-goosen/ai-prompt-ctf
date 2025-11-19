@@ -4,7 +4,7 @@ import random
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Callable
 
 import httpx
 from fastapi import Cookie, HTTPException, Form, Query
@@ -16,6 +16,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import Response as StarletteResponse
 
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
@@ -24,10 +27,24 @@ from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
 from ctf.leaderboard import (
+    ensure_leaderboard_user,
     get_leaderboard,
     get_leaderboard_summary,
     get_recent_completions,
 )
+
+
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: StarletteRequest, call_next: Callable
+    ) -> StarletteResponse:
+        response: StarletteResponse = await call_next(request)
+        response.headers[
+            "Cache-Control"
+        ] = "no-store, no-cache, must-revalidate, proxy-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
@@ -72,6 +89,8 @@ else:
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(NoCacheMiddleware)
+
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
@@ -282,6 +301,7 @@ async def register(
             )
             response.raise_for_status()
             logger.info(f"Registered user {user_id} with session {session_id}")
+            ensure_leaderboard_user(user_id)
 
             # Check if this is an HTMX request
             if is_htmx:

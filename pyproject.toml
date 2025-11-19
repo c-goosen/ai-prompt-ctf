@@ -28,6 +28,7 @@ dependencies = [
     "litellm>=1.77.5",
     "httpx>=0.28.1",
     "lancedb>=0.25.2",
+    "sqlalchemy>=2.0.36,<3",
 ]
 
 [dependency-groups]

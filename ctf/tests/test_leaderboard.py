@@ -36,3 +36,11 @@ def test_record_and_fetch_leaderboard():
     recent = lb.get_recent_completions(limit=2)
     assert len(recent) == 2
 
+
+def test_ensure_leaderboard_user_adds_level_zero_entry():
+    lb.ensure_leaderboard_user("charlie")
+    rows = lb.get_leaderboard()
+    assert rows
+    usernames = {row["username"] for row in rows}
+    assert "charlie" in usernames
+

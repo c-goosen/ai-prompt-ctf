@@ -17,3 +17,23 @@
        hx-swap="beforeend scroll:bottom"
        hx-indicator=".chat-loader"></i>
 </div>
+
+<script>
+    if (!window.__chatInputResetBound) {
+        window.__chatInputResetBound = true;
+        document.addEventListener("htmx:afterRequest", function (event) {
+            const trigger = event.detail && event.detail.elt;
+            if (!trigger) {
+                return;
+            }
+            const inputBox = trigger.closest(".input-box");
+            if (!inputBox) {
+                return;
+            }
+            const textInput = inputBox.querySelector('input[name="text_input"]');
+            if (textInput) {
+                textInput.value = "";
+            }
+        });
+    }
+</script>

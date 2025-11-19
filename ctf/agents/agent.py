@@ -131,6 +131,8 @@ and I'll transfer you to the appropriate challenge!
 When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent
 (where X is the level number).
 
+When a user successfully completes a level, use transfer_to_agent to delegate to the next level agent.
+
 Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent",
 "User wants to attempt level 3 challenge")
 """,

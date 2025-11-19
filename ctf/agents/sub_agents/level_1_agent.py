@@ -4,13 +4,15 @@ OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
 """
 
+from functools import partial
 from .base_agent import BaseCTFAgent
-from .system_prompt import get_basic_prompt
+from ctf.agents.sub_agents.system_prompt import get_basic_prompt
 from .tools import (
     submit_answer_func_tool,
     hints_func_tool,
     rag_tool_func_tool,
 )
+from ctf.agents.sub_agents.guard_rails import guard_rail_input_injection
 
 
 class Level1Agent(BaseCTFAgent):
@@ -27,6 +29,9 @@ class Level1Agent(BaseCTFAgent):
         """
         )
 
+        before_model_callback = partial(guard_rail_input_injection, level=1)
+        before_tool_callback = before_model_callback
+
         super().__init__(
             level=1,
             system_prompt=system_prompt,
@@ -36,4 +41,6 @@ class Level1Agent(BaseCTFAgent):
                 hints_func_tool,
                 submit_answer_func_tool,
             ],
+            before_model_callback=before_model_callback,
+            before_tool_callback=before_tool_callback
         )

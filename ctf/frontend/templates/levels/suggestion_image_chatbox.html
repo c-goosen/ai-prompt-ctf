@@ -30,5 +30,6 @@
        hx-target=".chat-history"
        hx-swap="beforeend scroll:bottom"
        hx-encoding="multipart/form-data"
-       hx-indicator=".chat-loader"></i>
+        hx-indicator=".chat-loader"
+        hx-on:htmx:afterRequest="const input=this.closest('.input-box')?.querySelector('input[name=text_input]'); if(input){input.value='';}"></i>
 </div>

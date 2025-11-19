@@ -6,11 +6,11 @@ import sqlite3
 import lancedb
 from google.adk.tools import FunctionTool
 from google.adk.tools.tool_context import ToolContext
+from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
 
 from ctf.app_config import settings
-from ctf.leaderboard import format_leaderboard_marker, record_level_completion
 from ctf.embeddings import embed_text
-from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
+from ctf.leaderboard import format_leaderboard_marker, record_level_completion
 
 logger = logging.getLogger(__name__)
 
@@ -84,10 +84,11 @@ async def submit_answer_func(
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
+        print("Answer is correct")
         _record_leaderboard_progress(level_int, tool_context)
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
-        transfer_to_agent(agent_name=f"Level{level_int + 1}Agent")
+        transfer_to_agent(agent_name=f"Level{level_int + 1}Agent")#, tool_context=tool_context)
         return f"""{answer} is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
         {marker}
         """
@@ -225,6 +226,7 @@ async def password_search_func(
 def _record_leaderboard_progress(
     level: int, tool_context: ToolContext | None
 ) -> None:
+    print(f"record_leaderboard_progress {level} {tool_context}")
     if tool_context is None:
         logger.debug("No tool_context provided; skipping leaderboard update")
         return
@@ -247,12 +249,14 @@ def _record_leaderboard_progress(
 
     if not username:
         logger.debug("No username available; skipping leaderboard update")
+        print(f"No username available; skipping leaderboard update")
         return
 
     try:
         record_level_completion(username=username, level=level)
     except Exception as exc:  # pragma: no cover - defensive logging
         logger.warning("Failed to record leaderboard entry for %s: %s", username, exc)
+        print(f"Failed to record leaderboard entry for {username}: {exc}")
 
 
 

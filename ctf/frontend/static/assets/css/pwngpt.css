@@ -18,6 +18,7 @@ body {
 }
 
 .left-panel {
+    height: 100%;
     flex-basis: 25%;
     background: linear-gradient(180deg, #060019 0%, #120528 45%, #1c0937 100%);
     color: #f4e7ff;
@@ -296,4 +297,26 @@ a:link, a:visited {
 
 textbox-icons {
  font-size: 1.5rem
+}
+
+.leaderboard-table th {
+    color: #ffffff;
+}
+.leaderboard-table td {
+    color: #ffffff;
+}
+
+.right-panel .form-control .label .label-text,
+.right-panel .form-control .label .label-text-alt {
+    color: #ffffff;
+}
+
+.right-panel .form-control .input {
+    color: #ffffff;
+    background: rgba(5, 2, 25, 0.6);
+    border-color: rgba(60, 252, 209, 0.4);
+}
+
+.right-panel .form-control .input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
