@@ -5,9 +5,15 @@
 </div>
 <!--<img src="{{ url_for('static', path='images/jb.png') }}" alt="">-->
 <div class="faq">
+    {% if MD_FILE %}
     <md-block>
-    {{ MD_FILE | safe }}
-    </md-block>
+        {{ MD_FILE | safe }} 
+        </md-block>
+    {% else %}
+        <md-block src="{{ BASE_DIR }}/CHALLENGES.MD">
+        {{ MD_FILE | safe }} 
+        </md-block>
+    {% endif %}
 </div>
 <div class="disclaimer">
     <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com

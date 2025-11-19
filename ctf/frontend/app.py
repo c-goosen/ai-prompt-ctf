@@ -33,6 +33,7 @@ from ctf.leaderboard import (
     get_recent_completions,
 )
 
+import markdown
 
 class NoCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(
@@ -155,28 +156,25 @@ def render_faq(request: Request):
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
-            "IMG_FILENAME": app.url_path_for(
-                "static",
-                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
-            ),
+           
             "MD_FILE": FAQ_MARKDOWN,
         },
     )
     return response
-
 
 @app.get("/challenges")
 @limiter.limit("60/min")
 def render_challanges(request: Request):
     is_htmx = request.headers.get("HX-Request")
     template_name = "challenges.html" if is_htmx else "challenges_page.html"
-
+    html_content = markdown.markdown(CHALLANGES_MARKDOWN)
     response = templates.TemplateResponse(
         template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
-            "MD_FILE": CHALLANGES_MARKDOWN,
+            "MD_FILE": html_content,
+            "BASE_DIR": BASE_DIR,
         },
     )
     return response

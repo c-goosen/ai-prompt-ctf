@@ -96,7 +96,13 @@ async def ensure_session_exists(
 
 
 async def call_adk_api(
-    user_id: str, session_id: str, message: str, file_text: str = ""
+    user_id: str,
+    session_id: str,
+    message: str,
+    file_text: str = "",
+    file_data: Optional[bytes] = None,
+    file_name: Optional[str] = None,
+    file_mime_type: Optional[str] = None,
 ) -> dict:
     """Call the ADK REST API at http://127.0.0.1:8000/run"""
 
@@ -108,17 +114,39 @@ async def call_adk_api(
     if not session_created:
         raise Exception("Failed to create or access session")
 
-    # Prepare the message content
-    content_text = message
+    # Prepare the message parts
+    parts = []
+    
+    # Add text part if message exists
+    if message:
+        parts.append({"text": message})
+    
+    # Add file_text as text if provided (for processed files like audio transcriptions)
     if file_text:
-        content_text = f"{message}\n\nFile content: {file_text}"
+        if message:
+            parts.append({"text": f"\n\nFile content: {file_text}"})
+        else:
+            parts.append({"text": file_text})
+    
+    # Add inline_data part if file_data is provided
+    if file_data:
+        file_base64 = base64.b64encode(file_data).decode("utf-8")
+        inline_data = {
+            "inline_data": {
+                "mime_type": file_mime_type or "application/octet-stream",
+                "data": file_base64,
+            }
+        }
+        if file_name:
+            inline_data["inline_data"]["display_name"] = file_name
+        parts.append(inline_data)
 
     # Use the format from Google ADK docs
     payload = {
         "appName": app_name,
         "userId": user_id,
         "sessionId": session_id,
-        "newMessage": {"role": "user", "parts": [{"text": content_text}]},
+        "newMessage": {"role": "user", "parts": parts},
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -156,19 +184,53 @@ async def chat_completion(
     ] = None,
 ):
     file_text = ""
+    file_data: Optional[bytes] = None
+    file_name: Optional[str] = None
+    file_mime_type: Optional[str] = None
 
     # Handle file uploads (audio and image processing)
     if file_input:
-        data = await file_input.read()
+        file_name = file_input.filename
+        file_mime_type = file_input.content_type or ""
+        
+        # Validate file type - only allow PDF, JSON, images, and audio
+        allowed_mime_prefixes = ["image/", "audio/", "application/pdf", "application/json"]
+        allowed_extensions = [".pdf", ".json"]
+        
+        file_name_lower = file_name.lower() if file_name else ""
+        file_mime_lower = file_mime_type.lower()
+        
+        has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
+        has_allowed_mime = any(file_mime_lower.startswith(prefix) for prefix in allowed_mime_prefixes)
+        
+        if not has_allowed_extension and not has_allowed_mime:
+            return HTMLResponse(
+                content="""
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-exclamation-circle"></i>
+                    <div>
+                        <h4>Invalid file type</h4>
+                        <p>Only PDF, JSON, image, and audio files are allowed.</p>
+                    </div>
+                </div>
+                """,
+                status_code=200,
+            )
+        
+        file_data = await file_input.read()
+        
         if file_type == "audio":
             print("File input detected -->")
             print(f"file_type --> {file_type}")
+            # Create a BytesIO object for transcription
+            from io import BytesIO
+            file_obj = BytesIO(file_data)
             client = OG_OPENAI()
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=(
                     "temp." + file_input.filename.split(".")[1],
-                    file_input.file,
+                    file_obj,
                     file_input.content_type,
                 ),
                 response_format="text",
@@ -180,7 +242,7 @@ async def chat_completion(
             from utils import image_to_text
 
             print("In image file")
-            file_text = image_to_text(data, prompt="What is in this image?")
+            file_text = image_to_text(file_data, prompt="What is in this image?")
             print(f"file_text -->{file_text}")
 
     # Protection checks are now handled by individual agents
@@ -222,6 +284,9 @@ async def chat_completion(
             session_id=session_id,
             message=text_input,
             file_text=file_text,
+            file_data=file_data,
+            file_name=file_name,
+            file_mime_type=file_mime_type,
         )
 
         def _normalize_role(role: Optional[str]) -> str:

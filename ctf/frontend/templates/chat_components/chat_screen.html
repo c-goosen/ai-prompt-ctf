@@ -1,4 +1,4 @@
-{% include "levels/auto_fill_chat.html" %}
+{% include "chat_components/auto_fill_chat.html" %}
 {% include "header.html" %}
 <div class="chatbox main-chatbox">
     <div class="functionalities">
@@ -45,12 +45,10 @@
         </div> -->
     </div>
 </div>
-{% include "levels/chat_history_loader.html" %}
+{% include "chat_components/chat_history_loader.html" %}
 <!--<div class="chat-input absolute">-->
 <div class="chat-input chat-input-fixed">
-    {% with _text_model="gpt-3.5-turbo" %}
-        {% include "levels/suggestion_chatbox.html" %}
-    {% endwith %}
+        {% include "chat_components/suggestion_chatbox.html" %}
     <div class="disclaimer">
         <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
     </div>

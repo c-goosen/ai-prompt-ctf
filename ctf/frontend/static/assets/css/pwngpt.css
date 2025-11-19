@@ -235,6 +235,28 @@ body {
     color: #dffef5 !important;
 }
 
+.chat-bubble pre,
+.chat-bubble code {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: rgba(5, 2, 25, 0.85);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: #f8f8f2;
+    border: 1px solid rgba(60, 252, 209, 0.25);
+}
+
+.chat-bubble code {
+    display: inline;
+    padding: 0.2rem 0.4rem;
+    margin: 0;
+}
+
 .chatbox {
     height: 80%;/* Set a fixed height */
     overflow-y: scroll;

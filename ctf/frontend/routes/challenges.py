@@ -36,7 +36,7 @@ templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 # async def render_ctf(request: Request):
 #     """Serve the chat screen template at /ctf."""
 #     return templates.TemplateResponse(
-#         "levels/chat_screen.html",
+#         "chat_components/chat_screen.html",
 #         {
 #             "request": request,
 #         },
@@ -63,7 +63,7 @@ async def load_chat(
         )
 
     is_htmx = request.headers.get("HX-Request")
-    template_name = "levels/chat_screen.html" if is_htmx else "chat_page.html"
+    template_name = "chat_components/chat_screen.html" if is_htmx else "chat_page.html"
     context = {
         "request": request,
         "message": "",
@@ -217,7 +217,7 @@ async def load_history(
         logger.debug("Cannot load history without user/session cookies")
 
     response = templates.TemplateResponse(
-        "levels/chat_history.html",
+        "chat_components/chat_history.html",
         {"request": request, "chat_history": chat_history},
     )
     return response

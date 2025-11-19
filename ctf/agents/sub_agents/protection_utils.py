@@ -5,6 +5,8 @@ Enhanced protection utilities for CTF agents
 import re
 from typing import Dict, Optional, Any
 
+from ctf.app_config import settings
+
 
 class ProtectionUtils:
     """Utility class for implementing various protection mechanisms"""
@@ -109,6 +111,21 @@ class ProtectionUtils:
             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
 
         return text
+
+    @staticmethod
+    def detect_password_leak(text: str, level: int) -> Optional[str]:
+        """Detect whether response text contains the level password."""
+        if not text:
+            return None
+
+        password = settings.PASSWORDS.get(level)
+        if not password:
+            return None
+
+        if password.lower() in text.lower():
+            return "Detected potential password disclosure in output."
+
+        return None
 
     @staticmethod
     def get_level_specific_protection(level: int) -> Dict[str, Any]:
