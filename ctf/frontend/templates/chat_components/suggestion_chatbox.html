@@ -1,0 +1,118 @@
+<style>
+    .input-box .file-upload-input {
+        display: none;
+    }
+
+    .input-box .attach-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0 0.5rem;
+    }
+
+    .input-box .file-selected-indicator {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.5rem;
+        color: #3cfcd1;
+    }
+
+    .input-box .file-selected-indicator.active {
+        display: flex;
+    }
+</style>
+<div class="input-box">
+    <label for="file_input" class="attach-label" title="Attach a file">
+        <i class="fa-solid fa-paperclip" style="font-size:1.3rem;"></i>
+    </label>
+    <input type="file"
+           name="file_input"
+           id="file_input"
+           class="file-upload-input"
+           accept=".pdf,.json,image/*,audio/*,application/pdf,application/json">
+    <div class="file-selected-indicator"
+         id="file_indicator"
+         title="File attached">
+        <i class="fa-solid fa-file" style="font-size:1.1rem;"></i>
+    </div>
+    <input type="text"
+           name="text_input"
+           id="text_input"
+           value="{{ suggestion }}">
+    <i class="fa-solid fa-paper-plane"
+       style="font-size:1.5rem"
+       hx-post="/v1/chat/completions"
+       hx-trigger="keyup[key=='Enter'] from:body, click"
+       hx-include="#text_input,#text_model,#file_input"
+       hx-target=".chat-history"
+       hx-swap="beforeend scroll:bottom"
+       hx-indicator=".chat-loader"
+       hx-encoding="multipart/form-data"></i>
+</div>
+<script>
+    if (!window.__chatInputResetBound) {
+        window.__chatInputResetBound = true;
+        document.addEventListener("htmx:afterRequest", function (event) {
+            const trigger = event.detail && event.detail.elt;
+            if (!trigger) {
+                return;
+            }
+            const inputBox = trigger.closest(".input-box");
+            if (!inputBox) {
+                return;
+            }
+            const textInput = inputBox.querySelector('input[name="text_input"]');
+            const fileInput = inputBox.querySelector('input[name="file_input"]');
+            const fileIndicator = inputBox.querySelector('.file-selected-indicator');
+            if (textInput) {
+                textInput.value = "";
+            }
+            if (fileInput) {
+                fileInput.value = "";
+            }
+            if (fileIndicator) {
+                fileIndicator.classList.remove('active');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('file_input');
+        const fileIndicator = document.getElementById('file_indicator');
+        if (!fileInput || !fileIndicator) {
+            return;
+        }
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileName = file.name.toLowerCase();
+                const fileType = file.type.toLowerCase();
+                
+                // Allowed file types: PDF, JSON, Images, Audio
+                const allowedExtensions = ['.pdf', '.json'];
+                const allowedMimeTypes = [
+                    'application/pdf',
+                    'application/json',
+                    'image/',
+                    'audio/'
+                ];
+                
+                const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+                const hasAllowedMimeType = allowedMimeTypes.some(mime => fileType.startsWith(mime));
+                
+                if (!hasAllowedExtension && !hasAllowedMimeType) {
+                    alert('Only PDF, JSON, image, and audio files are allowed.');
+                    fileInput.value = '';
+                    fileIndicator.classList.remove('active');
+                    return;
+                }
+                
+                fileIndicator.classList.add('active');
+            } else {
+                fileIndicator.classList.remove('active');
+            }
+        });
+    });
+</script>

@@ -3,20 +3,22 @@
 
 # Creating a python base with shared environment variables
 FROM python:3.14-slim AS python-base
-ENV UV_CACHE_DIR="/opt/uv-cache" \
-    UV_PROJECT_ENVIRONMENT="/opt/venv" \
-    PYSETUP_PATH="/opt/pysetup"
-
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PYSETUP_PATH="/opt/pysetup"
 
 # builder-base is used to build dependencies
 FROM python-base AS builder-base
+ENV UV_PROJECT_ENVIRONMENT="/opt/venv" \
+    UV_CACHE_DIR="/opt/uv-cache"
+ENV PATH="/opt/venv/bin:$PATH"
+
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        curl \
-        git \
-        build-essential \
-        python3-dev \
+    && apt-get install -y \
+    build-essential \
+    python3-dev \
+    python3-setuptools \
+    python3 \
+    gcc \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
@@ -27,29 +29,41 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 WORKDIR $PYSETUP_PATH
 COPY ./uv.lock ./pyproject.toml ./
 
-# Install dependencies
+# Install dependencies only (project will be installed in production stage)
 RUN uv sync --frozen --no-dev --no-install-project
 
 FROM python:3.14-slim AS production
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT="/app/.venv"
 
 EXPOSE 8000/tcp
 
-# Copy the virtual environment from the builder stage
-COPY --from=builder-base /opt/venv /opt/venv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Create user
+# Create user first (before copying files that need ownership)
 RUN groupadd -g 1500 appuser && \
     useradd -m -u 1500 -g appuser appuser
 
+# Copy the virtual environment from the builder stage
+COPY --from=builder-base /opt/venv /app/.venv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Set ownership of venv
+RUN chown -R appuser:appuser /app/.venv
+
+ENV PATH="/app/.venv/bin:$PATH"
+
 # Copy application code
 COPY --chown=appuser:appuser ./ /app
+WORKDIR /app
+
+# Install the project into the existing venv (dependencies already installed from builder)
+# uv sync will detect the existing venv and only install the project
+RUN uv sync --frozen --no-dev && \
+    chown -R appuser:appuser /app/.venv
+
 WORKDIR /app/ctf/agents
 
 USER appuser
 
-# Run the ADK API server
+# Run the ADK API server using uv run (which will use the existing venv)
 CMD ["uv", "run", "adk", "web", "--host", "0.0.0.0", "--port", "8000"]
 

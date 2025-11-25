@@ -8,7 +8,7 @@
                     </div>
                 </div>
                 <div class="chat-bubble">
-                    <md-block>{{ chat.memory }}</md-block>
+                    <md-block>{{ chat.memory | safe }}</md-block>
                 </div>
             </div>
         {% endif %}
@@ -21,22 +21,22 @@
                         </div>
                     </div>
                     <div class="chat-bubble">
-                        <md-block>{{ chat.memory }}</md-block>
+                        <md-block>{{ chat.memory | safe }}</md-block>
                     </div>
                 </div>
             {% endif %}
         {% elif chat.get('metadata',{}).get('role','') in ['tool'] %}
-    <div class="chat chat-end">
-        <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
+            <div class="chat chat-end">
+                <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
                         <i class="fa-solid fa-wrench" style="margin-right: 8px;"></i>
-            </div>
-        </div>
+                    </div>
+                </div>
                 <div class="chat-bubble chat-bubble-secondary">
-                    <md-block>{{ chat.memory }}</md-block>
-        </div>
-    </div>
-{% endif %}
+                    <md-block>{{ chat.memory | safe }}</md-block>
+                </div>
+            </div>
+        {% endif %}
     {% endfor %}
 {% else %}
     <div class="chat chat-end">

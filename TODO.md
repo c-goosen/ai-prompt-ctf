@@ -46,3 +46,9 @@
 * * ~~Google adk~~
 * * ~~Sessions~~
 * * ~~Lancedb~~
+
+* Add guardrails to prevent prompt injection in challenges
+* Code generation challenge
+* Leaderboard
+* Creating a new session
+* Improve FAQ

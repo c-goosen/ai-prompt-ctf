@@ -18,6 +18,7 @@ body {
 }
 
 .left-panel {
+    height: 100%;
     flex-basis: 25%;
     background: linear-gradient(180deg, #060019 0%, #120528 45%, #1c0937 100%);
     color: #f4e7ff;
@@ -86,7 +87,8 @@ body {
     height: 100%;
     /*max-height: 800px;*/
     width:100%;
-
+    padding-bottom: 1%;
+    position: relative;
 }
 
 .right-panel > * {
@@ -160,6 +162,19 @@ body {
     row-gap: 10px;
 }
 
+.chat-history {
+    width: 100%;
+}
+
+.chat-input-fixed {
+    position: sticky;
+    bottom: 0;
+    padding: 18px 0 24px;
+    background: linear-gradient(180deg, rgba(5, 2, 25, 0), rgba(5, 2, 25, 0.95));
+    z-index: 10;
+    width: 100%;
+}
+
 .input-box {
     border: 1px solid rgba(60, 252, 209, 0.3);
     border-radius: 12px;
@@ -167,16 +182,19 @@ body {
     margin: 0 10px;
     box-shadow: 0 0 25px rgba(92, 36, 255, 0.25);
     background: rgba(5, 2, 25, 0.9);
+    width: calc(100% - 20px);
+    min-height: 72px;
 }
 
 .input-box input[type="text"] {
     flex-grow: 1;
-    padding: 3%;
+    padding: 1.25rem 1.5rem;
     border: none;
     outline: none;
     border-radius: 12px 0 0 12px;
     background: transparent;
     color: #f9f7ff;
+    font-size: 1.15rem;
 }
 
 .input-box input::placeholder {
@@ -215,6 +233,28 @@ body {
     background: linear-gradient(135deg, rgba(60, 252, 209, 0.35), rgba(92, 36, 255, 0.35)) !important;
     border-color: rgba(60, 252, 209, 0.35);
     color: #dffef5 !important;
+}
+
+.chat-bubble pre,
+.chat-bubble code {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: rgba(5, 2, 25, 0.85);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: #f8f8f2;
+    border: 1px solid rgba(60, 252, 209, 0.25);
+}
+
+.chat-bubble code {
+    display: inline;
+    padding: 0.2rem 0.4rem;
+    margin: 0;
 }
 
 .chatbox {
@@ -279,4 +319,26 @@ a:link, a:visited {
 
 textbox-icons {
  font-size: 1.5rem
+}
+
+.leaderboard-table th {
+    color: #ffffff;
+}
+.leaderboard-table td {
+    color: #ffffff;
+}
+
+.right-panel .form-control .label .label-text,
+.right-panel .form-control .label .label-text-alt {
+    color: #ffffff;
+}
+
+.right-panel .form-control .input {
+    color: #ffffff;
+    background: rgba(5, 2, 25, 0.6);
+    border-color: rgba(60, 252, 209, 0.4);
+}
+
+.right-panel .form-control .input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }

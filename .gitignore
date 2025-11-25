@@ -13,3 +13,5 @@ chroma_db/
 users.db
 lancedb/
 ctf/lancedb/
+leaderboard.db
+agents/sub_agents/.adk/

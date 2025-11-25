@@ -32,22 +32,22 @@ templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
-@router.get("/ctf", include_in_schema=False)
-async def render_ctf(request: Request):
-    """Serve the chat screen template at /ctf."""
-    return templates.TemplateResponse(
-        "levels/chat_screen.html",
-        {
-            "request": request,
-        },
-    )
+# @router.get("/ctf", include_in_schema=False)
+# async def render_ctf(request: Request):
+#     """Serve the chat screen template at /ctf."""
+#     return templates.TemplateResponse(
+#         "chat_components/chat_screen.html",
+#         {
+#             "request": request,
+#         },
+#     )
 
 
 class Input(BaseModel):
     query: str
 
 
-@router.get("/challenges", include_in_schema=False)
+@router.get("/ctf", include_in_schema=False)
 async def load_chat(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
@@ -62,16 +62,32 @@ async def load_chat(
             "sub_agents", cookie_identity, session_cookie
         )
 
+    is_htmx = request.headers.get("HX-Request")
     template_name = (
-        "levels/chat_screen.html"
+        "chat_components/chat_screen.html" if is_htmx else "chat_page.html"
     )
     context = {
-                "request": request,
-                "PAGE_HEADER": settings.CTF_SUBTITLE,
-                "message": "",
-                "chat_history": chat_history,
+        "request": request,
+        "message": "",
+        "chat_history": chat_history,
     }
     return templates.TemplateResponse(template_name, context)
+
+
+@router.get("/chat", include_in_schema=False)
+async def load_chat_alias(
+    request: Request,
+    cookie_identity: Annotated[str | None, cookie] = None,
+    session_cookie: Annotated[
+        str | None, Cookie(alias="session_id", title="session_id")
+    ] = None,
+):
+    """Backward-compatible alias for /ctf."""
+    return await load_chat(
+        request=request,
+        cookie_identity=cookie_identity,
+        session_cookie=session_cookie,
+    )
 
 
 async def get_session_history(
@@ -110,7 +126,9 @@ async def get_session_history(
                         elif "functionCall" in part:
                             call = part["functionCall"]
                             args = call.get("args") or {}
-                            args_str = json.dumps(args, indent=2, sort_keys=True)
+                            args_str = json.dumps(
+                                args, indent=2, sort_keys=True
+                            )
                             text_chunks.append(
                                 f"Function call `{call.get('name', 'unknown')}`"
                                 f"\n```json\n{args_str}\n```"
@@ -119,7 +137,9 @@ async def get_session_history(
                         elif "functionResponse" in part:
                             fn_resp = part["functionResponse"]
                             resp = fn_resp.get("response") or {}
-                            resp_str = json.dumps(resp, indent=2, sort_keys=True)
+                            resp_str = json.dumps(
+                                resp, indent=2, sort_keys=True
+                            )
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"
@@ -127,7 +147,9 @@ async def get_session_history(
                             role_hint = "tool"
                     elif isinstance(part, str):
                         text_chunks.append(part)
-                text = "\n".join(chunk for chunk in text_chunks if chunk).strip()
+                text = "\n".join(
+                    chunk for chunk in text_chunks if chunk
+                ).strip()
                 if not text:
                     text = str(content.get("text") or "").strip()
                 if not text:
@@ -197,7 +219,7 @@ async def load_history(
         logger.debug("Cannot load history without user/session cookies")
 
     response = templates.TemplateResponse(
-        "levels/chat_history.html",
+        "chat_components/chat_history.html",
         {"request": request, "chat_history": chat_history},
     )
     return response

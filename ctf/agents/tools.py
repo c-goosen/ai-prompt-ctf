@@ -1,13 +1,18 @@
+import logging
 import os
 import re
 import sqlite3
 
 import lancedb
 from google.adk.tools import FunctionTool
+from google.adk.tools.tool_context import ToolContext
+from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
 
 from ctf.app_config import settings
 from ctf.embeddings import embed_text
-from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
+from ctf.leaderboard import format_leaderboard_marker, record_level_completion
+
+logger = logging.getLogger(__name__)
 
 
 db_path = os.getenv(
@@ -59,6 +64,8 @@ async def hints_func(hint: str, level: int):
 async def submit_answer_func(
     answer: str,
     level: int,
+    tool_context: ToolContext | None = None,
+    **_extra_kwargs,
 ) -> str:
     """Example to trigger this function: Submit the answer: answer
     Take a string answer and the current level
@@ -68,36 +75,27 @@ async def submit_answer_func(
         answer: Answer submitted for this level
         level: level passed in the prompt
     """
-    level_pass = settings.PASSWORDS.get(level)
+    try:
+        level_int = int(level)
+    except (TypeError, ValueError):
+        return "Unable to validate your answer because the level provided was invalid."
+
+    level_pass = settings.PASSWORDS.get(level_int)
     print(f"level_pass {level_pass}")
     print(f"answer {answer}")
     if answer == level_pass:
-        transfer_to_agent(f"Level{level + 1}Agent")
-        return f"""{answer} is correct! Click for next Level:
-        <div class="level-menu new-chat"
-                         hx-get="/level/{level + 1}"
-                         hx-trigger="click"
-                         hx-target=".right-panel"
-                         hx-params="*"
-                         hx-replace-url="true"
-                         hx-swap="innerHTML">
-                            <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
-        </div>
+        print("Answer is correct")
+        _record_leaderboard_progress(level_int, tool_context)
+        marker = format_leaderboard_marker(level=level_int)
+        print(f"marker {marker}")
+        transfer_to_agent(
+            agent_name=f"Level{level_int + 1}Agent"
+        )  # , tool_context=tool_context)
+        return f"""{answer} is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
+        {marker}
         """
-    # if answer == level_pass:
-    #     return f"""{answer} is correct! Click for next Level:
-    #     <div class="level-menu new-chat"
-    #                      hx-get="/level/{level + 1}"
-    #                      hx-trigger="click"
-    #                      hx-target=".right-panel"
-    #                      hx-params="*"
-    #                      hx-replace-url="true"
-    #                      hx-swap="innerHTML">
-    #                         <i class="fa-solid fa-plus"> Click for Level {level + 1}</i>
-    #     </div>
-    #     """
-    # else:
-    #     return "Wrong answer. You are not correct."
+    else:
+        return "Wrong answer. You are not correct."
 
 
 async def password_search_func(
@@ -225,6 +223,46 @@ async def password_search_func(
         return f"""Found {len(doc_list)} relevant document(s) for level {level}:
 
 {doc_list_str}"""
+
+
+def _record_leaderboard_progress(
+    level: int, tool_context: ToolContext | None
+) -> None:
+    print(f"record_leaderboard_progress {level} {tool_context}")
+    if tool_context is None:
+        logger.debug("No tool_context provided; skipping leaderboard update")
+        return
+
+    username: str | None = None
+
+    session = getattr(tool_context, "session", None)
+    if session is not None:
+        username = getattr(session, "user_id", None) or getattr(
+            session, "id", None
+        )
+
+    if not username:
+        state = getattr(tool_context, "state", None)
+        if isinstance(state, dict):
+            username = state.get("username") or state.get("user_id")
+
+    if not username:
+        invocation_context = getattr(tool_context, "_invocation_context", None)
+        if invocation_context is not None:
+            username = getattr(invocation_context, "user_id", None)
+
+    if not username:
+        logger.debug("No username available; skipping leaderboard update")
+        print(f"No username available; skipping leaderboard update")
+        return
+
+    try:
+        record_level_completion(username=username, level=level)
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.warning(
+            "Failed to record leaderboard entry for %s: %s", username, exc
+        )
+        print(f"Failed to record leaderboard entry for {username}: {exc}")
 
 
 # Create ADK FunctionTool instances

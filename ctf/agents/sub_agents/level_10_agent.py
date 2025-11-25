@@ -10,6 +10,10 @@ from .tools import (
     rag_tool_func_tool,
 )
 
+from functools import partial
+
+from ctf.agents.sub_agents.guard_rails import guard_rail_input_injection
+
 
 class Level10Agent(BaseCTFAgent):
     """Level 10 Agent - Hold the fort with all protections"""
@@ -27,6 +31,8 @@ class Level10Agent(BaseCTFAgent):
         """
         )
 
+        input_injection_callback = partial(guard_rail_input_injection, level=10)
+
         super().__init__(
             level=10,
             system_prompt=system_prompt,
@@ -36,4 +42,6 @@ class Level10Agent(BaseCTFAgent):
                 hints_func_tool,
                 submit_answer_func_tool,
             ],
+            before_model_callback=input_injection_callback,
+            before_tool_callback=input_injection_callback,
         )
