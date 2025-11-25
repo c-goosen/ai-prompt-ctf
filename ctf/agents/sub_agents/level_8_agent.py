@@ -12,6 +12,7 @@ from .tools import (
 from functools import partial
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
+
 class Level8Agent(BaseCTFAgent):
     """Level 8 Agent - Prompt-Goose fine-tuned protection"""
 
@@ -36,6 +37,10 @@ class Level8Agent(BaseCTFAgent):
                 hints_func_tool,
                 submit_answer_func_tool,
             ],
-            before_model_callback=partial(ProtectionUtils.llm_guard_prompt_injection_goose, level=8),
-            before_tool_callback=partial(ProtectionUtils.llm_guard_prompt_injection_goose, level=8)
+            before_model_callback=partial(
+                ProtectionUtils.llm_guard_prompt_injection_goose, level=8
+            ),
+            before_tool_callback=partial(
+                ProtectionUtils.llm_guard_prompt_injection_goose, level=8
+            ),
         )

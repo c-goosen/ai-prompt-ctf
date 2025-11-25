@@ -7,13 +7,13 @@ from google.adk.models import Gemini
 
 # "qwen3:1.7b"
 # model = LiteLlm(model="openai/gpt-5-nano")
-#model = LiteLlm(model="openai/gpt-5-mini")
-model= "gemini-2.5-pro"
-#model = LiteLlm(model="openai/gpt-4o-mini")
+# model = LiteLlm(model="openai/gpt-5-mini")
+model = "gemini-2.5-pro"
+# model = LiteLlm(model="openai/gpt-4o-mini")
 
 # gemini
 
 model = Gemini(
     retry_options=types.HttpRetryOptions(initial_delay=1, attempts=3),
-    model="gemini-2.5-pro"
-    )
+    model="gemini-2.5-pro",
+)

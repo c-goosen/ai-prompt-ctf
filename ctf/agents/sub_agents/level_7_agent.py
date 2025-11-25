@@ -38,7 +38,10 @@ class Level7Agent(BaseCTFAgent):
                 hints_func_tool,
                 submit_answer_func_tool,
             ],
-            before_model_callback=partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=7),
-            before_tool_callback=partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=7)
+            before_model_callback=partial(
+                ProtectionUtils.llm_guard_prompt_injection_meta, level=7
+            ),
+            before_tool_callback=partial(
+                ProtectionUtils.llm_guard_prompt_injection_meta, level=7
+            ),
         )
-    

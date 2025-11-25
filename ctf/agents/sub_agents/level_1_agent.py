@@ -41,5 +41,5 @@ class Level1Agent(BaseCTFAgent):
                 submit_answer_func_tool,
             ],
             before_model_callback=input_injection_callback,
-            before_tool_callback=input_injection_callback
+            before_tool_callback=input_injection_callback,
         )

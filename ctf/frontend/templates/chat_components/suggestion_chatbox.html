@@ -23,7 +23,6 @@
         display: flex;
     }
 </style>
-
 <div class="input-box">
     <label for="file_input" class="attach-label" title="Attach a file">
         <i class="fa-solid fa-paperclip" style="font-size:1.3rem;"></i>
@@ -33,14 +32,15 @@
            id="file_input"
            class="file-upload-input"
            accept=".pdf,.json,image/*,audio/*,application/pdf,application/json">
-    <div class="file-selected-indicator" id="file_indicator" title="File attached">
+    <div class="file-selected-indicator"
+         id="file_indicator"
+         title="File attached">
         <i class="fa-solid fa-file" style="font-size:1.1rem;"></i>
     </div>
     <input type="text"
            name="text_input"
            id="text_input"
            value="{{ suggestion }}">
-
     <i class="fa-solid fa-paper-plane"
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
@@ -51,7 +51,6 @@
        hx-indicator=".chat-loader"
        hx-encoding="multipart/form-data"></i>
 </div>
-
 <script>
     if (!window.__chatInputResetBound) {
         window.__chatInputResetBound = true;

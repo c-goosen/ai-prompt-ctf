@@ -88,7 +88,9 @@ async def submit_answer_func(
         _record_leaderboard_progress(level_int, tool_context)
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
-        transfer_to_agent(agent_name=f"Level{level_int + 1}Agent")#, tool_context=tool_context)
+        transfer_to_agent(
+            agent_name=f"Level{level_int + 1}Agent"
+        )  # , tool_context=tool_context)
         return f"""{answer} is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
         {marker}
         """
@@ -235,7 +237,9 @@ def _record_leaderboard_progress(
 
     session = getattr(tool_context, "session", None)
     if session is not None:
-        username = getattr(session, "user_id", None) or getattr(session, "id", None)
+        username = getattr(session, "user_id", None) or getattr(
+            session, "id", None
+        )
 
     if not username:
         state = getattr(tool_context, "state", None)
@@ -255,10 +259,10 @@ def _record_leaderboard_progress(
     try:
         record_level_completion(username=username, level=level)
     except Exception as exc:  # pragma: no cover - defensive logging
-        logger.warning("Failed to record leaderboard entry for %s: %s", username, exc)
+        logger.warning(
+            "Failed to record leaderboard entry for %s: %s", username, exc
+        )
         print(f"Failed to record leaderboard entry for {username}: {exc}")
-
-
 
 
 # Create ADK FunctionTool instances

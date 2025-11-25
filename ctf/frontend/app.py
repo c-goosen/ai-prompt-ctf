@@ -35,14 +35,15 @@ from ctf.leaderboard import (
 
 import markdown
 
+
 class NoCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: StarletteRequest, call_next: Callable
     ) -> StarletteResponse:
         response: StarletteResponse = await call_next(request)
-        response.headers[
-            "Cache-Control"
-        ] = "no-store, no-cache, must-revalidate, proxy-revalidate"
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, proxy-revalidate"
+        )
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         return response
@@ -155,11 +156,11 @@ def render_faq(request: Request):
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
-           
             "MD_FILE": FAQ_MARKDOWN,
         },
     )
     return response
+
 
 @app.get("/challenges")
 @limiter.limit("60/min")

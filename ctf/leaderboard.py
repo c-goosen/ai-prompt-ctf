@@ -122,9 +122,11 @@ def _migrate_legacy_tables(engine: Engine) -> None:
     Standardize historical schemas (session_id or user_id based) to username-only.
     """
     with engine.begin() as conn:
-        rows = conn.execute(
-            text("PRAGMA table_info(leaderboard_entries)")
-        ).mappings().all()
+        rows = (
+            conn.execute(text("PRAGMA table_info(leaderboard_entries)"))
+            .mappings()
+            .all()
+        )
     column_names = {row["name"] for row in rows} if rows else set()
     if not column_names:
         return
@@ -134,7 +136,9 @@ def _migrate_legacy_tables(engine: Engine) -> None:
 
     with engine.begin() as conn:
         conn.execute(
-            text("ALTER TABLE leaderboard_entries RENAME TO leaderboard_entries_old")
+            text(
+                "ALTER TABLE leaderboard_entries RENAME TO leaderboard_entries_old"
+            )
         )
         conn.execute(text(CREATE_TABLE_SQL))
 
@@ -148,7 +152,9 @@ def _migrate_legacy_tables(engine: Engine) -> None:
             username_column = "'unknown'"
 
     level_column = "level" if "level" in column_names else "0"
-    completed_column = "completed_at" if "completed_at" in column_names else "datetime('now')"
+    completed_column = (
+        "completed_at" if "completed_at" in column_names else "datetime('now')"
+    )
 
     with engine.begin() as conn:
         conn.execute(
@@ -171,7 +177,9 @@ def _session_scope() -> Iterator[Session]:
     engine = _get_engine()
     global _SESSION_FACTORY
     if _SESSION_FACTORY is None:
-        _SESSION_FACTORY = sessionmaker(engine, expire_on_commit=False, future=True)
+        _SESSION_FACTORY = sessionmaker(
+            engine, expire_on_commit=False, future=True
+        )
     session: Session = _SESSION_FACTORY()
     try:
         yield session
@@ -206,7 +214,9 @@ def strip_leaderboard_markers(text: str) -> tuple[str, list[dict]]:
         try:
             markers.append(json.loads(payload))
         except json.JSONDecodeError:
-            logger.debug("Failed to decode leaderboard marker payload: %s", payload)
+            logger.debug(
+                "Failed to decode leaderboard marker payload: %s", payload
+            )
         return ""
 
     import re
@@ -259,8 +269,12 @@ def get_leaderboard(limit: int = 25) -> list[dict]:
                     LeaderboardEntry.username,
                     func.count().label("levels_completed"),
                     func.max(LeaderboardEntry.level).label("highest_level"),
-                    func.max(LeaderboardEntry.completed_at).label("last_completed_at"),
-                    func.min(LeaderboardEntry.completed_at).label("first_completed_at"),
+                    func.max(LeaderboardEntry.completed_at).label(
+                        "last_completed_at"
+                    ),
+                    func.min(LeaderboardEntry.completed_at).label(
+                        "first_completed_at"
+                    ),
                 )
                 .group_by(LeaderboardEntry.username)
                 .order_by(
@@ -315,7 +329,9 @@ def get_leaderboard_summary() -> dict:
     try:
         with _session_scope() as session:
             stmt = select(
-                func.count(distinct(LeaderboardEntry.username)).label("players"),
+                func.count(distinct(LeaderboardEntry.username)).label(
+                    "players"
+                ),
                 func.count().label("total_completions"),
             )
             row = session.execute(stmt).one()
@@ -326,4 +342,3 @@ def get_leaderboard_summary() -> dict:
     except SQLAlchemyError as exc:
         logger.warning("Failed to load leaderboard summary: %s", exc)
         return {"players": 0, "total_completions": 0}
-

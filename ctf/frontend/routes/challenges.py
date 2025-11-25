@@ -63,7 +63,9 @@ async def load_chat(
         )
 
     is_htmx = request.headers.get("HX-Request")
-    template_name = "chat_components/chat_screen.html" if is_htmx else "chat_page.html"
+    template_name = (
+        "chat_components/chat_screen.html" if is_htmx else "chat_page.html"
+    )
     context = {
         "request": request,
         "message": "",

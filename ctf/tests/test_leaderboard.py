@@ -43,4 +43,3 @@ def test_ensure_leaderboard_user_adds_level_zero_entry():
     assert rows
     usernames = {row["username"] for row in rows}
     assert "charlie" in usernames
-

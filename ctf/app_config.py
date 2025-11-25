@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         "DISCORD_URL",
         "https://discord.com/channels/687602309395382282/1168515417514442834",
     )
-  
+
     CTF_NAME: str = os.getenv(
         "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
     )

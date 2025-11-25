@@ -1,5 +1,3 @@
-
-
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse, LlmRequest
 from typing import Optional
@@ -49,7 +47,11 @@ def guard_rail_input_injection(
         return LlmResponse(
             content=types.Content(
                 role="model",
-                parts=[types.Part(text="LLM call was blocked by guard_rail_input_injection.")],
+                parts=[
+                    types.Part(
+                        text="LLM call was blocked by guard_rail_input_injection."
+                    )
+                ],
             )
         )
     return None
@@ -64,7 +66,11 @@ def guard_rail_output_injection(
         return LlmResponse(
             content=types.Content(
                 role="model",
-                parts=[types.Part(text="LLM call was blocked by guard_rail_output_injection.")],
+                parts=[
+                    types.Part(
+                        text="LLM call was blocked by guard_rail_output_injection."
+                    )
+                ],
             )
         )
     return None

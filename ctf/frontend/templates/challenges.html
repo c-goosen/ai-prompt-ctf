@@ -6,12 +6,12 @@
 <!--<img src="{{ url_for('static', path='images/jb.png') }}" alt="">-->
 <div class="faq">
     {% if MD_FILE %}
-    <md-block>
-        {{ MD_FILE | safe }} 
+        <md-block>
+        {{ MD_FILE | safe }}
         </md-block>
     {% else %}
         <md-block src="{{ BASE_DIR }}/CHALLENGES.MD">
-        {{ MD_FILE | safe }} 
+        {{ MD_FILE | safe }}
         </md-block>
     {% endif %}
 </div>

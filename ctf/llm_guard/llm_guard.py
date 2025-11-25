@@ -54,6 +54,7 @@ class PromptGuardGoose(LLMGuardLocalBase):
         self.TOKENIZER = "cgoosen/prompt-tackler"
         self.max_length = 512
 
+
 class PromptGuardGooseModernBERT(LLMGuardLocalBase):
     def __init__(
         self,

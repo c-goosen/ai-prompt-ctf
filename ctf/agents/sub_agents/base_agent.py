@@ -18,6 +18,7 @@ from .protection_utils import ProtectionUtils
 from google.adk.tools import FunctionTool
 from model import model as model_config
 
+
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
 
@@ -31,7 +32,6 @@ class BaseCTFAgent(LlmAgent):
         before_model_callback: Optional[BeforeModelCallback] = None,
         after_model_callback: Optional[AfterModelCallback] = None,
         before_tool_callback: Optional[BeforeToolCallback] = None,
-
     ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
@@ -43,9 +43,9 @@ class BaseCTFAgent(LlmAgent):
         # Use default tools if none provided (avoid mutable default argument)
         if tools is None:
             tools = [
-                #submit_answer_func_tool,
+                # submit_answer_func_tool,
                 hints_func_tool,
-                #rag_tool_func_tool,
+                # rag_tool_func_tool,
             ]
 
         # Get level-specific protection configuration

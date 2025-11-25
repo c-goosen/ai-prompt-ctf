@@ -114,14 +114,13 @@ async def call_adk_api(
 
     # Prepare the message parts
     parts = []
-    
+
     # Add text part if message exists
     if message:
         parts.append({"text": message})
     else:
         raise Exception("No message provided")
-    
-    
+
     # Add inline_data part if file_data is provided
     if file_data:
         file_base64 = base64.b64encode(file_data).decode("utf-8")
@@ -186,18 +185,26 @@ async def chat_completion(
     if file_input:
         file_name = file_input.filename
         file_mime_type = file_input.content_type or ""
-        
+
         # Validate file type - only allow PDF, JSON, images, and audio
-        allowed_mime_prefixes = ["image/", "audio/", "application/pdf", "application/json"]
-        #allowed_extensions = [".pdf", ".json"]
-        
+        allowed_mime_prefixes = [
+            "image/",
+            "audio/",
+            "application/pdf",
+            "application/json",
+        ]
+        # allowed_extensions = [".pdf", ".json"]
+
         file_name_lower = file_name.lower() if file_name else ""
         file_mime_lower = file_mime_type.lower()
-        
-        #has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
-        has_allowed_mime = any(file_mime_lower.startswith(prefix) for prefix in allowed_mime_prefixes)
-        
-        #if not has_allowed_extension and not has_allowed_mime:
+
+        # has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
+        has_allowed_mime = any(
+            file_mime_lower.startswith(prefix)
+            for prefix in allowed_mime_prefixes
+        )
+
+        # if not has_allowed_extension and not has_allowed_mime:
         if not has_allowed_mime:
             return HTMLResponse(
                 content="""
@@ -211,9 +218,8 @@ async def chat_completion(
                 """,
                 status_code=200,
             )
-        
+
         file_data = await file_input.read()
-        
 
     # Protection checks are now handled by individual agents
 

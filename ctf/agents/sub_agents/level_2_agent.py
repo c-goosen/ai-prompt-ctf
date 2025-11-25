@@ -42,5 +42,5 @@ class Level2Agent(BaseCTFAgent):
                 submit_answer_func_tool,
             ],
             after_model_callback=output_injection_callback,
-            after_tool_callback=output_injection_callback
+            after_tool_callback=output_injection_callback,
         )
