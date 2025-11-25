@@ -9,6 +9,7 @@ def download_models():
     models = [
         "protectai/deberta-v3-base-prompt-injection-v2",
         "cgoosen/prompt-tackler",
+        "cgoosen/prompt-tackler_modernbert"
         # "facebook/s2t-medium-mustc-multilingual-st",
         # "unum-cloud/uform-gen2-qwen-500m"
     ]

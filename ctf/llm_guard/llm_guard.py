@@ -8,6 +8,7 @@ class LLMGuardLocalBase:
     ):
         self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
         self.TOKENIZER = "protectai/deberta-v3-base-prompt-injection-v2"
+        self.max_length = 512
 
     async def query(self, prompt: str) -> list:
         """
@@ -22,7 +23,7 @@ class LLMGuardLocalBase:
             model=model,
             tokenizer=tokenizer,
             truncation=True,
-            max_length=1024,
+            max_length=self.max_length,
             # device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
             device="cpu",
         )
@@ -38,6 +39,7 @@ class PromptGuardMeta(LLMGuardLocalBase):
     def __init__(
         self,
     ):
+        super().__init__()
         # self.MODEL = "meta-llama/Prompt-Guard-86M"
         self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
         # self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
@@ -50,3 +52,12 @@ class PromptGuardGoose(LLMGuardLocalBase):
     ):
         self.MODEL = "cgoosen/prompt-tackler"
         self.TOKENIZER = "cgoosen/prompt-tackler"
+        self.max_length = 512
+
+class PromptGuardGooseModernBERT(LLMGuardLocalBase):
+    def __init__(
+        self,
+    ):
+        self.MODEL = "cgoosen/prompt-tackler_modernbert"
+        self.TOKENIZER = "cgoosen/prompt-tackler_modernbert"
+        self.max_length = 8000

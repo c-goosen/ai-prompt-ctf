@@ -128,7 +128,6 @@ async def root(
                 "static",
                 path=f"/images/ai_image_banner/ai-challenge_{rand_img}.webp",
             ),
-            "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
             "THEME_MODE": "dark",
         },

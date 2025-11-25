@@ -12,7 +12,6 @@ from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
 from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
@@ -99,7 +98,6 @@ async def call_adk_api(
     user_id: str,
     session_id: str,
     message: str,
-    file_text: str = "",
     file_data: Optional[bytes] = None,
     file_name: Optional[str] = None,
     file_mime_type: Optional[str] = None,
@@ -120,13 +118,9 @@ async def call_adk_api(
     # Add text part if message exists
     if message:
         parts.append({"text": message})
+    else:
+        raise Exception("No message provided")
     
-    # Add file_text as text if provided (for processed files like audio transcriptions)
-    if file_text:
-        if message:
-            parts.append({"text": f"\n\nFile content: {file_text}"})
-        else:
-            parts.append({"text": file_text})
     
     # Add inline_data part if file_data is provided
     if file_data:
@@ -147,6 +141,7 @@ async def call_adk_api(
         "userId": user_id,
         "sessionId": session_id,
         "newMessage": {"role": "user", "parts": parts},
+        "streaming": False,
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -183,7 +178,6 @@ async def chat_completion(
         Cookie(alias="session_id", title="session_id"),
     ] = None,
 ):
-    file_text = ""
     file_data: Optional[bytes] = None
     file_name: Optional[str] = None
     file_mime_type: Optional[str] = None
@@ -195,15 +189,16 @@ async def chat_completion(
         
         # Validate file type - only allow PDF, JSON, images, and audio
         allowed_mime_prefixes = ["image/", "audio/", "application/pdf", "application/json"]
-        allowed_extensions = [".pdf", ".json"]
+        #allowed_extensions = [".pdf", ".json"]
         
         file_name_lower = file_name.lower() if file_name else ""
         file_mime_lower = file_mime_type.lower()
         
-        has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
+        #has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
         has_allowed_mime = any(file_mime_lower.startswith(prefix) for prefix in allowed_mime_prefixes)
         
-        if not has_allowed_extension and not has_allowed_mime:
+        #if not has_allowed_extension and not has_allowed_mime:
+        if not has_allowed_mime:
             return HTMLResponse(
                 content="""
                 <div class="alert alert-error">
@@ -219,31 +214,6 @@ async def chat_completion(
         
         file_data = await file_input.read()
         
-        if file_type == "audio":
-            print("File input detected -->")
-            print(f"file_type --> {file_type}")
-            # Create a BytesIO object for transcription
-            from io import BytesIO
-            file_obj = BytesIO(file_data)
-            client = OG_OPENAI()
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=(
-                    "temp." + file_input.filename.split(".")[1],
-                    file_obj,
-                    file_input.content_type,
-                ),
-                response_format="text",
-            )
-            file_text = transcription
-            print(file_text)
-
-        elif file_type == "image":
-            from utils import image_to_text
-
-            print("In image file")
-            file_text = image_to_text(file_data, prompt="What is in this image?")
-            print(f"file_text -->{file_text}")
 
     # Protection checks are now handled by individual agents
 
@@ -283,7 +253,6 @@ async def chat_completion(
             user_id=user_id,
             session_id=session_id,
             message=text_input,
-            file_text=file_text,
             file_data=file_data,
             file_name=file_name,
             file_mime_type=file_mime_type,

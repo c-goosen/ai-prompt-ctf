@@ -5,11 +5,89 @@ Enhanced protection utilities for CTF agents
 import re
 from typing import Dict, Optional, Any
 
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse, LlmRequest
+from google.genai import types
+
 from ctf.app_config import settings
+from ctf.llm_guard import PromptGuardMeta, PromptGuardGoose, PromptGuardGooseModernBERT
+
+llm_guard_meta = PromptGuardMeta()
+llm_guard_goose = PromptGuardGoose()
+llm_guard_goose_modernbert = PromptGuardGooseModernBERT()
+
+
+def _extract_last_user_message(llm_request: LlmRequest) -> str:
+    """Return the most recent user text from the request contents."""
+    if not llm_request or not llm_request.contents:
+        return ""
+
+    for content in reversed(llm_request.contents):
+        if content.role != "user":
+            continue
+
+        if not content.parts:
+            continue
+
+        text_parts = [
+            part.text.strip()
+            for part in content.parts
+            if getattr(part, "text", None)
+        ]
+        if text_parts:
+            return "\n".join(text_parts)
+
+    return ""
 
 
 class ProtectionUtils:
     """Utility class for implementing various protection mechanisms"""
+
+    @staticmethod
+    async def llm_guard_prompt_injection_meta(
+        callback_context: CallbackContext, llm_request: LlmRequest, level: int = 0
+    ) -> Optional[LlmResponse]:
+        """Detect prompt injection patterns using Prompt-Guard Meta model"""
+        last_user_message = _extract_last_user_message(llm_request)
+        
+        if not last_user_message:
+            return None
+
+        resp = await llm_guard_meta.query(last_user_message)
+        is_injection = bool(resp["label"] == "INJECTION" and resp["score"] > 0.8)
+        
+        if is_injection:
+            return LlmResponse(
+                content=types.Content(
+                    role="model",
+                    parts=[types.Part(text="LLM call was blocked by https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2.")],
+                )
+            )
+        
+        return None
+      
+    @staticmethod
+    async def llm_guard_prompt_injection_goose(
+        callback_context: CallbackContext, llm_request: LlmRequest, level: int = 0
+    ) -> Optional[LlmResponse]:
+        """Detect prompt injection patterns using Prompt-Goose fine-tuned model"""
+        last_user_message = _extract_last_user_message(llm_request)
+        
+        if not last_user_message:
+            return None
+
+        resp = await llm_guard_goose_modernbert.query(last_user_message)
+        is_injection = bool(resp["label"] == "INJECTION" and resp["score"] > 0.8)
+        
+        if is_injection:
+            return LlmResponse(
+                content=types.Content(
+                    role="model",
+                    parts=[types.Part(text="LLM call was blocked by https://huggingface.co/cgoosen/prompt-tackler_modernbert.")],
+                )
+            )
+        
+        return None
 
     @staticmethod
     def detect_prompt_injection(text: str, level: int = 0) -> Optional[str]:
