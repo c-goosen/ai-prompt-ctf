@@ -1,5 +1,6 @@
 import os.path
 import sys
+import ssl
 
 # Add the project root to Python path
 project_root = os.path.abspath(
@@ -9,7 +10,6 @@ sys.path.insert(0, project_root)
 import uvicorn  # noqa
 from ctf.llm_guard.llm_guard import PromptGuardMeta  # noqa
 
-import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
 

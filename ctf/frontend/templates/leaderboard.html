@@ -1,9 +1,76 @@
-<div>
-    <h3>Leaderboard</h3>
-</div>
-<div class="faq">
-    <p>Leaderboard coming soon...</p>
-</div>
-<div class="disclaimer">
-    <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
+<div class="leaderboard-wrapper">
+    <div class="leaderboard-header">
+        <h3>Live Leaderboard</h3>
+        <p>Progress updates land here as soon as a level is solved.</p>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Competitors</span>
+            <span class="stat-value">{{ leaderboard_summary.players if leaderboard_summary else 0 }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Levels Cleared</span>
+            <span class="stat-value">{{ leaderboard_summary.total_completions if leaderboard_summary else 0 }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Levels Available</span>
+            <span class="stat-value">{{ total_levels }}</span>
+        </div>
+    </div>
+    <div class="leaderboard-table-wrapper">
+        {% if leaderboard %}
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Levels Completed</th>
+                        <th>Highest Level</th>
+                        <th>Last Completion (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in leaderboard %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ entry.username }}</td>
+                            <td>{{ entry.levels_completed }}/{{ total_levels }}</td>
+                            <td>Level {{ entry.highest_level }}</td>
+                            <td>
+                                {% if entry.last_completed_at %}
+                                    {{ entry.last_completed_at.replace('T', ' ') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fa-solid fa-flag-checkered" style="margin-right: 8px;"></i>
+                No entries yet — be the first to crack a level!
+            </div>
+        {% endif %}
+    </div>
+    <div class="recent-completions">
+        <h4>Recent Completions</h4>
+        {% if recent_completions %}
+            <ul>
+                {% for entry in recent_completions %}
+                    <li>
+                        <span class="badge badge-primary">Level {{ entry.level }}</span>
+                        <strong>{{ entry.username }}</strong>
+                        <small>{{ entry.completed_at.replace('T', ' ') if entry.completed_at else "" }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recent completions.</p>
+        {% endif %}
+    </div>
+    <div class="disclaimer">
+        <u>PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com
+    </div>
 </div>

@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from pydantic import AnyUrl
@@ -18,9 +19,7 @@ class Settings(BaseSettings):
         "DISCORD_URL",
         "https://discord.com/channels/687602309395382282/1168515417514442834",
     )
-    SUBMIT_FLAGS_URL: str = os.getenv(
-        "SUBMIT_FLAGS_URL", "http://www.example.org"
-    )
+
     CTF_NAME: str = os.getenv(
         "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
     )
@@ -39,7 +38,6 @@ class Settings(BaseSettings):
     # Supabase
     #
     app_name: str = "LLM CTF - Get that password"
-    admin_email: str = "christogoosen@gmail.com"
 
     # Open Source
     # Run everything opensource the default
@@ -53,7 +51,6 @@ class Settings(BaseSettings):
     # OPENAI
     # Not so open
     OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
-    EMBED_MODEL: str = "nomic-embed-text"
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENSOURCE_LLM_MODEL: str = os.getenv("OPENSOURCE_LLM_MODEL", "qwen3:0.6b")
     #
@@ -93,10 +90,7 @@ class Settings(BaseSettings):
     ]
     FINAL_LEVEL: int = 10  # Actually 5
     COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
-    HUGGINGFACE_INFERENCE_API_URL: AnyUrl = os.getenv(
-        "HUGGINGFACE_INFERENCE_API_URL",
-        "https://k7jo934jj9b0wjer.us-east-1.aws.endpoints.huggingface.cloud",
-    )
+
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost")
     logger: object = logging.getLogger(__name__)
     DOCS_ON: bool = os.getenv("DOCS_ON", False)
@@ -105,6 +99,10 @@ class Settings(BaseSettings):
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     token_limit: int = 20000
+    LEADERBOARD_DB_PATH: str = os.getenv(
+        "LEADERBOARD_DB_PATH",
+        str(Path(__file__).resolve().parent / "leaderboard.db"),
+    )
 
 
 settings = Settings()

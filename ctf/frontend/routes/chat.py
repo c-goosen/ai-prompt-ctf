@@ -12,9 +12,9 @@ from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from openai import OpenAI as OG_OPENAI
 
 from ctf.app_config import settings
+from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -95,7 +95,12 @@ async def ensure_session_exists(
 
 
 async def call_adk_api(
-    user_id: str, session_id: str, message: str, file_text: str = ""
+    user_id: str,
+    session_id: str,
+    message: str,
+    file_data: Optional[bytes] = None,
+    file_name: Optional[str] = None,
+    file_mime_type: Optional[str] = None,
 ) -> dict:
     """Call the ADK REST API at http://127.0.0.1:8000/run"""
 
@@ -107,17 +112,35 @@ async def call_adk_api(
     if not session_created:
         raise Exception("Failed to create or access session")
 
-    # Prepare the message content
-    content_text = message
-    if file_text:
-        content_text = f"{message}\n\nFile content: {file_text}"
+    # Prepare the message parts
+    parts = []
+
+    # Add text part if message exists
+    if message:
+        parts.append({"text": message})
+    else:
+        raise Exception("No message provided")
+
+    # Add inline_data part if file_data is provided
+    if file_data:
+        file_base64 = base64.b64encode(file_data).decode("utf-8")
+        inline_data = {
+            "inline_data": {
+                "mime_type": file_mime_type or "application/octet-stream",
+                "data": file_base64,
+            }
+        }
+        if file_name:
+            inline_data["inline_data"]["display_name"] = file_name
+        parts.append(inline_data)
 
     # Use the format from Google ADK docs
     payload = {
         "appName": app_name,
         "userId": user_id,
         "sessionId": session_id,
-        "newMessage": {"role": "user", "parts": [{"text": content_text}]},
+        "newMessage": {"role": "user", "parts": parts},
+        "streaming": False,
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
@@ -144,8 +167,6 @@ async def chat_completion(
     request: Request,
     file_input: UploadFile | None = None,
     text_input: str = Form(...),
-    text_level: Optional[int] = Form(None),
-    text_model: Optional[str] = Form(None),
     file_type: Optional[str] = Form(None),
     cookie_identity: Annotated[
         str | None,
@@ -156,33 +177,49 @@ async def chat_completion(
         Cookie(alias="session_id", title="session_id"),
     ] = None,
 ):
-    file_text = ""
+    file_data: Optional[bytes] = None
+    file_name: Optional[str] = None
+    file_mime_type: Optional[str] = None
 
     # Handle file uploads (audio and image processing)
     if file_input:
-        data = await file_input.read()
-        if file_type == "audio":
-            print("File input detected -->")
-            print(f"file_type --> {file_type}")
-            client = OG_OPENAI()
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=(
-                    "temp." + file_input.filename.split(".")[1],
-                    file_input.file,
-                    file_input.content_type,
-                ),
-                response_format="text",
+        file_name = file_input.filename
+        file_mime_type = file_input.content_type or ""
+
+        # Validate file type - only allow PDF, JSON, images, and audio
+        allowed_mime_prefixes = [
+            "image/",
+            "audio/",
+            "application/pdf",
+            "application/json",
+        ]
+        # allowed_extensions = [".pdf", ".json"]
+
+        file_name_lower = file_name.lower() if file_name else ""
+        file_mime_lower = file_mime_type.lower()
+
+        # has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
+        has_allowed_mime = any(
+            file_mime_lower.startswith(prefix)
+            for prefix in allowed_mime_prefixes
+        )
+
+        # if not has_allowed_extension and not has_allowed_mime:
+        if not has_allowed_mime:
+            return HTMLResponse(
+                content="""
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-exclamation-circle"></i>
+                    <div>
+                        <h4>Invalid file type</h4>
+                        <p>Only PDF, JSON, image, and audio files are allowed.</p>
+                    </div>
+                </div>
+                """,
+                status_code=200,
             )
-            file_text = transcription
-            print(file_text)
 
-        elif file_type == "image":
-            from utils import image_to_text
-
-            print("In image file")
-            file_text = image_to_text(data, prompt="What is in this image?")
-            print(f"file_text -->{file_text}")
+        file_data = await file_input.read()
 
     # Protection checks are now handled by individual agents
 
@@ -222,7 +259,9 @@ async def chat_completion(
             user_id=user_id,
             session_id=session_id,
             message=text_input,
-            file_text=file_text,
+            file_data=file_data,
+            file_name=file_name,
+            file_mime_type=file_mime_type,
         )
 
         def _normalize_role(role: Optional[str]) -> str:
@@ -315,7 +354,15 @@ async def chat_completion(
         """
     ]
 
+    completed_levels: set[int] = set()
     for message in response_messages:
+        cleaned_text, markers = strip_leaderboard_markers(message["text"])
+        message["text"] = cleaned_text
+        for marker in markers:
+            if marker.get("status") == "correct":
+                level = marker.get("level")
+                if isinstance(level, int):
+                    completed_levels.add(level)
         if message["role"] == "assistant":
             chat_segments.append(
                 f"""
@@ -343,6 +390,13 @@ async def chat_completion(
                   </div>
                 </div>
                 """
+            )
+
+    if completed_levels and cookie_identity:
+        for level in sorted(completed_levels):
+            record_level_completion(
+                username=cookie_identity,
+                level=level,
             )
 
     return HTMLResponse(content="".join(chat_segments), status_code=200)

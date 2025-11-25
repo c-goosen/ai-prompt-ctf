@@ -4,10 +4,10 @@ import random
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Callable
 
 import httpx
-from fastapi import Cookie, HTTPException, Form
+from fastapi import Cookie, HTTPException, Form, Query
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,6 +16,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_ipaddr
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import Response as StarletteResponse
 
 from ctf.app_config import settings
 from ctf.llm_guard.llm_guard import PromptGuardMeta, PromptGuardGoose
@@ -23,6 +26,27 @@ from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
+from ctf.leaderboard import (
+    ensure_leaderboard_user,
+    get_leaderboard,
+    get_leaderboard_summary,
+    get_recent_completions,
+)
+
+import markdown
+
+
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: StarletteRequest, call_next: Callable
+    ) -> StarletteResponse:
+        response: StarletteResponse = await call_next(request)
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, proxy-revalidate"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
 
 limiter = Limiter(key_func=get_ipaddr, default_limits=["15/minute"])
@@ -67,6 +91,8 @@ else:
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(NoCacheMiddleware)
+
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
@@ -103,7 +129,6 @@ async def root(
                 "static",
                 path=f"/images/ai_image_banner/ai-challenge_{rand_img}.webp",
             ),
-            "SUBMIT_FLAGS_URL": settings.SUBMIT_FLAGS_URL,
             "DISCORD_URL": settings.DISCORD_URL,
             "THEME_MODE": "dark",
         },
@@ -131,10 +156,6 @@ def render_faq(request: Request):
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
-            "IMG_FILENAME": app.url_path_for(
-                "static",
-                path=f"/images/ai_image_banner/ai-challenge_{random.randint(1,18)}.webp",
-            ),
             "MD_FILE": FAQ_MARKDOWN,
         },
     )
@@ -146,13 +167,14 @@ def render_faq(request: Request):
 def render_challanges(request: Request):
     is_htmx = request.headers.get("HX-Request")
     template_name = "challenges.html" if is_htmx else "challenges_page.html"
-
+    html_content = markdown.markdown(CHALLANGES_MARKDOWN)
     response = templates.TemplateResponse(
         template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
-            "MD_FILE": CHALLANGES_MARKDOWN,
+            "MD_FILE": html_content,
+            "BASE_DIR": BASE_DIR,
         },
     )
     return response
@@ -164,11 +186,19 @@ def render_leaderboard(request: Request):
     is_htmx = request.headers.get("HX-Request")
     template_name = "leaderboard.html" if is_htmx else "leaderboard_page.html"
 
+    leaderboard_rows = get_leaderboard()
+    recent = get_recent_completions()
+    summary = get_leaderboard_summary()
+
     response = templates.TemplateResponse(
         template_name,
         {
             "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
+            "leaderboard": leaderboard_rows,
+            "recent_completions": recent,
+            "leaderboard_summary": summary,
+            "total_levels": settings.FINAL_LEVEL + 1,
         },
     )
     return response
@@ -182,6 +212,7 @@ def render_register(
     session_id: Annotated[
         str | None, Cookie(alias="session_id", title="session_id")
     ] = None,
+    force_new: bool = Query(False, alias="force_new"),
 ):
     """Render the register page, check if user already has a session"""
     # Check if user has a session
@@ -189,6 +220,8 @@ def render_register(
     if cookie_identity and session_id:
         # Could add async check here, but for now just check if cookies exist
         has_session = True
+
+    show_form = force_new or not has_session
 
     is_htmx = request.headers.get("HX-Request")
     template_name = "register.html" if is_htmx else "register_page.html"
@@ -201,6 +234,8 @@ def render_register(
             "has_session": has_session,
             "cookie_identity": cookie_identity,
             "session_id": session_id,
+            "show_form": show_form,
+            "force_new": force_new,
         },
     )
     return response
@@ -264,6 +299,7 @@ async def register(
             )
             response.raise_for_status()
             logger.info(f"Registered user {user_id} with session {session_id}")
+            ensure_leaderboard_user(user_id)
 
             # Check if this is an HTMX request
             if is_htmx:

@@ -1,13 +1,15 @@
 # Level 0
-Done
+
 This challenge is supposed to be relatively easy so that people can get a feel for the challenges.
 
 Just ask it what you are looking for, aka secrets, passwords, etc.
 
-## GPT-3.5 + prompt engineering prevention
+## OpenAI model without protections
 
 OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
+
+
 # Level 1
 ## Input Injection
 OWASP LLM01: Prompt Injection
@@ -28,9 +30,9 @@ Super prompt
 
 
 # Level 4
-## Vision - Multi-modal upload image with prompt injection
+## Vision, Audio and Files - Multi-modal upload image/audio/pdf/json files with prompt injection
 
-Prompt injection via describe the image
+Prompt injection via describe the files
 
 # Level 5
 ## Audio - Multi-modal upload audio file with prompt injection
@@ -61,4 +63,4 @@ Think SQL injection
 
 # Level 10
 
-## Hold the fort - all protections
+## Fortress of protections with an agentic dragon fighting you

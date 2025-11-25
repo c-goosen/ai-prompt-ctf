@@ -54,8 +54,8 @@ Tools
 * Agentic abilities
 * Htmx
 * LanceDB
-* Mutiple models poossible GPT3.5/GPT4, GPT-4-preview, GPT-4-Vision for prompting, gpt40, llama3.2 1b etc
-* Python 3.12+
+* Mutiple models poossible openai vision models, gemini 2->3, qwen3, etc
+* Python 3.13+
 * FastAPI  (async REST API framework)
 * Pydantic (types)
 * Huggingface finetuned models
