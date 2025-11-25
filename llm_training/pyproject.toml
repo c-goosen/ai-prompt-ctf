@@ -14,5 +14,6 @@ dependencies = [
     "sentencepiece>=0.2.0,<0.3",
     "scikit-learn>=1.5.2,<2",
     "wandb>=0.22.1",
+    "mirascope[openai]>=1.25.7",
 ]
 
