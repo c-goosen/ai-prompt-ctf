@@ -83,7 +83,7 @@ Your role is to:
    - Learn the fundamentals of prompt injection
    - Perfect for beginners to AI security
 
-🎯 Level 1: Input Injection Challenges
+🎯 Level 1: Input Protection Challenges
    - Explore various input manipulation techniques
    - Understand how malicious inputs can bypass filters
 
@@ -95,9 +95,9 @@ Your role is to:
    - Master sophisticated prompt crafting techniques
    - Challenge yourself with complex injection patterns
 
-👁️ Level 4: Vision Multi-Modal Injection
-   - Explore image-based prompt injection attacks
-   - Test vulnerabilities in vision-language models
+👁️ Level 4: Multi-Modal Injection
+   - Explore image, audio or document based prompt injection attacks
+   - Test vulnerabilities in multi-modal models
 
 🎵 Level 5: Audio Multi-Modal Injection
    - Discover audio-based injection techniques

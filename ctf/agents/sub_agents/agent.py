@@ -21,7 +21,6 @@ from ctf.agents.sub_agents.level_6_agent import Level6Agent
 from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
-from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
 
 
@@ -47,7 +46,6 @@ class CTFSubAgentsRootAgent(LlmAgent):
             Level7Agent(),
             Level8Agent(),
             Level9Agent(),
-            Level10Agent(),
         ]
 
         # Initialize the coordinator with sub-agents

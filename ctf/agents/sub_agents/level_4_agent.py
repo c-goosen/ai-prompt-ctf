@@ -1,6 +1,6 @@
 """
-Level 4 Agent - Vision Multi-modal upload image with prompt injection
-Prompt injection via describe the image
+Level 4 Agent - Multi-modal upload image, document or audio with prompt injection
+Prompt injection via describe the image, document or audio
 """
 
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
@@ -13,7 +13,7 @@ from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
 
 
 class Level4Agent(BaseCTFAgent):
-    """Level 4 Agent - Vision multi-modal prompt injection"""
+    """Level 4 Agent - Multi-modal prompt injection"""
 
     def __init__(self):
         system_prompt = (
