@@ -101,4 +101,4 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 
 
 # Expose the root agent that ADK web will discover
-root_agent = CTFSubAgentsRootAgent()
+root_agent = CTFSubAgentsRootAgent() # noqa: F841

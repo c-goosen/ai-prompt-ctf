@@ -51,6 +51,7 @@ dev = [
     "djlint>=1.36.1,<2",
     "anyio>=4.6.2.post1,<5",
     "vulture>=2.14",
+    "deadcode>=2.4.1",
 ]
 
 [tool.black]

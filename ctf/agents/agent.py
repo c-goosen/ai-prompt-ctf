@@ -56,7 +56,6 @@ class CTFCoordinatorAgent(LlmAgent):
         # Create session service
         db_url = "sqlite:///./my_agent_data.db"
         session_service = DatabaseSessionService(db_url=db_url)
-        # session_service = InMemorySessionService()
 
         # Create runner
         runner = Runner(session_service=session_service)
@@ -147,4 +146,4 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 
 
 # Create the main coordinator instance that ADK web will discover
-agent = CTFCoordinatorAgent()
+agent = CTFCoordinatorAgent() # noqa: F841

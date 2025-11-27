@@ -1,6 +1,6 @@
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse, LlmRequest
-from typing import Optional
+from typing import Optional, Any
 from google.genai import types
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
@@ -29,7 +29,10 @@ def _extract_last_user_message(llm_request: LlmRequest) -> str:
 
 
 def guard_rail_input_injection(
-    callback_context: CallbackContext, llm_request: LlmRequest, level: int
+    callback_context: CallbackContext | None = None,
+    level: int = 0,
+    llm_request: LlmRequest | None = None,
+    **_: Any,
 ) -> Optional[LlmResponse]:
     """Guardrail for input injection"""
     last_user_message = _extract_last_user_message(llm_request)
@@ -58,7 +61,9 @@ def guard_rail_input_injection(
 
 
 def guard_rail_output_injection(
-    callback_context: CallbackContext, llm_request: LlmRequest
+    callback_context: CallbackContext | None = None,
+    llm_request: LlmRequest | None = None,
+    **_: Any,
 ) -> Optional[LlmResponse]:
     """Guardrail for input injection"""
     last_user_message = _extract_last_user_message(llm_request)

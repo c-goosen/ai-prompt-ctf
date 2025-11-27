@@ -89,9 +89,10 @@ async def submit_answer_func(
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
         transfer_to_agent(
-            agent_name=f"Level{level_int + 1}Agent"
-        )  # , tool_context=tool_context)
-        return f"""{answer} is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
+            agent_name=f"Level{level_int + 1}Agent",
+            tool_context=tool_context,
+        )
+        return f"""The answer is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
         {marker}
         """
     else:

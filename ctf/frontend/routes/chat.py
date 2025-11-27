@@ -15,6 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
 from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
+from ctf.frontend.utils import redact_passwords_in_json
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -305,6 +306,9 @@ async def chat_completion(
                             resp_str = json.dumps(
                                 resp, indent=2, sort_keys=True
                             )
+                            # Redact passwords if this is from password_search_func
+                            if fn_resp.get("name") == "password_search_func":
+                                resp_str = redact_passwords_in_json(resp_str)
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"

@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from ctf.app_config import settings
+from ctf.frontend.utils import redact_passwords_in_json
 
 cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
 
@@ -140,6 +141,9 @@ async def get_session_history(
                             resp_str = json.dumps(
                                 resp, indent=2, sort_keys=True
                             )
+                            # Redact passwords if this is from password_search_func
+                            if fn_resp.get("name") == "password_search_func":
+                                resp_str = redact_passwords_in_json(resp_str)
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"

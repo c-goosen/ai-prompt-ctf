@@ -321,11 +321,28 @@ textbox-icons {
  font-size: 1.5rem
 }
 
+.leaderboard-table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid rgba(60, 252, 209, 0.4);
+}
+
 .leaderboard-table th {
     color: #ffffff;
+    border: 1px solid rgba(60, 252, 209, 0.4);
+    padding: 12px;
+    text-align: left;
+    background: rgba(5, 2, 25, 0.6);
 }
+
 .leaderboard-table td {
     color: #ffffff;
+    border: 1px solid rgba(60, 252, 209, 0.4);
+    padding: 12px;
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(60, 252, 209, 0.1);
 }
 
 .right-panel .form-control .label .label-text,

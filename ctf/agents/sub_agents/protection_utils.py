@@ -44,16 +44,41 @@ def _extract_last_user_message(llm_request: LlmRequest) -> str:
     return ""
 
 
+def _extract_response_text(llm_response: LlmResponse) -> str:
+    """Return the text from the response contents."""
+    if not llm_response or not llm_response.content:
+        return ""
+
+    if not llm_response.content.parts:
+        return ""
+
+    text_parts = [
+        part.text.strip()
+        for part in llm_response.content.parts
+        if getattr(part, "text", None)
+    ]
+    if text_parts:
+        return "\n".join(text_parts)
+
+    return ""
+
+
 class ProtectionUtils:
     """Utility class for implementing various protection mechanisms"""
 
     @staticmethod
     async def llm_guard_prompt_injection_meta(
-        callback_context: CallbackContext,
-        llm_request: LlmRequest,
+        *args: Any,
         level: int = 0,
+        callback_context: CallbackContext | None = None,
+        llm_request: LlmRequest | None = None,
+        **_: Any,
     ) -> Optional[LlmResponse]:
         """Detect prompt injection patterns using Prompt-Guard Meta model"""
+        if callback_context is None and args:
+            callback_context = args[0]
+        if llm_request is None and len(args) > 1:
+            llm_request = args[1]
         last_user_message = _extract_last_user_message(llm_request)
 
         if not last_user_message:
@@ -80,11 +105,17 @@ class ProtectionUtils:
 
     @staticmethod
     async def llm_guard_prompt_injection_goose(
-        callback_context: CallbackContext,
-        llm_request: LlmRequest,
+        *args: Any,
         level: int = 0,
+        callback_context: CallbackContext | None = None,
+        llm_request: LlmRequest | None = None,
+        **_: Any,
     ) -> Optional[LlmResponse]:
         """Detect prompt injection patterns using Prompt-Goose fine-tuned model"""
+        if callback_context is None and args:
+            callback_context = args[0]
+        if llm_request is None and len(args) > 1:
+            llm_request = args[1]
         last_user_message = _extract_last_user_message(llm_request)
 
         if not last_user_message:
@@ -211,8 +242,17 @@ class ProtectionUtils:
         return text
 
     @staticmethod
-    def detect_password_leak(text: str, level: int) -> Optional[str]:
+    def detect_password_leak(
+        callback_context: CallbackContext | None = None,
+        llm_response: LlmResponse | None = None,
+        level: int = 0,
+        **_: Any,
+    ) -> Optional[LlmResponse]:
         """Detect whether response text contains the level password."""
+        if not llm_response:
+            return None
+
+        text = _extract_response_text(llm_response)
         if not text:
             return None
 
@@ -221,42 +261,17 @@ class ProtectionUtils:
             return None
 
         if password.lower() in text.lower():
-            return "Detected potential password disclosure in output."
+            return LlmResponse(
+                content=types.Content(
+                    role="model",
+                    parts=[
+                        types.Part(
+                            text="LLM call was blocked by detect_password_leak."
+                        )
+                    ],
+                )
+            )
 
         return None
 
-    @staticmethod
-    def get_level_specific_protection(level: int) -> Dict[str, Any]:
-        """Get level-specific protection configuration"""
-        protections = {
-            "max_input_length": 1000,
-            "allowed_tools": [
-                "submit_answer_func",
-                "hints_func",
-                "rag_tool_func",
-            ],
-            "blocked_patterns": [],
-            "rate_limiting": False,
-        }
-
-        if level >= 1:
-            protections["blocked_patterns"].extend(
-                ["password", "secret", "key", "token"]
-            )
-
-        if level >= 3:
-            protections["max_input_length"] = 500
-            protections["blocked_patterns"].extend(
-                ["roleplay", "simulation", "hypothetical"]
-            )
-
-        if level >= 6:
-            protections["rate_limiting"] = True
-            protections["max_input_length"] = 300
-
-        if level >= 8:
-            protections["blocked_patterns"].extend(
-                ["jailbreak", "override", "bypass"]
-            )
-
-        return protections
+    
