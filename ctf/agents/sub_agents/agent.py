@@ -6,22 +6,22 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 from google.adk.agents import LlmAgent
 
 # from google.adk.models.lite_llm import LiteLlm
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
-from .level_0_agent import Level0Agent
-from .level_1_agent import Level1Agent
-from .level_2_agent import Level2Agent
-from .level_3_agent import Level3Agent
-from .level_4_agent import Level4Agent
-from .level_5_agent import Level5Agent
-from .level_6_agent import Level6Agent
-from .level_7_agent import Level7Agent
-from .level_8_agent import Level8Agent
-from .level_9_agent import Level9Agent
-from .level_10_agent import Level10Agent
+# from .tools import (
+#     submit_answer_func_tool,
+#     hints_func_tool,
+#     rag_tool_func_tool,
+# )
+from ctf.agents.sub_agents.level_0_agent import Level0Agent
+from ctf.agents.sub_agents.level_1_agent import Level1Agent
+from ctf.agents.sub_agents.level_2_agent import Level2Agent
+from ctf.agents.sub_agents.level_3_agent import Level3Agent
+from ctf.agents.sub_agents.level_4_agent import Level4Agent
+from ctf.agents.sub_agents.level_5_agent import Level5Agent
+from ctf.agents.sub_agents.level_6_agent import Level6Agent
+from ctf.agents.sub_agents.level_7_agent import Level7Agent
+from ctf.agents.sub_agents.level_8_agent import Level8Agent
+from ctf.agents.sub_agents.level_9_agent import Level9Agent
+from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
 
 
@@ -92,11 +92,11 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 "User wants to attempt level 3 challenge")
 """,
             sub_agents=level_agents,
-            tools=[
-                rag_tool_func_tool,
-                submit_answer_func_tool,
-                hints_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     submit_answer_func_tool,
+            #     hints_func_tool,
+            # ],
         )
 
 

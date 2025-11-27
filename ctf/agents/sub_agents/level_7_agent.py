@@ -3,13 +3,8 @@ Level 7 Agent - Open Source prompt protection - Prompt-Guard
 https://github.com/meta-llama/PurpleLlama/tree/main/Prompt-Guard
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_system_prompt_one
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
 from functools import partial
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
@@ -33,11 +28,11 @@ class Level7Agent(BaseCTFAgent):
             level=7,
             system_prompt=system_prompt,
             name="Level7Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
             before_model_callback=partial(
                 ProtectionUtils.llm_guard_prompt_injection_meta, level=7
             ),

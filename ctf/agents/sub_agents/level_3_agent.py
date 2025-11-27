@@ -3,13 +3,13 @@ Level 3 Agent - GPT-4o Prompt engineering challenge
 Super prompt engineering techniques
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_system_prompt_one
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
+# from .tools import (
+#     submit_answer_func_tool,
+#     hints_func_tool,
+#     rag_tool_func_tool,
+# )
 
 
 class Level3Agent(BaseCTFAgent):
@@ -39,9 +39,9 @@ class Level3Agent(BaseCTFAgent):
             level=3,
             system_prompt=system_prompt,
             name="Level3Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
         )

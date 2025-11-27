@@ -7,13 +7,8 @@ OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_basic_prompt
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_basic_prompt
 
 
 class Level0Agent(BaseCTFAgent):
@@ -38,9 +33,9 @@ class Level0Agent(BaseCTFAgent):
             level=0,
             system_prompt=system_prompt,
             name="Level0Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
         )

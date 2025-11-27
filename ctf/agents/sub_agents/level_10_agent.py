@@ -2,13 +2,8 @@
 Level 10 Agent - Hold the fort - all protections
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_system_prompt, get_system_prompt_one
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_system_prompt, get_system_prompt_one
 
 from functools import partial
 
@@ -48,11 +43,11 @@ class Level10Agent(BaseCTFAgent):
             level=10,
             system_prompt=system_prompt,
             name="Level10Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
             before_model_callback=[input_injection_callback, ProtectionUtils.llm_guard_prompt_injection_meta, ProtectionUtils.llm_guard_prompt_injection_goose],
             before_tool_callback=[input_injection_callback, ProtectionUtils.llm_guard_prompt_injection_meta, ProtectionUtils.llm_guard_prompt_injection_goose],
             after_model_callback=[output_injection_callback, password_leak_callback],

@@ -102,7 +102,7 @@ class ProtectionUtils:
             )
 
         return None
-
+      
     @staticmethod
     async def llm_guard_prompt_injection_goose(
         *args: Any,

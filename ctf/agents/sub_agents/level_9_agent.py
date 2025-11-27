@@ -2,13 +2,13 @@
 Level 9 Agent - Chain of Thought / Fight the AGI
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_system_prompt
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_system_prompt
+# from .tools import (
+#     submit_answer_func_tool,
+#     hints_func_tool,
+#     rag_tool_func_tool,
+# )
 
 
 class Level9Agent(BaseCTFAgent):
@@ -31,9 +31,9 @@ class Level9Agent(BaseCTFAgent):
             level=9,
             system_prompt=system_prompt,
             name="Level9Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
         )

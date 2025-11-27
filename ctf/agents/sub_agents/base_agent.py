@@ -11,12 +11,13 @@ from google.adk.agents.llm_agent import (
     BeforeModelCallback,
     BeforeToolCallback,
 )
-from .tools import (
+from ctf.agents.tools import (
     hints_func_tool,
+    submit_answer_func_tool,
+    rag_tool_func_tool,
 )
-from .protection_utils import ProtectionUtils
 from google.adk.tools import FunctionTool
-from model import model as model_config
+from ctf.agents.model import model as model_config
 
 
 class BaseCTFAgent(LlmAgent):
@@ -42,11 +43,7 @@ class BaseCTFAgent(LlmAgent):
 
         # Use default tools if none provided (avoid mutable default argument)
         if tools is None:
-            tools = [
-                # submit_answer_func_tool,
-                hints_func_tool,
-                # rag_tool_func_tool,
-            ]
+            tools = self.get_base_tools()
 
 
         # Initialize as LlmAgent with protection
@@ -71,3 +68,11 @@ class BaseCTFAgent(LlmAgent):
     def protection_config(self) -> Dict[str, Any]:
         """Get the protection configuration for this level"""
         return self._protection_config
+
+    def get_base_tools(self) -> list[FunctionTool]:
+        """Return the default tool list; subclasses can override to extend."""
+        return [
+            submit_answer_func_tool,
+            hints_func_tool,
+            rag_tool_func_tool,
+        ]

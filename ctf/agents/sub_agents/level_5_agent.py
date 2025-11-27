@@ -5,11 +5,11 @@ Prompt injection via describe the audio
 
 from .base_agent import BaseCTFAgent
 from .system_prompt import get_system_prompt_one
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+# from .tools import (
+#     submit_answer_func_tool,
+#     hints_func_tool,
+#     rag_tool_func_tool,
+# )
 
 
 class Level5Agent(BaseCTFAgent):
@@ -31,9 +31,9 @@ class Level5Agent(BaseCTFAgent):
             level=5,
             system_prompt=system_prompt,
             name="Level5Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
         )

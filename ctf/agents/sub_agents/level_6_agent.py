@@ -7,12 +7,9 @@ Think access files in naughty places
 Think SQL injection
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_system_prompt_one
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
+from ctf.agents.tools import (
     sql_query_tool,
 )
 
@@ -37,10 +34,9 @@ class Level6Agent(BaseCTFAgent):
             level=6,
             system_prompt=system_prompt,
             name="Level6Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-                sql_query_tool,
-            ],
         )
+
+    def get_base_tools(self):
+        """Extend base tools with SQL query tool for Level 6."""
+        base_tools = super().get_base_tools()
+        return base_tools + [sql_query_tool]

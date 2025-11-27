@@ -4,13 +4,13 @@ LLM02: Insecure Output Handling
 LLM06: Sensitive Information Disclosure
 """
 
-from .base_agent import BaseCTFAgent
-from .system_prompt import get_basic_prompt
-from .tools import (
-    submit_answer_func_tool,
-    hints_func_tool,
-    rag_tool_func_tool,
-)
+from ctf.agents.sub_agents.base_agent import BaseCTFAgent
+from ctf.agents.sub_agents.system_prompt import get_basic_prompt
+# from .tools import (
+#     submit_answer_func_tool,
+#     hints_func_tool,
+#     rag_tool_func_tool,
+# )
 from functools import partial
 from ctf.agents.sub_agents.guard_rails import guard_rail_output_injection
 
@@ -36,11 +36,11 @@ class Level2Agent(BaseCTFAgent):
             level=2,
             system_prompt=system_prompt,
             name="Level2Agent",
-            tools=[
-                rag_tool_func_tool,
-                hints_func_tool,
-                submit_answer_func_tool,
-            ],
+            # tools=[
+            #     rag_tool_func_tool,
+            #     hints_func_tool,
+            #     submit_answer_func_tool,
+            # ],
             after_model_callback=output_injection_callback,
             after_tool_callback=output_injection_callback,
         )
