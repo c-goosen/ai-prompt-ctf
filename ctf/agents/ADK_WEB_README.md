@@ -43,7 +43,7 @@ agents/
 The system implements the **Coordinator/Dispatcher Pattern** from [ADK Multi-Agent Systems](https://google.github.io/adk-docs/agents/multi-agents/):
 
 - **CTFCoordinatorAgent** (in `agent.py`): Main coordinator that welcomes users and delegates to level agents
-- **Level0Agent - Level10Agent** (in `sub_agents/`): Individual challenge agents with progressive security measures
+- **Level0Agent - Level9Agent** (in `sub_agents/`): Individual challenge agents with progressive security measures
 - **Agent Hierarchy**: All level agents are sub-agents of the coordinator
 - **LLM-Driven Delegation**: Coordinator uses `transfer_to_agent` to route users to appropriate levels
 

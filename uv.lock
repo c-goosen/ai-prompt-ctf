@@ -41,6 +41,8 @@ dependencies = [
     { name = "fastapi" },
     { name = "google-adk", extra = ["eval"] },
     { name = "gunicorn" },
+    { name = "html-to-markdown" },
+    { name = "html2markdown" },
     { name = "httpx" },
     { name = "jinja-markdown" },
     { name = "jinja2" },
@@ -54,6 +56,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
+    { name = "requests" },
     { name = "slowapi" },
     { name = "sqlalchemy" },
     { name = "torch" },
@@ -91,6 +94,8 @@ requires-dist = [
     { name = "fastapi", specifier = "==0.118.0" },
     { name = "google-adk", extras = ["eval"], specifier = ">=0.2.0" },
     { name = "gunicorn", specifier = "==23.0.0" },
+    { name = "html-to-markdown", specifier = ">=0.1.0" },
+    { name = "html2markdown", specifier = ">=0.1.7" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja-markdown", specifier = "~=1.210911" },
     { name = "jinja2", specifier = ">=3.1.5,<4" },
@@ -104,6 +109,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.0.3,<3" },
     { name = "python-dotenv", specifier = ">=1.1.0,<2" },
     { name = "python-multipart", specifier = ">=0.0.18,<0.0.19" },
+    { name = "requests", specifier = ">=2.32.0" },
     { name = "slowapi", specifier = ">=0.1.9,<0.2" },
     { name = "sqlalchemy", specifier = ">=2.0.36,<3" },
     { name = "torch", specifier = ">=2.6.0,<3" },
@@ -292,6 +298,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/38/2d/089786f725313508e5400763cb12dcac0d62bc18071364d0819c8377d6e9/bc_detect_secrets-1.5.43.tar.gz", hash = "sha256:c56dc62be49c46c751682219d1ce5e7b1933ebd4051d9766d9b9e72537550e61", size = 91289, upload-time = "2025-05-15T06:35:13.784Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/65/bd818293425f75b210531adfe81d66828f1d8841075df94ea2537d28fa52/bc_detect_secrets-1.5.43-py3-none-any.whl", hash = "sha256:9f0181b1092e99bc4e4667f110ed9c905c221d851a71fc0ce01ca3d936f8970b", size = 121140, upload-time = "2025-05-15T06:35:12.727Z" },
+]
+
+[[package]]
+name = "beautifulsoup4"
+version = "4.14.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "soupsieve" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/e9/df2358efd7659577435e2177bfa69cba6c33216681af51a707193dec162a/beautifulsoup4-4.14.2.tar.gz", hash = "sha256:2a98ab9f944a11acee9cc848508ec28d9228abfd522ef0fad6a02a72e0ded69e", size = 625822, upload-time = "2025-09-29T10:05:42.613Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/fe/3aed5d0be4d404d12d36ab97e2f1791424d9ca39c2f754a6285d59a3b01d/beautifulsoup4-4.14.2-py3-none-any.whl", hash = "sha256:5ef6fa3a8cbece8488d66985560f97ed091e22bbc4e9c2338508a9d5de6d4515", size = 106392, upload-time = "2025-09-29T10:05:43.771Z" },
 ]
 
 [[package]]
@@ -1476,6 +1495,26 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/92/68/89ac4e5b12a9ff6286a12174c8538a5930e2ed662091dd2572bbe0a18c8a/hf_xet-1.2.0-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:a55558084c16b09b5ed32ab9ed38421e2d87cf3f1f89815764d1177081b99865", size = 3508920, upload-time = "2025-10-24T19:04:26.927Z" },
     { url = "https://files.pythonhosted.org/packages/cb/44/870d44b30e1dcfb6a65932e3e1506c103a8a5aea9103c337e7a53180322c/hf_xet-1.2.0-cp37-abi3-win_amd64.whl", hash = "sha256:e6584a52253f72c9f52f9e549d5895ca7a471608495c4ecaa6cc73dba2b24d69", size = 2905735, upload-time = "2025-10-24T19:04:35.928Z" },
 ]
+
+[[package]]
+name = "html-to-markdown"
+version = "2.9.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/47/cf6bd7513e8349adf084775494bd0cb9f2621fd73ba8e2f9505e26893346/html_to_markdown-2.9.2.tar.gz", hash = "sha256:5071728992050f2234c29fcb87c89fe7716faebfb37ccd62d07202891e9f2c3f", size = 128680, upload-time = "2025-11-28T11:04:02.325Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/e0/5ccc79531b81a085257031efcceaf7c232b9d14e4e448ced17496ec76991/html_to_markdown-2.9.2-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:c323c938f9e57dca1f3ad4e9051cec124e181564d4b5c6737b107589e7175bd8", size = 4495653, upload-time = "2025-11-28T11:03:56.385Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/b9/0a8bb6b0906f3d31506da26d7689b40c684440387323d92e946cad929c92/html_to_markdown-2.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:cfac38987d7951b211c80800c4237d765b9046ec14443628172c424e832714e5", size = 5012645, upload-time = "2025-11-28T11:03:58.669Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/cc/bbe606bb65677537584a56093031635141af17abdb8b6d3ccc87dd920376/html_to_markdown-2.9.2-cp310-abi3-win_amd64.whl", hash = "sha256:c50b337a780010109681f6f3a6d4bd0a603c575b7472bb6e8afe4e168c594c67", size = 4920654, upload-time = "2025-11-28T11:04:00.489Z" },
+]
+
+[[package]]
+name = "html2markdown"
+version = "0.1.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "beautifulsoup4" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ba/05/666b8105c1c45ee05fcbcb210176c73638710e402b99c5968c5dfdf3c67d/html2markdown-0.1.7.tar.gz", hash = "sha256:92baf932c7f216be6d9459a191d45b6401e204bda7a5413febafa875512cfa8c", size = 5253, upload-time = "2019-02-09T00:04:01.195Z" }
 
 [[package]]
 name = "httpcore"
@@ -3384,6 +3423,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a2/87/a6771e1546d97e7e041b6ae58d80074f81b7d5121207425c964ddf5cfdbd/sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc", size = 20372, upload-time = "2024-02-25T23:20:04.057Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e9/44/75a9c9421471a6c4805dbf2356f7c181a29c1879239abab1ea2cc8f38b40/sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2", size = 10235, upload-time = "2024-02-25T23:20:01.196Z" },
+]
+
+[[package]]
+name = "soupsieve"
+version = "2.8"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/e6/21ccce3262dd4889aa3332e5a119a3491a95e8f60939870a3a035aabac0d/soupsieve-2.8.tar.gz", hash = "sha256:e2dd4a40a628cb5f28f6d4b0db8800b8f581b65bb380b97de22ba5ca8d72572f", size = 103472, upload-time = "2025-08-27T15:39:51.78Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/a0/bb38d3b76b8cae341dad93a2dd83ab7462e6dbcdd84d43f54ee60a8dc167/soupsieve-2.8-py3-none-any.whl", hash = "sha256:0cc76456a30e20f5d7f2e14a98a4ae2ee4e5abdc7c5ea0aafe795f344bc7984c", size = 36679, upload-time = "2025-08-27T15:39:50.179Z" },
 ]
 
 [[package]]

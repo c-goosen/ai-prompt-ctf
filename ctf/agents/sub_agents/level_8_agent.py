@@ -9,10 +9,11 @@ from ctf.agents.sub_agents.system_prompt import get_system_prompt
 #     hints_func_tool,
 #     rag_tool_func_tool,
 # )
+from google.adk.code_executors import BuiltInCodeExecutor
 
 
 class Level8Agent(BaseCTFAgent):
-    """Level 8 Agent - Chain of Thought / Fight the AGI"""
+    """Level 8 Agent - Excessive agency code generation agent"""
 
     def __init__(self):
         system_prompt = (
@@ -31,6 +32,8 @@ class Level8Agent(BaseCTFAgent):
             level=8,
             system_prompt=system_prompt,
             name="Level8Agent",
+            code_executor=BuiltInCodeExecutor(),
+            
             # tools=[
             #     rag_tool_func_tool,
             #     hints_func_tool,

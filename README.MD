@@ -40,7 +40,7 @@ The CTF uses a multi-agent architecture with a coordinator pattern, where a root
 
 The system consists of:
 - **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
-- **Level0Agent through Level10Agent**: Individual challenge agents with progressive security measures
+- **Level0Agent through9Agent**: Individual challenge agents with progressive security measures
 - **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, and `sql_query` that agents can call
 
 ## Other Info

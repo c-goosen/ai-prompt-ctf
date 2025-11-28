@@ -6,14 +6,8 @@ This is the main agent.py file that ADK web will discover
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 
-# from google.adk.sessions import InMemorySessionService
-
 from google.adk.sessions import DatabaseSessionService
-# from ctf.agents.tools import (
-#     submit_answer_func_tool,
-#     hints_func_tool,
-#     rag_tool_func_tool,
-# )
+
 from ctf.agents.sub_agents.level_0_agent import Level0Agent
 from sub_agents.level_1_agent import Level1Agent
 from ctf.agents.sub_agents.level_2_agent import Level2Agent
@@ -24,7 +18,6 @@ from ctf.agents.sub_agents.level_6_agent import Level6Agent
 from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
-from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
 
 
@@ -50,11 +43,10 @@ class CTFCoordinatorAgent(LlmAgent):
             Level7Agent,
             Level8Agent,
             Level9Agent,
-            Level10Agent,
         ]
 
         # Create session service
-        db_url = "sqlite:///./my_agent_data.db"
+        db_url = "sqlite:///./ai_ctf_agent_session_data.db"
         session_service = DatabaseSessionService(db_url=db_url)
 
         # Create runner
@@ -66,7 +58,7 @@ class CTFCoordinatorAgent(LlmAgent):
             model=model,
             instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.  # noqa: E501
 
-🎯 WELCOME TO THE AI PROMPT INJECTION CTF! 🎯
+🎯 WELCOME TO THE AI Agentic PROMPT INJECTION CTF! 🎯
 
 Welcome, challenger! You've entered the ultimate test of AI security knowledge.
 This Capture The Flag (CTF) challenge is designed to teach you about prompt injection vulnerabilities and how to defend against them.  # noqa: E501
@@ -79,7 +71,7 @@ Your role is to:
 
 📚 CHALLENGE LEVELS (0-10):
 
-🔰 Level 0: Basic Prompt Injection (Easiest)
+🔰 Level 0: Basic Prompt Injection (Easiest) 
    - Learn the fundamentals of prompt injection
    - Perfect for beginners to AI security
 
@@ -99,27 +91,23 @@ Your role is to:
    - Explore image, audio or document based prompt injection attacks
    - Test vulnerabilities in multi-modal models
 
-🎵 Level 5: Audio Multi-Modal Injection
-   - Discover audio-based injection techniques
-   - Learn about speech-to-text vulnerabilities
-
-⚙️ Level 6: Function Calling Injection
+⚙️ Level 5: Function Calling Injection
    - Master function call manipulation
    - Understand tool-use vulnerabilities
 
-🔒 Level 7: Prompt-Guard Protection
+🔒 Level 6: Prompt-Guard Protection
    - Challenge advanced protection mechanisms
    - Test your skills against enterprise-grade defenses
 
-🦆 Level 8: Prompt-Goose Protection
+🦆 Level 7: Prompt-Goose Protection
    - Face cutting-edge AI security tools
    - Push the boundaries of prompt injection
 
-🧩 Level 9: Chain of Thought Challenges
+🧩 Level 8: Chain of Thought Challenges
    - Manipulate reasoning processes
    - Explore advanced cognitive vulnerabilities
 
-🏆 Level 10: Maximum Security (Hardest)
+🏆 Level 9: Maximum Security (Hardest)
    - The ultimate challenge for AI security experts
    - Combine all techniques for maximum difficulty
 

@@ -4,13 +4,21 @@ import re
 import sqlite3
 
 import lancedb
+import requests
 from google.adk.tools import FunctionTool
 from google.adk.tools.tool_context import ToolContext
 from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
+from html_to_markdown import convert
 
 from ctf.app_config import settings
 from ctf.embeddings import embed_text
-from ctf.leaderboard import format_leaderboard_marker, record_level_completion
+from ctf.leaderboard import (
+    format_leaderboard_marker,
+    get_leaderboard,
+    get_leaderboard_summary,
+    get_recent_completions,
+    record_level_completion,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +96,24 @@ async def submit_answer_func(
         _record_leaderboard_progress(level_int, tool_context)
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
-        transfer_to_agent(
-            agent_name=f"Level{level_int + 1}Agent",
-            tool_context=tool_context,
-        )
-        return f"""The answer is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
+        
+        # If user completed level 9 (final level), transfer to LeaderboardAgent
+        if level_int == 9:
+            transfer_to_agent(
+                agent_name="LeaderboardAgent",
+                tool_context=tool_context,
+            )
+            return f"""🎉 Congratulations! You've completed all levels! You are a CTF master!
+
+The answer is correct! You have been transferred to the leaderboard to see your ranking. If you haven't been transferred, just type "show me the leaderboard".
+        {marker}
+        """
+        else:
+            transfer_to_agent(
+                agent_name=f"Level{level_int + 1}Agent",
+                tool_context=tool_context,
+            )
+            return f"""The answer is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
         {marker}
         """
     else:
@@ -223,7 +244,7 @@ async def password_search_func(
         doc_list_str = "\n".join(f"- {doc}" for doc in doc_list)
         return f"""Found {len(doc_list)} relevant document(s) for level {level}:
 
-{doc_list_str}"""
+                {doc_list_str}"""
 
 
 def _record_leaderboard_progress(
@@ -254,7 +275,7 @@ def _record_leaderboard_progress(
 
     if not username:
         logger.debug("No username available; skipping leaderboard update")
-        print(f"No username available; skipping leaderboard update")
+        print("No username available; skipping leaderboard update")
         return
 
     try:
@@ -266,8 +287,103 @@ def _record_leaderboard_progress(
         print(f"Failed to record leaderboard entry for {username}: {exc}")
 
 
+async def get_leaderboard_stats(limit: int = 25) -> str:
+    """
+    Get leaderboard statistics including top players, recent completions, and summary.
+    
+    Args:
+        limit: Maximum number of leaderboard entries to return (default: 25)
+    
+    Returns:
+        Formatted string with leaderboard information
+    """
+    try:
+        summary = get_leaderboard_summary()
+        leaderboard = get_leaderboard(limit=limit)
+        recent = get_recent_completions(limit=10)
+        
+        # Format the response
+        response_parts = []
+        
+        # Summary
+        response_parts.append("📊 **Leaderboard Summary**")
+        response_parts.append(f"- Total Players: {summary.get('players', 0)}")
+        response_parts.append(f"- Total Completions: {summary.get('total_completions', 0)}")
+        response_parts.append("")
+        
+        # Top Players
+        if leaderboard:
+            response_parts.append("🏆 **Top Players**")
+            response_parts.append("")
+            for idx, entry in enumerate(leaderboard[:10], 1):
+                username = entry.get("username", "Unknown")
+                levels = entry.get("levels_completed", 0)
+                highest = entry.get("highest_level", 0)
+                last_completed = entry.get("last_completed_at", "")
+                response_parts.append(
+                    f"{idx}. **{username}** - {levels}/11 levels completed "
+                    f"(Highest: Level {highest})"
+                )
+                if last_completed:
+                    response_parts.append(f"   Last completed: {last_completed}")
+            response_parts.append("")
+        else:
+            response_parts.append("No leaderboard entries yet.")
+            response_parts.append("")
+        
+        # Recent Completions
+        if recent:
+            response_parts.append("🕐 **Recent Completions**")
+            response_parts.append("")
+            for entry in recent[:5]:
+                username = entry.get("username", "Unknown")
+                level = entry.get("level", 0)
+                completed_at = entry.get("completed_at", "")
+                response_parts.append(
+                    f"- **{username}** completed Level {level} at {completed_at}"
+                )
+        
+        return "\n".join(response_parts)
+    except Exception as exc:
+        logger.error(f"Failed to get leaderboard stats: {exc}")
+        return f"Error retrieving leaderboard: {str(exc)}"
+
+
+async def web_scrape(url: str) -> str:
+    """
+    Scrape a web page by fetching its content and converting HTML to markdown.
+    
+    Args:
+        url: The URL of the web page to scrape
+    
+    Returns:
+        The markdown representation of the web page content
+    """
+    try:
+        # Perform GET request
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()  # Raise an error for bad status codes
+        
+        # Convert HTML to markdown
+        markdown_content = convert(response.text)
+        
+        logger.info(f"Successfully scraped and converted {url} to markdown")
+        return markdown_content
+        
+    except requests.RequestException as e:
+        error_msg = f"Error fetching URL {url}: {str(e)}"
+        logger.error(error_msg)
+        return error_msg
+    except Exception as e:
+        error_msg = f"Error converting HTML to markdown for {url}: {str(e)}"
+        logger.error(error_msg)
+        return error_msg
+
+
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
 rag_tool_func_tool = FunctionTool(password_search_func)
 sql_query_tool = FunctionTool(sql_query)
+leaderboard_stats_tool = FunctionTool(get_leaderboard_stats)
+web_scrape_tool = FunctionTool(web_scrape)

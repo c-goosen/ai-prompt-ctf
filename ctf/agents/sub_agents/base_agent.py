@@ -18,7 +18,7 @@ from ctf.agents.tools import (
 )
 from google.adk.tools import FunctionTool
 from ctf.agents.model import model as model_config
-
+from google.adk.code_executors import CodeExecutor
 
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
@@ -33,6 +33,7 @@ class BaseCTFAgent(LlmAgent):
         before_model_callback: Optional[BeforeModelCallback] = None,
         after_model_callback: Optional[AfterModelCallback] = None,
         before_tool_callback: Optional[BeforeToolCallback] = None,
+        code_executor: Optional[CodeExecutor] = None,
     ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
@@ -57,6 +58,7 @@ class BaseCTFAgent(LlmAgent):
             before_model_callback=before_model_callback,
             after_model_callback=after_model_callback,
             before_tool_callback=before_tool_callback,
+            code_executor=code_executor,
         )
 
     @property
