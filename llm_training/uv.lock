@@ -1039,6 +1039,7 @@ dependencies = [
     { name = "evaluate" },
     { name = "huggingface-hub", extra = ["hf-xet"] },
     { name = "jupyter" },
+    { name = "memory-profiler" },
     { name = "mirascope", extra = ["openai"] },
     { name = "scikit-learn" },
     { name = "sentencepiece" },
@@ -1053,6 +1054,7 @@ requires-dist = [
     { name = "evaluate", specifier = ">=0.4.1,<0.5" },
     { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.30.2,<0.31" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
+    { name = "memory-profiler", specifier = ">=0.61.0" },
     { name = "mirascope", extras = ["openai"], specifier = ">=1.25.7" },
     { name = "scikit-learn", specifier = ">=1.5.2,<2" },
     { name = "sentencepiece", specifier = ">=0.2.0,<0.3" },
@@ -1100,6 +1102,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c7/74/97e72a36efd4ae2bccb3463284300f8953f199b5ffbc04cbbb0ec78f74b1/matplotlib_inline-0.2.1.tar.gz", hash = "sha256:e1ee949c340d771fc39e241ea75683deb94762c8fa5f2927ec57c83c4dffa9fe", size = 8110, upload-time = "2025-10-23T09:00:22.126Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/af/33/ee4519fa02ed11a94aef9559552f3b17bb863f2ecfe1a35dc7f548cde231/matplotlib_inline-0.2.1-py3-none-any.whl", hash = "sha256:d56ce5156ba6085e00a9d54fead6ed29a9c47e215cd1bba2e976ef39f5710a76", size = 9516, upload-time = "2025-10-23T09:00:20.675Z" },
+]
+
+[[package]]
+name = "memory-profiler"
+version = "0.61.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "psutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b2/88/e1907e1ca3488f2d9507ca8b0ae1add7b1cd5d3ca2bc8e5b329382ea2c7b/memory_profiler-0.61.0.tar.gz", hash = "sha256:4e5b73d7864a1d1292fb76a03e82a3e78ef934d06828a698d9dada76da2067b0", size = 35935, upload-time = "2022-11-15T17:57:28.994Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/26/aaca612a0634ceede20682e692a6c55e35a94c21ba36b807cc40fe910ae1/memory_profiler-0.61.0-py3-none-any.whl", hash = "sha256:400348e61031e3942ad4d4109d18753b2fb08c2f6fb8290671c5513a34182d84", size = 31803, upload-time = "2022-11-15T17:57:27.031Z" },
 ]
 
 [[package]]

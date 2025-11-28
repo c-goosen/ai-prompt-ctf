@@ -32,7 +32,7 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: ai-prompt-ctf-frontend
     ports:
-      - "8100:8100"
+      - "8100:8100"  # Keep for direct access, Traefik will be main entry point
     environment:
       - PYTHONUNBUFFERED=1
       - FASTAPI_ENV=production
@@ -53,12 +53,43 @@ services:
         condition: service_healthy
     networks:
       - ctf-network
+    labels:
+      # Traefik configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`) || Host(`127.0.0.1`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8100"
+      - "traefik.docker.network=ctf-network"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  traefik:
+    image: traefik:v2.11
+    container_name: ai-prompt-ctf-traefik
+    command:
+      # Enable Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.network=ctf-network"
+      - "--providers.docker.exposedbydefault=false"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      # API and Dashboard (optional, for monitoring)
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - ctf-network
+    depends_on:
+      - frontend
 
 networks:
   ctf-network:
