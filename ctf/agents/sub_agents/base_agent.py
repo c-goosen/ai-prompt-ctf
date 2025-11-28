@@ -18,7 +18,7 @@ from ctf.agents.tools import (
 )
 from google.adk.tools import FunctionTool
 from ctf.agents.model import model as model_config
-from google.adk.code_executors import CodeExecutor
+from google.adk.code_executors import BaseCodeExecutor
 
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
@@ -33,7 +33,7 @@ class BaseCTFAgent(LlmAgent):
         before_model_callback: Optional[BeforeModelCallback] = None,
         after_model_callback: Optional[AfterModelCallback] = None,
         before_tool_callback: Optional[BeforeToolCallback] = None,
-        code_executor: Optional[CodeExecutor] = None,
+        code_executor: Optional[BaseCodeExecutor] = None,
     ):
         # Store level in a way that doesn't conflict with Pydantic
         self._level = level
@@ -43,8 +43,11 @@ class BaseCTFAgent(LlmAgent):
         model = model_config
 
         # Use default tools if none provided (avoid mutable default argument)
-        if tools is None:
-            tools = self.get_base_tools()
+        tools= [
+            submit_answer_func_tool,
+            hints_func_tool,
+            rag_tool_func_tool,
+        ]
 
 
         # Initialize as LlmAgent with protection
@@ -53,7 +56,11 @@ class BaseCTFAgent(LlmAgent):
             name=name,
             model=model,
             instruction=system_prompt,
-            tools=tools,
+            tools=[
+            submit_answer_func_tool,
+            hints_func_tool,
+            rag_tool_func_tool,
+        ],
             after_tool_callback=after_tool_callback,
             before_model_callback=before_model_callback,
             after_model_callback=after_model_callback,

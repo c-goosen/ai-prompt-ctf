@@ -11,6 +11,12 @@ from google.adk.agents import LlmAgent
 #     hints_func_tool,
 #     rag_tool_func_tool,
 # )
+from ctf.agents.tools import (
+    submit_answer_func_tool,
+    hints_func_tool,
+    rag_tool_func_tool,
+    leaderboard_stats_tool,
+)
 from ctf.agents.sub_agents.level_0_agent import Level0Agent
 from ctf.agents.sub_agents.level_1_agent import Level1Agent
 from ctf.agents.sub_agents.level_2_agent import Level2Agent
@@ -101,11 +107,12 @@ Example: If user says "show me the leaderboard" or "who are the top players", re
 transfer_to_agent("LeaderboardAgent", "User wants to view leaderboard statistics")
 """,
             sub_agents=level_agents,
-            # tools=[
-            #     rag_tool_func_tool,
-            #     submit_answer_func_tool,
-            #     hints_func_tool,
-            # ],
+            tools=[
+                rag_tool_func_tool,
+                submit_answer_func_tool,
+                hints_func_tool,
+                leaderboard_stats_tool,
+            ],
         )
 
 

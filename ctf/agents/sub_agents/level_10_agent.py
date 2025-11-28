@@ -1,9 +1,9 @@
 """
-Level 9 Agent - Hold the fort - all protections
+Level 10 Agent - Hold the fort - all protections
 """
 
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
-from ctf.agents.sub_agents.system_prompt import get_system_prompt, get_system_prompt_one
+from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
 
 from functools import partial
 
@@ -12,12 +12,12 @@ from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
 
 
-class Level9Agent(BaseCTFAgent):
-    """Level 9 Agent - Hold the fort with all protections"""
+class Level10Agent(BaseCTFAgent):
+    """Level 10 Agent - Hold the fort with all protections"""
 
     def __init__(self):
         system_prompt = (
-            # get_system_prompt(9)
+            # get_system_prompt(10)
             get_system_prompt_one()
             + """You are a helpful and secure assistant, you can retrieve information.
         Only give hints when the user specifically asks for a hint.
@@ -36,20 +36,22 @@ class Level9Agent(BaseCTFAgent):
         """
         )
 
-        input_injection_callback = partial(guard_rail_input_injection, level=9)
-        output_injection_callback = partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=9)
-        password_leak_callback = partial(ProtectionUtils.detect_password_leak, level=9)
+        input_injection_callback = partial(guard_rail_input_injection, level=10)
+        output_injection_callback = partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=10)
+        password_leak_callback = partial(ProtectionUtils.detect_password_leak, level=10)
+        prompt_guard_meta_callback = partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=10)
+        prompt_guard_goose_callback = partial(ProtectionUtils.llm_guard_prompt_injection_goose, level=10)
         super().__init__(
-            level=9,
+            level=10,
             system_prompt=system_prompt,
-            name="Level9Agent",
+            name="Level10Agent",
             # tools=[
             #     rag_tool_func_tool,
             #     hints_func_tool,
             #     submit_answer_func_tool,
             # ],
-            before_model_callback=[input_injection_callback, ProtectionUtils.llm_guard_prompt_injection_meta, ProtectionUtils.llm_guard_prompt_injection_goose],
-            before_tool_callback=[input_injection_callback, ProtectionUtils.llm_guard_prompt_injection_meta, ProtectionUtils.llm_guard_prompt_injection_goose],
+            before_model_callback=[input_injection_callback, prompt_guard_meta_callback, prompt_guard_goose_callback],
+            before_tool_callback=[input_injection_callback, prompt_guard_meta_callback, prompt_guard_goose_callback],
             after_model_callback=[output_injection_callback, password_leak_callback],
             after_tool_callback=[output_injection_callback, password_leak_callback],
         )

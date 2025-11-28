@@ -18,6 +18,7 @@ from ctf.agents.sub_agents.level_6_agent import Level6Agent
 from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
+from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config
 
 
@@ -43,6 +44,7 @@ class CTFCoordinatorAgent(LlmAgent):
             Level7Agent,
             Level8Agent,
             Level9Agent,
+            Level10Agent,
         ]
 
         # Create session service
@@ -125,11 +127,7 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 """,
             sub_agents=level_agents,
             runner=runner,
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
+  
         )
 
 
