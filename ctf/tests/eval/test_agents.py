@@ -32,16 +32,17 @@ def load_env():
 @pytest.mark.asyncio
 async def test_sub_agents():
     """Test the sub_agents app with evaluation data.
-    
+
     This test runs all evaluation sets found in ctf/agents/eval/
     against the sub_agents app. It will evaluate agent behavior
     including tool usage, response quality, and security protections.
     """
     # Path to eval data directory containing .evalset.json files
-    eval_data_dir = pathlib.Path(__file__).parent.parent.parent / "agents" / "eval"
+    eval_data_dir = (
+        pathlib.Path(__file__).parent.parent.parent / "agents" / "eval"
+    )
     await AgentEvaluator.evaluate(
         "sub_agents",
         str(eval_data_dir),
         num_runs=5,
     )
-

@@ -196,10 +196,8 @@ async def chat_completion(
         ]
         # allowed_extensions = [".pdf", ".json"]
 
-        file_name_lower = file_name.lower() if file_name else ""
         file_mime_lower = file_mime_type.lower()
 
-        # has_allowed_extension = any(file_name_lower.endswith(ext) for ext in allowed_extensions)
         has_allowed_mime = any(
             file_mime_lower.startswith(prefix)
             for prefix in allowed_mime_prefixes

@@ -11,7 +11,6 @@ from ctf.agents.sub_agents.guard_rails import guard_rail_input_injection
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
 
-
 class Level10Agent(BaseCTFAgent):
     """Level 10 Agent - Hold the fort with all protections"""
 
@@ -37,10 +36,18 @@ class Level10Agent(BaseCTFAgent):
         )
 
         input_injection_callback = partial(guard_rail_input_injection, level=10)
-        output_injection_callback = partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=10)
-        password_leak_callback = partial(ProtectionUtils.detect_password_leak, level=10)
-        prompt_guard_meta_callback = partial(ProtectionUtils.llm_guard_prompt_injection_meta, level=10)
-        prompt_guard_goose_callback = partial(ProtectionUtils.llm_guard_prompt_injection_goose, level=10)
+        output_injection_callback = partial(
+            ProtectionUtils.llm_guard_prompt_injection_meta, level=10
+        )
+        password_leak_callback = partial(
+            ProtectionUtils.detect_password_leak, level=10
+        )
+        prompt_guard_meta_callback = partial(
+            ProtectionUtils.llm_guard_prompt_injection_meta, level=10
+        )
+        prompt_guard_goose_callback = partial(
+            ProtectionUtils.llm_guard_prompt_injection_goose, level=10
+        )
         super().__init__(
             level=10,
             system_prompt=system_prompt,
@@ -50,8 +57,22 @@ class Level10Agent(BaseCTFAgent):
             #     hints_func_tool,
             #     submit_answer_func_tool,
             # ],
-            before_model_callback=[input_injection_callback, prompt_guard_meta_callback, prompt_guard_goose_callback],
-            before_tool_callback=[input_injection_callback, prompt_guard_meta_callback, prompt_guard_goose_callback],
-            after_model_callback=[output_injection_callback, password_leak_callback],
-            after_tool_callback=[output_injection_callback, password_leak_callback],
+            before_model_callback=[
+                input_injection_callback,
+                prompt_guard_meta_callback,
+                prompt_guard_goose_callback,
+            ],
+            before_tool_callback=[
+                input_injection_callback,
+                prompt_guard_meta_callback,
+                prompt_guard_goose_callback,
+            ],
+            after_model_callback=[
+                output_injection_callback,
+                password_leak_callback,
+            ],
+            after_tool_callback=[
+                output_injection_callback,
+                password_leak_callback,
+            ],
         )

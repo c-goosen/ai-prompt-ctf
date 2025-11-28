@@ -6,6 +6,7 @@ from ctf.llm_guard.llm_guard import (
     PromptGuardGoose,
     PromptGuardGooseModernBERT,
 )
+
 os.environ["CURL_CA_BUNDLE"] = ""
 
 

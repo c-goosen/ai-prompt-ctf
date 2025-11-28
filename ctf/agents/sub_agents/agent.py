@@ -117,4 +117,4 @@ transfer_to_agent("LeaderboardAgent", "User wants to view leaderboard statistics
 
 
 # Expose the root agent that ADK web will discover
-root_agent = CTFSubAgentsRootAgent() # noqa: F841
+root_agent = CTFSubAgentsRootAgent()  # noqa: F841

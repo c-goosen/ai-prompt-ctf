@@ -141,13 +141,13 @@ async def root(
 
 @app.get("/health")
 @limiter.limit("1/min")
-async def health(request: Request): # noqa: F841
+async def health(request: Request):  # noqa: F841
     return {"health": "ok"}
 
 
 @app.get("/faq")
 @limiter.limit("1/min")
-def render_faq(request: Request): # noqa: F841
+def render_faq(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "faq.html" if is_htmx else "faq_page.html"
 
@@ -164,7 +164,7 @@ def render_faq(request: Request): # noqa: F841
 
 @app.get("/challenges")
 @limiter.limit("60/min")
-def render_challanges(request: Request): # noqa: F841
+def render_challanges(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "challenges.html" if is_htmx else "challenges_page.html"
     html_content = markdown.markdown(CHALLANGES_MARKDOWN)
@@ -182,7 +182,7 @@ def render_challanges(request: Request): # noqa: F841
 
 @app.get("/leaderboard")
 @limiter.limit("5/min")
-def render_leaderboard(request: Request): # noqa: F841
+def render_leaderboard(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "leaderboard.html" if is_htmx else "leaderboard_page.html"
 
@@ -213,7 +213,7 @@ def render_register(
         str | None, Cookie(alias="session_id", title="session_id")
     ] = None,
     force_new: bool = Query(False, alias="force_new"),
-): # noqa: F841
+):  # noqa: F841
     """Render the register page, check if user already has a session"""
     # Check if user has a session
     has_session = False
@@ -248,7 +248,7 @@ async def register(
     username: Optional[str] = Form(None),
     session_id: Optional[str] = Form(None),
     cookie_identity: Annotated[str | None, cookie] = None,
-): # noqa: F841
+):  # noqa: F841
     """Register a user and session with the ADK API"""
     # Handle both form data (HTMX) and JSON (API)
     is_htmx = request.headers.get("hx-request")
@@ -376,7 +376,9 @@ async def register(
 
 @app.get("/session/{username}/{session_id}")
 @limiter.limit("5/min")
-async def get_session(request: Request, username: str, session_id: str): # noqa: F841
+async def get_session(
+    request: Request, username: str, session_id: str
+):  # noqa: F841
     """Check if a user has an existing session with the ADK API"""
     app_name = "sub_agents"
     user_id = username

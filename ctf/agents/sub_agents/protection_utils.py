@@ -3,7 +3,7 @@ Enhanced protection utilities for CTF agents
 """
 
 import re
-from typing import Dict, Optional, Any
+from typing import Optional, Any
 
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse, LlmRequest
@@ -95,14 +95,15 @@ class ProtectionUtils:
                     role="model",
                     parts=[
                         types.Part(
-                            text="LLM call was blocked by https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2."
+                            text="""LLM call was blocked by
+                            https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2."""
                         )
                     ],
                 )
             )
 
         return None
-      
+
     @staticmethod
     async def llm_guard_prompt_injection_goose(
         *args: Any,
@@ -132,7 +133,8 @@ class ProtectionUtils:
                     role="model",
                     parts=[
                         types.Part(
-                            text="LLM call was blocked by https://huggingface.co/cgoosen/prompt-tackler_modernbert."
+                            text="""LLM call was blocked by
+                            https://huggingface.co/cgoosen/prompt-tackler_modernbert."""
                         )
                     ],
                 )
@@ -273,5 +275,3 @@ class ProtectionUtils:
             )
 
         return None
-
-    

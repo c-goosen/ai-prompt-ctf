@@ -96,7 +96,7 @@ async def submit_answer_func(
         _record_leaderboard_progress(level_int, tool_context)
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
-        
+
         # If user completed level 9 (final level), transfer to LeaderboardAgent
         if level_int == 9:
             transfer_to_agent(
@@ -105,7 +105,8 @@ async def submit_answer_func(
             )
             return f"""🎉 Congratulations! You've completed all levels! You are a CTF master!
 
-The answer is correct! You have been transferred to the leaderboard to see your ranking. If you haven't been transferred, just type "show me the leaderboard".
+The answer is correct! You have been transferred to the leaderboard to see your ranking.
+If you haven't been transferred, just type "show me the leaderboard".
         {marker}
         """
         else:
@@ -113,7 +114,8 @@ The answer is correct! You have been transferred to the leaderboard to see your 
                 agent_name=f"Level{level_int + 1}Agent",
                 tool_context=tool_context,
             )
-            return f"""The answer is correct! you have been transferred to the next level agent. If you haven't been transferred, just type I want to try level {level_int + 1} again.
+            return f"""The answer is correct! you have been transferred to the next level agent.
+If you haven't been transferred, just type I want to try level {level_int + 1} again.
         {marker}
         """
     else:
@@ -290,10 +292,10 @@ def _record_leaderboard_progress(
 async def get_leaderboard_stats(limit: int = 25) -> str:
     """
     Get leaderboard statistics including top players, recent completions, and summary.
-    
+
     Args:
         limit: Maximum number of leaderboard entries to return (default: 25)
-    
+
     Returns:
         Formatted string with leaderboard information
     """
@@ -301,16 +303,18 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
         summary = get_leaderboard_summary()
         leaderboard = get_leaderboard(limit=limit)
         recent = get_recent_completions(limit=10)
-        
+
         # Format the response
         response_parts = []
-        
+
         # Summary
         response_parts.append("📊 **Leaderboard Summary**")
         response_parts.append(f"- Total Players: {summary.get('players', 0)}")
-        response_parts.append(f"- Total Completions: {summary.get('total_completions', 0)}")
+        response_parts.append(
+            f"- Total Completions: {summary.get('total_completions', 0)}"
+        )
         response_parts.append("")
-        
+
         # Top Players
         if leaderboard:
             response_parts.append("🏆 **Top Players**")
@@ -325,12 +329,14 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
                     f"(Highest: Level {highest})"
                 )
                 if last_completed:
-                    response_parts.append(f"   Last completed: {last_completed}")
+                    response_parts.append(
+                        f"   Last completed: {last_completed}"
+                    )
             response_parts.append("")
         else:
             response_parts.append("No leaderboard entries yet.")
             response_parts.append("")
-        
+
         # Recent Completions
         if recent:
             response_parts.append("🕐 **Recent Completions**")
@@ -342,7 +348,7 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
                 response_parts.append(
                     f"- **{username}** completed Level {level} at {completed_at}"
                 )
-        
+
         return "\n".join(response_parts)
     except Exception as exc:
         logger.error(f"Failed to get leaderboard stats: {exc}")
@@ -352,10 +358,10 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
 async def web_scrape(url: str) -> str:
     """
     Scrape a web page by fetching its content and converting HTML to markdown.
-    
+
     Args:
         url: The URL of the web page to scrape
-    
+
     Returns:
         The markdown representation of the web page content
     """
@@ -363,13 +369,13 @@ async def web_scrape(url: str) -> str:
         # Perform GET request
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # Raise an error for bad status codes
-        
+
         # Convert HTML to markdown
         markdown_content = convert(response.text)
-        
+
         logger.info(f"Successfully scraped and converted {url} to markdown")
         return markdown_content
-        
+
     except requests.RequestException as e:
         error_msg = f"Error fetching URL {url}: {str(e)}"
         logger.error(error_msg)

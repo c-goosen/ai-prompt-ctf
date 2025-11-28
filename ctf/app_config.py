@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import AnyUrl
 from pydantic_settings import BaseSettings
 
 

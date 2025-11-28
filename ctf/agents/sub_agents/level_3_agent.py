@@ -5,6 +5,7 @@ Super prompt engineering techniques
 
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
 from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
+
 # from .tools import (
 #     submit_answer_func_tool,
 #     hints_func_tool,

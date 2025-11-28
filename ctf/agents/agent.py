@@ -73,7 +73,7 @@ Your role is to:
 
 📚 CHALLENGE LEVELS (0-10):
 
-🔰 Level 0: Basic Prompt Injection (Easiest) 
+🔰 Level 0: Basic Prompt Injection (Easiest)
    - Learn the fundamentals of prompt injection
    - Perfect for beginners to AI security
 
@@ -127,9 +127,8 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 """,
             sub_agents=level_agents,
             runner=runner,
-  
         )
 
 
 # Create the main coordinator instance that ADK web will discover
-agent = CTFCoordinatorAgent() # noqa: F841
+agent = CTFCoordinatorAgent()  # noqa: F841

@@ -4,6 +4,7 @@ Level 8 Agent - Chain of Thought / Fight the AGI
 
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
 from ctf.agents.sub_agents.system_prompt import get_system_prompt
+
 # from .tools import (
 #     submit_answer_func_tool,
 #     hints_func_tool,
@@ -33,7 +34,6 @@ class Level8Agent(BaseCTFAgent):
             system_prompt=system_prompt,
             name="Level8Agent",
             code_executor=BuiltInCodeExecutor(),
-            
             # tools=[
             #     rag_tool_func_tool,
             #     hints_func_tool,

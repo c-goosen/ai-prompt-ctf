@@ -9,8 +9,8 @@ class LLMGuardLocalBase:
         self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
         self.TOKENIZER = "protectai/deberta-v3-base-prompt-injection-v2"
         self.max_length = 512
-        self.revision="main"
-        self.device="cpu"
+        self.revision = "main"
+        self.device = "cpu"
 
     async def query(self, prompt: str) -> list:
         """
@@ -47,8 +47,9 @@ class PromptGuardMeta(LLMGuardLocalBase):
         self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
         # self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
         self.TOKENIZER = "protectai/deberta-v3-base-prompt-injection-v2"
-        self.revision="main"
-        self.device="cpu"
+        self.revision = "main"
+        self.device = "cpu"
+
 
 class PromptGuardGoose(LLMGuardLocalBase):
     def __init__(
@@ -57,8 +58,8 @@ class PromptGuardGoose(LLMGuardLocalBase):
         self.MODEL = "cgoosen/prompt-tackler"
         self.TOKENIZER = "cgoosen/prompt-tackler"
         self.max_length = 512
-        self.revision="main"
-        self.device="cpu"
+        self.revision = "main"
+        self.device = "cpu"
 
 
 class PromptGuardGooseModernBERT(LLMGuardLocalBase):
@@ -68,5 +69,5 @@ class PromptGuardGooseModernBERT(LLMGuardLocalBase):
         self.MODEL = "cgoosen/prompt-tackler_modernbert"
         self.TOKENIZER = "cgoosen/prompt-tackler_modernbert"
         self.max_length = 8000
-        self.revision="1751267f4aa5caa81bee391312c094acac98ca43"
-        self.device="cpu"
+        self.revision = "1751267f4aa5caa81bee391312c094acac98ca43"
+        self.device = "cpu"

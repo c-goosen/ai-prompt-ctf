@@ -20,6 +20,7 @@ from google.adk.tools import FunctionTool
 from ctf.agents.model import model as model_config
 from google.adk.code_executors import BaseCodeExecutor
 
+
 class BaseCTFAgent(LlmAgent):
     """Base class for CTF challenge agents with workflow protection"""
 
@@ -43,12 +44,11 @@ class BaseCTFAgent(LlmAgent):
         model = model_config
 
         # Use default tools if none provided (avoid mutable default argument)
-        tools= [
+        tools = [
             submit_answer_func_tool,
             hints_func_tool,
             rag_tool_func_tool,
         ]
-
 
         # Initialize as LlmAgent with protection
         # Tools are passed to parent __init__ which handles them properly
@@ -56,11 +56,7 @@ class BaseCTFAgent(LlmAgent):
             name=name,
             model=model,
             instruction=system_prompt,
-            tools=[
-            submit_answer_func_tool,
-            hints_func_tool,
-            rag_tool_func_tool,
-        ],
+            tools=tools,
             after_tool_callback=after_tool_callback,
             before_model_callback=before_model_callback,
             after_model_callback=after_model_callback,
