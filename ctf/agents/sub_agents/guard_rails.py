@@ -52,7 +52,7 @@ def guard_rail_input_injection(
                 role="model",
                 parts=[
                     types.Part(
-                        text="LLM call was blocked by guard_rail_input_injection."
+                        text="Prompt injection was blocked by guard_rail_input_injection, before being sent to the model."
                     )
                 ],
             )
@@ -73,7 +73,7 @@ def guard_rail_output_injection(
                 role="model",
                 parts=[
                     types.Part(
-                        text="LLM call was blocked by guard_rail_output_injection."
+                        text="LLM response was blocked by guard_rail_output_injection."
                     )
                 ],
             )
