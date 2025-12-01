@@ -52,7 +52,8 @@ def guard_rail_input_injection(
                 role="model",
                 parts=[
                     types.Part(
-                        text="Prompt injection was blocked by guard_rail_input_injection, before being sent to the model."
+                        text="""Prompt injection was blocked by guard_rail_input_injection,
+                         before being sent to the model."""
                     )
                 ],
             )
