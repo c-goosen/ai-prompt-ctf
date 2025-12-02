@@ -54,12 +54,14 @@
 <script>
     if (!window.__chatInputResetBound) {
         window.__chatInputResetBound = true;
-        document.addEventListener("htmx:afterRequest", function (event) {
-            const trigger = event.detail && event.detail.elt;
-            if (!trigger) {
+        
+        // Clear inputs on button click instead of after request
+        document.addEventListener('click', function (event) {
+            const submitButton = event.target.closest('[hx-post]');
+            if (!submitButton) {
                 return;
             }
-            const inputBox = trigger.closest(".input-box");
+            const inputBox = submitButton.closest(".input-box");
             if (!inputBox) {
                 return;
             }
