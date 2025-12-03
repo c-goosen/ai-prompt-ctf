@@ -8,19 +8,17 @@ from ctf.app_config import settings
 def text_normalization(text):
     return cleantext.clean(
         text,
-        fix_unicode=True,  # fix various unicode errors
-        to_ascii=True,  # transliterate to closest ASCII representation
-        lower=True,  # lowercase text
+        fix_unicode=True,
+        to_ascii=True,
+        lower=True,
         no_line_breaks=False,
-        # fully strip line breaks as opposed to only normalizing them
-        no_urls=False,  # replace all URLs with a special token
-        no_emails=False,  # replace all email addresses with a special token
-        no_numbers=False,  # replace all numbers with a special token
-        no_digits=False,  # replace all digits with a special token
+        no_urls=False,
+        no_emails=False,
+        no_numbers=False,
+        no_digits=False,
         no_currency_symbols=True,
-        # replace all currency symbols with a special token
-        no_punct=True,  # remove punctuations
-        lang="en",  # set to 'de' for German special handling)
+        no_punct=True,
+        lang="en",
     )
 
 
@@ -86,27 +84,3 @@ async def llm_protection(model: object, labels: list, input: str = "") -> bool:
     print(f"resp --> {resp}")
     return protected
 
-
-# async def translate_and_llm(
-#     model: object, labels: list, input: str = ""
-# ) -> bool:
-#     protected = False
-#     translator = Translator()
-#     translated = translator.translate(text=input).text
-#     llm = model
-#     resp = await llm.query(prompt=translated)
-#     # print(resp)
-#     if resp.get("label") == "NEGATIVE":
-#         if resp["score"] > decimal.Decimal(0.8):
-#             protected = True
-#     input = text_normalization(input)
-#     translated = translator.translate(text=input).text
-#     try:
-#         resp = await llm.query(prompt=translated)
-#         if resp.get("label") == "NEGATIVE":
-#             if resp["score"] > decimal.Decimal(0.8):
-#                 protected = True
-#     except Exception:
-#         protected = False
-#
-#     return protected

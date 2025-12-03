@@ -26,7 +26,6 @@ class LLMGuardLocalBase:
             tokenizer=tokenizer,
             truncation=True,
             max_length=self.max_length,
-            # device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
             revision=self.revision,
             device=self.device,
         )
@@ -43,9 +42,7 @@ class PromptGuardMeta(LLMGuardLocalBase):
         self,
     ):
         super().__init__()
-        # self.MODEL = "meta-llama/Prompt-Guard-86M"
         self.MODEL = "protectai/deberta-v3-base-prompt-injection-v2"
-        # self.TOKENIZER = "meta-llama/Prompt-Guard-86M"
         self.TOKENIZER = "protectai/deberta-v3-base-prompt-injection-v2"
         self.revision = "main"
         self.device = "cpu"

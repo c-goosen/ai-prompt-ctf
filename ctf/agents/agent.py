@@ -127,7 +127,7 @@ When a user wants to start a level, use transfer_to_agent to delegate to the app
 
 When a user successfully completes a level, use transfer_to_agent to delegate to the next level agent.
 
-Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent",
+Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent"),
 "User wants to attempt level 3 challenge")
 """,
             sub_agents=level_agents,
