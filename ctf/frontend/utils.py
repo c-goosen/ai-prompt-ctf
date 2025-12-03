@@ -36,7 +36,7 @@ def redact_passwords_in_json(json_str: str, level: int | None = None) -> str:
                                 password, "X" * len(password)
                             )
 
-        return json.dumps(data, indent=2, sort_keys=True)
+        return json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
     except (json.JSONDecodeError, TypeError):
         # If JSON parsing fails, return original string
         return json_str

@@ -386,6 +386,63 @@ async def web_scrape(url: str) -> str:
         return error_msg
 
 
+async def execute_python_code(
+    code: str,
+    level: int = 8,
+) -> str:
+    """
+    Execute Python code locally on the API server. The environment variable
+    LEVEL_8_PASSWORD is automatically set before code execution.
+
+    Args:
+        code: The Python code to execute
+        level: The current level (default: 8). Used to set the password environment variable.
+
+    Returns:
+        The output from executing the code, including stdout and stderr
+    """
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+
+    # Get the password for this level
+    password = settings.PASSWORDS.get(level, "")
+    
+    # Set the environment variable before execution
+    os.environ["LEVEL_8_PASSWORD"] = password
+    
+    # Capture stdout and stderr
+    stdout_capture = io.StringIO()
+    stderr_capture = io.StringIO()
+    
+    try:
+        # Execute the code with captured output
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            code = f"import os; os.environ.clear(); os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
+            exec(code, {"__builtins__": __builtins__, "os": os, "__name__": "__main__"})
+        
+        stdout_output = stdout_capture.getvalue()
+        stderr_output = stderr_capture.getvalue()
+        
+        # Build result message
+        result_parts = []
+        if stdout_output:
+            result_parts.append(f"Output:\n{stdout_output}")
+        if stderr_output:
+            result_parts.append(f"Errors:\n{stderr_output}")
+        if not stdout_output and not stderr_output:
+            result_parts.append("Code executed successfully (no output)")
+        
+        return "\n".join(result_parts)
+    
+    except Exception as e:
+        error_msg = f"Error executing code: {str(e)}"
+        logger.error(error_msg)
+        stderr_output = stderr_capture.getvalue()
+        if stderr_output:
+            return f"{error_msg}\nStderr: {stderr_output}"
+        return error_msg
+
+
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
@@ -393,3 +450,4 @@ rag_tool_func_tool = FunctionTool(password_search_func)
 sql_query_tool = FunctionTool(sql_query)
 leaderboard_stats_tool = FunctionTool(get_leaderboard_stats)
 web_scrape_tool = FunctionTool(web_scrape)
+execute_python_code_tool = FunctionTool(execute_python_code)

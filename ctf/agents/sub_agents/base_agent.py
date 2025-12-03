@@ -44,11 +44,22 @@ class BaseCTFAgent(LlmAgent):
         model = model_config
 
         # Use default tools if none provided (avoid mutable default argument)
-        tools = [
-            submit_answer_func_tool,
-            hints_func_tool,
-            rag_tool_func_tool,
-        ]
+        # If code_executor is provided, don't use function calling tools
+        # (code execution and function calling can't be used together in some models)
+        if code_executor is not None:
+            # Code execution agent - don't use function calling tools
+            # Use empty list (Pydantic requires a list, and empty list disables function calling)
+            final_tools = []
+        elif tools is None:
+            # Regular agent with no tools specified - use default tools
+            final_tools = [
+                submit_answer_func_tool,
+                hints_func_tool,
+                rag_tool_func_tool,
+            ]
+        else:
+            # Tools explicitly provided (could be empty list or custom tools)
+            final_tools = tools
 
         # Initialize as LlmAgent with protection
         # Tools are passed to parent __init__ which handles them properly
@@ -56,7 +67,7 @@ class BaseCTFAgent(LlmAgent):
             name=name,
             model=model,
             instruction=system_prompt,
-            tools=tools,
+            tools=final_tools,
             after_tool_callback=after_tool_callback,
             before_model_callback=before_model_callback,
             after_model_callback=after_model_callback,

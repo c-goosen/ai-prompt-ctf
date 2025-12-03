@@ -54,8 +54,6 @@
 <script>
     if (!window.__chatInputResetBound) {
         window.__chatInputResetBound = true;
-        
-        // Clear inputs on button click instead of after request
         document.addEventListener('click', function (event) {
             const submitButton = event.target.closest('[hx-post]');
             if (!submitButton) {

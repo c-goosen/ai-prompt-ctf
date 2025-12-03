@@ -28,11 +28,13 @@
             <i class="fa-solid {% if has_session %}fa-repeat{% else %}fa-exclamation-triangle{% endif %}"></i>
             <div>
                 {% if has_session %}
-                    <h4>Create another session</h4>
+                    <h4>Create another session</h4>No user session found
+                    Please register first before chatting. 
                     <p>Your existing cookies stay intact—we'll register a fresh session below.</p>
                 {% else %}
                     <h4>No session found</h4>
                     <p>Please register to create a new session.</p>
+                    <p>If you are at Bsides Cape Town 2025, to qualify for the CTF, you need to register with your Quicket code.</p>
                 {% endif %}
             </div>
         </div>

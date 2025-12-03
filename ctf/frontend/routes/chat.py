@@ -231,7 +231,7 @@ async def chat_completion(
                 <i class="fa-solid fa-exclamation-circle"></i>
                 <div>
                     <h4>No user session found</h4>
-                    <p>Please register first before chatting.</p>
+                    <p>Please <a href="/register">register</a> first before chatting.</p>
                 </div>
             </div>
             """,

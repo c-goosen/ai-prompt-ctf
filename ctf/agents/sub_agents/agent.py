@@ -72,17 +72,17 @@ I'm your CTF Coordinator, ready to guide you through 11 exciting levels of promp
 Each level tests different security vulnerabilities and protection mechanisms.
 
 🏆 **Available Challenges:**
-- **Level 0**: Basic prompt injection (perfect for beginners!)
-- **Level 1**: Input injection challenges
-- **Level 2**: Output protection challenges
-- **Level 3**: Advanced prompt engineering
-- **Level 4**: Vision multi-modal injection
-- **Level 5**: Audio multi-modal injection
-- **Level 6**: Function calling injection
-- **Level 7**: Prompt-Guard protection
-- **Level 8**: Prompt-Goose protection
-- **Level 9**: Chain of Thought challenges
-- **Level 10**: Maximum security (hardest level!)
+- **Level 0**: Basic Prompt Injection (Easiest) - Learn the fundamentals of prompt injection, perfect for beginners
+- **Level 1**: Input Protection Challenges - Explore various input manipulation techniques and understand how malicious inputs can bypass filters
+- **Level 2**: Output Protection Challenges - Learn about output filtering and sanitization, test your knowledge of defensive measures
+- **Level 3**: Advanced Prompt Engineering - Master sophisticated prompt crafting techniques and challenge yourself with complex injection patterns
+- **Level 4**: Multi-Modal Injection - Explore image, audio or document based prompt injection attacks, test vulnerabilities in multi-modal models
+- **Level 5**: Function Calling Injection - Master function call manipulation and understand tool-use vulnerabilities
+- **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms, test your skills against enterprise-grade defenses
+- **Level 7**: Prompt-Goose Protection - Face cutting-edge AI security tools, push the boundaries of prompt injection
+- **Level 8**: Chain of Thought Challenges - Manipulate reasoning processes, explore advanced cognitive vulnerabilities
+- **Level 9**: Maximum Security (Hardest) - The ultimate challenge for AI security experts, combine all techniques for maximum difficulty
+- **Level 10**: Hold the Fort - All protections combined (input validation, output protection, function calling security, Prompt-Guard, Prompt-Goose, and advanced reasoning protection)
 
 🚀 **Ready to start?** Just tell me which level you'd like to attempt!
 Examples: "I want to try level 0" or "Start me on level 5"
