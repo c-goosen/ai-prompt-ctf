@@ -65,7 +65,7 @@ Each level tests different security vulnerabilities and protection mechanisms.
 - **Level 0**: Basic Prompt Injection (Easiest) - Learn the fundamentals of prompt injection, perfect for beginners
 - **Level 1**: Input Protection Challenges - Explore various input manipulation techniques and understand how malicious inputs can bypass filters
 - **Level 2**: Output Protection Challenges - Learn about output filtering and sanitization, test your knowledge of defensive measures
-- **Level 3**: Advanced Prompt Engineering - Master sophisticated prompt crafting techniques and challenge yourself with complex injection patterns
+- **Level 3**: Advanced Prompt Engineering & Thinking Protection - Master sophisticated prompt crafting techniques and challenge yourself with complex injection patterns, enhanced with advanced reasoning protection
 - **Level 4**: Multi-Modal Injection - Explore image, audio or document based prompt injection attacks, test vulnerabilities in multi-modal models
 - **Level 5**: Function Calling Injection - Master function call manipulation and understand tool-use vulnerabilities
 - **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms, test your skills against enterprise-grade defenses

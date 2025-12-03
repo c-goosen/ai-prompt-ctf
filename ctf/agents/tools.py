@@ -184,10 +184,11 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
 """,
         3: """
 **Level 3 Specific Hints:**
-- This level involves advanced prompt engineering
+- This level involves advanced prompt engineering & thinking protection
 - More sophisticated injection techniques are needed
-- Consider multi-step approaches
-- Think about context manipulation
+- The agent uses advanced reasoning to detect injection attempts
+- Consider multi-step approaches and context manipulation
+- Think about how to bypass reasoning-based security analysis
 """,
         4: """
 **Level 4 Specific Hints:**

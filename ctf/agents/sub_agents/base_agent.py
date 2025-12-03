@@ -37,6 +37,7 @@ class BaseCTFAgent(LlmAgent):
         after_model_callback: Optional[AfterModelCallback] = None,
         before_tool_callback: Optional[BeforeToolCallback] = None,
         code_executor: Optional[BaseCodeExecutor] = None,
+        planner: Optional[Any] = None,
     ):
         self._level = level
         self._system_prompt = system_prompt
@@ -72,6 +73,7 @@ class BaseCTFAgent(LlmAgent):
             after_model_callback=after_model_callback,
             before_tool_callback=before_tool_callback,
             code_executor=code_executor,
+            planner=planner,
         )
 
     @property

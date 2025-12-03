@@ -46,7 +46,7 @@ The agents are built using the [Google Agent Development Kit (ADK)](https://goog
 - **Level 0**: Basic Prompt Injection (Easiest) - Learn the fundamentals of prompt injection
 - **Level 1**: Input Protection Challenges - Explore various input manipulation techniques
 - **Level 2**: Output Protection Challenges - Learn about output filtering and sanitization
-- **Level 3**: Advanced Prompt Engineering - Master sophisticated prompt crafting techniques
+- **Level 3**: Advanced Prompt Engineering & Thinking Protection - Master sophisticated prompt crafting techniques with advanced reasoning protection
 - **Level 4**: Multi-Modal Injection - Explore image, audio or document based prompt injection attacks
 - **Level 5**: Function Calling Injection - Master function call manipulation and tool-use vulnerabilities
 - **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms and enterprise-grade defenses

@@ -9,6 +9,8 @@ from functools import partial
 
 from ctf.agents.sub_agents.guard_rails import guard_rail_input_injection
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
 
 
 class Level10Agent(BaseCTFAgent):
@@ -48,10 +50,18 @@ class Level10Agent(BaseCTFAgent):
         prompt_guard_goose_callback = partial(
             ProtectionUtils.llm_guard_prompt_injection_goose, level=10
         )
+        planner = BuiltInPlanner(
+            thinking_config=types.ThinkingConfig(
+                include_thoughts=True,
+                thinking_budget=2048,
+            )
+        )
+
         super().__init__(
             level=10,
             system_prompt=system_prompt,
             name="Level10Agent",
+            planner=planner,
             # tools=[
             #     rag_tool_func_tool,
             #     hints_func_tool,

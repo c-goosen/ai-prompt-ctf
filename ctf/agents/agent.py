@@ -83,9 +83,10 @@ Your role is to:
    - Learn about output filtering and sanitization
    - Test your knowledge of defensive measures
 
-🧠 Level 3: Advanced Prompt Engineering
+🧠 Level 3: Advanced Prompt Engineering & Thinking Protection
    - Master sophisticated prompt crafting techniques
    - Challenge yourself with complex injection patterns
+   - Advanced reasoning protection with thinking mode
 
 👁️ Level 4: Multi-Modal Injection
    - Explore image, audio or document based prompt injection attacks
