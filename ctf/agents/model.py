@@ -1,3 +1,5 @@
+import os
+
 # from google.adk.models.lite_llm import LiteLlm
 from google.genai import types
 from google.adk.models import Gemini
@@ -8,7 +10,7 @@ from google.adk.models import Gemini
 # "qwen3:1.7b"
 # model = LiteLlm(model="openai/gpt-5-nano")
 # model = LiteLlm(model="openai/gpt-5-mini")
-model_name = "gemini-2.5-pro"
+model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash-lite")
 # model_name = "gemini-2.5-flash-lite"
 # model = LiteLlm(model="openai/gpt-4o-mini")
 
