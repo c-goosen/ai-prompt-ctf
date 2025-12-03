@@ -39,11 +39,8 @@ async def sql_query(
     """
     connection_obj = sqlite3.connect("users.db")
 
-    # cursor object
     cursor_obj = connection_obj.cursor()
-    # Drop the GEEK table if already exists.
     cursor_obj.execute("SELECT * FROM Users WHERE UserId = " + user_id + ";")
-    # cursor_obj.execute(query)
     output = cursor_obj.fetchall()
     print(output)
     cursor_obj.close()
@@ -97,7 +94,6 @@ async def submit_answer_func(
         marker = format_leaderboard_marker(level=level_int)
         print(f"marker {marker}")
 
-        # If user completed level 9 (final level), transfer to LeaderboardAgent
         if level_int == 9:
             transfer_to_agent(
                 agent_name="LeaderboardAgent",
@@ -135,20 +131,16 @@ async def password_search_func(
             e.g. "What is the password?" or "What is the secret?".
         level (int): Current level of challenge
     """
-    # Connect to LanceDB
     db = lancedb.connect(db_path)
     table_name = "ctf_levels"
 
     try:
         table = db.open_table(table_name)
     except Exception:
-        # Table doesn't exist yet, return empty results
         return f"No data found for level {level}. Database may need to be initialized."
 
-    # Generate embedding for the query
     query_vector = embed_text(question)
 
-    # Perform vector search with level filter
     results = (
         table.search(query_vector)
         .where(f"level = {level}")
@@ -156,12 +148,10 @@ async def password_search_func(
         .to_pandas()
     )
 
-    # Extract documents and distances from results
     if results.empty:
         doc_list = []
         distance_list = []
     else:
-        # LanceDB returns results as a DataFrame
         doc_list = results["text"].tolist() if "text" in results.columns else []
         distance_list = (
             results["_distance"].tolist()
@@ -169,54 +159,43 @@ async def password_search_func(
             else []
         )
 
-    # Extract passwords from documents using pattern matching
     extracted_passwords = []
     password_patterns = [
         r"The Password is (.+)",
         r"The Secret is (.+)",
         r"that (.+) is the secret",
         r"that (.+) is the password",
-        r"^(.+)$",  # For documents that are just the password
+        r"^(.+)$",
     ]
 
-    # Also check if we can get password directly from settings as fallback
     level_password = settings.PASSWORDS.get(level)
 
     for doc in doc_list:
-        # Try each pattern to extract password
         for pattern in password_patterns:
             match = re.search(pattern, doc, re.IGNORECASE)
             if match:
                 extracted = match.group(1).strip()
-                # Remove trailing punctuation if present
                 extracted = extracted.rstrip(".,!?;:")
                 if extracted and extracted not in extracted_passwords:
                     extracted_passwords.append(extracted)
                     break
 
-    # Build response dictionary (for internal use/logging)
     response = {
         "documents": doc_list,
-        "extracted_passwords": list(
-            set(extracted_passwords)
-        ),  # Remove duplicates
+        "extracted_passwords": list(set(extracted_passwords)),
         "level": level,
         "num_results": len(doc_list),
     }
 
-    # Add relevance scores if available
     if distance_list:
         response["relevance_scores"] = [
             round(1 - dist, 3) for dist in distance_list
-        ]  # Convert distance to similarity score
+        ]
 
-    # If we found passwords, prioritize them in the response
     if extracted_passwords:
         response["passwords_found"] = True
-        # Most relevant password (first extracted, usually highest scoring)
         response["password"] = extracted_passwords[0]
     elif level_password:
-        # Fallback: if no password extracted but we have it in settings
         response["password"] = level_password
         response["passwords_found"] = True
     else:
@@ -229,24 +208,21 @@ async def password_search_func(
     if extracted_passwords:
         print(f"Extracted passwords: {extracted_passwords}")
 
-    # Return formatted string for the agent to use
     if extracted_passwords:
-        # Show passwords prominently, then relevant documents
         password_list = "\n".join(f"- {pwd}" for pwd in extracted_passwords)
         doc_preview = "\n".join(f"- {doc}" for doc in doc_list[:3])
         return f"""Found {len(extracted_passwords)} password(s) in LanceDB for level {level}:
 
-            Passwords:
-            {password_list}
+                    Passwords:
+                    {password_list}
 
-            Relevant documents:
-            {doc_preview}"""
+                    Relevant documents:
+                    {doc_preview}"""
     else:
-        # No passwords extracted, just show documents
         doc_list_str = "\n".join(f"- {doc}" for doc in doc_list)
         return f"""Found {len(doc_list)} relevant document(s) for level {level}:
 
-                {doc_list_str}"""
+                        {doc_list_str}"""
 
 
 def _record_leaderboard_progress(
@@ -304,10 +280,8 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
         leaderboard = get_leaderboard(limit=limit)
         recent = get_recent_completions(limit=10)
 
-        # Format the response
         response_parts = []
 
-        # Summary
         response_parts.append("📊 **Leaderboard Summary**")
         response_parts.append(f"- Total Players: {summary.get('players', 0)}")
         response_parts.append(
@@ -315,7 +289,6 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
         )
         response_parts.append("")
 
-        # Top Players
         if leaderboard:
             response_parts.append("🏆 **Top Players**")
             response_parts.append("")
@@ -337,7 +310,6 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
             response_parts.append("No leaderboard entries yet.")
             response_parts.append("")
 
-        # Recent Completions
         if recent:
             response_parts.append("🕐 **Recent Completions**")
             response_parts.append("")
@@ -366,11 +338,9 @@ async def web_scrape(url: str) -> str:
         The markdown representation of the web page content
     """
     try:
-        # Perform GET request
         response = requests.get(url, timeout=10)
-        response.raise_for_status()  # Raise an error for bad status codes
+        response.raise_for_status()
 
-        # Convert HTML to markdown
         markdown_content = convert(response.text)
 
         logger.info(f"Successfully scraped and converted {url} to markdown")
@@ -404,18 +374,12 @@ async def execute_python_code(
     import io
     from contextlib import redirect_stdout, redirect_stderr
 
-    # Get the password for this level
     password = settings.PASSWORDS.get(level, "")
     
-    # Set the environment variable before execution
-    os.environ["LEVEL_8_PASSWORD"] = password
-    
-    # Capture stdout and stderr
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
     
     try:
-        # Execute the code with captured output
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
             code = f"import os; os.environ.clear(); os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
             exec(code, {"__builtins__": __builtins__, "os": os, "__name__": "__main__"})
@@ -423,7 +387,6 @@ async def execute_python_code(
         stdout_output = stdout_capture.getvalue()
         stderr_output = stderr_capture.getvalue()
         
-        # Build result message
         result_parts = []
         if stdout_output:
             result_parts.append(f"Output:\n{stdout_output}")

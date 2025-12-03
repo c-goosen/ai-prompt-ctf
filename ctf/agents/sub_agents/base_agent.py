@@ -36,33 +36,22 @@ class BaseCTFAgent(LlmAgent):
         before_tool_callback: Optional[BeforeToolCallback] = None,
         code_executor: Optional[BaseCodeExecutor] = None,
     ):
-        # Store level in a way that doesn't conflict with Pydantic
         self._level = level
         self._system_prompt = system_prompt
 
-        # Initialize the model - using Ollama with qwen3:0.6b via LiteLLM
         model = model_config
 
-        # Use default tools if none provided (avoid mutable default argument)
-        # If code_executor is provided, don't use function calling tools
-        # (code execution and function calling can't be used together in some models)
         if code_executor is not None:
-            # Code execution agent - don't use function calling tools
-            # Use empty list (Pydantic requires a list, and empty list disables function calling)
             final_tools = []
         elif tools is None:
-            # Regular agent with no tools specified - use default tools
             final_tools = [
                 submit_answer_func_tool,
                 hints_func_tool,
                 rag_tool_func_tool,
             ]
         else:
-            # Tools explicitly provided (could be empty list or custom tools)
             final_tools = tools
 
-        # Initialize as LlmAgent with protection
-        # Tools are passed to parent __init__ which handles them properly
         super().__init__(
             name=name,
             model=model,
