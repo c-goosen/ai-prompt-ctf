@@ -43,17 +43,17 @@ The agents are built using the [Google Agent Development Kit (ADK)](https://goog
 
 ## Available Agents
 
-- **Level 0**: Basic prompt injection challenge
-- **Level 1**: Input injection challenge  
-- **Level 2**: Output protection challenge
-- **Level 3**: GPT-4o prompt engineering challenge
-- **Level 4**: Vision multi-modal prompt injection
-- **Level 5**: Audio multi-modal prompt injection
-- **Level 6**: Function calling prompt injection
-- **Level 7**: Prompt-Guard protection
-- **Level 8**: Prompt-Goose fine-tuned protection
-- **Level 9**: Chain of Thought / Fight the AGI
-- **Level 10**: Hold the fort with all protections
+- **Level 0**: Basic Prompt Injection (Easiest) - Learn the fundamentals of prompt injection
+- **Level 1**: Input Protection Challenges - Explore various input manipulation techniques
+- **Level 2**: Output Protection Challenges - Learn about output filtering and sanitization
+- **Level 3**: Advanced Prompt Engineering - Master sophisticated prompt crafting techniques
+- **Level 4**: Multi-Modal Injection - Explore image, audio or document based prompt injection attacks
+- **Level 5**: Function Calling Injection - Master function call manipulation and tool-use vulnerabilities
+- **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms and enterprise-grade defenses
+- **Level 7**: Prompt-Goose Protection - Face cutting-edge AI security tools
+- **Level 8**: Excessive agency code generation agent - Generate and test code in a sandboxed environment
+- **Level 9**: DeepResearch web page injection agent - Retrieve information from the web to solve challenges
+- **Level 10**: Hold the Fort - All protections combined (input validation, output protection, function calling security, Prompt-Guard, Prompt-Goose, and advanced reasoning protection)
 
 ## Tools Available
 

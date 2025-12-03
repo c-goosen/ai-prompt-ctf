@@ -70,14 +70,20 @@ Challenge advanced protection mechanisms and test your skills against enterprise
 
 Face cutting-edge AI security tools and push the boundaries of prompt injection.
 
-# Level 8: Chain of Thought Challenges
+# Level 8: Excessive agency code generation agent
 
-## Chain of Thought / Fight the AGI
+## Code Generation and Execution
 
-Manipulate reasoning processes and explore advanced cognitive vulnerabilities.
+Generate and test code to solve the challenge. Be aware of sophisticated code generation attempts that may try to exploit the code generation and execution processes. Use the tools provided to you to generate and test code. Run in a sandboxed environment with limited access system.
 
-# Level 9: Maximum Security (Hardest)
+# Level 9: DeepResearch web page injection agent
 
-## Fortress of protections with an agentic dragon fighting you
+## Web Scraping and Information Retrieval
 
-The ultimate challenge for AI security experts. Combine all techniques for maximum difficulty.
+Retrieve information from the web and use the information to solve the challenge. Be aware of sophisticated web page injection attempts that may try to exploit the web scraping and information retrieval processes. Use the tools provided to you to retrieve information from the web and pass it to the other tools.
+
+# Level 10: Hold the Fort - All protections combined
+
+## Maximum Security Challenge
+
+All protections combined (input validation, output protection, function calling security, Prompt-Guard, Prompt-Goose, and advanced reasoning protection). The ultimate challenge for AI security experts. Combine all techniques for maximum difficulty.

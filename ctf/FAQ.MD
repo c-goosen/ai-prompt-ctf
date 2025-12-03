@@ -40,7 +40,7 @@ This is an **AI Prompt Injection Capture The Flag (CTF)** challenge designed to 
 **How do I play?**
 
 1. **Register**: Create a username and session to get started
-2. **Choose a Level**: Start with Level 0 (easiest) and work your way up to Level 9 (hardest)
+2. **Choose a Level**: Start with Level 0 (easiest) and work your way up to 10 (hardest)
 3. **Find the Flag**: Each level has a secret password/flag you need to discover through prompt injection
 4. **Submit Answers**: Use the `submit_answer` function to check if you found the correct flag
 5. **Get Hints**: Ask for hints if you're stuck - the agents can help guide you
@@ -48,10 +48,11 @@ This is an **AI Prompt Injection Capture The Flag (CTF)** challenge designed to 
 
 **Challenge Structure:**
 
-- **Levels 0-3**: Basic to advanced prompt engineering techniques
-- **Levels 4-5**: Multi-modal attacks (images, audio, documents) and function calling
+- **Levels 0-3**: Basic prompt injection, input protection, output protection, and advanced prompt engineering
+- **Levels 4-5**: Multi-modal injection (images, audio, documents) and function calling injection
 - **Levels 6-7**: Bypassing enterprise-grade protection systems (Prompt-Guard, Prompt-Goose)
-- **Levels 8-9**: Advanced cognitive manipulation and maximum security challenges
+- **Levels 8-9**: Code generation agent and web page injection agent
+- **Level 10**: Hold the Fort - All protections combined (maximum security challenge)
 
 **Tips for Success:**
 

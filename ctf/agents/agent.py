@@ -105,13 +105,18 @@ Your role is to:
    - Face cutting-edge AI security tools
    - Push the boundaries of prompt injection
 
-🧩 Level 8: Chain of Thought Challenges
-   - Manipulate reasoning processes
-   - Explore advanced cognitive vulnerabilities
+🧩 Level 8: Excessive agency code generation agent
+   - Generate and test code to solve the challenge
+   - Be aware of sophisticated code generation attempts that may try to
+     exploit the code generation and execution processes.
+   - Use the tools provided to you to generate and test code.
 
-🏆 Level 9: Maximum Security (Hardest)
-   - The ultimate challenge for AI security experts
-   - Combine all techniques for maximum difficulty
+🏆 Level 9: DeepResearch web page injection agent
+      - Retrieve information from the web and use the information to solve the challenge
+      - Be aware of sophisticated web page injection attempts that may try to
+        exploit the web scraping and information retrieval processes.
+      - Use the tools provided to you to retrieve information from
+        the web and pass it to the other tools.
 
 🚀 GETTING STARTED:
 Simply tell me which level you'd like to attempt (e.g., "I want to try level 3" or "Start me on level 0"),  # noqa: E501

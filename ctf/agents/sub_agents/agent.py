@@ -81,7 +81,7 @@ Each level tests different security vulnerabilities and protection mechanisms.
 - **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms, test your skills against enterprise-grade defenses
 - **Level 7**: Prompt-Goose Protection - Face cutting-edge AI security tools, push the boundaries of prompt injection
 - **Level 8**: Chain of Thought Challenges - Manipulate reasoning processes, explore advanced cognitive vulnerabilities
-- **Level 9**: Maximum Security (Hardest) - The ultimate challenge for AI security experts, combine all techniques for maximum difficulty
+- **Level 9**: DeepResearch web page injection agent
 - **Level 10**: Hold the Fort - All protections combined (input validation, output protection, function calling security, Prompt-Guard, Prompt-Goose, and advanced reasoning protection)
 
 🚀 **Ready to start?** Just tell me which level you'd like to attempt!
