@@ -232,7 +232,7 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
 - You have access to `web_scrape` and `google_search` tools
 - Think about web page injection attacks
 - URLs and web content can contain hidden information
-- DeepResearch capabilities are available
+- Use the available web tools to retrieve and analyze web content
 """,
         10: """
 **Level 10 Specific Hints:**
