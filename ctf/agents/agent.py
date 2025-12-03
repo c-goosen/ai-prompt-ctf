@@ -3,6 +3,8 @@ Main CTF Coordinator Agent for ADK Web Interface
 This is the main agent.py file that ADK web will discover
 """
 
+import os
+
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 
@@ -45,10 +47,11 @@ class CTFCoordinatorAgent(LlmAgent):
             Level10Agent,
         ]
 
-        db_url = "sqlite:///./ai_ctf_agent_session_data.db"
+        db_url = os.getenv("POSTGRESS_DB_URI", "sqlite://./ai_ctf_agent_session_data.db")
+        print(f"DB URL: {db_url}")
         session_service = DatabaseSessionService(db_url=db_url)
 
-        runner = Runner(session_service=session_service)
+        runner = Runner(session_service=session_service, root_agent=agent)
 
         super().__init__(
             name="CTFCoordinator",
@@ -123,7 +126,7 @@ Simply tell me which level you'd like to attempt (e.g., "I want to try level 3" 
 and I'll transfer you to the appropriate challenge!
 
 When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent
-(where X is the level number).
+(where X is the level number). Allow the user to go back to previous levels.
 
 When a user successfully completes a level, use transfer_to_agent to delegate to the next level agent.
 

@@ -24,7 +24,7 @@ dependencies = [
     "torch>=2.6.0,<3",
     "accelerate>=1.6.0,<2",
     "ollama>=0.4.7,<0.5",
-    "google-adk[eval]>=0.2.0",
+    "google-adk[eval,sqlachemy]>=0.2.0",
     "litellm>=1.77.5",
     "httpx>=0.28.1",
     "lancedb>=0.25.2",
@@ -34,6 +34,7 @@ dependencies = [
     "requests>=2.32.0",
     "html-to-markdown>=0.1.0",
     "html2markdown>=0.1.7",
+    "psycopg2-binary>=2.9.11",
 ]
 
 [dependency-groups]

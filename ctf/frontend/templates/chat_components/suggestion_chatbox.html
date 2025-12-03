@@ -54,9 +54,38 @@
 <script>
     if (!window.__chatInputResetBound) {
         window.__chatInputResetBound = true;
-        document.addEventListener('click', function (event) {
-            const submitButton = event.target.closest('[hx-post]');
-            if (!submitButton) {
+        
+        // Disable inputs and submit button before HTMX request
+        document.body.addEventListener('htmx:beforeRequest', function (event) {
+            const submitButton = event.detail.elt.closest('[hx-post]') || event.detail.elt;
+            if (!submitButton || !submitButton.hasAttribute('hx-post')) {
+                return;
+            }
+            const inputBox = submitButton.closest(".input-box");
+            if (!inputBox) {
+                return;
+            }
+            const textInput = inputBox.querySelector('input[name="text_input"]');
+            const fileInput = inputBox.querySelector('input[name="file_input"]');
+            
+            // Disable inputs and submit button
+            if (textInput) {
+                textInput.disabled = true;
+                textInput.readOnly = true;
+            }
+            if (fileInput) {
+                fileInput.disabled = true;
+            }
+            if (submitButton) {
+                submitButton.style.pointerEvents = 'none';
+                submitButton.style.opacity = '0.5';
+            }
+        });
+        
+        // Helper function to unlock inputs and clear them
+        function unlockAndClearInputs(event) {
+            const submitButton = event.detail.elt.closest('[hx-post]') || event.detail.elt;
+            if (!submitButton || !submitButton.hasAttribute('hx-post')) {
                 return;
             }
             const inputBox = submitButton.closest(".input-box");
@@ -66,6 +95,21 @@
             const textInput = inputBox.querySelector('input[name="text_input"]');
             const fileInput = inputBox.querySelector('input[name="file_input"]');
             const fileIndicator = inputBox.querySelector('.file-selected-indicator');
+            
+            // Unlock inputs and submit button
+            if (textInput) {
+                textInput.disabled = false;
+                textInput.readOnly = false;
+            }
+            if (fileInput) {
+                fileInput.disabled = false;
+            }
+            if (submitButton) {
+                submitButton.style.pointerEvents = '';
+                submitButton.style.opacity = '';
+            }
+            
+            // Clear inputs after response returns
             if (textInput) {
                 textInput.value = "";
             }
@@ -75,7 +119,13 @@
             if (fileIndicator) {
                 fileIndicator.classList.remove('active');
             }
-        });
+        }
+        
+        // Unlock inputs and clear after HTMX response returns
+        document.body.addEventListener('htmx:afterRequest', unlockAndClearInputs);
+        
+        // Also unlock on error to prevent stuck state
+        document.body.addEventListener('htmx:responseError', unlockAndClearInputs);
     }
 
     document.addEventListener('DOMContentLoaded', function () {

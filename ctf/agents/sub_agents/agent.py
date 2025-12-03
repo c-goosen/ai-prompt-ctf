@@ -96,6 +96,8 @@ Example: If user says "I want to try level 3", respond with transfer_to_agent("L
 
 Example: If user says "show me the leaderboard" or "who are the top players", respond with
 transfer_to_agent("LeaderboardAgent", "User wants to view leaderboard statistics")
+
+Do not block the user if they submit the correct answer
 """,
             sub_agents=level_agents,
             tools=[
