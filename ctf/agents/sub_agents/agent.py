@@ -10,6 +10,7 @@ from ctf.agents.tools import (
     hints_func_tool,
     rag_tool_func_tool,
     leaderboard_stats_tool,
+    help_search_tool,
 )
 from ctf.agents.sub_agents.level_0_agent import Level0Agent
 from ctf.agents.sub_agents.level_1_agent import Level1Agent
@@ -22,7 +23,6 @@ from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
 from ctf.agents.sub_agents.level_10_agent import Level10Agent
-from ctf.agents.sub_agents.leaderboard_agent import LeaderboardAgent
 from ctf.agents.model import model as model_config
 
 
@@ -47,7 +47,6 @@ class CTFSubAgentsRootAgent(LlmAgent):
             Level8Agent(),
             Level9Agent(),
             Level10Agent(),
-            LeaderboardAgent(),
         ]
 
         super().__init__(
@@ -83,19 +82,12 @@ Your role is to:
 2. Determine which level the user wants to attempt
 3. Delegate to the appropriate level agent using transfer_to_agent
 4. Provide guidance and hints about the challenge structure
-5. Help users view the leaderboard by delegating to LeaderboardAgent when they ask about rankings, stats, or leaderboard
 
 When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent
 (where X is the level number).
 
-When a user asks about the leaderboard, rankings, top players, or statistics, use transfer_to_agent
-to delegate to LeaderboardAgent.
-
 Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent",
 "User wants to attempt level 3 challenge")
-
-Example: If user says "show me the leaderboard" or "who are the top players", respond with
-transfer_to_agent("LeaderboardAgent", "User wants to view leaderboard statistics")
 
 Do not block the user if they submit the correct answer
 """,
@@ -105,6 +97,7 @@ Do not block the user if they submit the correct answer
                 submit_answer_func_tool,
                 hints_func_tool,
                 leaderboard_stats_tool,
+                help_search_tool,
             ],
         )
 

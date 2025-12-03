@@ -95,14 +95,9 @@ async def submit_answer_func(
         print(f"marker {marker}")
 
         if level_int == 9:
-            transfer_to_agent(
-                agent_name="LeaderboardAgent",
-                tool_context=tool_context,
-            )
             return f"""🎉 Congratulations! You've completed all levels! You are a CTF master!
 
-The answer is correct! You have been transferred to the leaderboard to see your ranking.
-If you haven't been transferred, just type "show me the leaderboard".
+The answer is correct! You can now view the leaderboard using the get_leaderboard_stats tool.
         {marker}
         """
         else:
@@ -406,6 +401,102 @@ async def execute_python_code(
         return error_msg
 
 
+async def help_search(question: str) -> str:
+    """
+    Search the web for information related to CTF challenges, prompt injection,
+    agents, Google ADK, RAG, and other relevant topics. This function helps
+    users find documentation, tutorials, and resources.
+
+    Args:
+        question: The question or search query about CTF, prompt injection,
+            agents, Google ADK, RAG, or related topics.
+
+    Returns:
+        A formatted string with search results including titles, URLs, and
+        snippets from relevant web pages.
+    """
+    try:
+        from duckduckgo_search import DDGS
+
+        # Build search query with context about CTF/prompt injection/ADK/RAG
+        search_query = question
+        if not any(
+            term in question.lower()
+            for term in [
+                "ctf",
+                "prompt injection",
+                "agent",
+                "adk",
+                "rag",
+                "google",
+                "lancedb",
+            ]
+        ):
+            # Add context to improve search results
+            search_query = f"{question} CTF prompt injection agents Google ADK RAG"
+
+        # Use DuckDuckGo Search API
+        with DDGS() as ddgs:
+            results = list(ddgs.text(search_query, max_results=5))
+
+        if not results:
+            return f"""No search results found for: "{question}"
+
+Try rephrasing your question or being more specific about what you're looking for.
+Topics this help function can assist with:
+- CTF challenges and prompt injection
+- Google ADK (Agent Development Kit)
+- RAG (Retrieval Augmented Generation)
+- Agent architectures
+- LanceDB
+- LLM security"""
+
+        # Format the results
+        result_parts = [f'🔍 Search results for: "{question}"\n']
+        result_parts.append(f"Found {len(results)} result(s):\n")
+
+        for idx, result in enumerate(results, 1):
+            title = result.get("title", "No title")
+            url = result.get("href", "")
+            snippet = result.get("body", "").strip()
+
+            result_parts.append(f"{idx}. **{title}**")
+            if url:
+                result_parts.append(f"   URL: {url}")
+            if snippet:
+                # Truncate long snippets
+                if len(snippet) > 200:
+                    snippet = snippet[:200] + "..."
+                result_parts.append(f"   {snippet}")
+            result_parts.append("")
+
+        return "\n".join(result_parts)
+
+    except ImportError:
+        error_msg = "duckduckgo-search package is not available"
+        logger.error(error_msg)
+        return f"""{error_msg}
+
+Please install the duckduckgo-search package to use this feature."""
+    except Exception as e:
+        error_msg = f"Error searching the web: {str(e)}"
+        logger.error(error_msg)
+        return f"""{error_msg}
+
+You can try:
+- Rephrasing your question
+- Being more specific about the topic
+- Checking the documentation directly
+
+This help function can assist with questions about:
+- CTF challenges and prompt injection techniques
+- Google ADK (Agent Development Kit) documentation
+- RAG (Retrieval Augmented Generation) systems
+- Agent architectures and design patterns
+- LanceDB vector database
+- LLM security and protection mechanisms"""
+
+
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
@@ -414,3 +505,4 @@ sql_query_tool = FunctionTool(sql_query)
 leaderboard_stats_tool = FunctionTool(get_leaderboard_stats)
 web_scrape_tool = FunctionTool(web_scrape)
 execute_python_code_tool = FunctionTool(execute_python_code)
+help_search_tool = FunctionTool(help_search)

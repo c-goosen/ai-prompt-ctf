@@ -35,6 +35,7 @@ dependencies = [
     "html-to-markdown>=0.1.0",
     "html2markdown>=0.1.7",
     "psycopg2-binary>=2.9.11",
+    "duckduckgo-search>=8.1.1",
 ]
 
 [dependency-groups]

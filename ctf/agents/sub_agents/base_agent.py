@@ -15,6 +15,8 @@ from ctf.agents.tools import (
     hints_func_tool,
     submit_answer_func_tool,
     rag_tool_func_tool,
+    leaderboard_stats_tool,
+    help_search_tool,
 )
 from google.adk.tools import FunctionTool
 from ctf.agents.model import model as model_config
@@ -48,9 +50,17 @@ class BaseCTFAgent(LlmAgent):
                 submit_answer_func_tool,
                 hints_func_tool,
                 rag_tool_func_tool,
+                leaderboard_stats_tool,
+                help_search_tool,
             ]
         else:
             final_tools = tools
+            # Always add leaderboard_stats_tool if not already present
+            if leaderboard_stats_tool not in final_tools:
+                final_tools.append(leaderboard_stats_tool)
+            # Always add help_search_tool if not already present
+            if help_search_tool not in final_tools:
+                final_tools.append(help_search_tool)
 
         super().__init__(
             name=name,
@@ -80,4 +90,6 @@ class BaseCTFAgent(LlmAgent):
             submit_answer_func_tool,
             hints_func_tool,
             rag_tool_func_tool,
+            leaderboard_stats_tool,
+            help_search_tool,
         ]
