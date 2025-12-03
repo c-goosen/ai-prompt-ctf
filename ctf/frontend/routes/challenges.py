@@ -139,16 +139,13 @@ async def get_session_history(
                             fn_resp = part["functionResponse"]
                             resp = fn_resp.get("response") or {}
                             
-                            # Handle string responses directly (e.g., from execute_python_code)
                             if isinstance(resp, str):
                                 resp_str = resp
                                 text_chunks.append(
                                     f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                     f"\n```\n{resp_str}\n```"
                                 )
-                            # Handle dict responses - check if it's a simple result dict
                             elif isinstance(resp, dict) and len(resp) == 1:
-                                # If single key with string value containing newlines, display as text
                                 key, value = next(iter(resp.items()))
                                 if isinstance(value, str) and "\n" in value:
                                     resp_str = value
@@ -157,41 +154,21 @@ async def get_session_history(
                                         f"\n```\n{resp_str}\n```"
                                     )
                                 else:
-                                    # Format as JSON for structured data
                                     resp_str = json.dumps(
                                         resp, indent=4, sort_keys=True, ensure_ascii=False
                                     )
-                                    # Redact passwords if this is from password_search_func
                                     if fn_resp.get("name") == "password_search_func":
                                         resp_str = redact_passwords_in_json(resp_str)
-                                        # Re-format JSON after redaction to ensure pretty printing
-                                        try:
-                                            resp_dict = json.loads(resp_str)
-                                            resp_str = json.dumps(
-                                                resp_dict, indent=4, sort_keys=True, ensure_ascii=False
-                                            )
-                                        except (json.JSONDecodeError, TypeError):
-                                            pass
                                     text_chunks.append(
                                         f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                         f"\n```json\n{resp_str}\n```"
                                     )
                             else:
-                                # Format as JSON for complex structures
                                 resp_str = json.dumps(
                                     resp, indent=4, sort_keys=True, ensure_ascii=False
                                 )
-                                # Redact passwords if this is from password_search_func
                                 if fn_resp.get("name") == "password_search_func":
                                     resp_str = redact_passwords_in_json(resp_str)
-                                    # Re-format JSON after redaction to ensure pretty printing
-                                    try:
-                                        resp_dict = json.loads(resp_str)
-                                        resp_str = json.dumps(
-                                            resp_dict, indent=4, sort_keys=True, ensure_ascii=False
-                                        )
-                                    except (json.JSONDecodeError, TypeError):
-                                        pass
                                 text_chunks.append(
                                     f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                     f"\n```json\n{resp_str}\n```"
