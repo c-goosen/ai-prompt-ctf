@@ -55,10 +55,26 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY --chown=appuser:appuser ./ /app
 WORKDIR /app
 
+# Install build tools temporarily for building Rust dependencies
+# (needed for packages like html-to-markdown that have Rust components)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install the project into the existing venv (dependencies already installed from builder)
 # uv sync will detect the existing venv and only install the project
 RUN uv sync --frozen --no-dev && \
     chown -R appuser:appuser /app/.venv
+
+# Remove build tools to reduce image size
+# Note: python3-dev is kept as some packages may need it at runtime
+RUN apt-get update \
+    && apt-get purge -y build-essential gcc \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/ctf/agents
 

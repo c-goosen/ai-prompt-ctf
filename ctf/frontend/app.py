@@ -142,7 +142,51 @@ async def root(
 @app.get("/health")
 @limiter.limit("1/min")
 async def health(request: Request):  # noqa: F841
-    return {"health": "ok"}
+    """Health check endpoint that verifies frontend and ADK API status"""
+    health_status = {
+        "health": "ok",
+        "status": "healthy",
+        "services": {}
+    }
+    
+    # Check ADK API connectivity
+    adk_api_url = settings.ADK_API_URL
+    adk_healthy = False
+    adk_error = None
+    
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            # Try to hit the ADK API health endpoint if available, or just check connectivity
+            try:
+                response = await client.get(f"{adk_api_url}/health")
+                if response.status_code == 200:
+                    adk_healthy = True
+            except httpx.HTTPStatusError:
+                # ADK might not have /health, try a basic endpoint
+                try:
+                    # Try to get apps list as a connectivity check
+                    response = await client.get(f"{adk_api_url}/apps", timeout=2.0)
+                    adk_healthy = response.status_code < 500
+                except Exception as e:
+                    adk_error = str(e)
+                    adk_healthy = False
+    except Exception as e:
+        adk_error = str(e)
+        adk_healthy = False
+    
+    health_status["services"]["adk_api"] = {
+        "status": "healthy" if adk_healthy else "unhealthy",
+        "url": adk_api_url,
+    }
+    if adk_error:
+        health_status["services"]["adk_api"]["error"] = adk_error
+    
+    # Overall status is unhealthy if any critical service is down
+    if not adk_healthy:
+        health_status["status"] = "degraded"
+        # Don't change "health": "ok" for backward compatibility with tests
+    
+    return health_status
 
 
 @app.get("/faq")
