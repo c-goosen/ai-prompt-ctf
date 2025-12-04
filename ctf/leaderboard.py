@@ -1,14 +1,14 @@
 """
-SQLite-backed leaderboard helpers shared between the frontend and agent tools.
+PostgreSQL-backed leaderboard helpers shared between the frontend and agent tools.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Iterator
 
 from sqlalchemy import (
@@ -26,15 +26,13 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-from ctf.app_config import settings
-
 logger = logging.getLogger(__name__)
 
 LEADERBOARD_MARKER_PREFIX = "<!--LEADERBOARD:"
 LEADERBOARD_MARKER_SUFFIX = "-->"
 LEADERBOARD_MARKER_PATTERN = r"<!--LEADERBOARD:(?P<payload>{.*?})-->"
 
-_DB_PATH_OVERRIDE: Path | None = None
+_DB_URI_OVERRIDE: str | None = None
 _ENGINE: Engine | None = None
 _SESSION_FACTORY: sessionmaker | None = None
 _SCHEMA_INITIALIZED: bool = False
@@ -50,29 +48,25 @@ class LeaderboardEntry(Base):
     completed_at = Column(DateTime(timezone=True), nullable=False, index=True)
 
 
-def configure_db_path(path: Path) -> None:
+def configure_db_uri(uri: str) -> None:
     """
-    Allow tests to override the storage path without mutating global settings.
+    Allow tests to override the database URI without mutating global settings.
     """
-    global _DB_PATH_OVERRIDE
-    _DB_PATH_OVERRIDE = Path(path)
+    global _DB_URI_OVERRIDE
+    _DB_URI_OVERRIDE = uri
     _reset_engine()
 
 
-def reset_db_path_override() -> None:
-    global _DB_PATH_OVERRIDE
-    _DB_PATH_OVERRIDE = None
+def reset_db_uri_override() -> None:
+    global _DB_URI_OVERRIDE
+    _DB_URI_OVERRIDE = None
     _reset_engine()
 
 
-def _db_path() -> Path:
-    if _DB_PATH_OVERRIDE is not None:
-        return _DB_PATH_OVERRIDE
-    return Path(settings.LEADERBOARD_DB_PATH).expanduser().resolve()
-
-
-def _ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _db_uri() -> str:
+    if _DB_URI_OVERRIDE is not None:
+        return _DB_URI_OVERRIDE
+    return os.getenv("POSTGRESS_DB_URI", "sqlite:///./leaderboard.db")
 
 
 def _reset_engine() -> None:
@@ -86,9 +80,9 @@ def _reset_engine() -> None:
 
 CREATE_TABLE_SQL = """
     CREATE TABLE IF NOT EXISTS leaderboard_entries (
-        username TEXT NOT NULL,
+        username VARCHAR(255) NOT NULL,
         level INTEGER NOT NULL,
-        completed_at TEXT NOT NULL,
+        completed_at TIMESTAMP WITH TIME ZONE NOT NULL,
         PRIMARY KEY (username, level)
     )
 """
@@ -96,13 +90,16 @@ CREATE_TABLE_SQL = """
 
 def _get_engine() -> Engine:
     global _ENGINE
-    path = _db_path()
-    _ensure_parent(path)
+    db_uri = _db_uri()
     if _ENGINE is None:
+        # Remove SQLite-specific connect_args for PostgreSQL
+        connect_args = {}
+        if db_uri.startswith("sqlite"):
+            connect_args = {"check_same_thread": False}
         _ENGINE = create_engine(
-            f"sqlite:///{path}",
+            db_uri,
             future=True,
-            connect_args={"check_same_thread": False},
+            connect_args=connect_args,
         )
     _ensure_schema(_ENGINE)
     return _ENGINE
@@ -121,12 +118,43 @@ def _migrate_legacy_tables(engine: Engine) -> None:
     """
     Standardize historical schemas (session_id or user_id based) to username-only.
     """
+    db_uri = _db_uri()
+    is_postgres = db_uri.startswith("postgresql") or db_uri.startswith("postgres")
+    
+    # Check if table exists and get column info
     with engine.begin() as conn:
-        rows = (
-            conn.execute(text("PRAGMA table_info(leaderboard_entries)"))
-            .mappings()
-            .all()
-        )
+        # Check if table exists
+        if is_postgres:
+            check_table = text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'leaderboard_entries'
+                )
+            """)
+        else:
+            check_table = text("""
+                SELECT name FROM sqlite_master 
+                WHERE type='table' AND name='leaderboard_entries'
+            """)
+        
+        table_exists = conn.execute(check_table).scalar()
+        if not table_exists:
+            return
+        
+        # Get column info
+        if is_postgres:
+            rows = conn.execute(
+                text("""
+                    SELECT column_name as name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'leaderboard_entries'
+                """)
+            ).mappings().all()
+        else:
+            rows = conn.execute(
+                text("PRAGMA table_info(leaderboard_entries)")
+            ).mappings().all()
+    
     column_names = {row["name"] for row in rows} if rows else set()
     if not column_names:
         return
@@ -152,23 +180,34 @@ def _migrate_legacy_tables(engine: Engine) -> None:
             username_column = "'unknown'"
 
     level_column = "level" if "level" in column_names else "0"
-    completed_column = (
-        "completed_at" if "completed_at" in column_names else "datetime('now')"
-    )
+    if is_postgres:
+        completed_column = (
+            "completed_at" if "completed_at" in column_names else "NOW()"
+        )
+        insert_sql = f"""
+            INSERT INTO leaderboard_entries (username, level, completed_at)
+            SELECT {username_column}::VARCHAR AS username,
+                   {level_column}::INTEGER AS level,
+                   {completed_column}::TIMESTAMP WITH TIME ZONE AS completed_at
+            FROM leaderboard_entries_old
+            WHERE {username_column} IS NOT NULL
+            ON CONFLICT (username, level) DO NOTHING
+        """
+    else:
+        completed_column = (
+            "completed_at" if "completed_at" in column_names else "datetime('now')"
+        )
+        insert_sql = f"""
+            INSERT OR IGNORE INTO leaderboard_entries (username, level, completed_at)
+            SELECT {username_column} AS username,
+                   {level_column} AS level,
+                   {completed_column} AS completed_at
+            FROM leaderboard_entries_old
+            WHERE {username_column} IS NOT NULL
+        """
 
     with engine.begin() as conn:
-        conn.execute(
-            text(
-                f"""
-                INSERT OR IGNORE INTO leaderboard_entries (username, level, completed_at)
-                SELECT {username_column} AS username,
-                       {level_column} AS level,
-                       {completed_column} AS completed_at
-                FROM leaderboard_entries_old
-                WHERE {username_column} IS NOT NULL
-                """
-            )
-        )
+        conn.execute(text(insert_sql))
         conn.execute(text("DROP TABLE leaderboard_entries_old"))
 
 

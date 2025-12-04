@@ -8,9 +8,10 @@ from ctf import leaderboard as lb
 @pytest.fixture(autouse=True)
 def isolated_leaderboard_db(tmp_path: Path):  # noqa: F811
     db_path = tmp_path / "leaderboard.db"
-    lb.configure_db_path(db_path)
+    db_uri = f"sqlite:///{db_path}"
+    lb.configure_db_uri(db_uri)
     yield
-    lb.reset_db_path_override()
+    lb.reset_db_uri_override()
 
 
 def test_strip_leaderboard_markers():  # noqa: F841
