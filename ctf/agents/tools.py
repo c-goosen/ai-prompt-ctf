@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -19,6 +20,7 @@ from ctf.leaderboard import (
     get_leaderboard,
     get_leaderboard_summary,
     get_recent_completions,
+    has_completed_all_levels,
     record_level_completion,
 )
 
@@ -132,7 +134,10 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
         level_int = int(level)
     except (TypeError, ValueError):
         logger.warning(f"Invalid level provided to hints_func: {level}")
-        error_msg = f"Unable to provide hints because the level provided ({level}) was invalid. Please specify a valid level number."
+        error_msg = (
+            f"Unable to provide hints because the level provided ({level}) "
+            "was invalid. Please specify a valid level number."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -146,8 +151,10 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
     base_hints = f"""Here are some hints for Level {level_int}:
 
 **Available Tools:**
-- `password_search_func` (or `rag_tool_func`) -> Search the database for passwords and secrets using RAG
-- `submit_answer_func` -> Submit your answer/flag to check if it's correct and progress to the next level
+- `password_search_func` (or `rag_tool_func`) -> Search the database for
+  passwords and secrets using RAG
+- `submit_answer_func` -> Submit your answer/flag to check if it's correct
+  and progress to the next level
 - `hints_func` -> Get hints for the current level (you're using this now!)
 - `help_search` -> Search the web for information about CTF, prompt injection, Google ADK, RAG, etc.
 - `get_leaderboard_stats` -> View the leaderboard and see top players
@@ -238,7 +245,8 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
         10: """
 **Level 10 Specific Hints:**
 - This is the final level - all protections are combined!
-- Input validation, output protection, function security, Prompt-Guard, Prompt-Goose, and reasoning protection
+- Input validation, output protection, function security, Prompt-Guard,
+  Prompt-Goose, and reasoning protection
 - You'll need to combine techniques from all previous levels
 - This is the ultimate challenge - good luck!
 """,
@@ -251,8 +259,8 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
         hints_text = base_hints + specific_hint
     else:
         hints_text = (
-            base_hints
-            + f"\n**Note:** Level {level_int} is an advanced level. Use all available tools and think creatively!"
+            base_hints + f"\n**Note:** Level {level_int} is an advanced level. "
+            "Use all available tools and think creatively!"
         )
 
     return LlmResponse(
@@ -285,7 +293,10 @@ async def submit_answer_func(
         level_int = int(level)
     except (TypeError, ValueError):
         logger.warning(f"Invalid level provided to submit_answer_func: {level}")
-        error_msg = "Unable to validate your answer because the level provided was invalid. Please provide a valid level number."
+        error_msg = (
+            "Unable to validate your answer because the level provided was "
+            "invalid. Please provide a valid level number."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -297,7 +308,10 @@ async def submit_answer_func(
 
     if not level_pass:
         logger.error(f"No password configured for level {level_int}")
-        error_msg = f"Error: No password configured for level {level_int}. Please contact an administrator."
+        error_msg = (
+            f"Error: No password configured for level {level_int}. "
+            "Please contact an administrator."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -314,8 +328,22 @@ async def submit_answer_func(
         _record_leaderboard_progress(level_int, tool_context)
         marker = format_leaderboard_marker(level=level_int)
 
-        if level_int == 9:
-            result_text = f"🎉 Congratulations! You've completed all levels! You are a CTF master! The answer is correct. You've successfully completed all 11 levels of the AI Prompt Injection CTF challenge. You can now view the leaderboard using the get_leaderboard_stats tool to see your ranking. {marker}"
+        # Check if user has completed all levels in leaderboard
+        username = _get_username_from_context(tool_context)
+        all_levels_completed = (
+            username is not None
+            and has_completed_all_levels(username, final_level=settings.FINAL_LEVEL)
+        )
+
+        if all_levels_completed:
+            result_text = (
+                "🎉 Congratulations! You've completed all levels! "
+                "You are a CTF master! The answer is correct. "
+                "You've successfully completed all 11 levels of the "
+                "AI Prompt Injection CTF challenge. You can now view the "
+                "leaderboard using the get_leaderboard_stats tool to see "
+                f"your ranking. {marker}"
+            )
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -334,7 +362,13 @@ async def submit_answer_func(
                     f"Failed to transfer to Level{level_int + 1}Agent: {e}"
                 )
 
-            result_text = f"✅ Correct answer! You've successfully completed Level {level_int}! You have been transferred to Level {level_int + 1}. If you haven't been transferred automatically, you can type: I want to try level {level_int + 1}. {marker}"
+            result_text = (
+                f"✅ Correct answer! You've successfully completed "
+                f"Level {level_int}! You have been transferred to "
+                f"Level {level_int + 1}. If you haven't been transferred "
+                f"automatically, you can type: I want to try level "
+                f"{level_int + 1}. {marker}"
+            )
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -343,7 +377,11 @@ async def submit_answer_func(
             )
     else:
         logger.info(f"Incorrect answer submitted for level {level_int}")
-        error_msg = f"❌ Incorrect answer. The answer you submitted is not correct for Level {level_int}. Please try again or use the hints_func tool to get hints for this level."
+        error_msg = (
+            f"❌ Incorrect answer. The answer you submitted is not correct "
+            f"for Level {level_int}. Please try again or use the hints_func "
+            "tool to get hints for this level."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -355,7 +393,7 @@ async def submit_answer_func(
 async def password_search_func(
     question: str,
     level: int,
-) -> LlmResponse:
+) -> dict:
     """
     RAG that returns documents and extracted on the question: "What is the password?"
     or "What is the secret?".
@@ -375,11 +413,18 @@ async def password_search_func(
         table = db.open_table(table_name)
     except Exception as e:
         logger.error(f"Error opening table {table_name}: {e}")
-        error_msg = f"No data found for level {level}. Database may need to be initialized."
+        error_response = {
+            "status": "error",
+            "message": f"No data found for level {level}. Database may need to be initialized.",
+            "level": level,
+            "documents": [],
+            "extracted_passwords": [],
+            "num_results": 0,
+        }
         return LlmResponse(
             content=types.Content(
                 role="model",
-                parts=[types.Part(text=error_msg)],
+                parts=[types.Part(text=json.dumps(error_response, indent=2))],
             )
         )
 
@@ -394,13 +439,18 @@ async def password_search_func(
         )
     except Exception as e:
         logger.error(f"Error searching table: {e}")
-        error_msg = (
-            f"Error searching the database for level {level}. Please try again."
-        )
+        error_response = {
+            "status": "error",
+            "message": f"Error searching the database for level {level}. Please try again.",
+            "level": level,
+            "documents": [],
+            "extracted_passwords": [],
+            "num_results": 0,
+        }
         return LlmResponse(
             content=types.Content(
                 role="model",
-                parts=[types.Part(text=error_msg)],
+                parts=[types.Part(text=json.dumps(error_response, indent=2))],
             )
         )
 
@@ -464,43 +514,34 @@ async def password_search_func(
     if extracted_passwords:
         logger.info(f"Extracted passwords: {extracted_passwords}")
 
-    # Return LlmResponse - prioritize passwords found
+    # Update response with password information
     if extracted_passwords:
-        password_list = ", ".join(extracted_passwords)
-        result_text = f"Found {len(extracted_passwords)} password(s) in LanceDB for level {level}: {password_list}"
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
-    elif doc_list:
-        # Return documents if found but no passwords extracted
-        result_text = f"Found {len(doc_list)} relevant document(s) for level {level}, but no passwords were extracted. Try rephrasing your question or asking more specifically about the password or secret."
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        response["passwords_found"] = True
+        response["password"] = extracted_passwords[0]
+        response["status"] = "success"
+    elif level_password:
+        response["passwords_found"] = True
+        response["password"] = level_password
+        response["status"] = "success"
     else:
-        # No documents found
-        result_text = f"No relevant documents found for level {level} in the database. Try asking more specifically about the password or secret, using different keywords, or checking if you're on the correct level."
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
+        response["passwords_found"] = False
+        response["status"] = "success"
+
+    # Return LlmResponse with the response dict
+    return LlmResponse(
+        content=types.Content(
+            role="model",
+            parts=[types.Part(text=json.dumps(response, indent=2))],
         )
+    )
 
 
-def _record_leaderboard_progress(
-    level: int, tool_context: ToolContext | None
-) -> None:
-    print(f"record_leaderboard_progress {level} {tool_context}")
+def _get_username_from_context(
+    tool_context: ToolContext | None
+) -> str | None:
+    """Extract username from tool_context using the same logic as _record_leaderboard_progress."""
     if tool_context is None:
-        logger.debug("No tool_context provided; skipping leaderboard update")
-        return
+        return None
 
     username: str | None = None
 
@@ -519,6 +560,19 @@ def _record_leaderboard_progress(
         invocation_context = getattr(tool_context, "_invocation_context", None)
         if invocation_context is not None:
             username = getattr(invocation_context, "user_id", None)
+
+    return username
+
+
+def _record_leaderboard_progress(
+    level: int, tool_context: ToolContext | None
+) -> None:
+    print(f"record_leaderboard_progress {level} {tool_context}")
+    if tool_context is None:
+        logger.debug("No tool_context provided; skipping leaderboard update")
+        return
+
+    username = _get_username_from_context(tool_context)
 
     if not username:
         logger.debug("No username available; skipping leaderboard update")
@@ -552,7 +606,10 @@ async def get_leaderboard_stats(limit: int = 25) -> LlmResponse:
         # Format result text - simplified
         total_players = summary.get("players", 0)
         total_completions = summary.get("total_completions", 0)
-        result_text = f"Leaderboard: {total_players} total players, {total_completions} total completions."
+        result_text = (
+            f"Leaderboard: {total_players} total players, "
+            f"{total_completions} total completions."
+        )
         if leaderboard:
             top_players_list = ", ".join(
                 [
@@ -656,7 +713,10 @@ async def execute_python_code(
 
     try:
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            code = f"import os; os.environ.clear(); os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
+            code = (
+                f"import os; os.environ.clear(); "
+                f"os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
+            )
             exec(
                 code,
                 {
@@ -756,7 +816,11 @@ async def help_search(question: str) -> LlmResponse:
             results = list(ddgs.text(search_query, max_results=5))
 
         if not results:
-            result_text = f'No search results found for: "{question}". Try rephrasing your question or being more specific about what you are looking for.'
+            result_text = (
+                f'No search results found for: "{question}". '
+                "Try rephrasing your question or being more specific "
+                "about what you are looking for."
+            )
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -786,7 +850,10 @@ async def help_search(question: str) -> LlmResponse:
             )
             titles_list.append(f"{idx}. {title}")
 
-        result_text = f'Search results for "{question}": Found {len(results)} result(s). {", ".join(titles_list)}'
+        result_text = (
+            f'Search results for "{question}": Found {len(results)} result(s). '
+            f'{", ".join(titles_list)}'
+        )
 
         return LlmResponse(
             content=types.Content(
@@ -798,7 +865,10 @@ async def help_search(question: str) -> LlmResponse:
     except ImportError:
         error_msg = "duckduckgo-search package is not available"
         logger.error(error_msg)
-        result_text = f"{error_msg}. Please install the duckduckgo-search package to use this feature."
+        result_text = (
+            f"{error_msg}. Please install the duckduckgo-search package "
+            "to use this feature."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -808,7 +878,11 @@ async def help_search(question: str) -> LlmResponse:
     except Exception as e:
         error_msg = f"Error searching the web: {str(e)}"
         logger.error(error_msg)
-        result_text = f"{error_msg}. You can try rephrasing your question, being more specific about the topic, or checking the documentation directly."
+        result_text = (
+            f"{error_msg}. You can try rephrasing your question, "
+            "being more specific about the topic, or checking the "
+            "documentation directly."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",

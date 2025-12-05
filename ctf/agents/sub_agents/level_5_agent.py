@@ -11,6 +11,10 @@ from ctf.agents.sub_agents.base_agent import BaseCTFAgent
 from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
 from ctf.agents.tools import (
     sql_query_tool,
+    hints_func_tool,
+    help_search_tool,
+    submit_answer_func_tool,
+    leaderboard_stats_tool,
 )
 
 
@@ -33,10 +37,6 @@ class Level5Agent(BaseCTFAgent):
         super().__init__(
             level=5,
             system_prompt=system_prompt,
-            name="Level6Agent",
+            name="Level5Agent",
+            tools=[sql_query_tool, hints_func_tool, help_search_tool, submit_answer_func_tool, leaderboard_stats_tool],
         )
-
-    def get_base_tools(self):
-        """Extend base tools with SQL query tool for Level 5."""
-        base_tools = super().get_base_tools()
-        return base_tools + [sql_query_tool]

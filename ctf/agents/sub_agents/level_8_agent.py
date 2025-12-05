@@ -28,7 +28,7 @@ class Level8Agent(BaseCTFAgent):
 
         You have access to code execution capabilities via the execute_python_code tool.
         This tool will generate python code to execute the user's request.
-        
+
         Use the execute_python_code tool to run and test Python code locally.
         """
         )

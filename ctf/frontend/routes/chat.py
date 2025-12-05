@@ -15,7 +15,10 @@ from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
 from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
-from ctf.frontend.utils import redact_passwords_in_json
+from ctf.frontend.utils import (
+    redact_passwords_in_json,
+    redact_passwords_in_text,
+)
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -283,6 +286,9 @@ async def chat_completion(
                 role_hint = content.get("role") or event.get("author")
                 text_chunks: list[str] = []
 
+                # Track if this event contains password_search_func response
+                has_password_search = False
+
                 for part in parts:
                     if isinstance(part, dict):
                         if "text" in part:
@@ -304,9 +310,10 @@ async def chat_completion(
                             resp_str = json.dumps(
                                 resp, indent=2, sort_keys=True
                             )
-                            # Redact passwords if this is from password_search_func
+                            # Track if this is from password_search_func
                             if fn_resp.get("name") == "password_search_func":
-                                resp_str = redact_passwords_in_json(resp_str)
+                                has_password_search = True
+                                # resp_str = redact_passwords_in_json(resp_str)
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"
@@ -320,6 +327,20 @@ async def chat_completion(
                 ).strip()
                 if not text:
                     continue
+
+                # Redact passwords in the final text if this came from password_search_func
+                # Check if any functionResponse in this event was from password_search_func
+                has_password_search = any(
+                    (
+                        isinstance(p, dict)
+                        and "functionResponse" in p
+                        and p.get("functionResponse", {}).get("name")
+                        == "password_search_func"
+                    )
+                    for p in parts
+                )
+                if has_password_search:
+                    text = redact_passwords_in_text(text)
 
                 role = _normalize_role(role_hint)
                 response_messages.append({"role": role, "text": text})

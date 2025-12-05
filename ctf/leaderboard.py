@@ -130,7 +130,7 @@ def _migrate_legacy_tables(engine: Engine) -> None:
             check_table = text(
                 """
                 SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
+                    SELECT FROM information_schema.tables
                     WHERE table_name = 'leaderboard_entries'
                 )
             """
@@ -138,7 +138,7 @@ def _migrate_legacy_tables(engine: Engine) -> None:
         else:
             check_table = text(
                 """
-                SELECT name FROM sqlite_master 
+                SELECT name FROM sqlite_master
                 WHERE type='table' AND name='leaderboard_entries'
             """
             )
@@ -153,8 +153,8 @@ def _migrate_legacy_tables(engine: Engine) -> None:
                 conn.execute(
                     text(
                         """
-                    SELECT column_name as name 
-                    FROM information_schema.columns 
+                    SELECT column_name as name
+                    FROM information_schema.columns
                     WHERE table_name = 'leaderboard_entries'
                 """
                     )
@@ -397,3 +397,35 @@ def get_leaderboard_summary() -> dict:
     except SQLAlchemyError as exc:
         logger.warning("Failed to load leaderboard summary: %s", exc)
         return {"players": 0, "total_completions": 0}
+
+
+def has_completed_all_levels(username: str, final_level: int = 10) -> bool:
+    """
+    Check if a user has completed all levels (0 through final_level).
+
+    Args:
+        username: The username to check
+        final_level: The highest level number (default 10, so checks 0-10)
+
+    Returns:
+        True if the user has completed all levels, False otherwise
+    """
+    if not username:
+        return False
+    try:
+        with _session_scope() as session:
+            # Count distinct levels completed by this user
+            stmt = (
+                select(func.count(distinct(LeaderboardEntry.level)))
+                .where(LeaderboardEntry.username == username)
+            )
+            completed_count = session.execute(stmt).scalar() or 0
+            # User needs to complete levels 0 through final_level (inclusive)
+            # That's (final_level + 1) total levels
+            expected_count = final_level + 1
+            return completed_count >= expected_count
+    except SQLAlchemyError as exc:
+        logger.warning(
+            "Failed to check if user completed all levels: %s", exc
+        )
+        return False

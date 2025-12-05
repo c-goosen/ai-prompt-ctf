@@ -39,7 +39,10 @@ async def create_session(
         response.raise_for_status()
         return True, f"Session {session_id} created"
     except httpx.HTTPStatusError as e:
-        return False, f"Failed to create session {session_id}: {e.response.status_code} - {e.response.text}"
+        return (
+            False,
+            f"Failed to create session {session_id}: {e.response.status_code} - {e.response.text}",
+        )
     except Exception as e:
         return False, f"Error creating session {session_id}: {str(e)}"
 
@@ -108,7 +111,9 @@ async def test_session(session_num: int) -> dict:
 
         for i, result in enumerate(hi_results):
             if isinstance(result, Exception):
-                results["errors"].append(f"Hi message {i+1} exception: {str(result)}")
+                results["errors"].append(
+                    f"Hi message {i+1} exception: {str(result)}"
+                )
             else:
                 success, msg, response_data = result
                 results["hi_messages"].append(
@@ -175,7 +180,11 @@ async def main():
         session_id = result["session_id"]
         session_ok = result["session_created"]
         hi_count = len([m for m in result["hi_messages"] if m["success"]])
-        level_ok = result["level_message"]["success"] if result["level_message"] else False
+        level_ok = (
+            result["level_message"]["success"]
+            if result["level_message"]
+            else False
+        )
 
         if session_ok and hi_count == NUM_HI_MESSAGES and level_ok:
             successful_sessions += 1
@@ -205,10 +214,16 @@ async def main():
     print(f"\n📈 Summary:")
     print(f"   Total time: {elapsed:.2f} seconds")
     print(f"   Successful sessions: {successful_sessions}/{NUM_SESSIONS}")
-    print(f"   Successful hi messages: {successful_hi_messages}/{total_hi_messages}")
-    print(f"   Successful level messages: {successful_level_messages}/{NUM_SESSIONS}")
+    print(
+        f"   Successful hi messages: {successful_hi_messages}/{total_hi_messages}"
+    )
+    print(
+        f"   Successful level messages: {successful_level_messages}/{NUM_SESSIONS}"
+    )
     print(f"   Total errors: {total_errors}")
-    print(f"   Messages per second: {(total_hi_messages + NUM_SESSIONS) / elapsed:.2f}")
+    print(
+        f"   Messages per second: {(total_hi_messages + NUM_SESSIONS) / elapsed:.2f}"
+    )
 
     if successful_sessions == NUM_SESSIONS:
         print("\n✅ All tests passed!")
@@ -218,4 +233,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
