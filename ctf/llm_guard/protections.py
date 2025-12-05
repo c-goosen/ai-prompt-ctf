@@ -83,4 +83,3 @@ async def llm_protection(model: object, labels: list, input: str = "") -> bool:
             protected = True
     print(f"resp --> {resp}")
     return protected
-

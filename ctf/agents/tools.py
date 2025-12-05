@@ -46,20 +46,20 @@ async def sql_query(
     try:
         connection_obj = sqlite3.connect("users.db")
         cursor_obj = connection_obj.cursor()
-        
+
         # Get column names first
         cursor_obj.execute("PRAGMA table_info(Users)")
         columns = [col[1] for col in cursor_obj.fetchall()]
-        
+
         # WARNING: This is intentionally vulnerable to SQL injection for CTF purposes
         query = "SELECT * FROM Users WHERE UserId = " + user_id + ";"
         logger.info(f"Executing SQL query: {query}")
-        
+
         cursor_obj.execute(query)
         output = cursor_obj.fetchall()
         cursor_obj.close()
         connection_obj.close()
-        
+
         if not output:
             result_text = f"No users found with UserId: {user_id}"
             return LlmResponse(
@@ -68,7 +68,7 @@ async def sql_query(
                     parts=[types.Part(text=result_text)],
                 )
             )
-        
+
         # Format the results
         formatted_results = []
         for row in output:
@@ -76,7 +76,7 @@ async def sql_query(
             for col, val in zip(columns, row):
                 user_data[col] = val
             formatted_results.append(user_data)
-        
+
         if len(output) == 1:
             result_text = f"Found user with UserId: {user_id}"
             return LlmResponse(
@@ -93,7 +93,7 @@ async def sql_query(
                     parts=[types.Part(text=result_text)],
                 )
             )
-            
+
     except sqlite3.Error as e:
         error_msg = f"Database error: {str(e)}"
         logger.error(error_msg)
@@ -246,12 +246,15 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
 
     # Combine base hints with level-specific hints
     specific_hint = level_specific_hints.get(level_int, "")
-    
+
     if specific_hint:
         hints_text = base_hints + specific_hint
     else:
-        hints_text = base_hints + f"\n**Note:** Level {level_int} is an advanced level. Use all available tools and think creatively!"
-    
+        hints_text = (
+            base_hints
+            + f"\n**Note:** Level {level_int} is an advanced level. Use all available tools and think creatively!"
+        )
+
     return LlmResponse(
         content=types.Content(
             role="model",
@@ -291,7 +294,7 @@ async def submit_answer_func(
         )
 
     level_pass = settings.PASSWORDS.get(level_int)
-    
+
     if not level_pass:
         logger.error(f"No password configured for level {level_int}")
         error_msg = f"Error: No password configured for level {level_int}. Please contact an administrator."
@@ -302,8 +305,10 @@ async def submit_answer_func(
             )
         )
 
-    logger.info(f"Answer submitted for level {level_int}: {answer[:20]}... (password: {level_pass[:20]}...)")
-    
+    logger.info(
+        f"Answer submitted for level {level_int}: {answer[:20]}... (password: {level_pass[:20]}...)"
+    )
+
     if answer == level_pass:
         logger.info(f"Correct answer submitted for level {level_int}")
         _record_leaderboard_progress(level_int, tool_context)
@@ -325,8 +330,10 @@ async def submit_answer_func(
                 )
                 logger.info(f"Transferred user to Level{level_int + 1}Agent")
             except Exception as e:
-                logger.warning(f"Failed to transfer to Level{level_int + 1}Agent: {e}")
-            
+                logger.warning(
+                    f"Failed to transfer to Level{level_int + 1}Agent: {e}"
+                )
+
             result_text = f"✅ Correct answer! You've successfully completed Level {level_int}! You have been transferred to Level {level_int + 1}. If you haven't been transferred automatically, you can type: I want to try level {level_int + 1}. {marker}"
             return LlmResponse(
                 content=types.Content(
@@ -387,7 +394,9 @@ async def password_search_func(
         )
     except Exception as e:
         logger.error(f"Error searching table: {e}")
-        error_msg = f"Error searching the database for level {level}. Please try again."
+        error_msg = (
+            f"Error searching the database for level {level}. Please try again."
+        )
         return LlmResponse(
             content=types.Content(
                 role="model",
@@ -545,16 +554,20 @@ async def get_leaderboard_stats(limit: int = 25) -> LlmResponse:
         total_completions = summary.get("total_completions", 0)
         result_text = f"Leaderboard: {total_players} total players, {total_completions} total completions."
         if leaderboard:
-            top_players_list = ", ".join([
-                f"{entry.get('username', 'Unknown')} ({entry.get('levels_completed', 0)}/11)"
-                for entry in leaderboard[:5]
-            ])
+            top_players_list = ", ".join(
+                [
+                    f"{entry.get('username', 'Unknown')} ({entry.get('levels_completed', 0)}/11)"
+                    for entry in leaderboard[:5]
+                ]
+            )
             result_text += f" Top players: {top_players_list}."
         if recent:
-            recent_list = ", ".join([
-                f"{entry.get('username', 'Unknown')} (Level {entry.get('level', 0)})"
-                for entry in recent[:3]
-            ])
+            recent_list = ", ".join(
+                [
+                    f"{entry.get('username', 'Unknown')} (Level {entry.get('level', 0)})"
+                    for entry in recent[:3]
+                ]
+            )
             result_text += f" Recent completions: {recent_list}."
 
         return LlmResponse(
@@ -637,20 +650,29 @@ async def execute_python_code(
     from contextlib import redirect_stdout, redirect_stderr
 
     password = settings.PASSWORDS.get(level, "")
-    
+
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
-    
+
     try:
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
             code = f"import os; os.environ.clear(); os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
-            exec(code, {"__builtins__": __builtins__, "os": os, "__name__": "__main__"})
-        
+            exec(
+                code,
+                {
+                    "__builtins__": __builtins__,
+                    "os": os,
+                    "__name__": "__main__",
+                },
+            )
+
         stdout_output = stdout_capture.getvalue()
         stderr_output = stderr_capture.getvalue()
-        
+
         if stderr_output:
-            result_text = f"Code execution produced errors: {stderr_output[:200]}"
+            result_text = (
+                f"Code execution produced errors: {stderr_output[:200]}"
+            )
             if stdout_output:
                 result_text = f"Output: {stdout_output[:100]}. Errors: {stderr_output[:200]}"
             return LlmResponse(
@@ -660,7 +682,9 @@ async def execute_python_code(
                 )
             )
         elif stdout_output:
-            result_text = f"Code executed successfully. Output: {stdout_output[:500]}"
+            result_text = (
+                f"Code executed successfully. Output: {stdout_output[:500]}"
+            )
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -675,7 +699,7 @@ async def execute_python_code(
                     parts=[types.Part(text=result_text)],
                 )
             )
-    
+
     except Exception as e:
         error_msg = f"Error executing code: {str(e)}"
         logger.error(error_msg)
@@ -723,7 +747,9 @@ async def help_search(question: str) -> LlmResponse:
             ]
         ):
             # Add context to improve search results
-            search_query = f"{question} CTF prompt injection agents Google ADK RAG"
+            search_query = (
+                f"{question} CTF prompt injection agents Google ADK RAG"
+            )
 
         # Use DuckDuckGo Search API
         with DDGS() as ddgs:
@@ -745,17 +771,19 @@ async def help_search(question: str) -> LlmResponse:
             title = result.get("title", "No title")
             url = result.get("href", "")
             snippet = result.get("body", "").strip()
-            
+
             # Truncate long snippets
             if snippet and len(snippet) > 200:
                 snippet = snippet[:200] + "..."
-            
-            formatted_results.append({
-                "rank": idx,
-                "title": title,
-                "url": url,
-                "snippet": snippet,
-            })
+
+            formatted_results.append(
+                {
+                    "rank": idx,
+                    "title": title,
+                    "url": url,
+                    "snippet": snippet,
+                }
+            )
             titles_list.append(f"{idx}. {title}")
 
         result_text = f'Search results for "{question}": Found {len(results)} result(s). {", ".join(titles_list)}'

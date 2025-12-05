@@ -6,18 +6,18 @@
 <!--<img src="{{ url_for('static', path='images/jb.png') }}" alt="">-->
 <div class="faq">
     {% if MD_FILE %}
-    <div class="chat-bubble">
-        <md-block>
-        {{ MD_FILE | safe }}
-        </md-block>
-    </div>
+        <div class="chat-bubble">
+            <md-block>
+            {{ MD_FILE | safe }}
+            </md-block>
+        </div>
     {% else %}
-    <div class="chat-bubble">
+        <div class="chat-bubble">
             <md-block src="{{ BASE_DIR }}/CHALLENGES.MD">
-                    {{ MD_FILE | safe }}
-                </md-block>
-            </div>
-        {% endif %}
+            {{ MD_FILE | safe }}
+            </md-block>
+        </div>
+    {% endif %}
 </div>
 <div class="disclaimer">
     <u> PwnGPT V1</u>. All your AGI belong to us. Christo Goosen christogoosen@gmail.com

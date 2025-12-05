@@ -47,7 +47,9 @@ class CTFCoordinatorAgent(LlmAgent):
             Level10Agent,
         ]
 
-        db_url = os.getenv("POSTGRESS_DB_URI", "sqlite://./ai_ctf_agent_session_data.db")
+        db_url = os.getenv(
+            "POSTGRESS_DB_URI", "sqlite://./ai_ctf_agent_session_data.db"
+        )
         print(f"DB URL: {db_url}")
         session_service = DatabaseSessionService(db_url=db_url)
 

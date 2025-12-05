@@ -119,42 +119,56 @@ def _migrate_legacy_tables(engine: Engine) -> None:
     Standardize historical schemas (session_id or user_id based) to username-only.
     """
     db_uri = _db_uri()
-    is_postgres = db_uri.startswith("postgresql") or db_uri.startswith("postgres")
-    
+    is_postgres = db_uri.startswith("postgresql") or db_uri.startswith(
+        "postgres"
+    )
+
     # Check if table exists and get column info
     with engine.begin() as conn:
         # Check if table exists
         if is_postgres:
-            check_table = text("""
+            check_table = text(
+                """
                 SELECT EXISTS (
                     SELECT FROM information_schema.tables 
                     WHERE table_name = 'leaderboard_entries'
                 )
-            """)
+            """
+            )
         else:
-            check_table = text("""
+            check_table = text(
+                """
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name='leaderboard_entries'
-            """)
-        
+            """
+            )
+
         table_exists = conn.execute(check_table).scalar()
         if not table_exists:
             return
-        
+
         # Get column info
         if is_postgres:
-            rows = conn.execute(
-                text("""
+            rows = (
+                conn.execute(
+                    text(
+                        """
                     SELECT column_name as name 
                     FROM information_schema.columns 
                     WHERE table_name = 'leaderboard_entries'
-                """)
-            ).mappings().all()
+                """
+                    )
+                )
+                .mappings()
+                .all()
+            )
         else:
-            rows = conn.execute(
-                text("PRAGMA table_info(leaderboard_entries)")
-            ).mappings().all()
-    
+            rows = (
+                conn.execute(text("PRAGMA table_info(leaderboard_entries)"))
+                .mappings()
+                .all()
+            )
+
     column_names = {row["name"] for row in rows} if rows else set()
     if not column_names:
         return
@@ -195,7 +209,9 @@ def _migrate_legacy_tables(engine: Engine) -> None:
         """
     else:
         completed_column = (
-            "completed_at" if "completed_at" in column_names else "datetime('now')"
+            "completed_at"
+            if "completed_at" in column_names
+            else "datetime('now')"
         )
         insert_sql = f"""
             INSERT OR IGNORE INTO leaderboard_entries (username, level, completed_at)

@@ -128,7 +128,10 @@ async def get_session_history(
                             call = part["functionCall"]
                             args = call.get("args") or {}
                             args_str = json.dumps(
-                                args, indent=4, sort_keys=True, ensure_ascii=False
+                                args,
+                                indent=4,
+                                sort_keys=True,
+                                ensure_ascii=False,
                             )
                             text_chunks.append(
                                 f"Function call `{call.get('name', 'unknown')}`"
@@ -138,7 +141,7 @@ async def get_session_history(
                         elif "functionResponse" in part:
                             fn_resp = part["functionResponse"]
                             resp = fn_resp.get("response") or {}
-                            
+
                             if isinstance(resp, str):
                                 resp_str = resp
                                 text_chunks.append(
@@ -155,20 +158,36 @@ async def get_session_history(
                                     )
                                 else:
                                     resp_str = json.dumps(
-                                        resp, indent=4, sort_keys=True, ensure_ascii=False
+                                        resp,
+                                        indent=4,
+                                        sort_keys=True,
+                                        ensure_ascii=False,
                                     )
-                                    if fn_resp.get("name") == "password_search_func":
-                                        resp_str = redact_passwords_in_json(resp_str)
+                                    if (
+                                        fn_resp.get("name")
+                                        == "password_search_func"
+                                    ):
+                                        resp_str = redact_passwords_in_json(
+                                            resp_str
+                                        )
                                     text_chunks.append(
                                         f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                         f"\n```json\n{resp_str}\n```"
                                     )
                             else:
                                 resp_str = json.dumps(
-                                    resp, indent=4, sort_keys=True, ensure_ascii=False
+                                    resp,
+                                    indent=4,
+                                    sort_keys=True,
+                                    ensure_ascii=False,
                                 )
-                                if fn_resp.get("name") == "password_search_func":
-                                    resp_str = redact_passwords_in_json(resp_str)
+                                if (
+                                    fn_resp.get("name")
+                                    == "password_search_func"
+                                ):
+                                    resp_str = redact_passwords_in_json(
+                                        resp_str
+                                    )
                                 text_chunks.append(
                                     f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                     f"\n```json\n{resp_str}\n```"
