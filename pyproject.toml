@@ -48,7 +48,7 @@ dev = [
     "flake8>=6.1.0,<7",
     "flake8-bugbear>=23.12.2,<24",
     "bandit>=1.8.3,<2",
-    "pytest-cov>=4.1.0,<5",
+    "pytest-cov>=4.1.0,<8",
     "uvicorn>=0.34.0,<0.35",
     "setuptools>=70.0.0,<71",
     "huggingface-hub==0.35.3",
