@@ -311,13 +311,13 @@ wheels = [
 
 [[package]]
 name = "datasets"
-version = "2.21.0"
+version = "4.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "aiohttp" },
     { name = "dill" },
     { name = "filelock" },
     { name = "fsspec", extra = ["http"] },
+    { name = "httpx" },
     { name = "huggingface-hub" },
     { name = "multiprocess" },
     { name = "numpy" },
@@ -329,9 +329,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e5/a5/38719e5cff7aa0537a6be37d21cc1fdd7096e9565e8fce2d46a822e10b5b/datasets-2.21.0.tar.gz", hash = "sha256:998f85a8460f1bd982e5bd058f8a0808eef424249e3df1e8cdd594ccd0dc8ba2", size = 2215317, upload-time = "2024-08-14T06:40:44.314Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/93/bf/0dae295d6d1ba0b1a200a9dd216838464b5bbd05da01407cb1330b377445/datasets-4.4.1.tar.gz", hash = "sha256:80322699aa8c0bbbdb7caa87906da689c3c2e29523cff698775c67f28fdab1fc", size = 585341, upload-time = "2025-11-05T16:00:38.162Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/72/b3/33c4ad44fa020e3757e9b2fad8a5de53d9079b501e6bbc45bdd18f82f893/datasets-2.21.0-py3-none-any.whl", hash = "sha256:25e4e097110ce28824b746a107727ada94024cba11db8bc588d468414692b65a", size = 527251, upload-time = "2024-08-14T06:40:39.612Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/5e/6f8d874366788ad5d549e9ba258037d974dda6e004843be1bda794571701/datasets-4.4.1-py3-none-any.whl", hash = "sha256:c1163de5211e42546079ab355cc0250c7e6db16eb209ac5ac6252f801f596c44", size = 511591, upload-time = "2025-11-05T16:00:36.365Z" },
 ]
 
 [[package]]
@@ -1050,7 +1050,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.5.2,<2" },
-    { name = "datasets", specifier = ">=2.15.0,<3" },
+    { name = "datasets", specifier = ">=2.15.0,<5" },
     { name = "evaluate", specifier = ">=0.4.1,<0.5" },
     { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.30.2,<0.31" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
