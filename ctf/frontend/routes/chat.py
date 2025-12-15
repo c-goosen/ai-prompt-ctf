@@ -16,7 +16,7 @@ from fastapi.templating import Jinja2Templates
 from ctf.app_config import settings
 from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
 from ctf.frontend.utils import (
-    redact_passwords_in_json,
+    redact_passwords_in_json,  # noqa: F401
     redact_passwords_in_text,
 )
 
