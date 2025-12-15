@@ -415,9 +415,8 @@ def has_completed_all_levels(username: str, final_level: int = 10) -> bool:
     try:
         with _session_scope() as session:
             # Count distinct levels completed by this user
-            stmt = (
-                select(func.count(distinct(LeaderboardEntry.level)))
-                .where(LeaderboardEntry.username == username)
+            stmt = select(func.count(distinct(LeaderboardEntry.level))).where(
+                LeaderboardEntry.username == username
             )
             completed_count = session.execute(stmt).scalar() or 0
             # User needs to complete levels 0 through final_level (inclusive)
@@ -425,7 +424,5 @@ def has_completed_all_levels(username: str, final_level: int = 10) -> bool:
             expected_count = final_level + 1
             return completed_count >= expected_count
     except SQLAlchemyError as exc:
-        logger.warning(
-            "Failed to check if user completed all levels: %s", exc
-        )
+        logger.warning("Failed to check if user completed all levels: %s", exc)
         return False

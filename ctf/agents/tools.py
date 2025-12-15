@@ -332,7 +332,9 @@ async def submit_answer_func(
         username = _get_username_from_context(tool_context)
         all_levels_completed = (
             username is not None
-            and has_completed_all_levels(username, final_level=settings.FINAL_LEVEL)
+            and has_completed_all_levels(
+                username, final_level=settings.FINAL_LEVEL
+            )
         )
 
         if all_levels_completed:
@@ -536,9 +538,7 @@ async def password_search_func(
     )
 
 
-def _get_username_from_context(
-    tool_context: ToolContext | None
-) -> str | None:
+def _get_username_from_context(tool_context: ToolContext | None) -> str | None:
     """Extract username from tool_context using the same logic as _record_leaderboard_progress."""
     if tool_context is None:
         return None

@@ -38,5 +38,11 @@ class Level5Agent(BaseCTFAgent):
             level=5,
             system_prompt=system_prompt,
             name="Level5Agent",
-            tools=[sql_query_tool, hints_func_tool, help_search_tool, submit_answer_func_tool, leaderboard_stats_tool],
+            tools=[
+                sql_query_tool,
+                hints_func_tool,
+                help_search_tool,
+                submit_answer_func_tool,
+                leaderboard_stats_tool,
+            ],
         )
