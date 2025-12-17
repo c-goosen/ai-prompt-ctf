@@ -36,6 +36,8 @@ dependencies = [
     "html2markdown>=0.1.7",
     "psycopg2-binary>=2.9.11",
     "duckduckgo-search>=8.1.1",
+    "asyncpg>=0.31.0",
+    "greenlet>=3.3.0",
 ]
 
 [dependency-groups]
