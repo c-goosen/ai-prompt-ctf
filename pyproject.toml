@@ -42,7 +42,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "fastapi-cli>=0.0.7,<0.0.8",
+    "fastapi-cli>=0.0.7,<0.0.17",
     "pytest>=8.3.5,<9",
     "importanize>=0.7.0,<0.8",
     "memory-profiler>=0.61.0,<0.62",
