@@ -51,7 +51,7 @@ dev = [
     "flake8-bugbear>=23.12.2,<24",
     "bandit>=1.8.3,<2",
     "pytest-cov>=4.1.0,<5",
-    "uvicorn>=0.34.0,<0.35",
+    "uvicorn>=0.34.0,<0.39",
     "setuptools>=70.0.0,<71",
     "huggingface-hub==0.35.3",
     "pytest-asyncio>=0.24.0,<0.25",
