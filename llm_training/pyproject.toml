@@ -3,7 +3,7 @@ name = "llm-training"
 version = "0.2.0"
 description = ""
 authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13,<3.15"
 dependencies = [
     "transformers[torch]>=4.51.1,<5",
     "accelerate>=1.5.2,<2",
