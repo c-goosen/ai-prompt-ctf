@@ -3,13 +3,13 @@ name = "llm-training"
 version = "0.2.0"
 description = ""
 authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13,<3.15"
 dependencies = [
     "transformers[torch]>=4.51.1,<5",
     "accelerate>=1.5.2,<2",
     "huggingface-hub[hf-xet]>=0.30.2,<0.31",
     "jupyter>=1.0.0,<2",
-    "datasets>=2.15.0,<3",
+    "datasets>=2.15.0,<5",
     "evaluate>=0.4.1,<0.5",
     "sentencepiece>=0.2.0,<0.3",
     "scikit-learn>=1.5.2,<2",

@@ -3,17 +3,17 @@ name = "ai-prompt-ctf"
 version = "0.2.0"
 description = ""
 authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13,<3.15"
 readme = "README.md"
 dependencies = [
-    "fastapi==0.122.0",
+    "fastapi==0.124.4",
     "pydantic-settings>=2.0.3,<3",
     "jinja2>=3.1.5,<4",
-    "python-multipart>=0.0.18,<0.0.19",
+    "python-multipart>=0.0.18,<0.0.23",
     "python-dotenv>=1.1.0,<2",
     "clean-text>=0.6.0,<0.7",
     "unidecode>=1.3.7,<2",
-    "openai>=1.1.1,<2",
+    "openai>=1.1.1,<3",
     "bandit>=1.7.5,<2",
     "gunicorn==23.0.0",
     "jinja-markdown~=1.210911",
@@ -36,11 +36,13 @@ dependencies = [
     "html2markdown>=0.1.7",
     "psycopg2-binary>=2.9.11",
     "duckduckgo-search>=8.1.1",
+    "asyncpg>=0.31.0",
+    "greenlet>=3.3.0",
 ]
 
 [dependency-groups]
 dev = [
-    "fastapi-cli>=0.0.7,<0.0.8",
+    "fastapi-cli>=0.0.7,<0.0.17",
     "pytest>=8.3.5,<9",
     "importanize>=0.7.0,<0.8",
     "memory-profiler>=0.61.0,<0.62",
@@ -49,8 +51,8 @@ dev = [
     "flake8-bugbear>=23.12.2,<24",
     "bandit>=1.8.3,<2",
     "pytest-cov>=4.1.0,<5",
-    "uvicorn>=0.34.0,<0.35",
-    "setuptools>=70.0.0,<71",
+    "uvicorn>=0.34.0,<0.39",
+    "setuptools>=70.0.0,<79",
     "huggingface-hub==0.35.3",
     "pytest-asyncio>=0.24.0,<0.25",
     "djlint>=1.36.1,<2",

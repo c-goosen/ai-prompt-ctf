@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sqlite3
+from pathlib import Path
 
 import lancedb
 import requests
@@ -26,9 +27,12 @@ from ctf.leaderboard import (
 
 logger = logging.getLogger(__name__)
 
+# Get the default path relative to this file's location
+# tools.py is in ctf/agents/, so we go up one level to ctf/ and then into lancedb/
+_default_db_path = (Path(__file__).parent.parent / "lancedb").resolve()
 
 db_path = os.getenv(
-    "LANCE_DB_PATH", "/Users/goose/bsides/ai-prompt-ctf/ctf/lancedb/"
+    "LANCE_DB_PATH", str(_default_db_path)
 )
 
 
