@@ -31,9 +31,7 @@ logger = logging.getLogger(__name__)
 # tools.py is in ctf/agents/, so we go up one level to ctf/ and then into lancedb/
 _default_db_path = (Path(__file__).parent.parent / "lancedb").resolve()
 
-db_path = os.getenv(
-    "LANCE_DB_PATH", str(_default_db_path)
-)
+db_path = os.getenv("LANCE_DB_PATH", str(_default_db_path))
 
 
 async def sql_query(

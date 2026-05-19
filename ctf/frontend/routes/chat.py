@@ -15,10 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
 from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
-from ctf.frontend.utils import (
-    redact_passwords_in_json,  # noqa: F401
-    redact_passwords_in_text,
-)
+from ctf.frontend.utils import redact_passwords_in_text
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -33,37 +30,6 @@ router = APIRouter()
 templates = Jinja2Templates(directory="frontend/templates")
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
-
-
-def denied_response(text_input):
-    response = """!! You are not allowed to do that, you have been stopped by the LLM protection!
-    Passwords are to be kept secret !!"""
-    return HTMLResponse(
-        content=f"""
-            <div class="chat chat-start">
-              <div class="chat-image avatar">
-                <div class="w-10 rounded-full">
-                  <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
-                </div>
-              </div>
-              <div class="chat-bubble"><md-block>{text_input}</md-block></div>
-            </div>
-            <div class="chat chat-end">
-              <div class="chat-image avatar">
-                <div class="w-10 rounded-full">
-                  <i class="fa-solid fa-robot" style="margin-right: 8px;"></i>
-                </div>
-              </div>
-              <div class="chat-bubble">{response}</div>
-            </div>
-            """,
-        status_code=200,
-    )
-
-
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
 
 
 async def ensure_session_exists(
@@ -313,7 +279,6 @@ async def chat_completion(
                             # Track if this is from password_search_func
                             if fn_resp.get("name") == "password_search_func":
                                 has_password_search = True
-                                # resp_str = redact_passwords_in_json(resp_str)
                             text_chunks.append(
                                 f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                 f"\n```json\n{resp_str}\n```"

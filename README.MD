@@ -104,14 +104,124 @@ This will eventually be moved to start of app ^^
 python ctf/main.py
 ```
 
-## Run prod
+## Run with Docker Compose
+
+The recommended way to run the full stack (Ollama, ADK API, and frontend) is via `docker-compose.yml`.
+
+### Requirements
+
+- Docker 17.05+ (multi-stage builds)
+- Docker Compose v2 (`docker compose`)
+
+### Quick start (default profile — Ollama in Docker)
+
+From the repository root:
+
+```bash
+make run
+```
+
+This is equivalent to:
+
+```bash
+docker compose --profile default up --build
+```
+
+Copy `.env.example` to `.env` if you want `docker compose up` (without `--profile`) to enable the same stack via `COMPOSE_PROFILES=default`.
+
+On first start, `ollama-init` pulls the default model (`qwen3:0.6b`). The frontend also downloads Hugging Face guard models on startup, which can take several minutes.
+
+### Production profile (remote Ollama or API LLM)
+
+Use the `prod` profile when Ollama runs outside Compose or when using Gemini/OpenAI:
+
+```bash
+make run-prod
+```
+
+Remote Ollama on the host (model must already be pulled there):
+
+```bash
+COMPOSE_PROFILES=prod \
+  OLLAMA_API_BASE=http://host.docker.internal:11434 \
+  OPENSOURCE_LLM_MODEL=qwen3:0.6b \
+  docker compose up --build
+```
+
+Gemini:
+
+```bash
+COMPOSE_PROFILES=prod USE_GEMINI=1 docker compose up --build
+```
+
+### Access from the host
+
+| Service   | URL |
+|-----------|-----|
+| Frontend (CTF UI) | http://localhost:8100 |
+| ADK API | http://localhost:8000 |
+| ADK API docs | http://localhost:8000/docs |
+| Frontend health | http://localhost:8100/health |
+
+Use `localhost` or `127.0.0.1` in the browser. Ollama is not published to the host; containers reach it at `http://ollama:11434` on the Compose network.
+
+### Common commands
+
+```bash
+# Detached mode (default profile)
+docker compose --profile default up --build -d
+
+# Follow logs
+docker compose logs -f frontend adk-api
+
+# Stop and remove containers
+docker compose down
+```
+
+### Optional: Traefik reverse proxy
+
+To serve the frontend on port 80 instead of 8100:
+
+```bash
+docker compose up -d traefik
+```
+
+Then open http://localhost (Traefik routes `Host: localhost` and `Host: 127.0.0.1` to the frontend).
+
+### Environment variables
+
+Set in `docker-compose.yml` or override when starting:
+
+| Variable | Service | Default | Description |
+|----------|---------|---------|-------------|
+| `OLLAMA_MODEL` | ollama-init | `qwen3:0.6b` | Model pulled into Ollama on first run |
+| `OPENSOURCE_LLM_MODEL` | adk-api | `qwen3:0.6b` | Model name used by agents |
+| `USE_GEMINI` | adk-api | `0` | Set to `1` to use Gemini instead of Ollama |
+| `ADK_API_URL` | frontend | `http://adk-api:8000` | ADK API base URL (use service name inside Compose) |
+| `FASTAPI_ENV` | frontend | `production` | Disables uvicorn reload when `production` |
+| `DOCS_ON` | frontend | (off) | Set to `True` to enable FastAPI `/docs` on the frontend |
+
+Example — use a different Ollama model:
+
+```bash
+OLLAMA_MODEL=qwen3:1.7b OPENSOURCE_LLM_MODEL=qwen3:1.7b docker compose up --build
+```
+
+### Troubleshooting
+
+- **Connection reset on port 8100** — The frontend may still be loading models. Check logs: `docker compose logs -f frontend`. Wait until you see `Uvicorn running on http://0.0.0.0:8100` without a reloader parent process.
+- **Frontend never starts** — ADK API must pass its health check first. Check `docker compose logs adk-api`.
+- **ADK unhealthy** — Ensure Ollama finished pulling the model (`docker compose logs ollama-init`).
+
+More detail: [DOCKER.md](DOCKER.md).
+
+## Run prod (without Compose)
+
 ```bash
 FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127.0.0.1:8000 --forwarded-allow-ips '*' --workers 4
-
-# or via docker
-docker build -t llm_challenge .
-docker run -p 8000:8000  llm_challenge 
 ```
+
+Or build individual images — see [DOCKER.md](DOCKER.md).
 
 ## Auth 
 No longer uses auth. Flags to be placed in seperate area

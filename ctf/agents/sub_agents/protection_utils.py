@@ -12,12 +12,10 @@ from google.genai import types
 from ctf.app_config import settings
 from ctf.llm_guard import (
     PromptGuardMeta,
-    PromptGuardGoose,
     PromptGuardGooseModernBERT,
 )
 
 llm_guard_meta = PromptGuardMeta()
-llm_guard_goose = PromptGuardGoose()
 llm_guard_goose_modernbert = PromptGuardGooseModernBERT()
 
 
@@ -187,61 +185,6 @@ class ProtectionUtils:
                     return f"Advanced injection pattern detected: '{pattern}'"
 
         return None
-
-    @staticmethod
-    def detect_sql_injection(text: str) -> Optional[str]:
-        """Detect SQL injection patterns"""
-        sql_patterns = [
-            r"'\s*or\s*'1'\s*=\s*'1",
-            r"'\s*;\s*drop\s+table",
-            r"union\s+select",
-            r"insert\s+into",
-            r"delete\s+from",
-            r"update\s+set",
-            r"exec\s*\(",
-            r"xp_cmdshell",
-        ]
-
-        for pattern in sql_patterns:
-            if re.search(pattern, text.lower()):
-                return f"SQL injection pattern detected: '{pattern}'"
-
-        return None
-
-    @staticmethod
-    def detect_path_traversal(text: str) -> Optional[str]:
-        """Detect path traversal patterns"""
-        path_patterns = [
-            r"\.\./",
-            r"\.\.\\",
-            r"/etc/",
-            r"C:\\",
-            r"/proc/",
-            r"/sys/",
-            r"/dev/",
-        ]
-
-        for pattern in path_patterns:
-            if re.search(pattern, text):
-                return f"Path traversal pattern detected: '{pattern}'"
-
-        return None
-
-    @staticmethod
-    def sanitize_output(text: str, level: int) -> str:
-        """Sanitize output based on level"""
-        # Replace sensitive patterns
-        sensitive_replacements = {
-            r"password\s*[:=]\s*\w+": "password: [REDACTED]",
-            r"secret\s*[:=]\s*\w+": "secret: [REDACTED]",
-            r"key\s*[:=]\s*\w+": "key: [REDACTED]",
-            r"token\s*[:=]\s*\w+": "token: [REDACTED]",
-        }
-
-        for pattern, replacement in sensitive_replacements.items():
-            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-
-        return text
 
     @staticmethod
     def detect_password_leak(

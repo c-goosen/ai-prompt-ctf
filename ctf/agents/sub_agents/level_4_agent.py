@@ -6,12 +6,6 @@ Prompt injection via describe the image, document or audio
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
 from ctf.agents.sub_agents.system_prompt import get_system_prompt_one
 
-# from .tools import (
-#     submit_answer_func_tool,
-#     hints_func_tool,
-#     rag_tool_func_tool,
-# )
-
 
 class Level4Agent(BaseCTFAgent):
     """Level 4 Agent - Multi-modal prompt injection"""
@@ -33,9 +27,4 @@ class Level4Agent(BaseCTFAgent):
             level=4,
             system_prompt=system_prompt,
             name="Level4Agent",
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
         )

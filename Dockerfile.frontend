@@ -1,61 +1,46 @@
 # Dockerfile for Frontend (FastAPI)
-# Uses multi-stage builds requiring Docker 17.05 or higher
+# Builder uses the full trixie image (buildpack-deps) so packages like `regex`
+# can compile when no cp314 wheel exists. Production stays slim.
+# https://docs.astral.sh/uv/guides/integration/docker/
 
-# Creating a python base with shared environment variables
-FROM python:3.14-slim AS python-base
-ENV UV_CACHE_DIR="/opt/uv-cache" \
-    UV_PROJECT_ENVIRONMENT="/opt/venv" \
-    PYSETUP_PATH="/opt/pysetup"
+FROM ghcr.io/astral-sh/uv:python3.14-trixie AS builder
 
-ENV PATH="/opt/venv/bin:$PATH"
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
+    UV_PROJECT_ENVIRONMENT=/app/.venv
 
-# builder-base is used to build dependencies
-FROM python-base AS builder-base
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        curl \
-        git \
-        build-essential \
-        python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY uv.lock pyproject.toml ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
 
-# We copy our Python requirements here to cache them
-# and install only runtime deps using uv
-WORKDIR $PYSETUP_PATH
-COPY ./uv.lock ./pyproject.toml ./
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
 
-# Install dependencies
-RUN uv sync --frozen --no-dev --no-install-project
+FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS production
 
-FROM python:3.14-slim AS production
 ENV FASTAPI_ENV=production \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_NO_DEV=1 \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
+    PATH="/app/.venv/bin:$PATH" \
+    CURL_CA_BUNDLE="" \
+    REQUESTS_CA_BUNDLE=""
 
 EXPOSE 8100/tcp
 
-# Copy the virtual environment from the builder stage
-COPY --from=builder-base /opt/venv /opt/venv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Create user
 RUN groupadd -g 1500 appuser && \
     useradd -m -u 1500 -g appuser appuser
 
-# Copy application code
-COPY --chown=appuser:appuser ./ /app
 WORKDIR /app
+
+COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
+COPY --chown=appuser:appuser . /app
 
 USER appuser
 
-# Set environment variables for SSL
-ENV CURL_CA_BUNDLE="" \
-    REQUESTS_CA_BUNDLE=""
-
-# Run the frontend server
+ENTRYPOINT []
 CMD ["uv", "run", "ctf/frontend/main.py"]
-

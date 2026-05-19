@@ -33,9 +33,4 @@ class Level0Agent(BaseCTFAgent):
             level=0,
             system_prompt=system_prompt,
             name="Level0Agent",
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
         )

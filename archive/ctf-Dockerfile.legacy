@@ -1,9 +1,11 @@
-# Dockerfile
+# Legacy monolithic image (port 8000, gunicorn app:app).
+# Superseded by Dockerfile.frontend + Dockerfile.adk — see docker-compose.yml.
+#
 # Uses multi-stage builds requiring Docker 17.05 or higher
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 
 # Creating a python base with shared environment variables
-FROM python:3.12 AS python-base
+FROM python:3.14 AS python-base
 ENV UV_CACHE_DIR="/opt/uv-cache" \
     UV_PROJECT_ENVIRONMENT="/opt/venv" \
     PYSETUP_PATH="/opt/pysetup"
@@ -30,7 +32,7 @@ COPY ./uv.lock ./pyproject.toml ./
 # Install dependencies
 RUN uv sync --frozen --no-dev --no-install-project
 
-FROM python:3.12 AS production
+FROM python:3.14 AS production
 ENV FASTAPI_ENV=production
 
 EXPOSE 8000/tcp

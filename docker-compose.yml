@@ -1,6 +1,47 @@
-version: '3.8'
+# Profiles:
+#   default — Ollama runs in Docker (ollama + ollama-init). Use: docker compose --profile default up
+#   prod    — Remote Ollama or API LLM (no bundled Ollama). Use: docker compose --profile prod up
+#
+# Enable default locally without flags: copy .env.example to .env (sets COMPOSE_PROFILES=default).
 
 services:
+  ollama:
+    profiles: ["default"]
+    image: ollama/ollama:latest
+    container_name: ai-prompt-ctf-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ctf-network
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  ollama-init:
+    profiles: ["default"]
+    image: ollama/ollama:latest
+    container_name: ai-prompt-ctf-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:0.6b}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Pulling $${OLLAMA_MODEL} into Ollama..."
+        ollama pull "$${OLLAMA_MODEL}"
+        echo "Model $${OLLAMA_MODEL} is ready."
+    networks:
+      - ctf-network
+    restart: "no"
+
   adk-api:
     build:
       context: .
@@ -8,19 +49,32 @@ services:
     container_name: ai-prompt-ctf-adk
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - PYTHONUNBUFFERED=1
-      # Add any required environment variables here
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - USE_GEMINI=${USE_GEMINI:-0}
+      - GEMINI_MODEL_NAME=${GEMINI_MODEL_NAME:-}
+      - OPENSOURCE_LLM_MODEL=${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://ollama:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     volumes:
-      # Mount data directories if needed
       - ./ctf/lancedb:/app/ctf/lancedb
       - ./ctf/agents/lancedb:/app/ctf/agents/lancedb
+    depends_on:
+      ollama-init:
+        condition: service_completed_successfully
+        required: false
     networks:
       - ctf-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,19 +86,15 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: ai-prompt-ctf-frontend
     ports:
-      - "8100:8100"  # Keep for direct access, Traefik will be main entry point
+      - "8100:8100"
     environment:
       - PYTHONUNBUFFERED=1
       - FASTAPI_ENV=production
+      - RELOAD=0
       - CURL_CA_BUNDLE=""
       - REQUESTS_CA_BUNDLE=""
-      # ADK API URL - use service name for internal communication
       - ADK_API_URL=http://adk-api:8000
-      # Add other environment variables as needed
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
     volumes:
-      # Mount static files and templates
       - ./ctf/frontend/static:/app/ctf/frontend/static
       - ./ctf/frontend/templates:/app/ctf/frontend/templates
       - ./ctf/lancedb:/app/ctf/lancedb
@@ -54,14 +104,19 @@ services:
     networks:
       - ctf-network
     labels:
-      # Traefik configuration
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`localhost`) || Host(`127.0.0.1`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=8100"
       - "traefik.docker.network=ctf-network"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health')",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -71,19 +126,16 @@ services:
     image: traefik:v2.11
     container_name: ai-prompt-ctf-traefik
     command:
-      # Enable Docker provider
       - "--providers.docker=true"
       - "--providers.docker.network=ctf-network"
       - "--providers.docker.exposedbydefault=false"
-      # Entrypoints
       - "--entrypoints.web.address=:80"
-      # API and Dashboard (optional, for monitoring)
       - "--api.dashboard=true"
       - "--api.insecure=true"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"  # Traefik dashboard
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -95,3 +147,5 @@ networks:
   ctf-network:
     driver: bridge
 
+volumes:
+  ollama_data:

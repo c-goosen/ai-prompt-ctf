@@ -12,19 +12,22 @@ DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 COMPOSE_CMD ?= docker compose
 COMPOSE_SERVICES ?= adk-api frontend
 
-.PHONY: run
+.PHONY: run run-prod
 run:
-	$(COMPOSE_CMD) up --build $(COMPOSE_SERVICES)
+	$(COMPOSE_CMD) --profile default up --build $(COMPOSE_SERVICES)
+
+run-prod:
+	$(COMPOSE_CMD) --profile prod up --build $(COMPOSE_SERVICES)
 
 docker-image:
-	docker build -f ctf/Dockerfile --rm -t $(DOCKER_REPOSITORY):local .
+	docker build -f Dockerfile.frontend --rm -t $(DOCKER_REPOSITORY):local .
 
 ci-docker-auth:
 	@echo "Logging in to $(DOCKER_REGISTRY) as $(DOCKER_REGISTRY_USERNAME)"
 	@aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 955244480243.dkr.ecr.us-east-1.amazonaws.com
 
 ci-docker-build: ci-docker-auth
-	@docker build -f ctf/Dockerfile \
+	@docker build -f Dockerfile.frontend \
 		--no-cache \
 		-t $(DOCKER_REPOSITORY):$(GIT_HASH) .
 

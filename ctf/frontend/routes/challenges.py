@@ -7,7 +7,6 @@ from typing import Annotated
 import httpx
 from fastapi import APIRouter, Cookie, Request
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 
 from ctf.app_config import settings
 from ctf.frontend.utils import redact_passwords_in_json
@@ -19,10 +18,6 @@ logger = logging.getLogger(__name__)
 
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
-
-settings.OPENAI_API_KEY
-
-
 router = APIRouter()
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent
@@ -31,21 +26,6 @@ TEMPLATES_DIR = FRONTEND_DIR / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
-
-
-# @router.get("/ctf", include_in_schema=False)
-# async def render_ctf(request: Request):
-#     """Serve the chat screen template at /ctf."""
-#     return templates.TemplateResponse(
-#         "chat_components/chat_screen.html",
-#         {
-#             "request": request,
-#         },
-#     )
-
-
-class Input(BaseModel):
-    query: str
 
 
 @router.get("/ctf", include_in_schema=False)

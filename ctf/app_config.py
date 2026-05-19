@@ -11,9 +11,6 @@ if not os.getenv("PYTEST_CURRENT_TEST", False):
 
 
 class Settings(BaseSettings):
-    ORG_NAME: str = "BSIDES CPT"
-    APP_SECRET: str = os.getenv("SECRET", "SECRET")
-
     DISCORD_URL: str = os.getenv(
         "DISCORD_URL",
         "https://discord.com/channels/687602309395382282/1168515417514442834",
@@ -34,31 +31,12 @@ class Settings(BaseSettings):
         Each level becomes progressively harder. Happy chatting/prompting.
         """,
     )
-    # Supabase
-    #
-    app_name: str = "LLM CTF - Get that password"
-
-    # Open Source
-    # Run everything opensource the default
-    OPENSOURCE_LLM: bool = os.getenv("OPENSOURCE_LLM", True)
-    OPENSOURCE_REASONING_MODEL: str = os.getenv(
-        "OPENSOURCE_REASONING_MODEL", "qwen3:0.6b"
-    )
-    OPENSOURCE_VISION_MODEL: str = os.getenv("OPENSOURCE_VISION_MODEL", "")
-    OPENSOURCE_AUDIO_MODEL: str = os.getenv("OPENSOURCE_AUDIO_MODEL", "")
-
-    # OPENAI
-    # Not so open
-    OPENAI_LLM: bool = os.getenv("OPENAI_LLM", False)
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENSOURCE_LLM_MODEL: str = os.getenv("OPENSOURCE_LLM_MODEL", "qwen3:0.6b")
-    #
-    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
+    OLLAMA_API_BASE: str = os.getenv(
+        "OLLAMA_API_BASE", "http://127.0.0.1:11434"
+    )
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
-    BLOCK_MESSAGES: list[str] = [
-        "LLM protection activated, you can't do that.",
-    ]
-    IMAGE_DIR: str | bool = os.getenv("IMAGE_DIR", f"{os.getcwd()}/tmp")
     PASSWORDS: dict = {
         0: os.getenv("PASSWORD_ZERO", "PASS_ZERO"),
         1: os.getenv("PASSWORD_ONE", "PASS_ONE"),
@@ -88,16 +66,12 @@ class Settings(BaseSettings):
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
     FINAL_LEVEL: int = 10  # Actually 5
-    COOKIE_TIMEOUT: int = 5 * 24 * 60 * 60
-
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost")
     logger: object = logging.getLogger(__name__)
     DOCS_ON: bool = os.getenv("DOCS_ON", False)
-    LOCAL_GUARD_LLM: bool = os.getenv("LOCAL_GUARD_LLM", True)
     THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
     LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
-    token_limit: int = 20000
     LEADERBOARD_DB_PATH: str = os.getenv(
         "LEADERBOARD_DB_PATH",
         str(Path(__file__).resolve().parent / "leaderboard.db"),
@@ -106,5 +80,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
+os.environ["OLLAMA_API_BASE"] = settings.OLLAMA_API_BASE.rstrip("/")
 os.environ["THEME_COLOR"] = settings.THEME_COLOR
-print(settings.IMAGE_DIR)

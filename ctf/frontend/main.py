@@ -15,6 +15,15 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["REQUESTS_CA_BUNDLE"] = ""
+
+
+def _reload_enabled() -> bool:
+    reload = os.getenv("RELOAD")
+    if reload is not None:
+        return reload.lower() in ("1", "true", "yes")
+    return os.getenv("FASTAPI_ENV", "").lower() != "production"
+
+
 if __name__ == "__main__":
     # if bool(os.getenv("PREPARE_FLAGS", False)):
     #     prepare_flags()
@@ -22,7 +31,7 @@ if __name__ == "__main__":
         "ctf.frontend.app:app",
         host="0.0.0.0",
         log_level="info",
-        reload=os.getenv("RELOAD", True),
+        reload=_reload_enabled(),
         port=8100,
         loop="asyncio",
     )
