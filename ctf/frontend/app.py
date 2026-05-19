@@ -140,7 +140,6 @@ async def root(
 
 
 @app.get("/health")
-@limiter.limit("1/min")
 async def health(request: Request):  # noqa: F841
     """Health check endpoint that verifies frontend and ADK API status"""
     health_status = {"health": "ok", "status": "healthy", "services": {}}

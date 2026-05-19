@@ -28,11 +28,6 @@ class Level6Agent(BaseCTFAgent):
             level=6,
             system_prompt=system_prompt,
             name="Level6Agent",
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
             before_model_callback=partial(
                 ProtectionUtils.llm_guard_prompt_injection_meta, level=6
             ),

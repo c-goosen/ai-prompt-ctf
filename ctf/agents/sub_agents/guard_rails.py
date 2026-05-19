@@ -1,31 +1,13 @@
+from typing import Any, Optional
+
 from google.adk.agents.callback_context import CallbackContext
-from google.adk.models import LlmResponse, LlmRequest
-from typing import Optional, Any
+from google.adk.models import LlmRequest, LlmResponse
 from google.genai import types
-from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 
-
-def _extract_last_user_message(llm_request: LlmRequest) -> str:
-    """Return the most recent user text from the request contents."""
-    if not llm_request or not llm_request.contents:
-        return ""
-
-    for content in reversed(llm_request.contents):
-        if content.role != "user":
-            continue
-
-        if not content.parts:
-            continue
-
-        text_parts = [
-            part.text.strip()
-            for part in content.parts
-            if getattr(part, "text", None)
-        ]
-        if text_parts:
-            return "\n".join(text_parts)
-
-    return ""
+from ctf.agents.sub_agents.protection_utils import (
+    ProtectionUtils,
+    _extract_last_user_message,
+)
 
 
 def guard_rail_input_injection(
@@ -66,7 +48,7 @@ def guard_rail_output_injection(
     llm_request: LlmRequest | None = None,
     **_: Any,
 ) -> Optional[LlmResponse]:
-    """Guardrail for input injection"""
+    """Guardrail for output injection"""
     last_user_message = _extract_last_user_message(llm_request)
     if "password" in last_user_message.lower():
         return LlmResponse(

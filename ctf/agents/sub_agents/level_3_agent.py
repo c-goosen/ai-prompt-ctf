@@ -11,12 +11,6 @@ from ctf.agents.sub_agents.system_prompt import (
 from google.adk.planners import BuiltInPlanner
 from google.genai import types
 
-# from .tools import (
-#     submit_answer_func_tool,
-#     hints_func_tool,
-#     rag_tool_func_tool,
-# )
-
 
 class Level3Agent(BaseCTFAgent):
     """Level 3 Agent -Prompt engineering & thinking protection challenge"""
@@ -51,9 +45,4 @@ Examples of what to block:
             system_prompt=system_prompt,
             name="Level3Agent",
             planner=planner,
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
         )

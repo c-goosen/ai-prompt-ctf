@@ -50,12 +50,3 @@ class Level9Agent(BaseCTFAgent):
                 web_scrape_tool,
             ],
         )
-
-    # def get_base_tools(self):
-    #     """Extend base tools with web scrape and google search tool for Level 9."""
-    #     base_tools = super().get_base_tools()
-    #     return base_tools + [
-    #         AgentTool(google_search),
-    #         AgentTool(web_scrape_tool),
-    #         # web_scrape_tool
-    #     ]

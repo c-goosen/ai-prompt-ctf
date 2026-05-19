@@ -27,11 +27,6 @@ class Level7Agent(BaseCTFAgent):
             level=7,
             system_prompt=system_prompt,
             name="Level7Agent",
-            # tools=[
-            #     rag_tool_func_tool,
-            #     hints_func_tool,
-            #     submit_answer_func_tool,
-            # ],
             before_model_callback=partial(
                 ProtectionUtils.llm_guard_prompt_injection_goose, level=7
             ),

@@ -8,8 +8,8 @@ The agents are organized according to ADK web requirements:
 
 ```
 agents/
-├── agent.py                 # Main coordinator agent (required by ADK web)
-├── sub_agents/              # Directory containing level agents
+├── sub_agents/              # ADK app "sub_agents" (production entry point)
+│   ├── agent.py             # CTFSubAgentsRootAgent coordinator
 │   ├── __init__.py
 │   ├── base_agent.py        # Base class for all level agents
 │   ├── protection_utils.py  # Protection utilities
@@ -17,9 +17,7 @@ agents/
 │   ├── level_1_agent.py     # Level 1 challenge agent
 │   ├── ...
 │   └── level_10_agent.py    # Level 10 challenge agent
-├── agent_factory.py         # Factory for creating agents
-├── coordinator.py           # Alternative coordinator implementation
-└── README.md               # Documentation
+└── README.md                # Documentation
 ```
 
 ## Quick Start
@@ -42,14 +40,14 @@ agents/
 
 The system implements the **Coordinator/Dispatcher Pattern** from [ADK Multi-Agent Systems](https://google.github.io/adk-docs/agents/multi-agents/):
 
-- **CTFCoordinatorAgent** (in `agent.py`): Main coordinator that welcomes users and delegates to level agents
-- **Level0Agent - Level9Agent** (in `sub_agents/`): Individual challenge agents with progressive security measures
-- **Agent Hierarchy**: All level agents are sub-agents of the coordinator
+- **CTFSubAgentsRootAgent** (in `sub_agents/agent.py`): Main coordinator that welcomes users and delegates to level agents
+- **Level0Agent - Level10Agent** (in `sub_agents/`): Individual challenge agents with progressive security measures
+- **Agent Hierarchy**: All level agents are sub-agents of the root coordinator
 - **LLM-Driven Delegation**: Coordinator uses `transfer_to_agent` to route users to appropriate levels
 
 ## Features
 
-✅ **ADK Web Compatible**: Proper directory structure with `agent.py` and `sub_agents/` directory  
+✅ **ADK Web Compatible**: Proper directory structure with `sub_agents/agent.py` as root agent  
 ✅ **Multi-Agent Architecture**: Proper agent hierarchy with sub-agents  
 ✅ **LLM-Driven Delegation**: Automatic routing to level agents  
 ✅ **Session State Management**: Persistent memory across interactions  
@@ -81,6 +79,6 @@ The system implements the **Coordinator/Dispatcher Pattern** from [ADK Multi-Age
 
 If you get "No agents found" error:
 1. Make sure you're in the `/ctf/agents` directory
-2. Verify `agent.py` exists in the current directory
+2. Verify `sub_agents/agent.py` exists
 3. Verify `sub_agents/` directory exists with level agents
 4. Check that Ollama is running and the model is available
