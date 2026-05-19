@@ -15,6 +15,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["REQUESTS_CA_BUNDLE"] = ""
+
+
 def _reload_enabled() -> bool:
     reload = os.getenv("RELOAD")
     if reload is not None:

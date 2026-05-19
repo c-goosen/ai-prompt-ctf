@@ -33,7 +33,9 @@ class Settings(BaseSettings):
     )
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENSOURCE_LLM_MODEL: str = os.getenv("OPENSOURCE_LLM_MODEL", "qwen3:0.6b")
-    OLLAMA_API_BASE: str = os.getenv("OLLAMA_API_BASE", "http://127.0.0.1:11434")
+    OLLAMA_API_BASE: str = os.getenv(
+        "OLLAMA_API_BASE", "http://127.0.0.1:11434"
+    )
     INPUT_FILTERS: list[str] = ["secret", "password", "passphrase"]
     PASSWORDS: dict = {
         0: os.getenv("PASSWORD_ZERO", "PASS_ZERO"),
