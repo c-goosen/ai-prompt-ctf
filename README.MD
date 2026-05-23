@@ -224,7 +224,7 @@ FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127
 Or build individual images — see [DOCKER.md](DOCKER.md).
 
 ## Auth 
-No longer uses auth. Flags to be placed in seperate area
+No longer uses auth. Flags to be placed in separate area
 
 Anon users are tracked by cookie for chat history
 
