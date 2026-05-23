@@ -2,8 +2,8 @@
 * ~~Chatgpt theme~~
 * ~~Chromadb integration~~
 * ~~Basic Function calling~~
-* Seperate leaderboard
-* ~~Multimodal RAG (partailly integrated)~~
+* Separate leaderboard
+* ~~Multimodal RAG (partially integrated)~~
 * ~~Cleanup some of the code~~
 * ~~Logging config~~
 * Link LLM on hugginface in README
