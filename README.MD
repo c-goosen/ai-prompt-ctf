@@ -36,7 +36,7 @@ Google ADK API <-> FastAPI Backend <-> HTMX Frontend
 
 The CTF uses a multi-agent architecture with a coordinator pattern, where a root agent delegates to level-specific agents:
 
-![Agent Design Map](agent-design-map.png)
+![Agent Design Map](ctf/frontend/static/images/agent-design-map.png)
 
 The system consists of:
 - **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
@@ -44,7 +44,7 @@ The system consists of:
 - **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, and `sql_query` that agents can call
 
 ## Other Info
-[CHALLENGES](CHALLENGES.md)
+[CHALLENGES](ctf/CHALLENGES.MD)
 [TODO](TODO.md)
 
 Tools
