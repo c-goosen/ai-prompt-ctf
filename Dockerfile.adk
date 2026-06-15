@@ -35,7 +35,9 @@ RUN groupadd -g 1500 appuser && \
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
+# No --chown on the venv: it is read-only at runtime, so leaving it root-owned
+# avoids a slow per-file ownership rewrite of the whole tree during COPY.
+COPY --from=builder /app/.venv /app/.venv
 COPY --chown=appuser:appuser . /app
 
 USER appuser
