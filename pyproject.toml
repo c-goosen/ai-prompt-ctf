@@ -13,7 +13,7 @@ dependencies = [
     "python-dotenv>=1.1.0,<2",
     "clean-text>=0.6.0,<0.7",
     "bandit>=1.7.5,<2",
-    "gunicorn==23.0.0",
+    "gunicorn==26.0.0",
     "slowapi>=0.1.9,<0.2",
     "transformers>=4.51.0,<5",
     "torch>=2.6.0,<3",
