@@ -31,5 +31,4 @@ class Level1Agent(BaseCTFAgent):
             system_prompt=system_prompt,
             name="Level1Agent",
             before_model_callback=input_injection_callback,
-            before_tool_callback=input_injection_callback,
         )

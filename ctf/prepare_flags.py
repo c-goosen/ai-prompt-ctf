@@ -85,8 +85,13 @@ def prepare_flags(lancedb_persistent: bool = True):
         db_path = "./lancedb"
         print("persisted lancedb")
     else:
-        db_path = ":memory:"
-        print("non-persisted lancedb")
+        # LanceDB has no sqlite-style ":memory:" backend; connecting to that
+        # literal string creates a directory named ":memory:" in the cwd. Use a
+        # throwaway temp directory for the non-persistent case instead.
+        import tempfile
+
+        db_path = tempfile.mkdtemp(prefix="lancedb_")
+        print(f"non-persisted lancedb at {db_path}")
 
     db = lancedb.connect(db_path)
     table_name = "ctf_levels"
@@ -95,7 +100,10 @@ def prepare_flags(lancedb_persistent: bool = True):
     all_data = []
 
     for k in levels:
-        if k != 6:
+        # Level 5 is the function-calling / SQL-injection challenge: its agent
+        # only has the sql_query tool (no RAG), so the password must live in the
+        # SQL users table rather than the LanceDB RAG store.
+        if k != 5:
             _generic_password_text = generic_password_text
             for i in range(0, len(_generic_password_text)):
                 text = _generic_password_text[i].replace(

@@ -46,3 +46,26 @@ ci-lint:
 	@uv run black . --check
 	@uv run flake8
 	@uv run djlint ctf/frontend/templates/ --lint
+
+# ----- Formatting & Linting -----
+
+.PHONY: format lint security test
+
+# Auto-format Python code and Jinja templates in place.
+format:
+	@uv run black .
+	@uv run djlint ctf/frontend/templates/ --reformat
+
+# Check formatting and run static analysis without modifying files.
+lint:
+	@uv run black . --check
+	@uv run flake8
+	@uv run djlint ctf/frontend/templates/ --lint
+
+# Security scan. Note: this CTF contains intentionally vulnerable code,
+# so findings are expected and reviewed manually rather than gated in lint.
+security:
+	@uv run bandit -r . --ini .bandit
+
+test:
+	@uv run pytest ctf/

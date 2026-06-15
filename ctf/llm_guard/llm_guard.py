@@ -1,6 +1,11 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
 
+# Cache loaded pipelines so the model/tokenizer are only loaded from disk once
+# per configuration, instead of on every query (which was slow and churned
+# memory for the guard checks run on each message).
+_PIPELINE_CACHE: dict = {}
+
 
 class LLMGuardLocalBase:
     def __init__(
@@ -12,24 +17,40 @@ class LLMGuardLocalBase:
         self.revision = "main"
         self.device = "cpu"
 
+    def _get_pipeline(self):
+        key = (
+            self.MODEL,
+            self.TOKENIZER,
+            self.revision,
+            self.max_length,
+            self.device,
+        )
+        nlp = _PIPELINE_CACHE.get(key)
+        if nlp is None:
+            print(f"Loading model --> {self.MODEL} on {self.device}")
+            tokenizer = AutoTokenizer.from_pretrained(self.TOKENIZER)
+            model = AutoModelForSequenceClassification.from_pretrained(
+                self.MODEL
+            )
+            nlp = pipeline(
+                "text-classification",
+                model=model,
+                tokenizer=tokenizer,
+                truncation=True,
+                max_length=self.max_length,
+                revision=self.revision,
+                device=self.device,
+            )
+            _PIPELINE_CACHE[key] = nlp
+        return nlp
+
     async def query(self, prompt: str) -> list:
         """
         Locally run and prompt a AutoModelForSequenceClassification LLM.
         :param prompt:
         :return:
         """
-        tokenizer = AutoTokenizer.from_pretrained(self.TOKENIZER)
-        model = AutoModelForSequenceClassification.from_pretrained(self.MODEL)
-        nlp = pipeline(
-            "text-classification",
-            model=model,
-            tokenizer=tokenizer,
-            truncation=True,
-            max_length=self.max_length,
-            revision=self.revision,
-            device=self.device,
-        )
-        print(f"Running model --> {self.MODEL} on cpu")
+        nlp = self._get_pipeline()
 
         classification_results = nlp(prompt)
         if isinstance(classification_results, list):

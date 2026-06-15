@@ -7,11 +7,9 @@ from pathlib import Path
 
 import lancedb
 import requests
-from google.adk.models import LlmResponse
 from google.adk.tools import FunctionTool
 from google.adk.tools.tool_context import ToolContext
 from google.adk.tools.transfer_to_agent_tool import transfer_to_agent
-from google.genai import types
 from html_to_markdown import convert
 
 from ctf.app_config import settings
@@ -36,7 +34,7 @@ db_path = os.getenv("LANCE_DB_PATH", str(_default_db_path))
 
 async def sql_query(
     user_id: str,
-) -> LlmResponse:
+) -> str:
     """
     Query the users database to find user information by user ID.
     This function is vulnerable to SQL injection - be careful with the user_id parameter.
@@ -66,12 +64,7 @@ async def sql_query(
 
         if not output:
             result_text = f"No users found with UserId: {user_id}"
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
 
         # Format the results
         formatted_results = []
@@ -81,46 +74,30 @@ async def sql_query(
                 user_data[col] = val
             formatted_results.append(user_data)
 
+        results_json = json.dumps(formatted_results, indent=2, default=str)
         if len(output) == 1:
-            result_text = f"Found user with UserId: {user_id}"
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            result_text = f"Found user with UserId: {user_id}\n{results_json}"
+            return result_text
         else:
-            result_text = f"Found {len(output)} user(s) with UserId: {user_id}"
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
+            result_text = (
+                f"Found {len(output)} user(s) with UserId: {user_id}\n"
+                f"{results_json}"
             )
+            return result_text
 
     except sqlite3.Error as e:
         error_msg = f"Database error: {str(e)}"
         logger.error(error_msg)
         result_text = f"Error querying the database: {error_msg}"
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
     except Exception as e:
         error_msg = f"Unexpected error: {str(e)}"
         logger.error(error_msg)
         result_text = f"Error executing SQL query: {error_msg}"
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
 
 
-async def hints_func(hint: str, level: int) -> LlmResponse:
+async def hints_func(hint: str, level: int) -> str:
     """
     Provide hints to users when they request hints for a specific level.
     Only give hints when the user explicitly requests them.
@@ -140,12 +117,7 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
             f"Unable to provide hints because the level provided ({level}) "
             "was invalid. Please specify a valid level number."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
     logger.info(f"hints_func called for level {level_int} with query: {hint}")
 
@@ -265,12 +237,7 @@ async def hints_func(hint: str, level: int) -> LlmResponse:
             "Use all available tools and think creatively!"
         )
 
-    return LlmResponse(
-        content=types.Content(
-            role="model",
-            parts=[types.Part(text=hints_text)],
-        )
-    )
+    return hints_text
 
 
 async def submit_answer_func(
@@ -278,7 +245,7 @@ async def submit_answer_func(
     level: int,
     tool_context: ToolContext | None = None,
     **_extra_kwargs,
-) -> LlmResponse:
+) -> str:
     """
     Submit an answer/flag for the current level and check if it's correct.
     If correct, progress to the next level and record the completion.
@@ -299,12 +266,7 @@ async def submit_answer_func(
             "Unable to validate your answer because the level provided was "
             "invalid. Please provide a valid level number."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
     level_pass = settings.PASSWORDS.get(level_int)
 
@@ -314,12 +276,7 @@ async def submit_answer_func(
             f"Error: No password configured for level {level_int}. "
             "Please contact an administrator."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
     logger.info(
         f"Answer submitted for level {level_int}: {answer[:20]}... (password: {level_pass[:20]}...)"
@@ -348,12 +305,7 @@ async def submit_answer_func(
                 "leaderboard using the get_leaderboard_stats tool to see "
                 f"your ranking. {marker}"
             )
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
         else:
             try:
                 transfer_to_agent(
@@ -373,12 +325,7 @@ async def submit_answer_func(
                 f"automatically, you can type: I want to try level "
                 f"{level_int + 1}. {marker}"
             )
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
     else:
         logger.info(f"Incorrect answer submitted for level {level_int}")
         error_msg = (
@@ -386,12 +333,7 @@ async def submit_answer_func(
             f"for Level {level_int}. Please try again or use the hints_func "
             "tool to get hints for this level."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
 
 async def password_search_func(
@@ -425,12 +367,7 @@ async def password_search_func(
             "extracted_passwords": [],
             "num_results": 0,
         }
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=json.dumps(error_response, indent=2))],
-            )
-        )
+        return error_response
 
     query_vector = embed_text(question)
 
@@ -451,12 +388,7 @@ async def password_search_func(
             "extracted_passwords": [],
             "num_results": 0,
         }
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=json.dumps(error_response, indent=2))],
-            )
-        )
+        return error_response
 
     if results.empty:
         doc_list = []
@@ -531,13 +463,7 @@ async def password_search_func(
         response["passwords_found"] = False
         response["status"] = "success"
 
-    # Return LlmResponse with the response dict
-    return LlmResponse(
-        content=types.Content(
-            role="model",
-            parts=[types.Part(text=json.dumps(response, indent=2))],
-        )
-    )
+    return json.dumps(response, indent=2)
 
 
 def _get_username_from_context(tool_context: ToolContext | None) -> str | None:
@@ -590,7 +516,7 @@ def _record_leaderboard_progress(
         print(f"Failed to record leaderboard entry for {username}: {exc}")
 
 
-async def get_leaderboard_stats(limit: int = 25) -> LlmResponse:
+async def get_leaderboard_stats(limit: int = 25) -> str:
     """
     Get leaderboard statistics including top players, recent completions, and summary.
 
@@ -629,24 +555,14 @@ async def get_leaderboard_stats(limit: int = 25) -> LlmResponse:
             )
             result_text += f" Recent completions: {recent_list}."
 
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
     except Exception as exc:
         logger.error(f"Failed to get leaderboard stats: {exc}")
         error_msg = f"Error retrieving leaderboard: {str(exc)}"
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
 
-async def web_scrape(url: str) -> LlmResponse:
+async def web_scrape(url: str) -> str:
     """
     Scrape a web page by fetching its content and converting HTML to markdown.
 
@@ -663,37 +579,22 @@ async def web_scrape(url: str) -> LlmResponse:
         markdown_content = convert(response.text)
 
         logger.info(f"Successfully scraped and converted {url} to markdown")
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=markdown_content)],
-            )
-        )
+        return markdown_content
 
     except requests.RequestException as e:
         error_msg = f"Error fetching URL {url}: {str(e)}"
         logger.error(error_msg)
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
     except Exception as e:
         error_msg = f"Error converting HTML to markdown for {url}: {str(e)}"
         logger.error(error_msg)
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=error_msg)],
-            )
-        )
+        return error_msg
 
 
 async def execute_python_code(
     code: str,
     level: int = 8,
-) -> LlmResponse:
+) -> str:
     """
     Execute Python code locally on the API server. The environment variable
     LEVEL_8_PASSWORD is automatically set before code execution.
@@ -713,12 +614,16 @@ async def execute_python_code(
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
 
+    # Snapshot the real environment so the executed code only sees the level
+    # password, then restore it afterwards. Mutating os.environ in-process
+    # (this runs via exec in the API server process) would otherwise wipe the
+    # server's environment (API keys, Ollama base URL, etc.) for every
+    # subsequent request.
+    original_environ = dict(os.environ)
     try:
+        os.environ.clear()
+        os.environ["LEVEL_8_PASSWORD"] = password
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            code = (
-                f"import os; os.environ.clear(); "
-                f"os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
-            )
             exec(
                 code,
                 {
@@ -737,30 +642,15 @@ async def execute_python_code(
             )
             if stdout_output:
                 result_text = f"Output: {stdout_output[:100]}. Errors: {stderr_output[:200]}"
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
         elif stdout_output:
             result_text = (
                 f"Code executed successfully. Output: {stdout_output[:500]}"
             )
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
         else:
             result_text = "Code executed successfully (no output)"
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
 
     except Exception as e:
         error_msg = f"Error executing code: {str(e)}"
@@ -769,15 +659,14 @@ async def execute_python_code(
         result_text = error_msg
         if stderr_output:
             result_text = f"{error_msg}. Stderr: {stderr_output[:200]}"
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
+    finally:
+        # Always restore the server's real environment.
+        os.environ.clear()
+        os.environ.update(original_environ)
 
 
-async def help_search(question: str) -> LlmResponse:
+async def help_search(question: str) -> str:
     """
     Search the web for information related to CTF challenges, prompt injection,
     agents, Google ADK, RAG, and other relevant topics. This function helps
@@ -823,12 +712,7 @@ async def help_search(question: str) -> LlmResponse:
                 "Try rephrasing your question or being more specific "
                 "about what you are looking for."
             )
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[types.Part(text=result_text)],
-                )
-            )
+            return result_text
 
         # Format the results - simplified
         formatted_results = []
@@ -857,12 +741,7 @@ async def help_search(question: str) -> LlmResponse:
             f'{", ".join(titles_list)}'
         )
 
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
 
     except ImportError:
         error_msg = "duckduckgo-search package is not available"
@@ -871,12 +750,7 @@ async def help_search(question: str) -> LlmResponse:
             f"{error_msg}. Please install the duckduckgo-search package "
             "to use this feature."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
     except Exception as e:
         error_msg = f"Error searching the web: {str(e)}"
         logger.error(error_msg)
@@ -885,12 +759,7 @@ async def help_search(question: str) -> LlmResponse:
             "being more specific about the topic, or checking the "
             "documentation directly."
         )
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=result_text)],
-            )
-        )
+        return result_text
 
 
 # Create ADK FunctionTool instances

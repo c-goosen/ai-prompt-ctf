@@ -25,7 +25,9 @@ class Level2Agent(BaseCTFAgent):
         """
         )
 
-        output_injection_callback = partial(guard_rail_output_injection)
+        output_injection_callback = partial(
+            guard_rail_output_injection, level=2
+        )
 
         super().__init__(
             level=2,

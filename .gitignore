@@ -6,8 +6,6 @@ Miniforge*
 .teller.yml
 llm_training/
 supabase/
-chroma/
-chroma_db/
 users.db
 lancedb/
 ctf/lancedb/
