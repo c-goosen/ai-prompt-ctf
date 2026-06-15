@@ -3,7 +3,7 @@
 # can compile when no cp314 wheel exists. Production stays slim.
 # https://docs.astral.sh/uv/guides/integration/docker/
 
-FROM ghcr.io/astral-sh/uv:python3.14-trixie AS builder
+FROM ghcr.io/astral-sh/uv:0.11.21-python3.14-trixie AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -20,7 +20,7 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
-FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS production
+FROM ghcr.io/astral-sh/uv:0.11.21-python3.14-trixie-slim AS production
 
 ENV FASTAPI_ENV=production \
     PYTHONUNBUFFERED=1 \

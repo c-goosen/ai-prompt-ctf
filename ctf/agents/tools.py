@@ -81,8 +81,9 @@ async def sql_query(
                 user_data[col] = val
             formatted_results.append(user_data)
 
+        results_json = json.dumps(formatted_results, indent=2, default=str)
         if len(output) == 1:
-            result_text = f"Found user with UserId: {user_id}"
+            result_text = f"Found user with UserId: {user_id}\n{results_json}"
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -90,7 +91,10 @@ async def sql_query(
                 )
             )
         else:
-            result_text = f"Found {len(output)} user(s) with UserId: {user_id}"
+            result_text = (
+                f"Found {len(output)} user(s) with UserId: {user_id}\n"
+                f"{results_json}"
+            )
             return LlmResponse(
                 content=types.Content(
                     role="model",
@@ -713,12 +717,16 @@ async def execute_python_code(
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
 
+    # Snapshot the real environment so the executed code only sees the level
+    # password, then restore it afterwards. Mutating os.environ in-process
+    # (this runs via exec in the API server process) would otherwise wipe the
+    # server's environment (API keys, Ollama base URL, etc.) for every
+    # subsequent request.
+    original_environ = dict(os.environ)
     try:
+        os.environ.clear()
+        os.environ["LEVEL_8_PASSWORD"] = password
         with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            code = (
-                f"import os; os.environ.clear(); "
-                f"os.environ['LEVEL_8_PASSWORD'] = '{password}'; \n {code}"
-            )
             exec(
                 code,
                 {
@@ -775,6 +783,10 @@ async def execute_python_code(
                 parts=[types.Part(text=result_text)],
             )
         )
+    finally:
+        # Always restore the server's real environment.
+        os.environ.clear()
+        os.environ.update(original_environ)
 
 
 async def help_search(question: str) -> LlmResponse:

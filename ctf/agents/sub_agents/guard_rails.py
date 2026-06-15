@@ -4,9 +4,11 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmRequest, LlmResponse
 from google.genai import types
 
+from ctf.app_config import settings
 from ctf.agents.sub_agents.protection_utils import (
     ProtectionUtils,
     _extract_last_user_message,
+    _extract_response_text,
 )
 
 
@@ -45,12 +47,25 @@ def guard_rail_input_injection(
 
 def guard_rail_output_injection(
     callback_context: CallbackContext | None = None,
-    llm_request: LlmRequest | None = None,
+    llm_response: LlmResponse | None = None,
+    level: int = 2,
+    tool_response: Any = None,
     **_: Any,
 ) -> Optional[LlmResponse]:
-    """Guardrail for output injection"""
-    last_user_message = _extract_last_user_message(llm_request)
-    if "password" in last_user_message.lower():
+    """Guardrail for output: block responses/tool outputs leaking the password.
+
+    Wired as an ``after_model_callback`` (ADK passes ``llm_response``) and as an
+    ``after_tool_callback`` (ADK passes ``tool_response``). The previous version
+    inspected ``llm_request``, which ADK never supplies to after-callbacks, so it
+    was a silent no-op.
+    """
+    response_obj = llm_response or tool_response
+    text = _extract_response_text(response_obj) if response_obj else ""
+    if not text:
+        return None
+
+    password = settings.PASSWORDS.get(level)
+    if password and password.lower() in text.lower():
         return LlmResponse(
             content=types.Content(
                 role="model",

@@ -30,7 +30,4 @@ class Level7Agent(BaseCTFAgent):
             before_model_callback=partial(
                 ProtectionUtils.llm_guard_prompt_injection_goose, level=7
             ),
-            before_tool_callback=partial(
-                ProtectionUtils.llm_guard_prompt_injection_goose, level=7
-            ),
         )
