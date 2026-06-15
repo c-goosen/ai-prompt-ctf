@@ -71,7 +71,7 @@ line-length = 80
 target-version = ["py311"]
 
 [tool.djlint]
-exclude=".venv,venv,.tox,.eggs,..."
+exclude=".venv,venv,.tox,.eggs"
 ignore="H006,H013,H021"
 
 [tool.pytest.ini_options]
