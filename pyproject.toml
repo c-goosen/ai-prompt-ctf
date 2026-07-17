@@ -16,7 +16,7 @@ dependencies = [
     "gunicorn==26.0.0",
     "slowapi>=0.1.9,<0.2",
     "transformers>=4.51.0,<5",
-    "torch>=2.6.0,<3",
+    "torch>=2.13.0,<3",
     "google-adk[eval]>=2.0.0",
     "litellm>=1.83.7",
     "httpx>=0.28.1",
