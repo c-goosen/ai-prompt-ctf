@@ -1,9 +1,15 @@
+import asyncio
+import ipaddress
 import json
 import logging
 import os
 import re
+import socket
 import sqlite3
+import subprocess
+import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import lancedb
 import requests
@@ -410,8 +416,6 @@ async def password_search_func(
         r"^(.+)$",
     ]
 
-    level_password = settings.PASSWORDS.get(level)
-
     for doc in doc_list:
         for pattern in password_patterns:
             match = re.search(pattern, doc, re.IGNORECASE)
@@ -434,15 +438,6 @@ async def password_search_func(
             round(1 - dist, 3) for dist in distance_list
         ]
 
-    if extracted_passwords:
-        response["passwords_found"] = True
-        response["password"] = extracted_passwords[0]
-    elif level_password:
-        response["passwords_found"] = True
-        response["password"] = level_password
-    else:
-        response["passwords_found"] = False
-
     logger.info(
         f"password_search_func results for level {level}: {len(doc_list)} documents, "
         f"{len(extracted_passwords)} passwords extracted"
@@ -450,18 +445,17 @@ async def password_search_func(
     if extracted_passwords:
         logger.info(f"Extracted passwords: {extracted_passwords}")
 
-    # Update response with password information
     if extracted_passwords:
         response["passwords_found"] = True
         response["password"] = extracted_passwords[0]
         response["status"] = "success"
-    elif level_password:
-        response["passwords_found"] = True
-        response["password"] = level_password
-        response["status"] = "success"
     else:
         response["passwords_found"] = False
         response["status"] = "success"
+        response["message"] = (
+            "No password could be extracted from the retrieved documents "
+            "for this level."
+        )
 
     return json.dumps(response, indent=2)
 
@@ -562,6 +556,37 @@ async def get_leaderboard_stats(limit: int = 25) -> str:
         return error_msg
 
 
+MAX_SCRAPE_BYTES = 2_000_000
+
+
+def _web_scrape_safety_error(url: str) -> str | None:
+    """Return an error message if url is unsafe to scrape, else None.
+
+    Blocks non-http(s) schemes and hosts resolving to loopback/link-local/
+    private addresses (including the 169.254.169.254 cloud metadata
+    endpoint) to keep this tool scoped to fetching public web pages rather
+    than acting as an SSRF pivot into internal infrastructure.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return f"Blocked: unsupported URL scheme '{parsed.scheme}'"
+
+    hostname = parsed.hostname
+    if not hostname:
+        return "Blocked: URL has no hostname"
+
+    try:
+        resolved_ip = socket.gethostbyname(hostname)
+        ip_obj = ipaddress.ip_address(resolved_ip)
+    except (socket.gaierror, ValueError) as e:
+        return f"Blocked: could not resolve host '{hostname}': {e}"
+
+    if ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_private:
+        return f"Blocked: URL resolves to a disallowed address ({resolved_ip})"
+
+    return None
+
+
 async def web_scrape(url: str) -> str:
     """
     Scrape a web page by fetching its content and converting HTML to markdown.
@@ -572,11 +597,30 @@ async def web_scrape(url: str) -> str:
     Returns:
         A dictionary with status and the markdown representation of the web page content
     """
+    safety_error = _web_scrape_safety_error(url)
+    if safety_error:
+        logger.warning(f"Blocked web_scrape request for {url}: {safety_error}")
+        return safety_error
+
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=10, stream=True)
         response.raise_for_status()
 
-        markdown_content = convert(response.text)
+        content_length = response.headers.get("Content-Length")
+        if content_length and int(content_length) > MAX_SCRAPE_BYTES:
+            return f"Error: response too large ({content_length} bytes)"
+
+        body = bytearray()
+        for chunk in response.iter_content(chunk_size=8192):
+            body.extend(chunk)
+            if len(body) > MAX_SCRAPE_BYTES:
+                body = body[:MAX_SCRAPE_BYTES]
+                break
+
+        encoding = response.encoding or response.apparent_encoding or "utf-8"
+        text = bytes(body).decode(encoding, errors="replace")
+
+        markdown_content = convert(text)
 
         logger.info(f"Successfully scraped and converted {url} to markdown")
         return markdown_content
@@ -596,8 +640,8 @@ async def execute_python_code(
     level: int = 8,
 ) -> str:
     """
-    Execute Python code locally on the API server. The environment variable
-    LEVEL_8_PASSWORD is automatically set before code execution.
+    Execute Python code in an isolated subprocess. The environment variable
+    LEVEL_8_PASSWORD is set only for that subprocess's environment.
 
     Args:
         code: The Python code to execute
@@ -606,35 +650,37 @@ async def execute_python_code(
     Returns:
         A dictionary with status and the output from executing the code, including stdout and stderr
     """
-    import io
-    from contextlib import redirect_stdout, redirect_stderr
-
     password = settings.PASSWORDS.get(level, "")
 
-    stdout_capture = io.StringIO()
-    stderr_capture = io.StringIO()
-
-    # Snapshot the real environment so the executed code only sees the level
-    # password, then restore it afterwards. Mutating os.environ in-process
-    # (this runs via exec in the API server process) would otherwise wipe the
-    # server's environment (API keys, Ollama base URL, etc.) for every
-    # subsequent request.
-    original_environ = dict(os.environ)
+    # Run in a subprocess with a scoped env= dict rather than mutating this
+    # process's os.environ: the previous in-process exec() + os.environ
+    # clear/restore raced with any other concurrent request in this worker
+    # touching the environment (API keys, ADK_API_URL, etc. could be wiped
+    # or corrupted mid-request). A subprocess's environment is isolated by
+    # the OS, so no shared mutable state and no lock is needed.
     try:
-        os.environ.clear()
-        os.environ["LEVEL_8_PASSWORD"] = password
-        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            exec(
-                code,
-                {
-                    "__builtins__": __builtins__,
-                    "os": os,
-                    "__name__": "__main__",
-                },
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-c",
+            code,
+            env={
+                "LEVEL_8_PASSWORD": password,
+                "PATH": os.environ.get("PATH", ""),
+            },
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        try:
+            stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                process.communicate(), timeout=10
             )
+        except asyncio.TimeoutError:
+            process.kill()
+            await process.wait()
+            return "Code execution timed out after 10 seconds."
 
-        stdout_output = stdout_capture.getvalue()
-        stderr_output = stderr_capture.getvalue()
+        stdout_output = stdout_bytes.decode("utf-8", errors="replace")
+        stderr_output = stderr_bytes.decode("utf-8", errors="replace")
 
         if stderr_output:
             result_text = (
@@ -649,21 +695,12 @@ async def execute_python_code(
             )
             return result_text
         else:
-            result_text = "Code executed successfully (no output)"
-            return result_text
+            return "Code executed successfully (no output)"
 
     except Exception as e:
         error_msg = f"Error executing code: {str(e)}"
         logger.error(error_msg)
-        stderr_output = stderr_capture.getvalue()
-        result_text = error_msg
-        if stderr_output:
-            result_text = f"{error_msg}. Stderr: {stderr_output[:200]}"
-        return result_text
-    finally:
-        # Always restore the server's real environment.
-        os.environ.clear()
-        os.environ.update(original_environ)
+        return error_msg
 
 
 async def help_search(question: str) -> str:
