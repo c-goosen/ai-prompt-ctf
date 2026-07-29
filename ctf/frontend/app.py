@@ -9,6 +9,7 @@ from typing import Annotated, Optional, Callable
 import httpx
 from fastapi import Cookie, HTTPException, Form, Query
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -27,10 +28,12 @@ from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
 from ctf.leaderboard import (
+    claim_or_verify_username,
     ensure_leaderboard_user,
     get_leaderboard,
     get_leaderboard_summary,
     get_recent_completions,
+    verify_owner,
 )
 
 import markdown
@@ -289,6 +292,10 @@ async def register(
     username: Optional[str] = Form(None),
     session_id: Optional[str] = Form(None),
     cookie_identity: Annotated[str | None, cookie] = None,
+    player_token: Annotated[
+        str | None,
+        Cookie(alias="player_token", title="player_token"),
+    ] = None,
 ):  # noqa: F841
     """Register a user and session with the ADK API"""
     # Handle both form data (HTMX) and JSON (API)
@@ -322,6 +329,32 @@ async def register(
             raise HTTPException(
                 status_code=400, detail=f"Invalid request: {str(e)}"
             )
+
+    # Ensure this username isn't already claimed by someone else. First-time
+    # registration mints a new ownership token; a returning player must
+    # present the token they were given the first time.
+    owns_username, new_player_token = claim_or_verify_username(
+        user_id, player_token
+    )
+    if not owns_username:
+        if is_htmx:
+            return templates.TemplateResponse(
+                "register_error.html",
+                {
+                    "request": request,
+                    "PAGE_HEADER": settings.CTF_SUBTITLE,
+                    "error": "Username already taken",
+                    "error_detail": (
+                        "That username is already registered. Please "
+                        "choose another, or continue in the browser where "
+                        "you originally registered it."
+                    ),
+                },
+            )
+        raise HTTPException(
+            status_code=409,
+            detail="Username already taken",
+        )
 
     app_name = "sub_agents"
 
@@ -359,16 +392,38 @@ async def register(
                     key="anon_user_identity", value=user_id
                 )
                 html_response.set_cookie(key="session_id", value=session_id)
+                if new_player_token:
+                    html_response.set_cookie(
+                        key="player_token",
+                        value=new_player_token,
+                        httponly=True,
+                        samesite="lax",
+                    )
                 return html_response
             else:
                 # Return JSON for API calls
-                return {
-                    "status": "success",
-                    "message": "User registered successfully",
-                    "user_id": user_id,
-                    "session_id": session_id,
-                    "app_name": app_name,
-                }
+                json_response = JSONResponse(
+                    {
+                        "status": "success",
+                        "message": "User registered successfully",
+                        "user_id": user_id,
+                        "session_id": session_id,
+                        "app_name": app_name,
+                        **(
+                            {"player_token": new_player_token}
+                            if new_player_token
+                            else {}
+                        ),
+                    }
+                )
+                if new_player_token:
+                    json_response.set_cookie(
+                        key="player_token",
+                        value=new_player_token,
+                        httponly=True,
+                        samesite="lax",
+                    )
+                return json_response
         except httpx.HTTPStatusError as e:
             logger.error(
                 f"Failed to register user: {e.response.status_code} - {e.response.text}"
@@ -418,9 +473,22 @@ async def register(
 @app.get("/session/{username}/{session_id}")
 @limiter.limit("5/min")
 async def get_session(
-    request: Request, username: str, session_id: str
+    request: Request,
+    username: str,
+    session_id: str,
+    cookie_identity: Annotated[str | None, cookie] = None,
+    player_token: Annotated[
+        str | None,
+        Cookie(alias="player_token", title="player_token"),
+    ] = None,
 ):  # noqa: F841
     """Check if a user has an existing session with the ADK API"""
+    if cookie_identity != username or not verify_owner(username, player_token):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this session",
+        )
+
     app_name = "sub_agents"
     user_id = username
 
