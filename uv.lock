@@ -85,7 +85,7 @@ requires-dist = [
     { name = "fastapi", specifier = "==0.124.4" },
     { name = "google-adk", extras = ["eval"], specifier = ">=2.0.0" },
     { name = "gunicorn", specifier = "==26.0.0" },
-    { name = "html-to-markdown", specifier = ">=0.1.0" },
+    { name = "html-to-markdown", specifier = ">=3.6.20" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.5,<4" },
     { name = "lancedb", specifier = ">=0.25.2" },
