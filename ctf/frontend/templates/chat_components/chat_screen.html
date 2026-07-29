@@ -76,8 +76,8 @@
             }
         }
 
-        document.addEventListener("htmx:beforeRequest", maybeScroll);
-        document.addEventListener("htmx:afterSwap", function (evt) {
+        document.addEventListener("htmx:before:request", maybeScroll);
+        document.addEventListener("htmx:after:swap", function (evt) {
             const target = evt.detail && evt.detail.target;
             if (target && target.matches(".chat-history")) {
                 requestAnimationFrame(scrollChatToBottom);
