@@ -63,11 +63,6 @@ class Level10Agent(BaseCTFAgent):
                 prompt_guard_meta_callback,
                 prompt_guard_goose_callback,
             ],
-            before_tool_callback=[
-                input_injection_callback,
-                prompt_guard_meta_callback,
-                prompt_guard_goose_callback,
-            ],
             after_model_callback=[
                 password_leak_callback,
             ],

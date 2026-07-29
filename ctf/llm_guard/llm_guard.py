@@ -1,3 +1,5 @@
+import asyncio
+
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
 
@@ -44,18 +46,25 @@ class LLMGuardLocalBase:
             _PIPELINE_CACHE[key] = nlp
         return nlp
 
-    async def query(self, prompt: str) -> list:
-        """
-        Locally run and prompt a AutoModelForSequenceClassification LLM.
-        :param prompt:
-        :return:
-        """
+    def _classify(self, prompt: str) -> list:
         nlp = self._get_pipeline()
 
         classification_results = nlp(prompt)
         if isinstance(classification_results, list):
             classification_results = classification_results[0]
         return classification_results
+
+    async def query(self, prompt: str) -> list:
+        """
+        Locally run and prompt a AutoModelForSequenceClassification LLM.
+
+        Runs in a worker thread since both model loading (first call) and
+        inference are blocking, CPU-bound work that would otherwise stall
+        the event loop for every other concurrent request.
+        :param prompt:
+        :return:
+        """
+        return await asyncio.to_thread(self._classify, prompt)
 
 
 class PromptGuardMeta(LLMGuardLocalBase):
