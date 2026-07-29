@@ -56,7 +56,7 @@
         window.__chatInputResetBound = true;
         
         // Disable inputs and submit button before HTMX request
-        document.body.addEventListener('htmx:beforeRequest', function (event) {
+        document.body.addEventListener('htmx:before:request', function (event) {
             const submitButton = event.detail.elt.closest('[hx-post]') || event.detail.elt;
             if (!submitButton || !submitButton.hasAttribute('hx-post')) {
                 return;
@@ -122,10 +122,10 @@
         }
         
         // Unlock inputs and clear after HTMX response returns
-        document.body.addEventListener('htmx:afterRequest', unlockAndClearInputs);
-        
+        document.body.addEventListener('htmx:after:request', unlockAndClearInputs);
+
         // Also unlock on error to prevent stuck state
-        document.body.addEventListener('htmx:responseError', unlockAndClearInputs);
+        document.body.addEventListener('htmx:response:error', unlockAndClearInputs);
     }
 
     document.addEventListener('DOMContentLoaded', function () {

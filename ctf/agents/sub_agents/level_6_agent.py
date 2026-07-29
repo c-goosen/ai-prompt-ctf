@@ -31,7 +31,4 @@ class Level6Agent(BaseCTFAgent):
             before_model_callback=partial(
                 ProtectionUtils.llm_guard_prompt_injection_meta, level=6
             ),
-            before_tool_callback=partial(
-                ProtectionUtils.llm_guard_prompt_injection_meta, level=6
-            ),
         )

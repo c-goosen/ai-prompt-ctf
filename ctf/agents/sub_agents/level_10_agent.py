@@ -37,9 +37,6 @@ class Level10Agent(BaseCTFAgent):
         )
 
         input_injection_callback = partial(guard_rail_input_injection, level=10)
-        output_injection_callback = partial(
-            ProtectionUtils.llm_guard_prompt_injection_meta, level=10
-        )
         password_leak_callback = partial(
             ProtectionUtils.detect_password_leak, level=10
         )
@@ -66,17 +63,10 @@ class Level10Agent(BaseCTFAgent):
                 prompt_guard_meta_callback,
                 prompt_guard_goose_callback,
             ],
-            before_tool_callback=[
-                input_injection_callback,
-                prompt_guard_meta_callback,
-                prompt_guard_goose_callback,
-            ],
             after_model_callback=[
-                output_injection_callback,
                 password_leak_callback,
             ],
             after_tool_callback=[
-                output_injection_callback,
                 password_leak_callback,
             ],
         )
