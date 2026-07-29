@@ -1,3 +1,4 @@
+:memory:/
 __pycache__/
 .idea/
 Miniforge*
