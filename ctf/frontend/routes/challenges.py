@@ -9,7 +9,7 @@ from fastapi import APIRouter, Cookie, Request
 from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
-from ctf.frontend.utils import redact_passwords_in_json
+from ctf.frontend.utils import redact_passwords_in_text
 
 cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
 
@@ -91,9 +91,11 @@ async def get_session_history(
                 role = (role or fallback or "").lower()
                 if role in {"assistant", "model", "ctfsubagentsroot"}:
                     return "assistant"
+                if role in {"tool"}:
+                    return "tool"
                 if role in {"user"}:
                     return "user"
-                return "assistant" if role else "assistant"
+                return "assistant"
 
             def _event_to_message(event: dict) -> dict | None:
                 content = event.get("content") or {}
@@ -143,13 +145,6 @@ async def get_session_history(
                                         sort_keys=True,
                                         ensure_ascii=False,
                                     )
-                                    if (
-                                        fn_resp.get("name")
-                                        == "password_search_func"
-                                    ):
-                                        resp_str = redact_passwords_in_json(
-                                            resp_str
-                                        )
                                     text_chunks.append(
                                         f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                         f"\n```json\n{resp_str}\n```"
@@ -161,13 +156,6 @@ async def get_session_history(
                                     sort_keys=True,
                                     ensure_ascii=False,
                                 )
-                                if (
-                                    fn_resp.get("name")
-                                    == "password_search_func"
-                                ):
-                                    resp_str = redact_passwords_in_json(
-                                        resp_str
-                                    )
                                 text_chunks.append(
                                     f"Tool response `{fn_resp.get('name', 'unknown')}`"
                                     f"\n```json\n{resp_str}\n```"
@@ -182,6 +170,19 @@ async def get_session_history(
                     text = str(content.get("text") or "").strip()
                 if not text:
                     return None
+
+                has_password_search = any(
+                    (
+                        isinstance(p, dict)
+                        and "functionResponse" in p
+                        and p.get("functionResponse", {}).get("name")
+                        == "password_search_func"
+                    )
+                    for p in parts
+                )
+                if has_password_search:
+                    text = redact_passwords_in_text(text)
+
                 role = _normalize_role(role_hint, event.get("author"))
                 return {"memory": text, "metadata": {"role": role}}
 
@@ -218,7 +219,7 @@ async def get_session_history(
                 e.response.text,
             )
     except Exception as e:
-        logger.warning(f"Could not retrieve session history: {e}")
+        logger.error(f"Could not retrieve session history: {e}")
     return []
 
 

@@ -2,6 +2,7 @@
 Enhanced protection utilities for CTF agents
 """
 
+import json
 import re
 from typing import Optional, Any
 
@@ -191,13 +192,22 @@ class ProtectionUtils:
         callback_context: CallbackContext | None = None,
         llm_response: LlmResponse | None = None,
         level: int = 0,
+        tool_response: Any = None,
         **_: Any,
     ) -> Optional[LlmResponse]:
-        """Detect whether response text contains the level password."""
-        if not llm_response:
+        """Detect whether response text contains the level password.
+
+        Wired as both an ``after_model_callback`` (ADK passes
+        ``llm_response``) and an ``after_tool_callback`` (ADK passes
+        ``tool_response``, a plain dict/value rather than an LlmResponse).
+        """
+        if llm_response:
+            text = _extract_response_text(llm_response)
+        elif tool_response is not None:
+            text = json.dumps(tool_response, ensure_ascii=False)
+        else:
             return None
 
-        text = _extract_response_text(llm_response)
         if not text:
             return None
 

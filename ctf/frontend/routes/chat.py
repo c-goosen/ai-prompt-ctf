@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
-from ctf.leaderboard import record_level_completion, strip_leaderboard_markers
+from ctf.leaderboard import strip_leaderboard_markers
 from ctf.frontend.utils import redact_passwords_in_text
 
 # ADK API base URL
@@ -132,6 +132,87 @@ async def call_adk_api(
             raise
 
 
+def _normalize_role(role: Optional[str]) -> str:
+    if not role:
+        return "assistant"
+    role = role.lower()
+    if role in {"assistant", "model", "ctfsubagentsroot"}:
+        return "assistant"
+    if role in {"tool"}:
+        return "tool"
+    if role in {"user"}:
+        return "user"
+    return "assistant"
+
+
+def parse_adk_response_messages(adk_response) -> list[dict[str, str]]:
+    """Convert raw ADK response events into chat messages.
+
+    Pure (no leaderboard/DB side effects) so it can be unit tested without a
+    live ADK server.
+    """
+    response_messages: list[dict[str, str]] = []
+    if adk_response and isinstance(adk_response, list):
+        for event in adk_response:
+            content = event.get("content") or {}
+            parts = content.get("parts") or []
+            role_hint = content.get("role") or event.get("author")
+            text_chunks: list[str] = []
+
+            for part in parts:
+                if isinstance(part, dict):
+                    if "text" in part:
+                        text_chunks.append(str(part["text"]))
+                    elif "functionCall" in part:
+                        call = part["functionCall"]
+                        args = call.get("args") or {}
+                        args_str = json.dumps(args, indent=2, sort_keys=True)
+                        text_chunks.append(
+                            f"Function call `{call.get('name', 'unknown')}`"
+                            f"\n```json\n{args_str}\n```"
+                        )
+                        role_hint = "assistant"
+                    elif "functionResponse" in part:
+                        fn_resp = part["functionResponse"]
+                        resp = fn_resp.get("response") or {}
+                        resp_str = json.dumps(resp, indent=2, sort_keys=True)
+                        text_chunks.append(
+                            f"Tool response `{fn_resp.get('name', 'unknown')}`"
+                            f"\n```json\n{resp_str}\n```"
+                        )
+                        role_hint = "tool"
+                elif isinstance(part, str):
+                    text_chunks.append(part)
+
+            text = "\n".join(chunk for chunk in text_chunks if chunk).strip()
+            if not text:
+                continue
+
+            has_password_search = any(
+                (
+                    isinstance(p, dict)
+                    and "functionResponse" in p
+                    and p.get("functionResponse", {}).get("name")
+                    == "password_search_func"
+                )
+                for p in parts
+            )
+            if has_password_search:
+                text = redact_passwords_in_text(text)
+
+            role = _normalize_role(role_hint)
+            response_messages.append({"role": role, "text": text})
+
+    if not response_messages:
+        response_messages = [
+            {
+                "role": "assistant",
+                "text": "Sorry, I couldn't process your request. Please try again.",
+            }
+        ]
+    return response_messages
+
+
 @router.post("/chat/completions", include_in_schema=True)
 async def chat_completion(
     request: Request,
@@ -232,91 +313,7 @@ async def chat_completion(
             file_mime_type=file_mime_type,
         )
 
-        def _normalize_role(role: Optional[str]) -> str:
-            if not role:
-                return "assistant"
-            role = role.lower()
-            if role in {"assistant", "model", "ctfsubagentsroot"}:
-                return "assistant"
-            if role in {"tool"}:
-                return "tool"
-            if role in {"user"}:
-                return "user"
-            return "assistant"
-
-        response_messages: list[dict[str, str]] = []
-        if adk_response and isinstance(adk_response, list):
-            for event in adk_response:
-                content = event.get("content") or {}
-                parts = content.get("parts") or []
-                role_hint = content.get("role") or event.get("author")
-                text_chunks: list[str] = []
-
-                # Track if this event contains password_search_func response
-                has_password_search = False
-
-                for part in parts:
-                    if isinstance(part, dict):
-                        if "text" in part:
-                            text_chunks.append(str(part["text"]))
-                        elif "functionCall" in part:
-                            call = part["functionCall"]
-                            args = call.get("args") or {}
-                            args_str = json.dumps(
-                                args, indent=2, sort_keys=True
-                            )
-                            text_chunks.append(
-                                f"Function call `{call.get('name', 'unknown')}`"
-                                f"\n```json\n{args_str}\n```"
-                            )
-                            role_hint = "assistant"
-                        elif "functionResponse" in part:
-                            fn_resp = part["functionResponse"]
-                            resp = fn_resp.get("response") or {}
-                            resp_str = json.dumps(
-                                resp, indent=2, sort_keys=True
-                            )
-                            # Track if this is from password_search_func
-                            if fn_resp.get("name") == "password_search_func":
-                                has_password_search = True
-                            text_chunks.append(
-                                f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                                f"\n```json\n{resp_str}\n```"
-                            )
-                            role_hint = "tool"
-                    elif isinstance(part, str):
-                        text_chunks.append(part)
-
-                text = "\n".join(
-                    chunk for chunk in text_chunks if chunk
-                ).strip()
-                if not text:
-                    continue
-
-                # Redact passwords in the final text if this came from password_search_func
-                # Check if any functionResponse in this event was from password_search_func
-                has_password_search = any(
-                    (
-                        isinstance(p, dict)
-                        and "functionResponse" in p
-                        and p.get("functionResponse", {}).get("name")
-                        == "password_search_func"
-                    )
-                    for p in parts
-                )
-                if has_password_search:
-                    text = redact_passwords_in_text(text)
-
-                role = _normalize_role(role_hint)
-                response_messages.append({"role": role, "text": text})
-
-        if not response_messages:
-            response_messages = [
-                {
-                    "role": "assistant",
-                    "text": "Sorry, I couldn't process your request. Please try again.",
-                }
-            ]
+        response_messages = parse_adk_response_messages(adk_response)
 
     except Exception as e:
         logger.error(f"Error calling ADK API: {e}")
@@ -342,15 +339,17 @@ async def chat_completion(
         """
     ]
 
-    completed_levels: set[int] = set()
     for message in response_messages:
-        cleaned_text, markers = strip_leaderboard_markers(message["text"])
+        # Only strip the marker text for display here. Leaderboard credit
+        # must never be derived from free-text model output: that text is
+        # directly reachable via prompt injection (a player can simply ask
+        # the model to repeat the marker string to fake a completion).
+        # Authoritative crediting happens server-side in
+        # ctf.agents.tools._record_leaderboard_progress, which is only
+        # invoked from an actual submit_answer_func tool call and uses the
+        # ADK-session-bound identity rather than model-supplied text.
+        cleaned_text, _markers = strip_leaderboard_markers(message["text"])
         message["text"] = cleaned_text
-        for marker in markers:
-            if marker.get("status") == "correct":
-                level = marker.get("level")
-                if isinstance(level, int):
-                    completed_levels.add(level)
         if message["role"] == "assistant":
             chat_segments.append(
                 f"""
@@ -378,13 +377,6 @@ async def chat_completion(
                   </div>
                 </div>
                 """
-            )
-
-    if completed_levels and cookie_identity:
-        for level in sorted(completed_levels):
-            record_level_completion(
-                username=cookie_identity,
-                level=level,
             )
 
     return HTMLResponse(content="".join(chat_segments), status_code=200)
