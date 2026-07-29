@@ -3,7 +3,7 @@ Base agent class for CTF challenges using Google ADK with Sequential Workflow an
 Compatible with ADK Multi-Agent Systems
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from google.adk.agents import LlmAgent
 from google.adk.agents.llm_agent import (
     AfterModelCallback,
@@ -80,11 +80,6 @@ class BaseCTFAgent(LlmAgent):
     def level(self) -> int:
         """Get the level of this agent"""
         return self._level
-
-    @property
-    def protection_config(self) -> Dict[str, Any]:
-        """Get the protection configuration for this level"""
-        return self._protection_config
 
     def get_base_tools(self) -> list[FunctionTool]:
         """Return the default tool list; subclasses can override to extend."""

@@ -4,9 +4,11 @@ PostgreSQL-backed leaderboard helpers shared between the frontend and agent tool
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import secrets
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Iterator
@@ -46,6 +48,14 @@ class LeaderboardEntry(Base):
     username = Column(String, primary_key=True)
     level = Column(Integer, primary_key=True)
     completed_at = Column(DateTime(timezone=True), nullable=False, index=True)
+
+
+class PlayerIdentity(Base):
+    __tablename__ = "player_identities"
+
+    username = Column(String, primary_key=True)
+    token_hash = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
 
 
 def configure_db_uri(uri: str) -> None:
@@ -297,6 +307,66 @@ def record_level_completion(username: str, level: int) -> None:
             session.add(entry)
     except SQLAlchemyError as exc:
         logger.warning("Failed to record leaderboard entry: %s", exc)
+
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def claim_or_verify_username(
+    username: str, presented_token: str | None
+) -> tuple[bool, str | None]:
+    """
+    Claim a username on first registration, or verify ownership on a repeat
+    registration under the same username.
+
+    Returns (allowed, new_token). new_token is only set when a fresh
+    ownership token was minted for a first-time claim; callers should set it
+    as an httponly cookie. When allowed is True and new_token is None, the
+    caller already presented the correct existing owner token.
+    """
+    if not username:
+        return False, None
+    timestamp = datetime.now(timezone.utc)
+    try:
+        with _session_scope() as session:
+            entry = session.get(PlayerIdentity, username)
+            if entry is None:
+                new_token = secrets.token_urlsafe(32)
+                session.add(
+                    PlayerIdentity(
+                        username=username,
+                        token_hash=_hash_token(new_token),
+                        created_at=timestamp,
+                    )
+                )
+                result = (True, new_token)
+            elif (
+                presented_token
+                and _hash_token(presented_token) == entry.token_hash
+            ):
+                result = (True, None)
+            else:
+                result = (False, None)
+        return result
+    except SQLAlchemyError as exc:
+        logger.warning("Failed to claim/verify username %s: %s", username, exc)
+        return False, None
+
+
+def verify_owner(username: str, presented_token: str | None) -> bool:
+    """Check whether presented_token is the registered owner token for username."""
+    if not username or not presented_token:
+        return False
+    try:
+        with _session_scope() as session:
+            entry = session.get(PlayerIdentity, username)
+            if entry is None:
+                return False
+            return _hash_token(presented_token) == entry.token_hash
+    except SQLAlchemyError as exc:
+        logger.warning("Failed to verify owner for %s: %s", username, exc)
+        return False
 
 
 def ensure_leaderboard_user(username: str) -> None:
