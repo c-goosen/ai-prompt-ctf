@@ -1,6 +1,5 @@
 * ~~Remove auth~~
 * ~~Chatgpt theme~~
-* ~~Chromadb integration~~
 * ~~Basic Function calling~~
 * Seperate leaderboard
 * ~~Multimodal RAG (partailly integrated)~~
