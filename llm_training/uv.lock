@@ -1331,7 +1331,7 @@ requires-dist = [
     { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.30.2,<0.31" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "memory-profiler", specifier = ">=0.61.0" },
-    { name = "mirascope", extras = ["openai"], specifier = ">=2.4.0" },
+    { name = "mirascope", extras = ["openai"], specifier = ">=2.5.0" },
     { name = "scikit-learn", specifier = ">=1.5.2,<2" },
     { name = "sentencepiece", specifier = ">=0.2.0,<0.3" },
     { name = "transformers", extras = ["torch"], specifier = ">=4.51.1,<5" },
