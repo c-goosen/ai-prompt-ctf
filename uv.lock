@@ -116,7 +116,7 @@ dev = [
     { name = "huggingface-hub", specifier = "==0.35.3" },
     { name = "importanize", specifier = ">=0.7.0,<0.8" },
     { name = "memory-profiler", specifier = ">=0.61.0,<0.62" },
-    { name = "openinference-instrumentation-google-adk", specifier = ">=0.1.14" },
+    { name = "openinference-instrumentation-google-adk", specifier = ">=0.1.18" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.41.1" },
     { name = "opentelemetry-sdk", specifier = ">=1.41.1" },
     { name = "pytest", specifier = ">=8.3.5,<9" },
@@ -2236,7 +2236,7 @@ wheels = [
 
 [[package]]
 name = "openinference-instrumentation-google-adk"
-version = "0.1.17"
+version = "0.1.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "openinference-instrumentation" },
@@ -2247,9 +2247,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/c2/8400125398ac568efe49bc8a9411a4c860b27112279d52d2bb8acbc70126/openinference_instrumentation_google_adk-0.1.17.tar.gz", hash = "sha256:8235d2cf3fce5edaf213136fbd00e876db183add362b2edede87cd42b21ab112", size = 14844, upload-time = "2026-07-01T15:44:19.524Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/32/7e495ede54df630d7191fe619b7c06b6e64885a0458a519e629b6d273194/openinference_instrumentation_google_adk-0.1.18.tar.gz", hash = "sha256:74aefc7a4b473c2ef6545f67757ba7c41a1b67e40d589243c8c047626a64ae73", size = 15252, upload-time = "2026-07-30T16:38:34.615Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/27/c0/b0c301a0a1de9fe377e666e89b9e87fa368bd5ac1341ab125624e2bbc081/openinference_instrumentation_google_adk-0.1.17-py3-none-any.whl", hash = "sha256:3f45e38cfd5ffb41c18deddc747e48c68595d4dfa1a89b7b1aa1f3d31e46ce0d", size = 16755, upload-time = "2026-07-01T15:44:18.364Z" },
+    { url = "https://files.pythonhosted.org/packages/13/1d/62ed81d2313b8d18857a73f2d38e785facb21f55d704b876adeb3d6bd991/openinference_instrumentation_google_adk-0.1.18-py3-none-any.whl", hash = "sha256:c3e1c784dd7c105967b31926663b12d9ee2fe208b4948e7294fae04bfa621d98", size = 17194, upload-time = "2026-07-30T16:38:33.25Z" },
 ]
 
 [[package]]
