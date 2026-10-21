@@ -8,6 +8,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import secrets
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -27,6 +28,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
+
+from ctf.app_config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +79,9 @@ def reset_db_uri_override() -> None:
 def _db_uri() -> str:
     if _DB_URI_OVERRIDE is not None:
         return _DB_URI_OVERRIDE
-    return os.getenv("POSTGRESS_DB_URI", "sqlite:///./leaderboard.db")
+    # POSTGRESS_DB_URI is the historical (misspelled) name; keep honouring it.
+    db_uri = os.getenv("POSTGRES_DB_URI") or os.getenv("POSTGRESS_DB_URI")
+    return db_uri or f"sqlite:///{settings.LEADERBOARD_DB_PATH}"
 
 
 def _reset_engine() -> None:
@@ -284,8 +289,6 @@ def strip_leaderboard_markers(text: str) -> tuple[str, list[dict]]:
             )
         return ""
 
-    import re
-
     pattern = re.compile(LEADERBOARD_MARKER_PATTERN)
     cleaned = pattern.sub(_replace, text)
     return cleaned.strip(), markers
@@ -297,14 +300,14 @@ def record_level_completion(username: str, level: int) -> None:
     timestamp = datetime.now(timezone.utc)
     try:
         with _session_scope() as session:
-            entry = session.get(LeaderboardEntry, (username, level))
-            if entry is None:
-                entry = LeaderboardEntry(
-                    username=username, level=level, completed_at=timestamp
+            # Keep the first completion time: re-submitting a solved level
+            # must not change ranking tie-breaks or spam recent completions.
+            if session.get(LeaderboardEntry, (username, level)) is None:
+                session.add(
+                    LeaderboardEntry(
+                        username=username, level=level, completed_at=timestamp
+                    )
                 )
-            else:
-                entry.completed_at = timestamp
-            session.add(entry)
     except SQLAlchemyError as exc:
         logger.warning("Failed to record leaderboard entry: %s", exc)
 

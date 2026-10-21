@@ -1,8 +1,6 @@
 import logging
 import os
-import random
 import uuid
-from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Optional, Callable
 
@@ -27,6 +25,7 @@ from ctf.prepare_flags import prepare_flags
 from ctf.prepare_hf_models import download_models
 from ctf.frontend.routes import challenges
 from ctf.frontend.routes import chat
+from ctf.frontend.utils import is_valid_session_id, is_valid_username
 from ctf.leaderboard import (
     claim_or_verify_username,
     ensure_leaderboard_user,
@@ -67,12 +66,8 @@ class RegisterRequest(BaseModel):
     session_id: str | None = None
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.requests_client = httpx.AsyncClient()
-    yield
-    await app.requests_client.aclose()
-
+# Identity cookies are only read server-side, so keep them away from JS.
+IDENTITY_COOKIE_KWARGS = {"httponly": True, "samesite": "lax"}
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -85,9 +80,9 @@ if bool(os.getenv("PREPARE_FLAGS", False)):
 download_models()
 
 if settings.DOCS_ON:
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI()
 else:
-    app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+    app = FastAPI(docs_url=None, redoc_url=None)
 
 # Rate limiting to keep AI costs low, naught H@xors
 
@@ -115,30 +110,27 @@ PromptGuardMeta()
 
 
 @app.get("/")
-@limiter.limit("1/sec")
+@limiter.limit("1/second")
 async def root(
     request: Request, cookie_identity: Annotated[str | None, cookie] = None
 ):
-    rand_img = random.randint(1, 18)
-
     resp = templates.TemplateResponse(
+        request,
         "root.html",
         {
-            "request": request,
             "CTF_NAME": settings.CTF_NAME,
             "CTF_DETAILS": settings.CTF_DETAILS,
             "CTF_SUBTITLE": settings.CTF_SUBTITLE,
-            "IMG_FILENAME": app.url_path_for(
-                "static",
-                path=f"/images/ai_image_banner/ai-challenge_{rand_img}.webp",
-            ),
             "DISCORD_URL": settings.DISCORD_URL,
             "THEME_MODE": "dark",
         },
     )
     if not cookie_identity:
-        resp.set_cookie(key="anon_user_identity", value=str(uuid.uuid4()))
-    print(cookie_identity)
+        resp.set_cookie(
+            key="anon_user_identity",
+            value=str(uuid.uuid4()),
+            **IDENTITY_COOKIE_KWARGS,
+        )
     return resp
 
 
@@ -154,22 +146,14 @@ async def health(request: Request):  # noqa: F841
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            # Try to hit the ADK API health endpoint if available, or just check connectivity
-            try:
-                response = await client.get(f"{adk_api_url}/health")
-                if response.status_code == 200:
-                    adk_healthy = True
-            except httpx.HTTPStatusError:
-                # ADK might not have /health, try a basic endpoint
-                try:
-                    # Try to get apps list as a connectivity check
-                    response = await client.get(
-                        f"{adk_api_url}/apps", timeout=2.0
-                    )
-                    adk_healthy = response.status_code < 500
-                except Exception as e:
-                    adk_error = str(e)
-                    adk_healthy = False
+            response = await client.get(f"{adk_api_url}/health")
+            adk_healthy = response.status_code == 200
+            if not adk_healthy:
+                # Older ADK servers have no /health; fall back to listing apps.
+                response = await client.get(
+                    f"{adk_api_url}/list-apps", timeout=2.0
+                )
+                adk_healthy = response.status_code < 500
     except Exception as e:
         adk_error = str(e)
         adk_healthy = False
@@ -190,15 +174,15 @@ async def health(request: Request):  # noqa: F841
 
 
 @app.get("/faq")
-@limiter.limit("1/min")
+@limiter.limit("1/minute")
 def render_faq(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "faq.html" if is_htmx else "faq_page.html"
 
     response = templates.TemplateResponse(
+        request,
         template_name,
         {
-            "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
             "MD_FILE": FAQ_MARKDOWN,
         },
@@ -207,15 +191,15 @@ def render_faq(request: Request):  # noqa: F841
 
 
 @app.get("/challenges")
-@limiter.limit("60/min")
+@limiter.limit("60/minute")
 def render_challanges(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "challenges.html" if is_htmx else "challenges_page.html"
     html_content = markdown.markdown(CHALLANGES_MARKDOWN)
     response = templates.TemplateResponse(
+        request,
         template_name,
         {
-            "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
             "MD_FILE": html_content,
             "BASE_DIR": BASE_DIR,
@@ -225,7 +209,7 @@ def render_challanges(request: Request):  # noqa: F841
 
 
 @app.get("/leaderboard")
-@limiter.limit("5/min")
+@limiter.limit("5/minute")
 def render_leaderboard(request: Request):  # noqa: F841
     is_htmx = request.headers.get("HX-Request")
     template_name = "leaderboard.html" if is_htmx else "leaderboard_page.html"
@@ -235,9 +219,9 @@ def render_leaderboard(request: Request):  # noqa: F841
     summary = get_leaderboard_summary()
 
     response = templates.TemplateResponse(
+        request,
         template_name,
         {
-            "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
             "leaderboard": leaderboard_rows,
             "recent_completions": recent,
@@ -249,7 +233,7 @@ def render_leaderboard(request: Request):  # noqa: F841
 
 
 @app.get("/register")
-@limiter.limit("5/min")
+@limiter.limit("5/minute")
 def render_register(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
@@ -271,9 +255,9 @@ def render_register(
     template_name = "register.html" if is_htmx else "register_page.html"
 
     response = templates.TemplateResponse(
+        request,
         template_name,
         {
-            "request": request,
             "PAGE_HEADER": settings.CTF_SUBTITLE,
             "has_session": has_session,
             "cookie_identity": cookie_identity,
@@ -286,7 +270,7 @@ def render_register(
 
 
 @app.post("/register")
-@limiter.limit("5/min")
+@limiter.limit("5/minute")
 async def register(
     request: Request,
     username: Optional[str] = Form(None),
@@ -303,32 +287,50 @@ async def register(
 
     if is_htmx:
         # Form submission from HTMX
-        if not username:
-            return templates.TemplateResponse(
-                "register_error.html",
-                {
-                    "request": request,
-                    "PAGE_HEADER": settings.CTF_SUBTITLE,
-                    "error": "Username is required",
-                    "error_detail": "Please provide a username",
-                },
-            )
         user_id = username
         session_id = session_id or str(uuid.uuid4())
     else:
         # JSON API call
         try:
             body = await request.json()
-            user_id = body.get("username")
-            session_id = body.get("session_id") or str(uuid.uuid4())
-            if not user_id:
-                raise HTTPException(
-                    status_code=400, detail="Username is required"
-                )
-        except Exception as e:
+        except ValueError as e:
             raise HTTPException(
                 status_code=400, detail=f"Invalid request: {str(e)}"
             )
+        if not isinstance(body, dict):
+            raise HTTPException(
+                status_code=400, detail="Invalid request: expected an object"
+            )
+        user_id = body.get("username")
+        session_id = body.get("session_id") or str(uuid.uuid4())
+
+    validation_error = None
+    if not user_id:
+        validation_error = ("Username is required", "Please provide a username")
+    elif not isinstance(user_id, str) or not is_valid_username(user_id):
+        validation_error = (
+            "Invalid username",
+            "Usernames are 1-32 characters: letters, digits, '_', '-' "
+            "or '.', and may not start with '.'",
+        )
+    elif not isinstance(session_id, str) or not is_valid_session_id(session_id):
+        validation_error = (
+            "Invalid session ID",
+            "Session IDs are 1-64 characters: letters, digits or '-'",
+        )
+    if validation_error:
+        error, error_detail = validation_error
+        if is_htmx:
+            return templates.TemplateResponse(
+                request,
+                "register_error.html",
+                {
+                    "PAGE_HEADER": settings.CTF_SUBTITLE,
+                    "error": error,
+                    "error_detail": error_detail,
+                },
+            )
+        raise HTTPException(status_code=400, detail=error)
 
     # Ensure this username isn't already claimed by someone else. First-time
     # registration mints a new ownership token; a returning player must
@@ -339,9 +341,9 @@ async def register(
     if not owns_username:
         if is_htmx:
             return templates.TemplateResponse(
+                request,
                 "register_error.html",
                 {
-                    "request": request,
                     "PAGE_HEADER": settings.CTF_SUBTITLE,
                     "error": "Username already taken",
                     "error_detail": (
@@ -379,9 +381,9 @@ async def register(
             if is_htmx:
                 # Return HTML response with cookies set
                 html_response = templates.TemplateResponse(
+                    request,
                     "register_success.html",
                     {
-                        "request": request,
                         "PAGE_HEADER": settings.CTF_SUBTITLE,
                         "user_id": user_id,
                         "session_id": session_id,
@@ -389,15 +391,20 @@ async def register(
                 )
                 # Set cookies
                 html_response.set_cookie(
-                    key="anon_user_identity", value=user_id
+                    key="anon_user_identity",
+                    value=user_id,
+                    **IDENTITY_COOKIE_KWARGS,
                 )
-                html_response.set_cookie(key="session_id", value=session_id)
+                html_response.set_cookie(
+                    key="session_id",
+                    value=session_id,
+                    **IDENTITY_COOKIE_KWARGS,
+                )
                 if new_player_token:
                     html_response.set_cookie(
                         key="player_token",
                         value=new_player_token,
-                        httponly=True,
-                        samesite="lax",
+                        **IDENTITY_COOKIE_KWARGS,
                     )
                 return html_response
             else:
@@ -420,8 +427,7 @@ async def register(
                     json_response.set_cookie(
                         key="player_token",
                         value=new_player_token,
-                        httponly=True,
-                        samesite="lax",
+                        **IDENTITY_COOKIE_KWARGS,
                     )
                 return json_response
         except httpx.HTTPStatusError as e:
@@ -431,9 +437,9 @@ async def register(
             if is_htmx:
                 # Return error HTML for HTMX
                 return templates.TemplateResponse(
+                    request,
                     "register_error.html",
                     {
-                        "request": request,
                         "PAGE_HEADER": settings.CTF_SUBTITLE,
                         "error": f"Failed to register: {e.response.status_code}",
                         "error_detail": e.response.text,
@@ -452,9 +458,9 @@ async def register(
             if is_htmx:
                 # Return error HTML for HTMX
                 return templates.TemplateResponse(
+                    request,
                     "register_error.html",
                     {
-                        "request": request,
                         "PAGE_HEADER": settings.CTF_SUBTITLE,
                         "error": "Failed to connect to ADK API",
                         "error_detail": str(e),
@@ -471,7 +477,7 @@ async def register(
 
 
 @app.get("/session/{username}/{session_id}")
-@limiter.limit("5/min")
+@limiter.limit("5/minute")
 async def get_session(
     request: Request,
     username: str,
@@ -483,6 +489,8 @@ async def get_session(
     ] = None,
 ):  # noqa: F841
     """Check if a user has an existing session with the ADK API"""
+    if not is_valid_session_id(session_id):
+        raise HTTPException(status_code=400, detail="Invalid session ID")
     if cookie_identity != username or not verify_owner(username, player_token):
         raise HTTPException(
             status_code=403,

@@ -7,7 +7,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from ctf.app_config import settings
-from ctf.frontend.app import app
+from ctf.frontend.app import app, limiter
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits():
+    """Every TestClient shares one client IP, so clear limiter state per test."""
+    limiter.reset()
+    yield
 
 
 def _adk_api_reachable() -> bool:
@@ -17,7 +24,7 @@ def _adk_api_reachable() -> bool:
             response = client.get(f"{base}/health")
             if response.status_code == 200:
                 return True
-            response = client.get(f"{base}/apps", timeout=2.0)
+            response = client.get(f"{base}/list-apps", timeout=2.0)
             return response.status_code < 500
     except httpx.HTTPError:
         return False
@@ -54,5 +61,6 @@ def chat_client(require_adk_api):
     cookies = {
         "anon_user_identity": user_id,
         "session_id": session_id,
+        "player_token": register.json()["player_token"],
     }
     yield client, cookies

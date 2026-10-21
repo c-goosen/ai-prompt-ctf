@@ -1,0 +1,73 @@
+# Package Management with `uv`
+These rules define strict guidelines for managing Python dependencies in this project using the `uv` dependency manager.
+
+This project uses the uv package manager. Running anything equates to the following examples:
+* uv run adk web (web console for development)
+* uv run api_server
+* uv run main.py
+
+The agents are built with google adk.
+The frontend is built with fastapi + htmx
+The vector DB is lancedb
+LLMS used are via Ollama and are qwen3:0.6b
+
+Google ADK docs: https://google.github.io/adk-docs/
+
+**✅ Use `uv` exclusively**
+
+- All Python dependencies **must be installed, synchronized, and locked** using `uv`.
+- Never use `pip`, `pip-tools`, or `poetry` directly for dependency management.
+
+**🔁 Managing Dependencies**
+
+Always use these commands:
+
+```bash
+# Add or upgrade dependencies
+uv add <package>
+
+# Remove dependencies
+uv remove <package>
+
+# Reinstall all dependencies from lock file
+uv sync
+```
+
+**🔁 Scripts**
+
+```bash
+# Run script with proper dependencies
+uv run script.py
+```
+
+You can edit inline-metadata manually:
+
+```python
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "torch",
+#     "torchvision",
+#     "opencv-python",
+#     "numpy",
+#     "matplotlib",
+#     "Pillow",
+#     "timm",
+# ]
+# ///
+
+print("some python code")
+```
+
+Or using uv cli:
+
+```bash
+# Add or upgrade script dependencies
+uv add package-name --script script.py
+
+# Remove script dependencies
+uv remove package-name --script script.py
+
+# Reinstall all script dependencies from lock file
+uv sync --script script.py
+```

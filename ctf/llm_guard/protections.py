@@ -1,8 +1,11 @@
+import logging
 import re
 
 import cleantext
 
 from ctf.app_config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def text_normalization(text):
@@ -81,5 +84,5 @@ async def llm_protection(model: object, labels: list, input: str = "") -> bool:
     if resp.get("label") in labels:
         if resp["score"] > 0.8:
             protected = True
-    print(f"resp --> {resp}")
+    logger.debug("llm_protection response: %s", resp)
     return protected

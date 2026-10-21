@@ -345,7 +345,7 @@ async def submit_answer_func(
 async def password_search_func(
     question: str,
     level: int,
-) -> dict:
+) -> str:
     """
     RAG that returns documents and extracted on the question: "What is the password?"
     or "What is the secret?".
@@ -356,8 +356,21 @@ async def password_search_func(
         level (int): Current level of challenge
 
     Returns:
-        A dictionary with status, search results, passwords found, and documents
+        A JSON string with status, search results, passwords found, and documents
     """
+    try:
+        level = int(level)
+    except (TypeError, ValueError):
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"Invalid level: {level!r}",
+                "documents": [],
+                "extracted_passwords": [],
+                "num_results": 0,
+            }
+        )
+
     db = lancedb.connect(db_path)
     table_name = "ctf_levels"
 
@@ -373,7 +386,7 @@ async def password_search_func(
             "extracted_passwords": [],
             "num_results": 0,
         }
-        return error_response
+        return json.dumps(error_response, indent=2)
 
     query_vector = embed_text(question)
 
@@ -394,7 +407,7 @@ async def password_search_func(
             "extracted_passwords": [],
             "num_results": 0,
         }
-        return error_response
+        return json.dumps(error_response, indent=2)
 
     if results.empty:
         doc_list = []
@@ -489,7 +502,7 @@ def _get_username_from_context(tool_context: ToolContext | None) -> str | None:
 def _record_leaderboard_progress(
     level: int, tool_context: ToolContext | None
 ) -> None:
-    print(f"record_leaderboard_progress {level} {tool_context}")
+    logger.debug("record_leaderboard_progress level=%s", level)
     if tool_context is None:
         logger.debug("No tool_context provided; skipping leaderboard update")
         return
@@ -498,7 +511,6 @@ def _record_leaderboard_progress(
 
     if not username:
         logger.debug("No username available; skipping leaderboard update")
-        print("No username available; skipping leaderboard update")
         return
 
     try:
@@ -507,7 +519,6 @@ def _record_leaderboard_progress(
         logger.warning(
             "Failed to record leaderboard entry for %s: %s", username, exc
         )
-        print(f"Failed to record leaderboard entry for {username}: {exc}")
 
 
 async def get_leaderboard_stats(limit: int = 25) -> str:

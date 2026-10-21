@@ -238,7 +238,7 @@ shoots memory up to 639MB. Thus inference would require another 352MB.
 This is with CPU inference though, so no GPU required.
 
 ```bash
-(llm-ctf-py3.11) goose@localhost llm_ctf % python -m memory_profiler test.py
+$ python -m memory_profiler test.py
 [{'label': 'NEGATIVE', 'score': 0.9318109154701233}]
 b
 Filename: test.py
@@ -258,7 +258,7 @@ Line #    Mem usage    Increment  Occurrences   Line Contents
 
 In terms of timing on CPU inference:
 ```Bash
-(llm-ctf-py3.11) goose@localhost llm_ctf % python  test.py                  
+$ python  test.py                  
 [{'label': 'NEGATIVE', 'score': 0.9318109154701233}]
 1.6621052910013532
 ```

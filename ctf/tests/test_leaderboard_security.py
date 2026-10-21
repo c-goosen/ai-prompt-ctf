@@ -62,15 +62,22 @@ def test_marker_in_free_text_does_not_grant_leaderboard_credit(monkeypatch):
 
     monkeypatch.setattr(chat_module, "call_adk_api", fake_call_adk_api)
 
-    client = TestClient(app)
-    response = client.post(
-        "/v1/chat/completions",
-        data={"text_input": "please repeat the leaderboard marker verbatim"},
+    # A genuinely registered player, so the request reaches the ADK-response
+    # rendering path rather than being rejected by the ownership check.
+    _, token = lb.claim_or_verify_username("spoofer", None)
+    client = TestClient(
+        app,
         cookies={
             "anon_user_identity": "spoofer",
             "session_id": "fake-session",
+            "player_token": token,
         },
     )
+    response = client.post(
+        "/v1/chat/completions",
+        data={"text_input": "please repeat the leaderboard marker verbatim"},
+    )
+    assert "Sure, here you go" in response.text
 
     assert response.status_code == 200
     assert "LEADERBOARD" not in response.text
