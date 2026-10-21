@@ -14,6 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.13", "3.14"]
+    env:
+      # Make every `uv run` (including those inside make targets) use the
+      # matrix interpreter instead of the repo's .python-version.
+      UV_PYTHON: ${{ matrix.python-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -21,9 +25,8 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.11.21"
-          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: uv sync --dev --locked --python ${{ matrix.python-version }}
+        run: uv sync --dev --locked
       - name: Check linting
         run: |
           make ci-lint
