@@ -3,7 +3,15 @@
      font-family: 'Open Sans', sans-serif;
 }
 
+html,
 body {
+    height: 100%;
+}
+
+/* #body beats daisyUI's [data-theme] background-color, which otherwise
+   paints the theme's base colour under these gradients. */
+body#body {
+    overflow: hidden;
     background: radial-gradient(circle at top, rgba(111, 71, 255, 0.25), transparent 55%),
                 radial-gradient(circle at 20% 20%, rgba(255, 47, 213, 0.2), transparent 40%),
                 radial-gradient(circle at 80% 0%, rgba(60, 252, 209, 0.25), transparent 45%),
@@ -14,14 +22,14 @@ body {
 
 .content-box {
     display: flex;
-    height: 100%;
+    height: 100vh;
     overflow-x: hidden;
     min-width: 0;
 }
 
 .left-panel {
-    height: 100%;
     flex: 0 0 25%;
+    overflow-y: auto;
     min-width: 0;
     background: linear-gradient(180deg, #060019 0%, #120528 45%, #1c0937 100%);
     color: #f4e7ff;
@@ -29,6 +37,7 @@ body {
     flex-direction: column;
     font-size: 10px;
     height: 100%;
+    max-width: 320px;
     border-right: 1px solid rgba(255, 47, 213, 0.25);
     box-shadow: 0 0 40px rgba(92, 36, 255, 0.25);
 }
@@ -44,7 +53,6 @@ body {
     flex: 1 1 75%;
     min-width: 0;
     background: linear-gradient(180deg, rgba(8, 3, 35, 0.9) 0%, rgba(7, 8, 40, 0.9) 60%, rgba(8, 6, 28, 0.95) 100%);
-    font-family: "Font Awesome 6 Free";
 }
 
 .left-panel > * {
@@ -52,14 +60,9 @@ body {
 }
 
 .chats-levels {
-    flex-basis: 70%;
-
     display: flex;
     flex-direction: column;
-}
-
-.chats-levels i {
-    margin-right: 10px;
+    gap: 0.5rem;
 }
 
 
@@ -307,13 +310,68 @@ a:link, a:visited {
 }
 
 .level-menu {
-    padding: 5% !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.level-menu i {
+    width: 1.25rem;
+    text-align: center;
+    color: #3cfcd1;
+}
+
+a.level-menu:link,
+a.level-menu:visited {
+    color: #e4fdf7;
+}
+
+/* The intro/examples block is empty; don't let it reserve 80% height. */
+.main-chatbox {
+    height: auto;
+    overflow: visible;
+}
+
+/* Fill the panel so the input box sits at the bottom even with few messages. */
+.chat-history-wrapper {
+    flex: 1 0 auto;
+}
+
+.chat-bubble .tool-list {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+}
+
+.chat-bubble .tool-list li + li {
+    margin-top: 0.25rem;
 }
 
 @media only screen and (max-width: 768px) {
-  /* For mobile phones: */
-  [class*="level-menu"] {
-     padding: 10% !important;
+  /* Stack the panels on phones and let the page scroll as a whole. */
+  body#body {
+     overflow: auto;
+  }
+  .content-box {
+     flex-direction: column;
+     height: auto;
+     min-height: 100vh;
+  }
+  .left-panel {
+     flex: none;
+     max-width: none;
+     height: auto;
+  }
+  .left-panel .logo img {
+     max-width: 160px;
+  }
+  .right-panel {
+     height: auto;
+     min-height: 70vh;
   }
 }
 

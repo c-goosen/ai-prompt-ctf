@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="light" lang="en">
+<html data-theme="dark" lang="en">
     <head>
         {% block head %}
             <meta name="keywords" content="pwngpt,pwn,gpt,ctf,cgoosen,goose" />
@@ -12,25 +12,23 @@
             <link rel="stylesheet"
                   href="{{ url_for('static', path='/assets/css/pwngpt.css') }}" />
             <link rel="stylesheet"
+                  href="{{ url_for('static', path='/assets/css/animations.css') }}" />
+            <link rel="stylesheet"
                   href="{{ url_for('static', path='/assets/css/all.min.css') }}" />
             <script type="module" src="https://md-block.verou.me/md-block.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js"
                     integrity="sha384-BvJpBiO8Kh31EqtJe5DRIeWrHWnCGkwytKs9NKFi86Hhw96dEqdEMzZDeK9iEGTc"
                     crossorigin="anonymous"></script>
+            <script src="{{ url_for('static', path='/assets/js/animations.js') }}" defer></script>
             <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
                   rel="stylesheet" />
             <script src="https://cdn.tailwindcss.com"></script>
-            <script>
-              function changeTheme() {
-                document.getElementById("body").setAttribute("data-theme", "dark");
-              }
-            </script>
             <style>
     @import url('https://fonts.googleapis.com/css2?family=Almendra+Display&family=Brygada+1918:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Cinzel:wght@400;500;600;700;800;900&family=Estonia&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Josefin+Slab:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@200;300;400&family=Open+Sans:wght@300;400;500;600;700;800&family=Sevillana&display=swap');
             </style>
         {% endblock %}
     </head>
-    <body id="body" data-theme="light">
+    <body id="body" data-theme="dark">
         <div class="content-box">
             <div class="left-panel">
                 <div class="logo mt-1 mb-1 flex justify-center">
@@ -47,7 +45,7 @@
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-plus"> Chat</i>
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i><span>Chat</span>
                     </div>
                     <div class="level-menu new-chat"
                          hx-get="/leaderboard"
@@ -55,7 +53,7 @@
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-trophy"> Leaderboard</i>
+                        <i class="fa-solid fa-trophy" aria-hidden="true"></i><span>Leaderboard</span>
                     </div>
                     <div class="level-menu new-chat"
                          hx-get="/register"
@@ -63,7 +61,7 @@
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-user-plus"> Register</i>
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>Register</span>
                     </div>
                     <div class="level-menu new-chat"
                          hx-get="/faq"
@@ -71,7 +69,7 @@
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-circle-question"> FAQ</i>
+                        <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>FAQ</span>
                     </div>
                     <div class="level-menu new-chat"
                          hx-get="/challenges"
@@ -79,11 +77,14 @@
                          hx-target=".right-panel"
                          hx-swap="innerHTML"
                          hx-replace-url="true">
-                        <i class="fa-solid fa-arrow-up-right-from-square"> Challenges</i>
+                        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span>Challenges</span>
                     </div>
-                    <div class="level-menu new-chat">
-                        <a href="{{ DISCORD_URL }}" target="_blank"><i class="fa-brands fa-discord">Discord</i></a>
-                    </div>
+                    <a class="level-menu new-chat"
+                       href="{{ DISCORD_URL }}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        <i class="fa-brands fa-discord" aria-hidden="true"></i><span>Discord</span>
+                    </a>
                     <!--                    <div class="chat-history"></div>-->
                 </div>
             </div>

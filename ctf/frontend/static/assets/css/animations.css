@@ -1,0 +1,272 @@
+/*
+ * Animations adapted from Watermelon UI (https://ui.watermelon.sh, MIT):
+ * fluid-tabs, inline-toast, labeled-progress-indicator, copy-confirm,
+ * shimmer-button. Ported from motion/react to CSS; behaviour lives in
+ * ../js/animations.js.
+ */
+
+:root {
+    --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --spring-smooth: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* watermelon: fluid-tabs (sidebar sliding pill) */
+.chats-levels {
+    position: relative;
+}
+
+.chats-levels > .level-menu {
+    position: relative;
+    z-index: 1;
+}
+
+.nav-pill {
+    position: absolute;
+    top: 0;
+    left: 5px;
+    right: 5px;
+    z-index: 0;
+    height: 0;
+    opacity: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 47, 213, 0.6);
+    background: linear-gradient(180deg, rgba(92, 36, 255, 0.55), rgba(255, 47, 213, 0.3));
+    box-shadow: 0 0 22px rgba(255, 47, 213, 0.35);
+    pointer-events: none;
+    transition: transform 420ms var(--spring-bounce),
+                height 420ms var(--spring-bounce),
+                opacity 200ms ease;
+}
+
+.nav-pill.is-visible {
+    opacity: 1;
+}
+
+/* Let the pill show through the active item instead of its own background. */
+.chats-levels > .level-menu.is-active {
+    background: transparent;
+    border-color: transparent;
+}
+
+.level-menu.is-pulsing > span {
+    animation: label-blur-pulse 300ms ease-out;
+}
+
+@keyframes label-blur-pulse {
+    0%, 100% { filter: blur(0); }
+    50% { filter: blur(4px); }
+}
+
+/* watermelon: inline-toast (chat message entrance) */
+.msg-enter {
+    animation: msg-enter 420ms var(--spring-smooth) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes msg-enter {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+        transform: scale(0.95) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+    }
+}
+
+/* watermelon: labeled-progress-indicator (chat loader) */
+.chat-loader .chat-bubble {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 220px;
+}
+
+.loader-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    perspective: 800px;
+}
+
+.loader-label {
+    display: inline-block;
+    transform-origin: bottom;
+}
+
+.loader-label.is-changing {
+    animation: loader-label-in 450ms var(--spring-smooth);
+}
+
+@keyframes loader-label-in {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+        transform: translateY(8px) rotateX(-60deg) scale(1.3);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+    }
+}
+
+.loader-track {
+    position: relative;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: rgba(5, 2, 25, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Indeterminate: there is no real progress signal from the ADK call. */
+.loader-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, rgba(92, 36, 255, 0.2), #3cfcd1, rgba(255, 47, 213, 0.2));
+}
+
+/* Only sweep while htmx marks the indicator as active, not while it's hidden. */
+.chat-loader.htmx-request .loader-bar,
+.htmx-request .chat-loader .loader-bar {
+    animation: loader-sweep 1.4s linear infinite;
+}
+
+@keyframes loader-sweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(260%); }
+}
+
+/* watermelon: copy-confirm (copy buttons) */
+.chat-bubble pre.has-copy {
+    position: relative;
+    padding-top: 2.4rem;
+}
+
+.chat-bubble pre.has-copy > .copy-btn {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+}
+
+.copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(60, 252, 209, 0.35);
+    background: rgba(5, 2, 25, 0.9);
+    color: #e4fdf7;
+    font: 600 0.75rem/1.4 'Open Sans', sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 250ms ease, border-color 250ms ease,
+                transform 150ms var(--spring-bounce);
+}
+
+.copy-btn:hover {
+    transform: scale(1.04);
+    border-color: rgba(255, 47, 213, 0.55);
+}
+
+.copy-btn:active {
+    transform: scale(0.96);
+}
+
+.copy-btn.is-copied {
+    background-color: #15803d;
+    border-color: #22c55e;
+}
+
+.copy-btn.is-animating .copy-icon {
+    animation: copy-icon-swap 300ms var(--spring-smooth);
+}
+
+@keyframes copy-icon-swap {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+        transform: scale(0.25);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+    }
+}
+
+.copy-btn .copy-char {
+    display: inline-block;
+}
+
+.copy-btn.is-animating .copy-char {
+    animation: copy-char-in 320ms var(--spring-bounce) both;
+    animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+@keyframes copy-char-in {
+    from {
+        opacity: 0;
+        transform: translateY(5px) scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* watermelon: shimmer-button */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    transform: translateX(-100%);
+    transition: transform 700ms ease;
+    pointer-events: none;
+}
+
+.shimmer:hover::after,
+.shimmer:focus-visible::after {
+    transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-pill,
+    .copy-btn,
+    .shimmer::after {
+        transition: none;
+    }
+
+    .msg-enter,
+    .level-menu.is-pulsing > span,
+    .loader-label.is-changing,
+    .copy-btn.is-animating .copy-icon,
+    .copy-btn.is-animating .copy-char,
+    .loader-bar {
+        animation: none;
+    }
+
+    .shimmer::after {
+        display: none;
+    }
+
+    .loader-bar,
+    .chat-loader.htmx-request .loader-bar,
+    .htmx-request .chat-loader .loader-bar {
+        width: 100%;
+        opacity: 0.6;
+        animation: none;
+    }
+}

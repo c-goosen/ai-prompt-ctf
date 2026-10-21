@@ -27,6 +27,7 @@ TEMPLATES_DIR = FRONTEND_DIR / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
 templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
+templates.env.globals.update(DISCORD_URL=settings.DISCORD_URL)
 
 
 @router.get("/ctf", include_in_schema=False)

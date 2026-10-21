@@ -41,7 +41,10 @@
            name="text_input"
            id="text_input"
            value="{{ suggestion }}">
-    <i class="fa-solid fa-paper-plane"
+    <i class="fa-solid fa-paper-plane shimmer"
+       role="button"
+       tabindex="0"
+       aria-label="Send message"
        style="font-size:1.5rem"
        hx-post="/v1/chat/completions"
        hx-trigger="keyup[key=='Enter'] from:body, click"
@@ -57,7 +60,8 @@
         
         // Disable inputs and submit button before HTMX request
         document.body.addEventListener('htmx:before:request', function (event) {
-            const submitButton = event.detail.elt.closest('[hx-post]') || event.detail.elt;
+            // htmx 4 dispatches on the source element; there is no detail.elt.
+            const submitButton = event.target.closest('[hx-post]') || event.target;
             if (!submitButton || !submitButton.hasAttribute('hx-post')) {
                 return;
             }
@@ -84,7 +88,8 @@
         
         // Helper function to unlock inputs and clear them
         function unlockAndClearInputs(event) {
-            const submitButton = event.detail.elt.closest('[hx-post]') || event.detail.elt;
+            // htmx 4 dispatches on the source element; there is no detail.elt.
+            const submitButton = event.target.closest('[hx-post]') || event.target;
             if (!submitButton || !submitButton.hasAttribute('hx-post')) {
                 return;
             }

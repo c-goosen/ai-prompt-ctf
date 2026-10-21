@@ -78,8 +78,9 @@
 
         document.addEventListener("htmx:before:request", maybeScroll);
         document.addEventListener("htmx:after:swap", function (evt) {
-            const target = evt.detail && evt.detail.target;
-            if (target && target.matches(".chat-history")) {
+            // htmx 4 dispatches on the source element (no detail.target).
+            const target = evt.target;
+            if (target && target.closest && target.closest(".chat-history, .input-box")) {
                 requestAnimationFrame(scrollChatToBottom);
             }
         });

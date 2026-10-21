@@ -6,8 +6,13 @@
     </div>
     <div class="chat-loader htmx-indicator" aria-live="polite">
         <div class="chat-bubble">
-            <i class="fa-solid fa-comment-dots fa-bounce"></i>
-            <span>Sending…</span>
+            <div class="loader-label-wrap">
+                <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+                <span class="loader-label">Sending…</span>
+            </div>
+            <div class="loader-track" aria-hidden="true">
+                <div class="loader-bar"></div>
+            </div>
         </div>
     </div>
 </div>

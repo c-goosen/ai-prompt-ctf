@@ -80,3 +80,11 @@ def test_route_rate_limits_are_enforced():
     # limits>=5, leaving every per-route limit unregistered.
     statuses = [client.get("/faq").status_code for _ in range(2)]
     assert statuses == [200, 429]
+
+
+def test_chat_page_loads_watermelon_animations():
+    response = client.get("/ctf")
+    assert response.status_code == 200
+    assert "/assets/css/animations.css" in response.text
+    assert "/assets/js/animations.js" in response.text
+    assert 'class="loader-label"' in response.text
