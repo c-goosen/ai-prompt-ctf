@@ -1,7 +1,8 @@
 # PwnGPT web app (Next.js 16.4 API on vinext), built as a standalone Node server.
-# Build context is web/ (see docker-compose.yml).
+# Build context is web/ (see docker-compose.yml). Keep the Node tag in step
+# with web/.nvmrc.
 
-FROM node:24-slim AS build
+FROM node:24.18.0-slim AS build
 RUN npm install -g pnpm@11.21.0
 WORKDIR /app
 
@@ -13,7 +14,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 COPY . .
 RUN pnpm build
 
-FROM node:24-slim AS production
+FROM node:24.18.0-slim AS production
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=8100

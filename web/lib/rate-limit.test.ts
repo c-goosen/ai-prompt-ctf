@@ -22,7 +22,12 @@ describe("rate limiting", () => {
     expect(isExempt("/faq")).toBe(false);
   });
 
-  it("prefers the first X-Forwarded-For address", () => {
-    expect(clientIp(new Headers({ "x-forwarded-for": "1.2.3.4, 10.0.0.1" }))).toBe("1.2.3.4");
+  it("ignores client-supplied X-Forwarded-For entries", () => {
+    // nginx appends the real client address to whatever the client sent.
+    expect(clientIp(new Headers({ "x-forwarded-for": "6.6.6.6, 1.2.3.4" }))).toBe("1.2.3.4");
+    expect(
+      clientIp(new Headers({ "x-forwarded-for": "6.6.6.6", "x-real-ip": "1.2.3.4" })),
+    ).toBe("1.2.3.4");
+    expect(clientIp(new Headers({ "cf-connecting-ip": "5.5.5.5", "x-real-ip": "1.2.3.4" }))).toBe("5.5.5.5");
   });
 });

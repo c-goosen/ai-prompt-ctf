@@ -80,13 +80,24 @@ export class RateLimiter {
   }
 }
 
-/** Client IP, preferring X-Forwarded-For like slowapi's get_ipaddr. */
+/**
+ * Client IP from headers our proxies set: Cloudflare's cf-connecting-ip, then
+ * X-Real-IP (nginx sets it to $remote_addr; Traefik overwrites it), then the
+ * last X-Forwarded-For hop. The first X-Forwarded-For entry is whatever the
+ * client sent (nginx's $proxy_add_x_forwarded_for appends), so trusting it
+ * would let anyone dodge the limits.
+ */
 export function clientIp(headers: Headers): string {
+  const direct = headers.get("cf-connecting-ip") ?? headers.get("x-real-ip");
+  if (direct) {
+    return direct.trim();
+  }
   const forwarded = headers.get("x-forwarded-for");
   if (forwarded) {
-    return forwarded.split(",")[0].trim();
+    const hops = forwarded.split(",").map((hop) => hop.trim()).filter(Boolean);
+    return hops[hops.length - 1] ?? "unknown";
   }
-  return headers.get("cf-connecting-ip") ?? headers.get("x-real-ip") ?? "unknown";
+  return "unknown";
 }
 
 export function describeLimit(limit: Limit): string {

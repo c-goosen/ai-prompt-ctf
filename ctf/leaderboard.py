@@ -1,5 +1,8 @@
 """
-PostgreSQL-backed leaderboard helpers shared between the frontend and agent tools.
+Leaderboard helpers for the agent tools (Postgres, or SQLite locally).
+
+The Next.js web app (web/lib/leaderboard.ts, web/lib/identity.ts) reads the
+same tables, so keep the schema and token hashing in step with it.
 """
 
 from __future__ import annotations
