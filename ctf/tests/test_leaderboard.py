@@ -55,3 +55,11 @@ def test_resubmitting_a_level_keeps_first_completion_time():  # noqa: F841
 
     assert len(recent) == 1
     assert recent[0]["completed_at"] == first
+
+
+def test_postgres_uri_uses_psycopg2_driver(monkeypatch):  # noqa: F841
+    lb.reset_db_uri_override()
+    monkeypatch.setenv("POSTGRES_DB_URI", "postgresql://u:p@db:5432/ctf")
+    assert lb._db_uri() == "postgresql+psycopg2://u:p@db:5432/ctf"
+    monkeypatch.setenv("POSTGRES_DB_URI", "postgres://u:p@db/ctf")
+    assert lb._db_uri() == "postgresql+psycopg2://u:p@db/ctf"

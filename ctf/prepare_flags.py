@@ -67,7 +67,7 @@ def setup_sql_level(PASSWORD: str):
     print("Connection closed")
 
 
-def prepare_flags(lancedb_persistent: bool = True):
+def prepare_flags(lancedb_persistent: bool = True, db_path: str | None = None):
     # create vector store client
     levels = list(settings.PASSWORDS.keys())
     print(f"Levels: {levels}")
@@ -82,8 +82,8 @@ def prepare_flags(lancedb_persistent: bool = True):
 
     # Connect to LanceDB
     if lancedb_persistent:
-        db_path = "./lancedb"
-        print("persisted lancedb")
+        db_path = db_path or "./lancedb"
+        print(f"persisted lancedb at {db_path}")
     else:
         # LanceDB has no sqlite-style ":memory:" backend; connecting to that
         # literal string creates a directory named ":memory:" in the cwd. Use a

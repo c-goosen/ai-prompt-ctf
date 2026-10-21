@@ -81,7 +81,21 @@ def _db_uri() -> str:
         return _DB_URI_OVERRIDE
     # POSTGRESS_DB_URI is the historical (misspelled) name; keep honouring it.
     db_uri = os.getenv("POSTGRES_DB_URI") or os.getenv("POSTGRESS_DB_URI")
-    return db_uri or f"sqlite:///{settings.LEADERBOARD_DB_PATH}"
+    if not db_uri:
+        return f"sqlite:///{settings.LEADERBOARD_DB_PATH}"
+    return _with_psycopg2_driver(db_uri)
+
+
+def _with_psycopg2_driver(db_uri: str) -> str:
+    """
+    The URI is shared with the web app (postgres.js), so it is a plain
+    postgresql:// URL. SQLAlchemy 2.1 maps that to psycopg 3, but this
+    project ships psycopg2, so name the driver explicitly.
+    """
+    for scheme in ("postgresql://", "postgres://"):
+        if db_uri.startswith(scheme):
+            return "postgresql+psycopg2://" + db_uri[len(scheme) :]
+    return db_uri
 
 
 def _reset_engine() -> None:
