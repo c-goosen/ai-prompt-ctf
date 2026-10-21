@@ -1,7 +1,13 @@
 import "server-only";
 
 import { ADK_APP_NAME, adkApiUrl } from "./config";
-import { eventToMessage, parseRunResponse, type AdkEvent, type ChatMessage } from "./events";
+import {
+  eventToMessage,
+  parseRunResponse,
+  stripLeaderboardMarkers,
+  type AdkEvent,
+  type ChatMessage,
+} from "./events";
 import { redactPasswords } from "./redact";
 
 /**
@@ -140,7 +146,9 @@ export async function getSessionHistory(
     const events = (session?.events as AdkEvent[] | undefined) ?? [];
     return events
       .map((event) => eventToMessage(event, redactPasswords))
-      .filter((m): m is ChatMessage => m !== null);
+      .filter((m): m is ChatMessage => m !== null)
+      .map((m) => ({ ...m, text: stripLeaderboardMarkers(m.text) }))
+      .filter((m) => m.text !== "");
   } catch (error) {
     console.warn("Could not retrieve session history:", (error as Error).message);
     return [];

@@ -57,8 +57,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 TEMPLATES_DIR = FRONTEND_DIR / "templates"
 STATIC_DIR = FRONTEND_DIR / "static"
-FAQ_MARKDOWN = (BASE_DIR / "FAQ.MD").read_text()
-CHALLANGES_MARKDOWN = (BASE_DIR / "CHALLENGES.MD").read_text()
+# Content moved to the Next.js app (web/content) during the migration.
+FAQ_MARKDOWN = (BASE_DIR.parent / "web" / "content" / "faq.md").read_text()
+CHALLANGES_MARKDOWN = (
+    BASE_DIR.parent / "web" / "content" / "challenges.md"
+).read_text()
 
 
 class RegisterRequest(BaseModel):

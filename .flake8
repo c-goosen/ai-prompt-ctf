@@ -13,4 +13,5 @@ exclude =
     ./llm_guard/system_prompt.py
     ./ctf/prepare_flags.py
     ./ctf/tests/
-    ./scripts/test_adk_concurrency.py
+    ./scripts/test_adk_concurrency.py,
+    ./web

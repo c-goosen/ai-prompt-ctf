@@ -69,6 +69,7 @@ explicit = true
 [tool.black]
 line-length = 80
 target-version = ["py313"]
+extend-exclude = "^/web/"
 
 [tool.djlint]
 exclude=".venv,venv,.tox,.eggs"
