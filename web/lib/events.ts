@@ -1,7 +1,6 @@
 /**
- * Convert ADK session events into chat messages. Ported from
- * ctf/frontend/utils.py (event_to_message) and ctf/leaderboard.py
- * (strip_leaderboard_markers). Pure: no I/O, so it is unit tested directly.
+ * Convert ADK session events into chat messages, and strip the agent's
+ * leaderboard markers for display. Pure: no I/O, so it is unit tested directly.
  */
 
 export type ChatRole = "user" | "assistant" | "tool";

@@ -11,8 +11,7 @@ import {
 import { redactPasswords } from "./redact";
 
 /**
- * Client for the Python ADK API server (ctf/agents). Ported from
- * ctf/frontend/routes/chat.py and challenges.py. Callers must pass a
+ * Client for the Python ADK API server (ctf/agents). Callers must pass a
  * username/session id that already passed validation and the ownership
  * check, because both are interpolated into the URL path.
  */

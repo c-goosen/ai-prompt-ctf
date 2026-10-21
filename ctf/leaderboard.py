@@ -1,18 +1,16 @@
 """
 Leaderboard helpers for the agent tools (Postgres, or SQLite locally).
 
-The Next.js web app (web/lib/leaderboard.ts, web/lib/identity.ts) reads the
-same tables, so keep the schema and token hashing in step with it.
+The agent records completions here (submit_answer_func). The Next.js web
+app reads the same leaderboard_entries table and owns player registration
+(player_identities), so keep the schema in step with web/lib/db.ts.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import os
-import re
-import secrets
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Iterator
@@ -38,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 LEADERBOARD_MARKER_PREFIX = "<!--LEADERBOARD:"
 LEADERBOARD_MARKER_SUFFIX = "-->"
-LEADERBOARD_MARKER_PATTERN = r"<!--LEADERBOARD:(?P<payload>{.*?})-->"
 
 _DB_URI_OVERRIDE: str | None = None
 _ENGINE: Engine | None = None
@@ -54,14 +51,6 @@ class LeaderboardEntry(Base):
     username = Column(String, primary_key=True)
     level = Column(Integer, primary_key=True)
     completed_at = Column(DateTime(timezone=True), nullable=False, index=True)
-
-
-class PlayerIdentity(Base):
-    __tablename__ = "player_identities"
-
-    username = Column(String, primary_key=True)
-    token_hash = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
 
 
 def configure_db_uri(uri: str) -> None:
@@ -287,30 +276,6 @@ def format_leaderboard_marker(level: int, status: str = "correct") -> str:
     return f"{LEADERBOARD_MARKER_PREFIX}{payload}{LEADERBOARD_MARKER_SUFFIX}"
 
 
-def strip_leaderboard_markers(text: str) -> tuple[str, list[dict]]:
-    """
-    Remove leaderboard markers from a string and return structured payloads.
-    """
-    if not text:
-        return text, []
-
-    markers: list[dict] = []
-
-    def _replace(match):
-        payload = match.group("payload")
-        try:
-            markers.append(json.loads(payload))
-        except json.JSONDecodeError:
-            logger.debug(
-                "Failed to decode leaderboard marker payload: %s", payload
-            )
-        return ""
-
-    pattern = re.compile(LEADERBOARD_MARKER_PATTERN)
-    cleaned = pattern.sub(_replace, text)
-    return cleaned.strip(), markers
-
-
 def record_level_completion(username: str, level: int) -> None:
     if not username:
         return
@@ -327,83 +292,6 @@ def record_level_completion(username: str, level: int) -> None:
                 )
     except SQLAlchemyError as exc:
         logger.warning("Failed to record leaderboard entry: %s", exc)
-
-
-def _hash_token(token: str) -> str:
-    return hashlib.sha256(token.encode("utf-8")).hexdigest()
-
-
-def claim_or_verify_username(
-    username: str, presented_token: str | None
-) -> tuple[bool, str | None]:
-    """
-    Claim a username on first registration, or verify ownership on a repeat
-    registration under the same username.
-
-    Returns (allowed, new_token). new_token is only set when a fresh
-    ownership token was minted for a first-time claim; callers should set it
-    as an httponly cookie. When allowed is True and new_token is None, the
-    caller already presented the correct existing owner token.
-    """
-    if not username:
-        return False, None
-    timestamp = datetime.now(timezone.utc)
-    try:
-        with _session_scope() as session:
-            entry = session.get(PlayerIdentity, username)
-            if entry is None:
-                new_token = secrets.token_urlsafe(32)
-                session.add(
-                    PlayerIdentity(
-                        username=username,
-                        token_hash=_hash_token(new_token),
-                        created_at=timestamp,
-                    )
-                )
-                result = (True, new_token)
-            elif (
-                presented_token
-                and _hash_token(presented_token) == entry.token_hash
-            ):
-                result = (True, None)
-            else:
-                result = (False, None)
-        return result
-    except SQLAlchemyError as exc:
-        logger.warning("Failed to claim/verify username %s: %s", username, exc)
-        return False, None
-
-
-def verify_owner(username: str, presented_token: str | None) -> bool:
-    """Check whether presented_token is the registered owner token for username."""
-    if not username or not presented_token:
-        return False
-    try:
-        with _session_scope() as session:
-            entry = session.get(PlayerIdentity, username)
-            if entry is None:
-                return False
-            return _hash_token(presented_token) == entry.token_hash
-    except SQLAlchemyError as exc:
-        logger.warning("Failed to verify owner for %s: %s", username, exc)
-        return False
-
-
-def ensure_leaderboard_user(username: str) -> None:
-    if not username:
-        return
-    timestamp = datetime.now(timezone.utc)
-    try:
-        with _session_scope() as session:
-            entry = session.get(LeaderboardEntry, (username, 0))
-            if entry is None:
-                session.add(
-                    LeaderboardEntry(
-                        username=username, level=0, completed_at=timestamp
-                    )
-                )
-    except SQLAlchemyError as exc:
-        logger.warning("Failed to ensure leaderboard user: %s", exc)
 
 
 def get_leaderboard(limit: int = 25) -> list[dict]:

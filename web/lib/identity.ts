@@ -4,13 +4,13 @@ import { getDb, timestampParam } from "./db";
 import { isValidSessionId, isValidUsername } from "./validation";
 
 /**
- * Username ownership, ported from ctf/leaderboard.py
- * (claim_or_verify_username / verify_owner).
+ * Username ownership (formerly in the FastAPI frontend).
  *
  * The first registration of a username mints a random token; only its
  * sha256 is stored. The token goes back to the browser as an httpOnly
- * cookie and must be presented to use that username again. Tokens and
- * hashes are interchangeable with ones the Python code created.
+ * cookie and must be presented to use that username again. The format
+ * matches what the Python frontend stored, so existing players' tokens
+ * still verify.
  */
 
 function base64Url(bytes: Uint8Array): string {
