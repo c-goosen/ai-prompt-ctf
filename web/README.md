@@ -7,6 +7,8 @@ Python Google ADK app in `../ctf/agents`.
 
 ## Commands
 
+Node version: `.nvmrc` (24.18.0; CI reads it too). With nvm, run `nvm use` in `web/`.
+
 ```bash
 pnpm install
 pnpm dev          # http://localhost:3000 (vinext dev server)
