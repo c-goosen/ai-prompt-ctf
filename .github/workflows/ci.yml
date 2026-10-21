@@ -62,6 +62,8 @@ jobs:
         run: pnpm lint
       - name: Typecheck
         run: pnpm typecheck
+      - name: Test
+        run: pnpm test
       - name: Build (vinext, Node standalone)
         run: pnpm build
       - name: Build (Next.js 16.4 compatibility)
