@@ -1,5 +1,7 @@
 import "server-only";
 
+import { REQUEST_SCOPED_DB } from "@/lib/platform";
+
 import { databaseUrl, sqlitePath } from "./config";
 
 /**
@@ -77,7 +79,13 @@ export function toDate(value: unknown): Date | null {
 
 async function createPostgres(url: string): Promise<Db> {
   const { default: postgres } = await import("postgres");
-  const sql = postgres(url, { max: 5, idle_timeout: 20, onnotice: () => {} });
+  const sql = postgres(
+    url,
+    REQUEST_SCOPED_DB
+      ? // One short-lived client per request; skip the type-lookup round trip.
+        { max: 1, idle_timeout: 5, fetch_types: false, onnotice: () => {} }
+      : { max: 5, idle_timeout: 20, onnotice: () => {} },
+  );
   return {
     dialect: "postgres",
     async query<T>(text: string, params: unknown[] = []) {
@@ -90,7 +98,15 @@ async function createPostgres(url: string): Promise<Db> {
 }
 
 async function createSqlite(path: string): Promise<Db> {
-  const { DatabaseSync } = await import("node:sqlite");
+  let DatabaseSync: typeof import("node:sqlite").DatabaseSync;
+  try {
+    ({ DatabaseSync } = await import("node:sqlite"));
+  } catch {
+    // e.g. Cloudflare Workers, which has no node:sqlite.
+    throw new Error(
+      "No leaderboard database configured: set POSTGRES_DB_URI (or a HYPERDRIVE binding on Cloudflare).",
+    );
+  }
   const db = new DatabaseSync(path);
   db.exec("PRAGMA busy_timeout = 5000");
   return {
@@ -106,18 +122,29 @@ async function createSqlite(path: string): Promise<Db> {
   };
 }
 
+let schemaReady = false;
+
 export async function openDb(url?: string): Promise<Db> {
   const db = url ? await createPostgres(url) : await createSqlite(sqlitePath());
-  for (const statement of SCHEMA[db.dialect]) {
-    await db.query(statement);
+  if (!schemaReady) {
+    for (const statement of SCHEMA[db.dialect]) {
+      await db.query(statement);
+    }
+    schemaReady = true;
   }
   return db;
 }
 
 let shared: Promise<Db> | null = null;
 
-/** Process-wide connection, opened on first use. */
+/**
+ * The database for this call: a process-wide connection on Node, or a fresh
+ * request-scoped client on Workers (REQUEST_SCOPED_DB).
+ */
 export function getDb(): Promise<Db> {
+  if (REQUEST_SCOPED_DB && !shared) {
+    return openDb(databaseUrl());
+  }
   if (!shared) {
     shared = openDb(databaseUrl()).catch((error) => {
       shared = null;
@@ -130,6 +157,7 @@ export function getDb(): Promise<Db> {
 /** Test hook: swap in a specific database (e.g. an in-memory SQLite one). */
 export function setDbForTesting(db: Db | null): void {
   shared = db ? Promise.resolve(db) : null;
+  schemaReady = db !== null;
 }
 
 export async function openSqliteForTesting(path = ":memory:"): Promise<Db> {

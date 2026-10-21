@@ -98,7 +98,13 @@ export async function authorizedIdentity(
   if (!isValidUsername(username) || !isValidSessionId(sessionId)) {
     return null;
   }
-  if (!(await verifyOwner(username, playerToken))) {
+  try {
+    if (!(await verifyOwner(username, playerToken))) {
+      return null;
+    }
+  } catch (error) {
+    // Fail closed: without the database nobody's ownership can be proven.
+    console.error("Ownership check failed:", (error as Error).message);
     return null;
   }
   return { username, sessionId };

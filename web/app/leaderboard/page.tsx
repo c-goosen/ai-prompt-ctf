@@ -19,12 +19,32 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+async function loadLeaderboard() {
+  try {
+    const [rows, recent, summary] = await Promise.all([
+      getLeaderboard(),
+      getRecentCompletions(),
+      getLeaderboardSummary(),
+    ]);
+    return { rows, recent, summary };
+  } catch (error) {
+    console.error("Failed to load leaderboard:", (error as Error).message);
+    return null;
+  }
+}
+
 export default async function LeaderboardPage() {
-  const [rows, recent, summary] = await Promise.all([
-    getLeaderboard(),
-    getRecentCompletions(),
-    getLeaderboardSummary(),
-  ]);
+  const data = await loadLeaderboard();
+  if (!data) {
+    return (
+      <PageShell title="Live Leaderboard">
+        <div role="alert" className="rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-card-foreground">
+          The leaderboard is temporarily unavailable. Please try again shortly.
+        </div>
+      </PageShell>
+    );
+  }
+  const { rows, recent, summary } = data;
 
   return (
     <PageShell title="Live Leaderboard">

@@ -58,3 +58,21 @@ describe("JSON registration", () => {
     expect(retry.status).toBe(200);
   });
 });
+
+describe("registration without a database", () => {
+  it("returns 503 instead of crashing", async () => {
+    const { setDbForTesting } = await import("@/lib/db");
+    setDbForTesting({
+      dialect: "sqlite",
+      query: async () => {
+        throw new Error("database is down");
+      },
+      close: async () => {},
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockAdk(() => json({}));
+    const response = await register(request("/api/register", { method: "POST", json: { username: "gina" } }));
+    expect(response.status).toBe(503);
+    setDbForTesting(null);
+  });
+});

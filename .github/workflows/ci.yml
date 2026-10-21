@@ -68,3 +68,5 @@ jobs:
         run: pnpm build
       - name: Build (Next.js 16.4 compatibility)
         run: pnpm build:next
+      - name: Build (vinext, Cloudflare Workers)
+        run: pnpm build:cf

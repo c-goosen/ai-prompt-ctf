@@ -8,7 +8,7 @@ import { isValidSessionId, isValidUsername, SESSION_ID_RULES, USERNAME_RULES } f
 
 export type RegisterOutcome =
   | { ok: true; username: string; sessionId: string; newToken: string | null }
-  | { ok: false; status: 400 | 409 | 502; error: string; detail: string };
+  | { ok: false; status: 400 | 409 | 502 | 503; error: string; detail: string };
 
 /**
  * Register a player and their ADK session. Shared by the register form's
@@ -37,7 +37,18 @@ export async function registerPlayer(input: {
 
   // First registration mints an ownership token; a returning player must
   // present the token they were given the first time.
-  const claim = await claimOrVerifyUsername(username, input.presentedToken);
+  let claim: Awaited<ReturnType<typeof claimOrVerifyUsername>>;
+  try {
+    claim = await claimOrVerifyUsername(username, input.presentedToken);
+  } catch (error) {
+    console.error("Registration database error:", (error as Error).message);
+    return {
+      ok: false,
+      status: 503,
+      error: "Registration is temporarily unavailable",
+      detail: "Please try again in a moment.",
+    };
+  }
   if (!claim.allowed) {
     return {
       ok: false,
@@ -59,7 +70,12 @@ export async function registerPlayer(input: {
     return { ok: false, status: 502, error: "Failed to connect to ADK API", detail: message };
   }
 
-  await ensureLeaderboardUser(username);
+  try {
+    await ensureLeaderboardUser(username);
+  } catch (error) {
+    // Not fatal: the player is registered; the board entry is cosmetic.
+    console.error("Could not add player to the leaderboard:", (error as Error).message);
+  }
   return { ok: true, username, sessionId, newToken: claim.newToken };
 }
 

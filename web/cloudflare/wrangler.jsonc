@@ -1,0 +1,26 @@
+// Cloudflare Workers config for the vinext build (vite.config.cloudflare.ts).
+// It lives in cloudflare/ rather than the project root because vinext treats a
+// root wrangler config as "Cloudflare only" and rejects the Node build.
+// The Python ADK agent is not deployed here; the Worker calls it over HTTPS.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "pwngpt-web",
+  "compatibility_date": "2026-10-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "vinext/server/fetch-handler",
+  "assets": {
+    "directory": "../dist/client",
+    "html_handling": "none",
+    "not_found_handling": "none",
+    "binding": "ASSETS",
+    "run_worker_first": ["/*", "!/_next/static/*", "!/*/_next/static/*"]
+  },
+  "vars": {
+    // Public URL of the ADK agent (e.g. through a Cloudflare Tunnel).
+    "ADK_API_URL": "https://adk.example.com"
+  }
+  // Before deploying, add the Postgres connection and secrets:
+  //   npx wrangler hyperdrive create pwngpt-db --connection-string="postgresql://..."
+  //   then add: "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<id from above>" }]
+  //   npx wrangler secret put PASSWORD_ZERO   (and PASSWORD_ONE ... PASSWORD_TEN)
+}

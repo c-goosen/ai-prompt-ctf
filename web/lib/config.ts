@@ -1,5 +1,7 @@
 import "server-only";
 
+import { platformDatabaseUrl } from "@/lib/platform";
+
 /**
  * Runtime configuration, read from the environment.
  *
@@ -55,12 +57,13 @@ export const siteConfig = {
 };
 
 /**
- * Leaderboard database location. Postgres when POSTGRES_DB_URI is set (the
- * historical POSTGRESS_DB_URI spelling is still honoured, as in
- * ctf/leaderboard.py), otherwise the SQLite file the Python agent uses.
+ * Leaderboard database location: the platform's (Cloudflare Hyperdrive) or
+ * POSTGRES_DB_URI for Postgres (the historical POSTGRESS_DB_URI spelling is
+ * still honoured, as in ctf/leaderboard.py), otherwise the SQLite file the
+ * Python agent uses.
  */
 export function databaseUrl(): string | undefined {
-  return env("POSTGRES_DB_URI") ?? env("POSTGRESS_DB_URI");
+  return platformDatabaseUrl() ?? env("POSTGRES_DB_URI") ?? env("POSTGRESS_DB_URI");
 }
 
 export function sqlitePath(): string {
