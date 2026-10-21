@@ -37,3 +37,32 @@ jobs:
           OPENAI_API_KEY: ""
           HUGGINGFACE_API_KEY: ""
           PYTEST_CURRENT_TEST: "true"
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: web/package.json
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build (vinext, Node standalone)
+        run: pnpm build
+      - name: Build (Next.js 16.4 compatibility)
+        run: pnpm build:next
