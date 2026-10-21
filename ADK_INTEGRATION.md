@@ -1,192 +1,101 @@
 # ADK API Integration
 
-This document describes the integration between the CTF frontend and the Google ADK API server.
-
-## Overview
-
-The frontend has been updated to use the ADK REST API instead of directly calling FastAPI code. Each level in the frontend now makes API calls to `http://127.0.0.1:8000` (the ADK server).
+How the web app (`web/`, Next.js 16.4 on vinext) talks to the Google ADK API server that runs the CTF agents.
 
 ## Architecture
 
 ```
-Frontend (Port 8100) -> ADK API Server (Port 8000) -> Level Agents
+Browser -> Web app (8100 in Docker, 3000 in dev) -> ADK API Server (8000) -> sub_agents (coordinator + level agents)
+                  \-> Postgres (leaderboard, player tokens) <-/
 ```
 
-### Components
+1. **Web app** (`web/`): UI, registration and username ownership, the chat proxy, history, leaderboard, rate limits.
+2. **ADK API server**: `adk web` / `adk api_server` serving the `sub_agents` app from `ctf/agents`.
+3. **Agents** (`ctf/agents/sub_agents/`): `CTFSubAgentsRoot` routes to `Level0Agent` … `Level10Agent`, which apply
+   the guardrails and call the tools (`ctf/agents/tools.py`).
 
-1. **Frontend Server** (`ctf/frontend/main.py`): FastAPI server serving the web interface
-2. **ADK API Server**: Google ADK web server exposing REST API endpoints
-3. **Level Agents** (`ctf/agents/sub_agents/`): Individual challenge agents for each level
+## Request flow
 
-## API Integration Details
+1. The chat UI posts `multipart/form-data` (`text_input`, optional `file_input`) to `/v1/chat/completions`.
+2. The route checks the identity cookies: `anon_user_identity` and `session_id` must be well formed, and the
+   httpOnly `player_token` must match the stored hash for that username. Otherwise it returns 401 and never
+   calls ADK.
+3. `web/lib/adk.ts` makes sure the session exists:
+   - `GET /apps/sub_agents/users/{user_id}/sessions/{session_id}`
+   - `POST` the same URL with `{}` if it returned 404
+4. It calls `POST /run` (payload below). Uploads (PDF, JSON, images, audio; up to 10 MB) are sent as a base64
+   `inline_data` part.
+5. `web/lib/events.ts` turns the returned events into messages (text, function calls, tool responses),
+   redacts level passwords from `password_search_func` output, and strips leaderboard markers.
+6. The route responds `{ "messages": [{ "role": "assistant" | "tool", "text": "..." }] }`, which the client
+   renders as markdown (raw HTML is not rendered).
 
-### Request Flow
+One ADK session per player session: the coordinator moves the player between levels within it ("I want to try
+level 3"), so there is no level prefix in messages.
 
-1. User submits form in frontend (HTMX POST to `/v1/chat/completions`)
-2. Frontend processes form data (file uploads for levels 4-5)
-3. Frontend ensures session exists:
-   - Checks if session exists: `GET /apps/sub_agents/users/{user_id}/sessions/{session_id}`
-   - Creates session if needed: `POST /apps/sub_agents/users/{user_id}/sessions/{session_id}`
-4. Frontend calls ADK API at `http://127.0.0.1:8000/run` with:
-   - `appName`: "sub_agents" (contains all level agents)
-   - `userId`: From cookie identity
-   - `sessionId`: `{user_id}-level-{level}`
-   - `newMessage`: User's input text prefixed with level
-5. ADK API routes to appropriate level agent
-6. Agent processes request and returns response
-7. Frontend extracts response text and returns HTML
-
-### ADK API Payload Format
+### `/run` payload
 
 ```json
 {
   "appName": "sub_agents",
-  "userId": "user_123",
-  "sessionId": "user_123-level-0",
-  "newMessage": {
-    "parts": [{"text": "Level 0: What is the password?"}],
-    "role": "user"
-  },
+  "userId": "alice",
+  "sessionId": "0f8fad5b-d9cb-469f-a165-70867728950e",
+  "newMessage": { "role": "user", "parts": [{ "text": "I want to try level 0" }] },
   "streaming": false
 }
 ```
 
-### Response Processing
+### Response
 
-The ADK API returns an array of events. The frontend extracts text from:
+An array of events; text is taken from `content.parts[].text`, plus `functionCall` and `functionResponse` parts:
+
 ```json
-[
-  {
-    "content": {
-      "parts": [{"text": "Response text here"}]
-    }
-  }
-]
+[{ "author": "Level0Agent", "content": { "role": "model", "parts": [{ "text": "Response text here" }] } }]
 ```
+
+Chat history comes from the session's `events` (`GET /apps/sub_agents/users/{user_id}/sessions/{session_id}`),
+parsed the same way.
+
+## Leaderboard
+
+Completions are recorded by the agent: `submit_answer_func` writes to `leaderboard_entries` (`ctf/leaderboard.py`)
+using the ADK session's user id. The web app only reads the leaderboard and adds a level 0 entry at registration.
+Credit is never derived from model text, which players can steer with prompt injection.
 
 ## Running the System
 
-### 1. Install Dependencies
-
 ```bash
 uv sync
+cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000   # agent
+make web-dev                                                   # web app, http://localhost:3000
 ```
-
-### 2. Start ADK Server
-
-```bash
-cd ctf/agents
-uv run adk web
-```
-
-This starts the ADK server on `http://127.0.0.1:8000`
-
-### 3. Start Frontend Server
-
-```bash
-uv run ctf/frontend/main.py
-```
-
-This starts the frontend on `http://127.0.0.1:8100`
-
-### 4. Test Integration
 
 Test the ADK API directly:
 ```bash
-# Test session creation
 curl -X POST "http://localhost:8000/apps/sub_agents/users/test_user/sessions/test_session" \
-  -H "Content-Type: application/json" -d "null"
+  -H "Content-Type: application/json" -d "{}"
 
-# Test agent run
 curl -X POST http://localhost:8000/run \
   -H "Content-Type: application/json" \
-  -d '{"appName":"sub_agents","userId":"test_user","sessionId":"test_session","newMessage":{"parts":[{"text":"Level 0: Hello, what is the password?"}],"role":"user"},"streaming":false}'
+  -d '{"appName":"sub_agents","userId":"test_user","sessionId":"test_session","newMessage":{"parts":[{"text":"I want to try level 0"}],"role":"user"},"streaming":false}'
 ```
 
-Test the frontend integration by visiting `http://127.0.0.1:8100` and trying any level.
+End-to-end agent tests (need a running agent): `uv run pytest ctf/tests/test_vals.py -m adk_api -o addopts=""`.
 
-## Key Changes Made
+## Error handling
 
-### Frontend Routes (`ctf/frontend/routes/chat.py`)
-
-- **Removed**: Direct agent instantiation and execution
-- **Removed**: Frontend-level protection checks (now handled by agents)
-- **Added**: `call_adk_api()` function to make HTTP requests to ADK server
-- **Added**: `ensure_session_exists()` function for automatic session management
-- **Updated**: `chat_completion()` endpoint to use ADK API with session management
-- **Preserved**: File upload handling (audio/image processing) and HTML response formatting
-
-### Frontend Routes (`ctf/frontend/routes/challenges.py`)
-
-- **Added**: `get_session_history()` function to retrieve chat history from ADK API
-- **Updated**: Session-aware history loading for each level
-- **Improved**: Graceful fallback when session history is unavailable
-
-### Dependencies (`pyproject.toml`)
-
-- **Updated**: `httpx>=0.28.1` for HTTP client functionality
-
-### Session Management
-
-- **Automatic Creation**: Sessions are created automatically for each user and level
-- **Session Format**: `{user_id}-level-{level}` (e.g., "user123-level-0")
-- **User ID**: Uses cookie identity (`anon_user_identity`)
-- **Persistent State**: Session state is managed by ADK server (no longer using local memory)
-- **Per-Level Isolation**: Each level has its own session for proper isolation
-
-## Agent Mapping
-
-All levels are handled by the `sub_agents` app, which contains individual level agents:
-
-| Level | Description |
-|-------|-------------|
-| 0 | Basic prompt injection |
-| 1 | Input injection challenges |
-| 2 | Output protection challenges |
-| 3 | Advanced prompt engineering |
-| 4 | Vision multi-modal injection |
-| 5 | Audio multi-modal injection |
-| 6 | Function calling injection |
-| 7 | Prompt-Guard protection |
-| 8 | Prompt-Goose protection |
-| 9 | Chain of Thought challenges |
-| 10 | Maximum security |
-
-The level is specified in the message content (e.g., "Level 0: What is the password?") and the sub_agents app routes to the appropriate level agent.
-
-## Error Handling
-
-- **Connection Errors**: Graceful fallback with user-friendly error messages
-- **API Errors**: Logged and handled with fallback responses
-- **Protection Logic**: Now handled entirely by individual agents (not frontend)
-
-## Future Enhancements
-
-1. **Session History**: Implement ADK API calls to retrieve chat history
-2. **Streaming**: Enable streaming responses using `/run_sse` endpoint
-3. **Error Recovery**: Enhanced error handling and retry logic
-4. **Monitoring**: Add observability for API calls and performance metrics
+- ADK unreachable: chat replies with an apology message; `/health` reports `degraded` with the error.
+- Registration when ADK is down: 502, and the just-claimed username is released.
+- Database unreachable: registration returns 503, ownership checks fail closed, and the leaderboard shows an
+  "unavailable" notice.
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Connection Refused**: Ensure ADK server is running on port 8000
-2. **Agent Not Found**: Verify agent names match exactly (case-sensitive)
-3. **Timeout Errors**: Check if agents are taking too long to respond
-4. **Session Issues**: Clear browser cookies if session state is corrupted
-
-### Debug Commands
+1. **Connection refused**: ensure the ADK server is running on port 8000 and `ADK_API_URL` points at it.
+2. **"No user session found" in chat**: register first; the `player_token` cookie proves the username is yours.
+3. **Timeouts**: `/run` allows 60 s; small local models can be slow on the first call.
 
 ```bash
-# Check ADK server status
-curl http://127.0.0.1:8000/docs
-
-# Test ADK API directly
-curl -X POST http://127.0.0.1:8000/run \
-  -H "Content-Type: application/json" \
-  -d '{"app_name":"Level0Agent","user_id":"test","session_id":"test-session","new_message":{"parts":[{"text":"Hello"}],"role":"user"},"streaming":false}'
-
-# Check frontend server
-curl http://127.0.0.1:8100/health
+curl http://127.0.0.1:8000/docs      # ADK server
+curl http://localhost:3000/health    # web app (8100 in Docker)
 ```

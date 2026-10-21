@@ -45,6 +45,7 @@
 * * ~~Google adk~~
 * * ~~Sessions~~
 * * ~~Lancedb~~
+* * ~~Frontend on Next.js (vinext) + Tailwind, shared Postgres leaderboard~~
 
 * Add guardrails to prevent prompt injection in challenges
 * Code generation challenge

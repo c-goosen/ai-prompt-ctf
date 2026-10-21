@@ -22,15 +22,22 @@ Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give mys
 
 ## Architecture
 
-The system follows a modern web architecture pattern:
-
 ```
-Google ADK API <-> FastAPI Backend <-> HTMX Frontend
+Browser <-> Web app (Next.js 16.4 on vinext, web/) <-> Google ADK API (Python, ctf/agents) <-> LLM
+                       \                                  /
+                        +------ Postgres (leaderboard) ---+
 ```
 
-- **Google ADK API**: Powers the agentic LLM capabilities and evaluation framework
-- **FastAPI Backend**: Provides REST API endpoints and serves the web application
-- **HTMX Frontend**: Delivers dynamic, interactive web interface without complex JavaScript
+- **Web app** (`web/`): Next.js 16.4 App Router, built and served with
+  [vinext](https://github.com/cloudflare/vinext) (Vite), styled with Tailwind CSS v4, shadcn/ui and
+  [Watermelon UI](https://ui.watermelon.sh) animations. It renders the UI and owns everything except the agent:
+  registration and username ownership, the chat proxy to ADK `/run`, chat history, the leaderboard, FAQ and
+  challenges, rate limiting and the health check. It runs as a standalone Node server (Docker) or on
+  Cloudflare Workers.
+- **Google ADK API** (`ctf/agents`): the multi-agent CTF (coordinator + one agent per level), guardrails and
+  tools. It records level completions when `submit_answer_func` accepts a password.
+- **Postgres**: the shared leaderboard and player-ownership tables. Without `POSTGRES_DB_URI`, both sides fall
+  back to the SQLite file `ctf/leaderboard.db`.
 
 ### Agent Design
 
@@ -40,49 +47,44 @@ The CTF uses a multi-agent architecture with a coordinator pattern, where a root
 
 The system consists of:
 - **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
-- **Level0Agent through9Agent**: Individual challenge agents with progressive security measures
+- **Level0Agent through Level10Agent**: Individual challenge agents with progressive security measures
 - **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, and `sql_query` that agents can call
 
 ## Other Info
-[CHALLENGES](CHALLENGES.md)
+[CHALLENGES](web/content/challenges.md)
+[FAQ](web/content/faq.md)
 [TODO](TODO.md)
 
 Tools
-* Google ADK agent SDK
-* RAG (Retrieval Augmented Generation)
-* Function calling
-* Agentic abilities
-* Htmx
-* LanceDB
-* Mutiple models poossible openai vision models, gemini 2->3, qwen3, etc
-* Python 3.13+
-* FastAPI  (async REST API framework)
-* Pydantic (types)
-* Huggingface finetuned models
+* Google ADK agent SDK (Python 3.13+, Pydantic)
+* RAG (Retrieval Augmented Generation) with LanceDB
+* Function calling and agentic abilities
+* Multiple models possible: OpenAI vision models, Gemini 2->3, qwen3, etc.
+* Hugging Face fine-tuned guard models
+* Next.js 16.4 + vinext, React 19, Tailwind CSS v4, shadcn/ui, Watermelon UI, motion
 
 ## API Docs
-API docs are located at ${URI}/docs
-http://127.0.0.1:8000/docs#
-
-But are switched off for events. You can switch it on with an ENV var DOCS_ON=True
-
+The ADK API docs are at http://127.0.0.1:8000/docs.
 
 ## Install dependencies
-Install uv package manager
-Then run
+Agent (Python, [uv](https://docs.astral.sh/uv/)):
 ```bash
 uv sync
 ```
+Web app (Node 24 + [pnpm](https://pnpm.io)):
+```bash
+make web-install   # = pnpm --dir web install --frozen-lockfile
+```
 
 ## Database
-Uses LanceDB for vector storage with local persistence.
+LanceDB holds the vector store for the RAG levels. All passwords go into the same table and are filtered by level.
 
-All passwords get thrown in the same table, but get filtered to make things simpler
+The leaderboard and player tokens live in Postgres (`POSTGRES_DB_URI`), or SQLite at `ctf/leaderboard.db` when
+that isn't set. The agent and the web app must point at the same database.
 
-## Loading documents into LanceDB vector store
-Add files to directories with passwords for various levels. Repeat passwords with words like secret.
-
-You will need to set the level passwords like this:
+## Level passwords and flags
+Set the level passwords for **both** the agent and the web app (the web app redacts them from RAG tool output):
+```bash
 PASSWORD_ZERO="BSIDES_GET_STARTED_CTF"
 PASSWORD_ONE="bughuntersquest"
 PASSWORD_TWO="QUANTUMCRYPTO"
@@ -94,19 +96,21 @@ PASSWORD_SEVEN="P@SSWORD123"
 PASSWORD_EIGHT="OWASPTOP10AI"
 PASSWORD_NINE="SKYNETRECRUIT"
 PASSWORD_TEN="Woohoo"
-```bash
-python prepare_flags.py
 ```
-This will eventually be moved to start of app ^^
+Seed them into LanceDB (and the level 5 SQL table) with:
+```bash
+cd ctf/agents && PREPARE_FLAGS=1 uv run python -m ctf.agent_startup
+```
+In Docker, set `PREPARE_FLAGS=1` on the `adk-api` service once.
 
 ## Run locally
-```bash
-python ctf/main.py
-```
+1. Agent: `cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000` (needs Ollama with `qwen3:0.6b`,
+   or `USE_GEMINI=1`).
+2. Web app: `make web-dev`, then open http://localhost:3000.
 
 ## Run with Docker Compose
 
-The recommended way to run the full stack (Ollama, ADK API, and frontend) is via `docker-compose.yml`.
+The recommended way to run the full stack (Ollama, Postgres, ADK agent, web app) is via `docker-compose.yml`.
 
 ### Requirements
 
@@ -124,12 +128,13 @@ make run
 This is equivalent to:
 
 ```bash
-docker compose --profile default up --build
+docker compose --profile default up --build adk-api web
 ```
 
 Copy `.env.example` to `.env` if you want `docker compose up` (without `--profile`) to enable the same stack via `COMPOSE_PROFILES=default`.
 
-On first start, `ollama-init` pulls the default model (`qwen3:0.6b`). The frontend also downloads Hugging Face guard models on startup, which can take several minutes.
+On first start, `ollama-init` pulls the default model (`qwen3:0.6b`), and the agent container downloads the
+Hugging Face guard models before serving (`ctf/agent_startup.py`), which can take several minutes.
 
 ### Production profile (remote Ollama or API LLM)
 
@@ -158,12 +163,13 @@ COMPOSE_PROFILES=prod USE_GEMINI=1 docker compose up --build
 
 | Service   | URL |
 |-----------|-----|
-| Frontend (CTF UI) | http://localhost:8100 |
+| Web app (CTF UI) | http://localhost:8100 |
+| Web app health | http://localhost:8100/health |
 | ADK API | http://localhost:8000 |
 | ADK API docs | http://localhost:8000/docs |
-| Frontend health | http://localhost:8100/health |
 
-Use `localhost` or `127.0.0.1` in the browser. Ollama is not published to the host; containers reach it at `http://ollama:11434` on the Compose network.
+Use `localhost` or `127.0.0.1` in the browser. Ollama and Postgres are not published to the host; containers reach
+them on the Compose network.
 
 ### Common commands
 
@@ -172,21 +178,21 @@ Use `localhost` or `127.0.0.1` in the browser. Ollama is not published to the ho
 docker compose --profile default up --build -d
 
 # Follow logs
-docker compose logs -f frontend adk-api
+docker compose logs -f web adk-api
 
-# Stop and remove containers
+# Stop and remove containers (add -v to also drop the Postgres volume)
 docker compose down
 ```
 
 ### Optional: Traefik reverse proxy
 
-To serve the frontend on port 80 instead of 8100:
+To serve the web app on port 80 instead of 8100:
 
 ```bash
 docker compose up -d traefik
 ```
 
-Then open http://localhost (Traefik routes `Host: localhost` and `Host: 127.0.0.1` to the frontend).
+Then open http://localhost (Traefik routes `Host: localhost` and `Host: 127.0.0.1` to the web app).
 
 ### Environment variables
 
@@ -197,9 +203,13 @@ Set in `docker-compose.yml` or override when starting:
 | `OLLAMA_MODEL` | ollama-init | `qwen3:0.6b` | Model pulled into Ollama on first run |
 | `OPENSOURCE_LLM_MODEL` | adk-api | `qwen3:0.6b` | Model name used by agents |
 | `USE_GEMINI` | adk-api | `0` | Set to `1` to use Gemini instead of Ollama |
-| `ADK_API_URL` | frontend | `http://adk-api:8000` | ADK API base URL (use service name inside Compose) |
-| `FASTAPI_ENV` | frontend | `production` | Disables uvicorn reload when `production` |
-| `DOCS_ON` | frontend | (off) | Set to `True` to enable FastAPI `/docs` on the frontend |
+| `PREPARE_FLAGS` | adk-api | (off) | Set to `1` to seed level flags into LanceDB on start |
+| `DOWNLOAD_MODELS` | adk-api | `1` | Pre-download the guard models on start |
+| `PASSWORD_ZERO` … `PASSWORD_TEN` | adk-api, web | `PASS_ZERO` … | Level passwords |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres, adk-api, web | `ctf` | Leaderboard database (`POSTGRES_DB_URI` is built from these) |
+| `ADK_API_URL` | web | `http://adk-api:8000` | ADK API base URL (use service name inside Compose) |
+| `CTF_NAME` / `CTF_SUBTITLE` / `DISCORD_URL` | web | see compose | Branding and the sidebar Discord link |
+| `COOKIE_SECURE` | web | `0` | Set to `1` when served over HTTPS (marks identity cookies `Secure`) |
 
 Example — use a different Ollama model:
 
@@ -209,24 +219,22 @@ OLLAMA_MODEL=qwen3:1.7b OPENSOURCE_LLM_MODEL=qwen3:1.7b docker compose up --buil
 
 ### Troubleshooting
 
-- **Connection reset on port 8100** — The frontend may still be loading models. Check logs: `docker compose logs -f frontend`. Wait until you see `Uvicorn running on http://0.0.0.0:8100` without a reloader parent process.
-- **Frontend never starts** — ADK API must pass its health check first. Check `docker compose logs adk-api`.
+- **Web app never starts** — It waits for the ADK API health check, and the agent downloads guard models first.
+  Check `docker compose logs -f adk-api`.
 - **ADK unhealthy** — Ensure Ollama finished pulling the model (`docker compose logs ollama-init`).
+- **Leaderboard empty after solving a level** — The agent and web app must share `POSTGRES_DB_URI`.
+- **HTTP 429** — Per-IP rate limits (see `web/lib/rate-limit.ts`) keep LLM costs down.
 
 More detail: [DOCKER.md](DOCKER.md).
 
-## Run prod (without Compose)
+## Deploy the web app to Cloudflare Workers
 
-```bash
-FORWARDED_ALLOW_IPS="*" gunicorn -k uvicorn.workers.UvicornWorker app:app -b 127.0.0.1:8000 --forwarded-allow-ips '*' --workers 4
-```
+The web app can also run on Workers (the agent stays on a server). See [web/README.md](web/README.md#cloudflare-workers)
+for the Hyperdrive and secret setup, then `pnpm --dir web deploy:cf`.
 
-Or build individual images — see [DOCKER.md](DOCKER.md).
-
-## Auth 
-No longer uses auth. Flags to be placed in seperate area
-
-Anon users are tracked by cookie for chat history
+## Auth
+No accounts. A username is claimed on first registration; the browser gets an httpOnly ownership token, and chat
+history and leaderboard progress are tied to it.
 
 ## Memory requirements for Local LLM running
 ### Subject to change
