@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline
@@ -7,6 +8,8 @@ from transformers import pipeline
 # per configuration, instead of on every query (which was slow and churned
 # memory for the guard checks run on each message).
 _PIPELINE_CACHE: dict = {}
+
+logger = logging.getLogger(__name__)
 
 
 class LLMGuardLocalBase:
@@ -29,7 +32,7 @@ class LLMGuardLocalBase:
         )
         nlp = _PIPELINE_CACHE.get(key)
         if nlp is None:
-            print(f"Loading model --> {self.MODEL} on {self.device}")
+            logger.info("Loading model %s on %s", self.MODEL, self.device)
             tokenizer = AutoTokenizer.from_pretrained(self.TOKENIZER)
             model = AutoModelForSequenceClassification.from_pretrained(
                 self.MODEL

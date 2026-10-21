@@ -1,6 +1,5 @@
 import os.path
 import sys
-import ssl
 
 # Add the project root to Python path
 project_root = os.path.abspath(
@@ -9,12 +8,6 @@ project_root = os.path.abspath(
 sys.path.insert(0, project_root)
 import uvicorn  # noqa
 from ctf.llm_guard.llm_guard import PromptGuardMeta  # noqa
-
-
-ssl._create_default_https_context = ssl._create_unverified_context
-
-os.environ["CURL_CA_BUNDLE"] = ""
-os.environ["REQUESTS_CA_BUNDLE"] = ""
 
 
 def _reload_enabled() -> bool:

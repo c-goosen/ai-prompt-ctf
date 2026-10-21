@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from pathlib import Path
@@ -9,9 +8,11 @@ from fastapi import APIRouter, Cookie, Request
 from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
-from ctf.frontend.utils import redact_passwords_in_text
+from ctf.frontend.utils import authorized_identity, event_to_message
 
 cookie = Cookie(alias="anon_user_identity", title="anon_user_identity")
+session_cookie_param = Cookie(alias="session_id", title="session_id")
+player_token_cookie = Cookie(alias="player_token", title="player_token")
 
 # get root logger
 logger = logging.getLogger(__name__)
@@ -32,15 +33,15 @@ templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 async def load_chat(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
-    session_cookie: Annotated[
-        str | None, Cookie(alias="session_id", title="session_id")
-    ] = None,
+    session_cookie: Annotated[str | None, session_cookie_param] = None,
+    player_token: Annotated[str | None, player_token_cookie] = None,
 ):
     """Render the chat experience without level-specific logic."""
     chat_history: list = []
-    if cookie_identity and session_cookie:
+    user_id = authorized_identity(cookie_identity, session_cookie, player_token)
+    if user_id:
         chat_history = await get_session_history(
-            "sub_agents", cookie_identity, session_cookie
+            "sub_agents", user_id, session_cookie
         )
 
     is_htmx = request.headers.get("HX-Request")
@@ -48,26 +49,25 @@ async def load_chat(
         "chat_components/chat_screen.html" if is_htmx else "chat_page.html"
     )
     context = {
-        "request": request,
         "message": "",
         "chat_history": chat_history,
     }
-    return templates.TemplateResponse(template_name, context)
+    return templates.TemplateResponse(request, template_name, context)
 
 
 @router.get("/chat", include_in_schema=False)
 async def load_chat_alias(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
-    session_cookie: Annotated[
-        str | None, Cookie(alias="session_id", title="session_id")
-    ] = None,
+    session_cookie: Annotated[str | None, session_cookie_param] = None,
+    player_token: Annotated[str | None, player_token_cookie] = None,
 ):
     """Backward-compatible alias for /ctf."""
     return await load_chat(
         request=request,
         cookie_identity=cookie_identity,
         session_cookie=session_cookie,
+        player_token=player_token,
     )
 
 
@@ -87,113 +87,18 @@ async def get_session_history(
             response.raise_for_status()
             session_data = response.json()
 
-            def _normalize_role(role: str | None, fallback: str | None) -> str:
-                role = (role or fallback or "").lower()
-                if role in {"assistant", "model", "ctfsubagentsroot"}:
-                    return "assistant"
-                if role in {"tool"}:
-                    return "tool"
-                if role in {"user"}:
-                    return "user"
-                return "assistant"
-
-            def _event_to_message(event: dict) -> dict | None:
-                content = event.get("content") or {}
-                parts = content.get("parts") or []
-                text_chunks: list[str] = []
-                role_hint = content.get("role") or event.get("author")
-                for part in parts:
-                    if isinstance(part, dict):
-                        if "text" in part:
-                            text_chunks.append(str(part["text"]))
-                        elif "functionCall" in part:
-                            call = part["functionCall"]
-                            args = call.get("args") or {}
-                            args_str = json.dumps(
-                                args,
-                                indent=4,
-                                sort_keys=True,
-                                ensure_ascii=False,
-                            )
-                            text_chunks.append(
-                                f"Function call `{call.get('name', 'unknown')}`"
-                                f"\n```json\n{args_str}\n```"
-                            )
-                            role_hint = "assistant"
-                        elif "functionResponse" in part:
-                            fn_resp = part["functionResponse"]
-                            resp = fn_resp.get("response") or {}
-
-                            if isinstance(resp, str):
-                                resp_str = resp
-                                text_chunks.append(
-                                    f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                                    f"\n```\n{resp_str}\n```"
-                                )
-                            elif isinstance(resp, dict) and len(resp) == 1:
-                                key, value = next(iter(resp.items()))
-                                if isinstance(value, str) and "\n" in value:
-                                    resp_str = value
-                                    text_chunks.append(
-                                        f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                                        f"\n```\n{resp_str}\n```"
-                                    )
-                                else:
-                                    resp_str = json.dumps(
-                                        resp,
-                                        indent=4,
-                                        sort_keys=True,
-                                        ensure_ascii=False,
-                                    )
-                                    text_chunks.append(
-                                        f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                                        f"\n```json\n{resp_str}\n```"
-                                    )
-                            else:
-                                resp_str = json.dumps(
-                                    resp,
-                                    indent=4,
-                                    sort_keys=True,
-                                    ensure_ascii=False,
-                                )
-                                text_chunks.append(
-                                    f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                                    f"\n```json\n{resp_str}\n```"
-                                )
-                            role_hint = "tool"
-                    elif isinstance(part, str):
-                        text_chunks.append(part)
-                text = "\n".join(
-                    chunk for chunk in text_chunks if chunk
-                ).strip()
-                if not text:
-                    text = str(content.get("text") or "").strip()
-                if not text:
-                    return None
-
-                has_password_search = any(
-                    (
-                        isinstance(p, dict)
-                        and "functionResponse" in p
-                        and p.get("functionResponse", {}).get("name")
-                        == "password_search_func"
-                    )
-                    for p in parts
-                )
-                if has_password_search:
-                    text = redact_passwords_in_text(text)
-
-                role = _normalize_role(role_hint, event.get("author"))
-                return {"memory": text, "metadata": {"role": role}}
-
             history: list = []
 
             # Prefer events payload (new ADK format)
-            events = session_data.get("events", [])
-            for event in events:
-                message = _event_to_message(event)
+            for event in session_data.get("events", []):
+                message = event_to_message(event)
                 if message:
-                    history.append(message)
+                    history.append(
+                        {
+                            "memory": message["text"],
+                            "metadata": {"role": message["role"]},
+                        }
+                    )
 
             if history:
                 return history
@@ -227,28 +132,28 @@ async def get_session_history(
 async def load_history(
     request: Request,
     cookie_identity: Annotated[str | None, cookie] = None,
-    session_cookie: Annotated[
-        str | None,
-        Cookie(alias="session_id", title="session_id"),
-    ] = None,
+    session_cookie: Annotated[str | None, session_cookie_param] = None,
+    player_token: Annotated[str | None, player_token_cookie] = None,
 ):
     """HTMX endpoint to render chat history."""
     chat_history: list = []
 
-    if cookie_identity and session_cookie:
+    user_id = authorized_identity(cookie_identity, session_cookie, player_token)
+    if user_id:
         chat_history = await get_session_history(
-            "sub_agents", cookie_identity, session_cookie
+            "sub_agents", user_id, session_cookie
         )
         logger.info(
             "Loaded %s history items for user %s",
             len(chat_history),
-            cookie_identity,
+            user_id,
         )
     else:
-        logger.debug("Cannot load history without user/session cookies")
+        logger.debug("Cannot load history without verified user/session")
 
     response = templates.TemplateResponse(
+        request,
         "chat_components/chat_history.html",
-        {"request": request, "chat_history": chat_history},
+        {"chat_history": chat_history},
     )
     return response

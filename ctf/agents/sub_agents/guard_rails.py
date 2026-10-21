@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 
 from google.adk.agents.callback_context import CallbackContext
@@ -11,6 +12,8 @@ from ctf.agents.sub_agents.protection_utils import (
     _extract_response_text,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def guard_rail_input_injection(
     callback_context: CallbackContext | None = None,
@@ -20,7 +23,7 @@ def guard_rail_input_injection(
 ) -> Optional[LlmResponse]:
     """Guardrail for input injection"""
     last_user_message = _extract_last_user_message(llm_request)
-    print(f"[Callback] Inspecting last user message: '{last_user_message}'")
+    logger.debug("Inspecting last user message: %r", last_user_message)
 
     if not last_user_message:
         return None

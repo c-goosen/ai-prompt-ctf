@@ -1,5 +1,4 @@
 import base64
-import json
 import logging
 import os
 import httpx
@@ -11,11 +10,10 @@ from fastapi import Cookie
 from fastapi import Form, UploadFile
 from fastapi import Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 from ctf.app_config import settings
 from ctf.leaderboard import strip_leaderboard_markers
-from ctf.frontend.utils import redact_passwords_in_text
+from ctf.frontend.utils import authorized_identity, event_to_message
 
 # ADK API base URL
 ADK_API_BASE_URL = settings.ADK_API_URL
@@ -26,10 +24,6 @@ logger = logging.getLogger(__name__)
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="frontend/templates")
-templates.env.globals.update(LOGO_URL=settings.LOGO_URL)
-templates.env.globals.update(THEME_COLOR=settings.THEME_COLOR)
 
 
 async def ensure_session_exists(
@@ -132,19 +126,6 @@ async def call_adk_api(
             raise
 
 
-def _normalize_role(role: Optional[str]) -> str:
-    if not role:
-        return "assistant"
-    role = role.lower()
-    if role in {"assistant", "model", "ctfsubagentsroot"}:
-        return "assistant"
-    if role in {"tool"}:
-        return "tool"
-    if role in {"user"}:
-        return "user"
-    return "assistant"
-
-
 def parse_adk_response_messages(adk_response) -> list[dict[str, str]]:
     """Convert raw ADK response events into chat messages.
 
@@ -154,54 +135,9 @@ def parse_adk_response_messages(adk_response) -> list[dict[str, str]]:
     response_messages: list[dict[str, str]] = []
     if adk_response and isinstance(adk_response, list):
         for event in adk_response:
-            content = event.get("content") or {}
-            parts = content.get("parts") or []
-            role_hint = content.get("role") or event.get("author")
-            text_chunks: list[str] = []
-
-            for part in parts:
-                if isinstance(part, dict):
-                    if "text" in part:
-                        text_chunks.append(str(part["text"]))
-                    elif "functionCall" in part:
-                        call = part["functionCall"]
-                        args = call.get("args") or {}
-                        args_str = json.dumps(args, indent=2, sort_keys=True)
-                        text_chunks.append(
-                            f"Function call `{call.get('name', 'unknown')}`"
-                            f"\n```json\n{args_str}\n```"
-                        )
-                        role_hint = "assistant"
-                    elif "functionResponse" in part:
-                        fn_resp = part["functionResponse"]
-                        resp = fn_resp.get("response") or {}
-                        resp_str = json.dumps(resp, indent=2, sort_keys=True)
-                        text_chunks.append(
-                            f"Tool response `{fn_resp.get('name', 'unknown')}`"
-                            f"\n```json\n{resp_str}\n```"
-                        )
-                        role_hint = "tool"
-                elif isinstance(part, str):
-                    text_chunks.append(part)
-
-            text = "\n".join(chunk for chunk in text_chunks if chunk).strip()
-            if not text:
-                continue
-
-            has_password_search = any(
-                (
-                    isinstance(p, dict)
-                    and "functionResponse" in p
-                    and p.get("functionResponse", {}).get("name")
-                    == "password_search_func"
-                )
-                for p in parts
-            )
-            if has_password_search:
-                text = redact_passwords_in_text(text)
-
-            role = _normalize_role(role_hint)
-            response_messages.append({"role": role, "text": text})
+            message = event_to_message(event)
+            if message:
+                response_messages.append(message)
 
     if not response_messages:
         response_messages = [
@@ -226,6 +162,10 @@ async def chat_completion(
     session_id: Annotated[
         str | None,
         Cookie(alias="session_id", title="session_id"),
+    ] = None,
+    player_token: Annotated[
+        str | None,
+        Cookie(alias="player_token", title="player_token"),
     ] = None,
 ):
     file_data: Optional[bytes] = None
@@ -272,8 +212,9 @@ async def chat_completion(
 
     # Protection checks are now handled by individual agents
 
-    # Use username and session_id from cookies (set during registration)
-    user_id = cookie_identity
+    # Use username and session_id from cookies (set during registration).
+    # The identity cookie alone is forgeable, so require the owner token too.
+    user_id = authorized_identity(cookie_identity, session_id, player_token)
     if not user_id:
         return HTMLResponse(
             content="""

@@ -65,7 +65,7 @@ class Settings(BaseSettings):
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
-    FINAL_LEVEL: int = 10  # Actually 5
+    FINAL_LEVEL: int = 10
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost")
     logger: object = logging.getLogger(__name__)
     DOCS_ON: bool = os.getenv("DOCS_ON", False)

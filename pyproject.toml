@@ -68,7 +68,7 @@ explicit = true
 
 [tool.black]
 line-length = 80
-target-version = ["py311"]
+target-version = ["py313"]
 
 [tool.djlint]
 exclude=".venv,venv,.tox,.eggs"

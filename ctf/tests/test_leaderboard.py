@@ -44,3 +44,14 @@ def test_ensure_leaderboard_user_adds_level_zero_entry():  # noqa: F841
     assert rows
     usernames = {row["username"] for row in rows}
     assert "charlie" in usernames
+
+
+def test_resubmitting_a_level_keeps_first_completion_time():  # noqa: F841
+    lb.record_level_completion("dana", 1)
+    first = lb.get_recent_completions()[0]["completed_at"]
+
+    lb.record_level_completion("dana", 1)
+    recent = lb.get_recent_completions()
+
+    assert len(recent) == 1
+    assert recent[0]["completed_at"] == first
