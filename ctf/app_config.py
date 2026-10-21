@@ -11,26 +11,6 @@ if not os.getenv("PYTEST_CURRENT_TEST", False):
 
 
 class Settings(BaseSettings):
-    DISCORD_URL: str = os.getenv(
-        "DISCORD_URL",
-        "https://discord.com/channels/687602309395382282/1168515417514442834",
-    )
-
-    CTF_NAME: str = os.getenv(
-        "CTF_NAME", "BSIDES CTF Prompt Injection challenge"
-    )
-    CTF_SUBTITLE: str = os.getenv("CTF_SUBTITLE", "Agentic LLM CTF")
-    CTF_DETAILS: str = os.getenv(
-        "CTF_DETAILS",
-        """This is a prompt injection
-        (https://www.lakera.ai/insights/what-is-prompt-injection)
-        challenge.
-        You need to progress through multiple levels.
-        Each time you get a password/secret back,
-        you should submit it to progress through the levels.
-        Each level becomes progressively harder. Happy chatting/prompting.
-        """,
-    )
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENSOURCE_LLM_MODEL: str = os.getenv("OPENSOURCE_LLM_MODEL", "qwen3:0.6b")
     OLLAMA_API_BASE: str = os.getenv(
@@ -66,11 +46,7 @@ class Settings(BaseSettings):
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
     FINAL_LEVEL: int = 10
-    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost")
     logger: object = logging.getLogger(__name__)
-    DOCS_ON: bool = os.getenv("DOCS_ON", False)
-    THEME_COLOR: str = os.getenv("THEME_COLOR", "#de7838")
-    LOGO_URL: str = os.getenv("LOGO_URL", "logo.svg")
     ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     LEADERBOARD_DB_PATH: str = os.getenv(
         "LEADERBOARD_DB_PATH",
@@ -81,4 +57,3 @@ class Settings(BaseSettings):
 settings = Settings()
 os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
 os.environ["OLLAMA_API_BASE"] = settings.OLLAMA_API_BASE.rstrip("/")
-os.environ["THEME_COLOR"] = settings.THEME_COLOR

@@ -1,20 +1,14 @@
 """Shared pytest fixtures for the CTF test suite."""
 
+import json
 import uuid
 
 import httpx
 import pytest
-from fastapi.testclient import TestClient
 
 from ctf.app_config import settings
-from ctf.frontend.app import app, limiter
 
-
-@pytest.fixture(autouse=True)
-def reset_rate_limits():
-    """Every TestClient shares one client IP, so clear limiter state per test."""
-    limiter.reset()
-    yield
+ADK_APP_NAME = "sub_agents"
 
 
 def _adk_api_reachable() -> bool:
@@ -40,27 +34,55 @@ def require_adk_api():
         )
 
 
-@pytest.fixture
-def chat_client(require_adk_api):
+def visible_text(events: list) -> str:
     """
-    FastAPI test client with a fresh user/session registered against ADK.
+    What a player sees for a /run response, as the web app renders it:
+    model text, function calls and tool responses, except the
+    password_search_func output, which the web app redacts.
+    """
+    chunks = []
+    for event in events or []:
+        for part in (event.get("content") or {}).get("parts") or []:
+            if "text" in part:
+                chunks.append(str(part["text"]))
+            elif "functionCall" in part:
+                chunks.append(json.dumps(part["functionCall"].get("args")))
+            elif "functionResponse" in part:
+                response = part["functionResponse"]
+                if response.get("name") != "password_search_func":
+                    chunks.append(json.dumps(response.get("response")))
+    return "\n".join(chunks)
 
-    Yields (client, cookies) where cookies must be passed to /v1/chat/completions.
+
+@pytest.fixture
+def adk_chat(require_adk_api):
     """
+    A fresh ADK session; yields send(text) -> visible response text.
+    Talks to the ADK API directly (the web app is a thin proxy over /run).
+    """
+    base = settings.ADK_API_URL.rstrip("/")
     user_id = f"pytest-{uuid.uuid4().hex[:8]}"
     session_id = str(uuid.uuid4())
-    client = TestClient(app)
-    register = client.post(
-        "/register",
-        json={"username": user_id, "session_id": session_id},
-    )
-    if register.status_code >= 400:
-        pytest.skip(
-            f"ADK registration failed ({register.status_code}): {register.text}"
+    with httpx.Client(timeout=120.0) as client:
+        created = client.post(
+            f"{base}/apps/{ADK_APP_NAME}/users/{user_id}/sessions/{session_id}",
+            json={},
         )
-    cookies = {
-        "anon_user_identity": user_id,
-        "session_id": session_id,
-        "player_token": register.json()["player_token"],
-    }
-    yield client, cookies
+        if created.status_code >= 400:
+            pytest.skip(f"ADK session creation failed: {created.status_code}")
+
+        def send(text: str) -> str:
+            response = client.post(
+                f"{base}/run",
+                json={
+                    "appName": ADK_APP_NAME,
+                    "userId": user_id,
+                    "sessionId": session_id,
+                    "newMessage": {"role": "user", "parts": [{"text": text}]},
+                    "streaming": False,
+                },
+            )
+            response.raise_for_status()
+            return visible_text(response.json())
+
+        yield send
