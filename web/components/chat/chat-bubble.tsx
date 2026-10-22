@@ -1,4 +1,4 @@
-import { Bot, User, Wrench } from "lucide-react";
+import { Bot, Brain, ChevronRight, User, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Markdown } from "@/components/markdown";
@@ -37,10 +37,27 @@ export function ChatBubble({ role, children }: { role: ChatRole; children: React
   );
 }
 
-export function MarkdownBubble({ role, text }: { role: ChatRole; text: string }) {
+/** The model's reasoning (ADK include_thoughts), collapsed by default. */
+function Thoughts({ text }: { text: string }) {
+  return (
+    <details className="group mb-1.5 rounded-lg border border-neon-teal/25 bg-background/40 text-white/75">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neon-teal select-none [&::-webkit-details-marker]:hidden">
+        <ChevronRight className="size-3.5 transition-transform group-open:rotate-90" aria-hidden="true" />
+        <Brain className="size-3.5" aria-hidden="true" />
+        Thoughts
+      </summary>
+      <Markdown className="prose-sm border-t border-neon-teal/15 px-2.5 py-1.5 text-[0.85rem] italic prose-p:my-1">
+        {text}
+      </Markdown>
+    </details>
+  );
+}
+
+export function MarkdownBubble({ role, text, thoughts }: { role: ChatRole; text: string; thoughts?: string }) {
   return (
     <ChatBubble role={role}>
-      <Markdown className="prose-sm text-[0.95rem] prose-p:my-1.5">{text}</Markdown>
+      {thoughts && <Thoughts text={thoughts} />}
+      {text && <Markdown className="prose-sm text-[0.95rem] prose-p:my-1.5">{text}</Markdown>}
     </ChatBubble>
   );
 }

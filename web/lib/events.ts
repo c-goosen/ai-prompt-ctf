@@ -8,6 +8,8 @@ export type ChatRole = "user" | "assistant" | "tool";
 export interface ChatMessage {
   role: ChatRole;
   text: string;
+  /** The model's reasoning, from parts ADK marks as thoughts (include_thoughts). */
+  thoughts?: string;
 }
 
 /** Loose shape of an ADK event as returned by /run and the sessions API. */
@@ -22,6 +24,7 @@ export interface AdkEvent {
 
 interface AdkPart {
   text?: unknown;
+  thought?: boolean;
   functionCall?: { name?: string; args?: unknown };
   functionResponse?: { name?: string; response?: unknown };
 }
@@ -77,6 +80,7 @@ export function eventToMessage(
   const parts = content.parts ?? [];
   let roleHint = content.role ?? event.author;
   const chunks: string[] = [];
+  const thoughtChunks: string[] = [];
   let hasPasswordSearch = false;
 
   for (const part of parts) {
@@ -84,6 +88,8 @@ export function eventToMessage(
       chunks.push(part);
     } else if (!part || typeof part !== "object") {
       continue;
+    } else if (part.thought && part.text !== undefined) {
+      thoughtChunks.push(String(part.text));
     } else if ("text" in part && part.text !== undefined) {
       chunks.push(String(part.text));
     } else if (part.functionCall) {
@@ -105,13 +111,19 @@ export function eventToMessage(
   if (!text) {
     text = String(content.text ?? "").trim();
   }
-  if (!text) {
+  let thoughts = thoughtChunks.filter(Boolean).join("\n").trim();
+  if (!text && !thoughts) {
     return null;
   }
   if (hasPasswordSearch) {
     text = redact(text);
+    thoughts = redact(thoughts);
   }
-  return { role: normalizeRole(roleHint), text };
+  const message: ChatMessage = { role: normalizeRole(roleHint), text };
+  if (thoughts) {
+    message.thoughts = thoughts;
+  }
+  return message;
 }
 
 export const FALLBACK_MESSAGE: ChatMessage = {
@@ -133,6 +145,15 @@ export function parseRunResponse(
 }
 
 const LEADERBOARD_MARKER = /<!--LEADERBOARD:(\{.*?\})-->/g;
+
+/** stripLeaderboardMarkers over a message's text and thoughts. */
+export function stripMessageMarkers(message: ChatMessage): ChatMessage {
+  const stripped: ChatMessage = { ...message, text: stripLeaderboardMarkers(message.text) };
+  if (message.thoughts) {
+    stripped.thoughts = stripLeaderboardMarkers(message.thoughts);
+  }
+  return stripped;
+}
 
 /**
  * Remove leaderboard markers from model text. Display-only: credit is never

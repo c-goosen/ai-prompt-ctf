@@ -4,7 +4,7 @@ import { ADK_APP_NAME, adkApiUrl } from "./config";
 import {
   eventToMessage,
   parseRunResponse,
-  stripLeaderboardMarkers,
+  stripMessageMarkers,
   type AdkEvent,
   type ChatMessage,
 } from "./events";
@@ -146,8 +146,8 @@ export async function getSessionHistory(
     return events
       .map((event) => eventToMessage(event, redactPasswords))
       .filter((m): m is ChatMessage => m !== null)
-      .map((m) => ({ ...m, text: stripLeaderboardMarkers(m.text) }))
-      .filter((m) => m.text !== "");
+      .map(stripMessageMarkers)
+      .filter((m) => m.text !== "" || m.thoughts);
   } catch (error) {
     console.warn("Could not retrieve session history:", (error as Error).message);
     return [];

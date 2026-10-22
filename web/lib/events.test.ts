@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { eventToMessage, parseRunResponse, stripLeaderboardMarkers } from "./events";
+import { eventToMessage, parseRunResponse, stripLeaderboardMarkers, stripMessageMarkers } from "./events";
 
 const redact = (text: string) => text.split("PASS_ZERO").join("[REDACTED]");
 
@@ -44,6 +44,22 @@ describe("eventToMessage", () => {
     expect(eventToMessage(other, redact)?.text).toBe("PASS_ZERO");
   });
 
+  it("splits thought parts out of the reply text", () => {
+    const message = eventToMessage({
+      content: { role: "model", parts: [{ text: "pondering", thought: true }, { text: "answer" }] },
+    });
+    expect(message).toEqual({ role: "assistant", text: "answer", thoughts: "pondering" });
+  });
+
+  it("keeps thought-only events and omits empty thoughts", () => {
+    expect(eventToMessage({ content: { parts: [{ text: "hmm", thought: true }] } })).toEqual({
+      role: "assistant",
+      text: "",
+      thoughts: "hmm",
+    });
+    expect(eventToMessage({ content: { parts: [{ text: "hi" }] } })).not.toHaveProperty("thoughts");
+  });
+
   it("skips empty events, and parseRunResponse falls back", () => {
     expect(eventToMessage({ content: { parts: [] } })).toBeNull();
     const messages = parseRunResponse([{ content: { parts: [] } }]);
@@ -57,5 +73,14 @@ describe("stripLeaderboardMarkers", () => {
     expect(stripLeaderboardMarkers('Congrats! <!--LEADERBOARD:{"status": "correct", "level": 3}-->')).toBe(
       "Congrats!",
     );
+  });
+
+  it("strips markers from thoughts too", () => {
+    const marker = '<!--LEADERBOARD:{"level": 3}-->';
+    expect(stripMessageMarkers({ role: "assistant", text: `ok ${marker}`, thoughts: `t ${marker}` })).toEqual({
+      role: "assistant",
+      text: "ok",
+      thoughts: "t",
+    });
   });
 });

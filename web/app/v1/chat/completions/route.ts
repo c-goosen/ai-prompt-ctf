@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { isAllowedUpload, runAgent, type Upload } from "@/lib/adk";
-import { stripLeaderboardMarkers, type ChatMessage } from "@/lib/events";
+import { stripMessageMarkers, type ChatMessage } from "@/lib/events";
 import { authorizedIdentity } from "@/lib/identity";
 import { identityCookies } from "@/lib/request-identity";
 
@@ -67,6 +67,6 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     messages: messages
       .filter((message) => message.role !== "user")
-      .map((message) => ({ ...message, text: stripLeaderboardMarkers(message.text) })),
+      .map(stripMessageMarkers),
   });
 }

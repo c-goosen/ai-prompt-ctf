@@ -94,7 +94,7 @@ export function ChatScreen({
         {entries.length === 0 && <WelcomeMessages />}
         {entries.map((entry) => (
           <MessageEnter key={entry.id} animate={entry.fresh} index={entry.batchIndex}>
-            <MarkdownBubble role={entry.role} text={entry.text} />
+            <MarkdownBubble role={entry.role} text={entry.text} thoughts={entry.thoughts} />
           </MessageEnter>
         ))}
         {pending && (
