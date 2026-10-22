@@ -14,15 +14,6 @@ def isolated_leaderboard_db(tmp_path: Path):  # noqa: F811
     lb.reset_db_uri_override()
 
 
-def test_strip_leaderboard_markers():  # noqa: F841
-    marker = lb.format_leaderboard_marker(level=3)
-    text = f"Congrats! {marker}"
-    cleaned, markers = lb.strip_leaderboard_markers(text)
-    assert cleaned == "Congrats!"
-    assert markers and markers[0]["level"] == 3
-    assert markers[0]["status"] == "correct"
-
-
 def test_record_and_fetch_leaderboard():  # noqa: F841
     lb.record_level_completion("alice", 1)
     lb.record_level_completion("alice", 2)
@@ -38,14 +29,6 @@ def test_record_and_fetch_leaderboard():  # noqa: F841
     assert len(recent) == 2
 
 
-def test_ensure_leaderboard_user_adds_level_zero_entry():  # noqa: F841
-    lb.ensure_leaderboard_user("charlie")
-    rows = lb.get_leaderboard()
-    assert rows
-    usernames = {row["username"] for row in rows}
-    assert "charlie" in usernames
-
-
 def test_resubmitting_a_level_keeps_first_completion_time():  # noqa: F841
     lb.record_level_completion("dana", 1)
     first = lb.get_recent_completions()[0]["completed_at"]
@@ -55,3 +38,11 @@ def test_resubmitting_a_level_keeps_first_completion_time():  # noqa: F841
 
     assert len(recent) == 1
     assert recent[0]["completed_at"] == first
+
+
+def test_postgres_uri_uses_psycopg2_driver(monkeypatch):  # noqa: F841
+    lb.reset_db_uri_override()
+    monkeypatch.setenv("POSTGRES_DB_URI", "postgresql://u:p@db:5432/ctf")
+    assert lb._db_uri() == "postgresql+psycopg2://u:p@db:5432/ctf"
+    monkeypatch.setenv("POSTGRES_DB_URI", "postgres://u:p@db/ctf")
+    assert lb._db_uri() == "postgresql+psycopg2://u:p@db/ctf"

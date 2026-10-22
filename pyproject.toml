@@ -6,15 +6,10 @@ authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
 requires-python = ">=3.13,<3.15"
 readme = "README.md"
 dependencies = [
-    "fastapi==0.124.4",
     "pydantic-settings>=2.14.2,<3",
-    "jinja2>=3.1.5,<4",
-    "python-multipart>=0.0.32,<0.0.33",
     "python-dotenv>=1.1.0,<2",
     "clean-text>=0.6.0,<0.7",
     "bandit>=1.7.5,<2",
-    "gunicorn==26.0.0",
-    "slowapi>=0.1.9,<0.2",
     "transformers>=4.51.0,<5",
     "torch>=2.13.0,<3",
     "google-adk[eval]>=2.0.0",
@@ -22,7 +17,6 @@ dependencies = [
     "httpx>=0.28.1",
     "lancedb>=0.25.2",
     "sqlalchemy>=2.0.36,<3",
-    "markdown>=3.10",
     "requests>=2.32.0",
     "html-to-markdown>=3.6.20",
     "psycopg2-binary>=2.9.11",
@@ -32,7 +26,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "fastapi-cli>=0.0.24,<0.0.25",
     "pytest>=8.3.5,<9",
     "importanize>=0.7.0,<0.8",
     "memory-profiler>=0.61.0,<0.62",
@@ -41,11 +34,9 @@ dev = [
     "flake8-bugbear>=23.12.2,<24",
     "bandit>=1.8.3,<2",
     "pytest-cov>=7.1.0,<8",
-    "uvicorn>=0.34.0,<0.39",
     "setuptools>=83.0.0,<84",
     "huggingface-hub==0.35.3",
     "pytest-asyncio>=1.4.0,<1.5",
-    "djlint>=1.36.1,<2",
     "anyio>=4.6.2.post1,<5",
     "vulture>=2.14",
     "deadcode>=2.4.1",
@@ -69,10 +60,7 @@ explicit = true
 [tool.black]
 line-length = 80
 target-version = ["py313"]
-
-[tool.djlint]
-exclude=".venv,venv,.tox,.eggs"
-ignore="H006,H013,H021"
+extend-exclude = "^/web/"
 
 [tool.pytest.ini_options]
 markers = [

@@ -23,7 +23,7 @@ from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
 from ctf.agents.sub_agents.level_10_agent import Level10Agent
-from ctf.agents.model import model as model_config
+from ctf.agents.model import model as model_config, thinking_planner
 
 
 class CTFSubAgentsRootAgent(LlmAgent):
@@ -52,6 +52,7 @@ class CTFSubAgentsRootAgent(LlmAgent):
         super().__init__(
             name="CTFSubAgentsRoot",
             model=model,
+            planner=thinking_planner(),
             instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.  # noqa: E501
 
 ALWAYS start by greeting the user with this welcome message:

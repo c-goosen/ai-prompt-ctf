@@ -9,3 +9,20 @@ updates:
     directory: "/llm_training"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Upgrade the Next.js/vinext/React toolchain together.
+      next-vinext:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+          - "vinext"
+          - "@vinext/*"
+          - "react"
+          - "react-dom"
+          - "react-server-dom-webpack"
+          - "vite"
+          - "@vitejs/*"

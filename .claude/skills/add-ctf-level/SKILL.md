@@ -31,16 +31,22 @@ Bind `level=N` with `functools.partial` and pass as callback lists:
 - Add `N: os.getenv("PASSWORD_<WORD>", "PASS_<WORD>")` to `PASSWORDS`.
 - Set `FINAL_LEVEL = N`.
 
-## 4. Other hard-coded counts
-- `ctf/agents/tools.py`: "completed all N levels" message.
-- `grep -rn "11 levels\|Level10" --include=*.py --include=*.md --include=*.MD .` to catch stragglers.
+## 4. Web app (`web/`)
+- `web/lib/config.ts`: add `"PASSWORD_<WORD>"` to `PASSWORD_ENV_NAMES` (used to redact the
+  RAG tool's output) and set `FINAL_LEVEL = N` (leaderboard totals).
+- `docker-compose.yml`: add `PASSWORD_<WORD>` to `x-shared-env` so the agent and web app agree.
+- `web/cloudflare/wrangler.jsonc` comment: the secret list for Workers deploys.
 
-## 5. Docs
-- `ctf/CHALLENGES.MD`: new `# Level N:` section matching existing ones.
+## 5. Other hard-coded counts
+- `ctf/agents/tools.py`: "completed all N levels" message.
+- `grep -rn "11 levels\|Level10" --include=*.py --include=*.ts --include=*.tsx --include=*.md --include=*.MD . --exclude-dir=node_modules` to catch stragglers.
+
+## 6. Docs
+- `web/content/challenges.md`: new `# Level N:` section matching existing ones (shown on `/challenges`).
 - `README.MD`: add `PASSWORD_<WORD>=` to the password list.
 - `ctf/agents/ADK_WEB_README.md`: file tree and agent range.
 
-## 6. Verify
+## 7. Verify
 - `ctf/tests/test_vals.py` parametrizes on `FINAL_LEVEL`, so it covers the new level automatically.
 - Add an evalset for the level with the `ctf-eval` skill if behaviour matters.
-- Run `make format`, then the `ctf-check` skill.
+- Run `make format`, then the `ctf-check` skill (both the Python and web checks).

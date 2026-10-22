@@ -19,7 +19,7 @@ from ctf.agents.tools import (
     help_search_tool,
 )
 from google.adk.tools import FunctionTool
-from ctf.agents.model import model as model_config
+from ctf.agents.model import model as model_config, thinking_planner
 from google.adk.code_executors import BaseCodeExecutor
 
 
@@ -73,7 +73,7 @@ class BaseCTFAgent(LlmAgent):
             after_model_callback=after_model_callback,
             before_tool_callback=before_tool_callback,
             code_executor=code_executor,
-            planner=planner,
+            planner=planner or thinking_planner(),
         )
 
     @property
