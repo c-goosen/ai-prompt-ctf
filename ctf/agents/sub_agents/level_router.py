@@ -3,7 +3,9 @@
 Small models such as qwen3:0.6b reason about calling transfer_to_agent and
 then never emit the call, so "level N" requests are routed here without
 asking the model. Likewise the level agent greets the player on arrival
-without a model call, instead of mistaking the transfer for a request.
+without a model call, instead of mistaking the transfer for a request, and
+answers hint requests with a real hints_func call (the model sometimes
+writes the call out as text instead).
 """
 
 import re
@@ -43,6 +45,19 @@ _LEVEL_REQUEST = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 
+# The web app's /hint command sends "Give me a hint for the current level."
+# (or "...level: <question>"); players also just type "hint".
+_HINT_REQUEST = re.compile(
+    r"""
+    (?:(?:give\s+me|can\s+i\s+(?:get|have)|i\s+(?:want|need))\s+)?
+    (?:a\s+|another\s+)?hint
+    (?:\s+for\s+(?:the\s+)?(?:current|this)\s+level)?
+    (?:\s+please)?
+    (?:\s*:\s*.*)?
+    """,
+    re.IGNORECASE | re.VERBOSE | re.DOTALL,
+)
+
 
 def requested_level(text: str) -> Optional[int]:
     """Return N when the whole message asks to play level N, else None.
@@ -58,20 +73,24 @@ def requested_level(text: str) -> Optional[int]:
     return level if level <= MAX_LEVEL else None
 
 
+def _user_text(llm_request: LlmRequest | None) -> Optional[str]:
+    """The text of the user's own turn, or None after a tool call."""
+    if not llm_request or not llm_request.contents:
+        return None
+    last = llm_request.contents[-1]
+    if last.role != "user" or not last.parts:
+        return None
+    return "\n".join(part.text for part in last.parts if part.text)
+
+
 def route_level_request(
     llm_request: LlmRequest | None = None, **_: Any
 ) -> Optional[LlmResponse]:
     """before_model_callback that transfers "level N" requests directly."""
-    if not llm_request or not llm_request.contents:
-        return None
-
     # Only the user's own turn: after a tool call the last content is a
     # function response, and re-routing then would loop.
-    last = llm_request.contents[-1]
-    if last.role != "user" or not last.parts:
-        return None
-    text = "\n".join(part.text for part in last.parts if part.text)
-    level = requested_level(text)
+    text = _user_text(llm_request)
+    level = requested_level(text) if text else None
     if level is None:
         return None
 
@@ -107,6 +126,30 @@ def level_greeting(level: int):
         )
 
     return greet
+
+
+def route_hint_request(level: int):
+    """before_model_callback that turns a hint request into hints_func."""
+
+    def route(
+        llm_request: LlmRequest | None = None, **_: Any
+    ) -> Optional[LlmResponse]:
+        text = _user_text(llm_request)
+        if not text or not _HINT_REQUEST.fullmatch(text.strip().rstrip("!.?")):
+            return None
+        return LlmResponse(
+            content=types.Content(
+                role="model",
+                parts=[
+                    types.Part.from_function_call(
+                        name="hints_func",
+                        args={"hint": text.strip(), "level": level},
+                    )
+                ],
+            )
+        )
+
+    return route
 
 
 def greeting_text(level: int) -> str:
