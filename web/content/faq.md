@@ -1,5 +1,3 @@
-# FAQ
-
 ## Prompt Injection
 
 **What is Prompt Injection?**

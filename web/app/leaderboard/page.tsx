@@ -12,9 +12,9 @@ const formatTime = (iso: string | null) => (iso ? iso.replace("T", " ").replace(
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-neon-teal/30 bg-card/60 p-4">
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-3xl font-bold text-white">{value}</div>
+    <div className="rounded-xl border border-neon-teal/30 bg-card/60 p-3 sm:p-4">
+      <div className="text-xs text-muted-foreground sm:text-sm">{label}</div>
+      <div className="text-2xl font-bold text-white sm:text-3xl">{value}</div>
     </div>
   );
 }
@@ -48,7 +48,7 @@ export default async function LeaderboardPage() {
 
   return (
     <PageShell title="Live Leaderboard" description="Progress updates land here as soon as a level is solved.">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Stat label="Competitors" value={summary.players} />
         <Stat label="Levels Cleared" value={summary.totalCompletions} />
         <Stat label="Levels Available" value={TOTAL_LEVELS} />

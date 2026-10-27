@@ -11,7 +11,7 @@ export default function ChallengesPage() {
   return (
     <PageShell title={siteConfig.subtitle()}>
       <div className="rounded-2xl border border-neon-pink/30 bg-gradient-to-br from-neon-pink/20 to-neon-violet/30 p-5 md:p-8">
-        <Markdown>{challenges}</Markdown>
+        <Markdown className="prose-h1:mt-10 prose-h1:mb-3 prose-h1:text-2xl first:prose-h1:mt-0 prose-h2:mt-4 prose-h2:mb-2 prose-h2:text-base prose-h2:text-neon-teal">{challenges}</Markdown>
       </div>
     </PageShell>
   );

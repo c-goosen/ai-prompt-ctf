@@ -128,6 +128,7 @@ services:
     environment:
       <<: *shared-env
       ADK_API_URL: http://adk-api:8000
+      ADK_RUN_TIMEOUT_MS: ${ADK_RUN_TIMEOUT_MS:-180000}
       CTF_NAME: ${CTF_NAME:-BSIDES CTF Prompt Injection challenge}
       CTF_SUBTITLE: ${CTF_SUBTITLE:-Agentic LLM CTF}
       DISCORD_URL: ${DISCORD_URL:-}
