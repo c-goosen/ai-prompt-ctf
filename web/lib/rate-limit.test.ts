@@ -5,15 +5,17 @@ import { RateLimiter, clientIp, isExempt, limitFor } from "./rate-limit";
 describe("rate limiting", () => {
   it("allows up to the limit within a window, then reports retry-after", () => {
     const limiter = new RateLimiter();
-    const limit = limitFor("/faq"); // 1 per minute
-    expect(limiter.hit("ip|GET|/faq", limit, 0).allowed).toBe(true);
-    const second = limiter.hit("ip|GET|/faq", limit, 1_000);
-    expect(second).toEqual({ allowed: false, retryAfter: 59 });
+    const limit = limitFor("/faq"); // 3 per minute
+    for (const now of [0, 100, 200]) {
+      expect(limiter.hit("ip|GET|/faq", limit, now).allowed).toBe(true);
+    }
+    const fourth = limiter.hit("ip|GET|/faq", limit, 1_000);
+    expect(fourth).toEqual({ allowed: false, retryAfter: 59 });
     expect(limiter.hit("ip|GET|/faq", limit, 60_000).allowed).toBe(true);
   });
 
-  it("uses the 15/minute default for unlisted routes", () => {
-    expect(limitFor("/v1/chat/completions")).toEqual({ requests: 15, windowMs: 60_000 });
+  it("uses the 45/minute default for unlisted routes", () => {
+    expect(limitFor("/v1/chat/completions")).toEqual({ requests: 45, windowMs: 60_000 });
   });
 
   it("exempts health checks and static assets", () => {

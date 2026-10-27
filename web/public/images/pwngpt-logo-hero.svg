@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 232" role="img" aria-label="PwnGPT: Agentic LLM CTF">
+  <defs>
+    <clipPath id="card"><rect width="320" height="232" rx="20"/></clipPath>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0937"/>
+      <stop offset=".62" stop-color="#2a0b4d"/>
+      <stop offset="1" stop-color="#060019"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff2fd5"/>
+      <stop offset="1" stop-color="#5c24ff"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3cfcd1" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#3cfcd1"/>
+      <stop offset="1" stop-color="#ff2fd5" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="screenGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#3cfcd1" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#3cfcd1" stop-opacity="0"/>
+    </radialGradient>
+    <!-- synthwave sun: slices cut out of the lower half -->
+    <mask id="sunSlices">
+      <rect width="320" height="232" fill="#fff"/>
+      <g fill="#000">
+        <rect x="0" y="78" width="320" height="2"/>
+        <rect x="0" y="87" width="320" height="3"/>
+        <rect x="0" y="97" width="320" height="4"/>
+        <rect x="0" y="108" width="320" height="5"/>
+      </g>
+    </mask>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowStrong" x="-30%" y="-60%" width="160%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="320" height="232" fill="#060019"/>
+    <rect width="320" height="150" fill="url(#sky)"/>
+
+    <!-- sun -->
+    <circle cx="160" cy="80" r="54" fill="url(#sun)" opacity=".75" mask="url(#sunSlices)"/>
+
+    <!-- skyline -->
+    <g fill="#0b0222">
+      <path d="M0 120V70h16v-8h14v24h12V54h20v66zM62 120V84h18v-12h12v48z"/>
+      <path d="M320 120V62h-14v-10h-16v38h-12V74h-18v46zM260 120V92h-16v28z"/>
+    </g>
+    <g fill="#3cfcd1" opacity=".75">
+      <rect x="20" y="70" width="3" height="3"/><rect x="26" y="78" width="3" height="3"/>
+      <rect x="48" y="62" width="3" height="3"/><rect x="54" y="74" width="3" height="3"/>
+      <rect x="294" y="62" width="3" height="3"/><rect x="300" y="72" width="3" height="3"/>
+      <rect x="266" y="84" width="3" height="3"/>
+    </g>
+    <g fill="#ff2fd5" opacity=".8">
+      <rect x="48" y="86" width="3" height="3"/><rect x="84" y="80" width="3" height="3"/>
+      <rect x="282" y="80" width="3" height="3"/><rect x="250" y="98" width="3" height="3"/>
+      <rect x="300" y="90" width="3" height="3"/><rect x="12" y="96" width="3" height="3"/>
+    </g>
+
+    <!-- grid floor -->
+    <g stroke="#ff2fd5" stroke-width="1" fill="none" opacity=".45">
+      <path d="M0 120h320M0 124h320M0 130h320M0 139h320"/>
+      <path d="M160 120V150M160 120L100 150M160 120L40 150M160 120L-20 150M160 120L220 150M160 120L280 150M160 120L340 150"/>
+    </g>
+
+    <!-- laptop screen light on the hacker -->
+    <ellipse cx="160" cy="118" rx="56" ry="34" fill="url(#screenGlow)"/>
+
+    <!-- hacker -->
+    <path d="M104 150C106 126 120 112 136 106C132 76 144 54 160 47C176 54 188 76 184 106C200 112 214 126 216 150Z"
+          fill="#0d0326" stroke="#ff2fd5" stroke-width="2.5" stroke-linejoin="round" filter="url(#glow)"/>
+    <path d="M140 102C140 78 150 66 160 66C170 66 180 78 180 102C174 108 146 108 140 102Z" fill="#050014"/>
+    <g filter="url(#glow)">
+      <rect x="147" y="74" width="26" height="28" rx="8" fill="#060019" stroke="#3cfcd1" stroke-width="2.6"/>
+      <circle cx="154.5" cy="85" r="2.5" fill="#3cfcd1"/>
+      <circle cx="165.5" cy="85" r="2.5" fill="#3cfcd1"/>
+      <path d="M153 92.5q7 6 14 0" fill="none" stroke="#3cfcd1" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+    <!-- drawstrings -->
+    <path d="M152 108v14M168 108v14" stroke="#ff2fd5" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- laptop lid (seen from behind) -->
+    <path d="M124 150L131 126H189L196 150Z" fill="#170838" stroke="#5c24ff" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="160" cy="138" r="3" fill="#3cfcd1" filter="url(#glow)"/>
+
+    <!-- divider -->
+    <rect x="24" y="150" width="272" height="1.5" fill="url(#rule)"/>
+
+    <!-- wordmark -->
+    <g font-family="ui-monospace, 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace" text-anchor="middle">
+      <text x="160" y="195" font-size="38" font-weight="800" letter-spacing="-1" fill="#ff2fd5" filter="url(#glowStrong)">Pwn<tspan fill="#ffffff">GPT</tspan></text>
+      <text x="161" y="217" font-size="11" font-weight="700" letter-spacing="4.4" fill="#3cfcd1" filter="url(#glow)">AGENTIC LLM CTF</text>
+    </g>
+  </g>
+  <rect x=".75" y=".75" width="318.5" height="230.5" rx="19.25" fill="none" stroke="#5c24ff" stroke-opacity=".55" stroke-width="1.5"/>
+</svg>

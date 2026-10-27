@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ADK_APP_NAME, adkApiUrl } from "./config";
+import { ADK_APP_NAME, adkApiUrl, adkRunTimeoutMs } from "./config";
 import {
   eventToMessage,
   parseRunResponse,
@@ -9,6 +9,7 @@ import {
   type ChatMessage,
 } from "./events";
 import { redactPasswords } from "./redact";
+import { collapseCommandMarker } from "./slash";
 
 /**
  * Client for the Python ADK API server (ctf/agents). Callers must pass a
@@ -127,7 +128,7 @@ export async function runAgent(
       newMessage: { role: "user", parts },
       streaming: false,
     }),
-    timeoutMs: 60_000,
+    timeoutMs: adkRunTimeoutMs(),
   });
   if (!response.ok) {
     throw new AdkError(`ADK /run failed: ${response.status}`, response.status);
@@ -147,6 +148,7 @@ export async function getSessionHistory(
       .map((event) => eventToMessage(event, redactPasswords))
       .filter((m): m is ChatMessage => m !== null)
       .map(stripMessageMarkers)
+      .map((m) => (m.role === "user" ? { ...m, text: collapseCommandMarker(m.text) } : m))
       .filter((m) => m.text !== "" || m.thoughts);
   } catch (error) {
     console.warn("Could not retrieve session history:", (error as Error).message);

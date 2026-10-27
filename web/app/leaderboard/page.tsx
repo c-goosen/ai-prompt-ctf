@@ -47,8 +47,7 @@ export default async function LeaderboardPage() {
   const { rows, recent, summary } = data;
 
   return (
-    <PageShell title="Live Leaderboard">
-      <p className="-mt-4 text-muted-foreground">Progress updates land here as soon as a level is solved.</p>
+    <PageShell title="Live Leaderboard" description="Progress updates land here as soon as a level is solved.">
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Competitors" value={summary.players} />
         <Stat label="Levels Cleared" value={summary.totalCompletions} />

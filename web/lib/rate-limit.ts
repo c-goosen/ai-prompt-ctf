@@ -1,6 +1,6 @@
 /**
- * Fixed-window per-IP rate limiting, keeping the limits the FastAPI app had
- * (slowapi), which exist to keep LLM costs down.
+ * Fixed-window per-IP rate limiting, at three times the limits the FastAPI
+ * app had (slowapi). They exist to keep LLM costs down.
  *
  * State is per server instance (in memory). That is fine for the single
  * Docker container; on Cloudflare Workers each isolate counts separately,
@@ -15,17 +15,17 @@ export interface Limit {
 const SECOND = 1_000;
 const MINUTE = 60 * SECOND;
 
-/** Default for any route not listed below (slowapi default_limits). */
-export const DEFAULT_LIMIT: Limit = { requests: 15, windowMs: MINUTE };
+/** Default for any route not listed below (3x slowapi default_limits). */
+export const DEFAULT_LIMIT: Limit = { requests: 45, windowMs: MINUTE };
 
 /** Per-route limits, matched on exact pathname. */
 export const ROUTE_LIMITS: Record<string, Limit> = {
-  "/": { requests: 1, windowMs: SECOND },
-  "/faq": { requests: 1, windowMs: MINUTE },
-  "/challenges": { requests: 60, windowMs: MINUTE },
-  "/leaderboard": { requests: 5, windowMs: MINUTE },
-  "/register": { requests: 5, windowMs: MINUTE },
-  "/api/register": { requests: 5, windowMs: MINUTE },
+  "/": { requests: 3, windowMs: SECOND },
+  "/faq": { requests: 3, windowMs: MINUTE },
+  "/challenges": { requests: 180, windowMs: MINUTE },
+  "/leaderboard": { requests: 15, windowMs: MINUTE },
+  "/register": { requests: 15, windowMs: MINUTE },
+  "/api/register": { requests: 15, windowMs: MINUTE },
 };
 
 /** Paths that are never limited: health checks and static assets. */

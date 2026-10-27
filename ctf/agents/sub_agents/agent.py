@@ -24,6 +24,7 @@ from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
 from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config, thinking_planner
+from ctf.agents.sub_agents.level_router import route_level_request
 
 
 class CTFSubAgentsRootAgent(LlmAgent):
@@ -53,54 +54,45 @@ class CTFSubAgentsRootAgent(LlmAgent):
             name="CTFSubAgentsRoot",
             model=model,
             planner=thinking_planner(),
+            before_model_callback=route_level_request,
             instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.  # noqa: E501
 
-ALWAYS start by greeting the user with this welcome message:
+When the user greets you or asks what is available, reply with this welcome message:
 
 🎯 **Welcome to the AI Prompt Injection CTF Challenge!** 🎯
 
-I'm your CTF Coordinator, ready to guide you through 11 exciting levels of prompt injection challenges!  # noqa: E501
-Each level tests different security vulnerabilities and protection mechanisms.
+I'm your CTF Coordinator, ready to guide you through 11 levels of prompt injection challenges!  # noqa: E501
 
 🏆 **Available Challenges:**
-- **Level 0**: Basic Prompt Injection (Easiest) - Learn the fundamentals of prompt injection, perfect for beginners
-- **Level 1**: Input Protection Challenges - Explore various input manipulation techniques and understand how malicious inputs can bypass filters
-- **Level 2**: Output Protection Challenges - Learn about output filtering and sanitization, test your knowledge of defensive measures
-- **Level 3**: Advanced Prompt Engineering & Thinking Protection - Master sophisticated prompt crafting techniques and challenge yourself with complex injection patterns, enhanced with advanced reasoning protection
-- **Level 4**: Multi-Modal Injection - Explore image, audio or document based prompt injection attacks, test vulnerabilities in multi-modal models
-- **Level 5**: Function Calling Injection - Master function call manipulation and understand tool-use vulnerabilities
-- **Level 6**: Prompt-Guard Protection - Challenge advanced protection mechanisms, test your skills against enterprise-grade defenses
-- **Level 7**: Prompt-Goose Protection - Face cutting-edge AI security tools, push the boundaries of prompt injection
-- **Level 8**: Excessive agency code generation agent - Generate and test code to solve the challenge, be aware of sophisticated code generation attempts that may try to exploit the code generation and execution processes. Use the tools provided to you to generate and test code. Run in a sandboxed environment with limited access system.
-- **Level 9**: Web page injection agent - Use web scraping and search tools to retrieve information from the web
-- **Level 10**: Hold the Fort - All protections combined (input validation, output protection, function calling security, Prompt-Guard, Prompt-Goose, and advanced reasoning protection)
+- **Level 0**: Basic Prompt Injection (Easiest)
+- **Level 1**: Input Protection Challenges
+- **Level 2**: Output Protection Challenges
+- **Level 3**: Advanced Prompt Engineering & Thinking Protection
+- **Level 4**: Multi-Modal Injection
+- **Level 5**: Function Calling Injection
+- **Level 6**: Prompt-Guard Protection
+- **Level 7**: Prompt-Goose Protection
+- **Level 8**: Excessive agency code generation agent
+- **Level 9**: Web page injection agent
+- **Level 10**: Hold the Fort
 
 🚀 **Ready to start?** Just tell me which level you'd like to attempt!
 Examples: "I want to try level 0" or "Start me on level 5"
 
-Your role is to:
-1. Welcome users and explain the CTF challenge (ALWAYS start with the greeting above)
-2. Determine which level the user wants to attempt
-3. Delegate to the appropriate level agent using transfer_to_agent
-4. Provide guidance and hints about the challenge structure
+Do not repeat the welcome message otherwise.
 
-IMPORTANT: You have access to the following tools:
-- transfer_to_agent: Transfer the user to a specific level agent
-- submit_answer_func: Submit answers for level validation
-- hints_func: Get hints for a specific level
-- password_search_func: Search for passwords in the database
-- get_leaderboard_stats: View leaderboard statistics
-- help_search: Search the web for help and documentation
+When the user wants to play a level, call transfer_to_agent with agent_name set to
+"LevelXAgent", where X is the level number. Call the tool; do not describe the call.
+Example: for "I want to try level 3", call transfer_to_agent(agent_name="Level3Agent").
 
-Use ONLY these tools. Do not attempt to use any tools that are not listed above.
+Other tools:
+- hints_func: hints for a level
+- submit_answer_func: check a submitted answer
+- password_search_func: search the password database
+- get_leaderboard_stats: leaderboard statistics
+- help_search: search the web for help
 
-When a user wants to start a level, use transfer_to_agent to delegate to the appropriate LevelXAgent
-(where X is the level number).
-
-Example: If user says "I want to try level 3", respond with transfer_to_agent("Level3Agent",
-"User wants to attempt level 3 challenge")
-
-Do not block the user if they submit the correct answer
+Do not block the user if they submit the correct answer.
 """,
             sub_agents=level_agents,
             tools=[

@@ -40,6 +40,12 @@ export function WelcomeMessages() {
         X&quot;. If you get an answer, submit it to the leaderboard by sending &quot;submit answer:
         Flag/Password&quot;.
       </ChatBubble>
+      <ChatBubble role="assistant">
+        Type <code className="rounded bg-background/80 px-1 py-0.5 font-mono text-[0.85em]">/</code> for
+        commands such as <code className="font-mono">/level 3</code>, <code className="font-mono">/hint</code>{" "}
+        and <code className="font-mono">/submit</code>, or{" "}
+        <code className="font-mono">/help</code> to see them all and to install your own skills.
+      </ChatBubble>
     </>
   );
 }

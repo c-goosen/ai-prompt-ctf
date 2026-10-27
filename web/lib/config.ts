@@ -39,6 +39,12 @@ export function adkApiUrl(): string {
   return (env("ADK_API_URL") ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
 }
 
+/** Timeout for an agent /run call; local Ollama models can be slow. */
+export function adkRunTimeoutMs(): number {
+  const value = Number(env("ADK_RUN_TIMEOUT_MS"));
+  return Number.isFinite(value) && value > 0 ? value : 180_000;
+}
+
 /** Level passwords keyed by level, defaulting like app_config.py (PASS_ZERO, ...). */
 export function levelPasswords(): Record<number, string> {
   const passwords: Record<number, string> = {};

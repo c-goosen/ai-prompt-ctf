@@ -21,6 +21,7 @@ export interface Db {
 }
 
 // Same tables as the SQLAlchemy models, so either side can create them first.
+// player_skills is web-only: the agent only ever sees expanded skill prompts.
 const SCHEMA: Record<Db["dialect"], string[]> = {
   postgres: [
     `CREATE TABLE IF NOT EXISTS leaderboard_entries (
@@ -34,6 +35,13 @@ const SCHEMA: Record<Db["dialect"], string[]> = {
        username VARCHAR NOT NULL PRIMARY KEY,
        token_hash VARCHAR NOT NULL,
        created_at TIMESTAMP WITH TIME ZONE NOT NULL)`,
+    `CREATE TABLE IF NOT EXISTS player_skills (
+       username VARCHAR NOT NULL,
+       name VARCHAR NOT NULL,
+       description VARCHAR NOT NULL,
+       body TEXT NOT NULL,
+       updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+       PRIMARY KEY (username, name))`,
   ],
   sqlite: [
     `CREATE TABLE IF NOT EXISTS leaderboard_entries (
@@ -47,6 +55,13 @@ const SCHEMA: Record<Db["dialect"], string[]> = {
        username VARCHAR NOT NULL PRIMARY KEY,
        token_hash VARCHAR NOT NULL,
        created_at DATETIME NOT NULL)`,
+    `CREATE TABLE IF NOT EXISTS player_skills (
+       username VARCHAR NOT NULL,
+       name VARCHAR NOT NULL,
+       description VARCHAR NOT NULL,
+       body TEXT NOT NULL,
+       updated_at DATETIME NOT NULL,
+       PRIMARY KEY (username, name))`,
   ],
 };
 

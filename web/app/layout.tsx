@@ -25,7 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-h-dvh md:h-dvh md:overflow-hidden">
         <div className="flex min-h-dvh flex-col md:h-dvh md:flex-row">
           <Sidebar discordUrl={siteConfig.discordUrl()} />
-          <main className="min-w-0 flex-1 bg-gradient-to-b from-[#080323]/90 via-[#070828]/90 to-[#08061c]/95 md:h-dvh md:overflow-y-auto">
+          <main className="flex min-w-0 flex-1 flex-col bg-gradient-to-b from-[#080323]/90 via-[#070828]/90 to-[#08061c]/95 md:h-dvh md:overflow-y-auto">
             {children}
           </main>
         </div>
