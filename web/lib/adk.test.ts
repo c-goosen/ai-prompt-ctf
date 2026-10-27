@@ -1,11 +1,60 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { json, mockAdk } from "@/test/helpers";
+import { json, mockAdk, sse } from "@/test/helpers";
 
-import { getSessionHistory } from "./adk";
+import { getSessionHistory, runAgent } from "./adk";
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+/** ADK double: sessions exist, /run_sse answers with `run`. */
+const adkRun = (run: (init?: RequestInit) => Response) =>
+  mockAdk((url, init) => (url.endsWith("/run_sse") ? run(init) : json({ id: "s", events: [] })));
+
+describe("runAgent", () => {
+  it("keeps the messages received before a mid-run error", async () => {
+    adkRun(() =>
+      sse([
+        { content: { parts: [{ functionCall: { name: "hints_func", args: {} } }] } },
+        { error: "AttributeError: boom" },
+      ]),
+    );
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const messages = await runAgent("alice", "s1", "hint please");
+    expect(messages.map((m) => m.text)).toEqual([
+      expect.stringContaining("Function call `hints_func`"),
+      "Sorry, there was an error processing your request. Please try again.",
+    ]);
+  });
+
+  it("throws when the run fails before any message", async () => {
+    adkRun(() => sse([{ error: "AttributeError: boom" }]));
+    await expect(runAgent("alice", "s1", "hi")).rejects.toThrow("AttributeError: boom");
+  });
+
+  it("times out a stream that goes quiet, keeping what arrived", async () => {
+    vi.stubEnv("ADK_RUN_TIMEOUT_MS", "50");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    adkRun((init) => {
+      const encoder = new TextEncoder();
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const event = { content: { role: "model", parts: [{ text: "partial answer" }] } };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+          init?.signal?.addEventListener("abort", () => controller.error(init.signal!.reason));
+        },
+      });
+      return new Response(body, { headers: { "content-type": "text/event-stream" } });
+    });
+    const messages = await runAgent("alice", "s1", "hi");
+    expect(messages.map((m) => m.text)).toEqual([
+      "partial answer",
+      "Sorry, the agent took too long to respond. Please try again.",
+    ]);
+  });
 });
 
 describe("getSessionHistory", () => {

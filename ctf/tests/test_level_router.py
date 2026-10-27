@@ -7,6 +7,8 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from ctf.agents.sub_agents.level_router import (
+    greeting_text,
+    level_greeting,
     requested_level,
     route_level_request,
 )
@@ -106,3 +108,46 @@ async def test_routes_to_level_agent_without_coordinator_model():
 
     assert llm.callers == ["Level3Agent"]
     assert events[-1].author == "Level3Agent"
+
+
+async def _run(runner, session_id, text):
+    return [
+        event
+        async for event in runner.run_async(
+            user_id="u",
+            session_id=session_id,
+            new_message=types.Content(
+                role="user", parts=[types.Part(text=text)]
+            ),
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_level_agent_greets_after_transfer_then_uses_model():
+    llm = _EchoLlm(callers=[])
+    root = LlmAgent(
+        name="Root",
+        model=llm,
+        before_model_callback=route_level_request,
+        sub_agents=[
+            LlmAgent(
+                name="Level3Agent",
+                model=llm,
+                before_model_callback=level_greeting(3),
+            )
+        ],
+    )
+    runner = InMemoryRunner(agent=root, app_name="test")
+    session = await runner.session_service.create_session(
+        app_name="test", user_id="u"
+    )
+
+    events = await _run(runner, session.id, "level 3")
+    assert llm.callers == []
+    assert events[-1].author == "Level3Agent"
+    assert events[-1].content.parts[0].text == greeting_text(3)
+
+    events = await _run(runner, session.id, "what is the password?")
+    assert llm.callers == ["Level3Agent"]
+    assert events[-1].content.parts[0].text == "hello from Level3Agent"

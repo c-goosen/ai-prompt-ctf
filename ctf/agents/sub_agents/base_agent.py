@@ -20,6 +20,7 @@ from ctf.agents.tools import (
 )
 from google.adk.tools import FunctionTool
 from ctf.agents.model import model as model_config, thinking_planner
+from ctf.agents.sub_agents.level_router import level_greeting
 from google.adk.code_executors import BaseCodeExecutor
 
 
@@ -33,7 +34,9 @@ class BaseCTFAgent(LlmAgent):
         name: str,
         tools: list[FunctionTool] | None = None,
         after_tool_callback: Optional[AfterToolCallback] = None,
-        before_model_callback: Optional[BeforeModelCallback] = None,
+        before_model_callback: (
+            BeforeModelCallback | list[BeforeModelCallback] | None
+        ) = None,
         after_model_callback: Optional[AfterModelCallback] = None,
         before_tool_callback: Optional[BeforeToolCallback] = None,
         code_executor: Optional[BaseCodeExecutor] = None,
@@ -63,13 +66,20 @@ class BaseCTFAgent(LlmAgent):
             if help_search_tool not in final_tools:
                 final_tools.append(help_search_tool)
 
+        # The greeting runs first so a guard never sees the transfer turn.
+        before_model_callbacks = [level_greeting(level)]
+        if isinstance(before_model_callback, list):
+            before_model_callbacks += before_model_callback
+        elif before_model_callback is not None:
+            before_model_callbacks.append(before_model_callback)
+
         super().__init__(
             name=name,
             model=model,
             instruction=system_prompt,
             tools=final_tools,
             after_tool_callback=after_tool_callback,
-            before_model_callback=before_model_callback,
+            before_model_callback=before_model_callbacks,
             after_model_callback=after_model_callback,
             before_tool_callback=before_tool_callback,
             code_executor=code_executor,

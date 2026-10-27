@@ -62,6 +62,36 @@ def _extract_response_text(llm_response: LlmResponse) -> str:
     return ""
 
 
+def _callback_text(llm_response: LlmResponse | None, tool_response: Any) -> str:
+    """Text to inspect in an after_model or after_tool callback.
+
+    ADK passes ``llm_response`` to after_model callbacks and the raw tool
+    result (usually a str) as ``tool_response`` to after_tool callbacks.
+    """
+    if llm_response:
+        return _extract_response_text(llm_response)
+    if tool_response is None:
+        return ""
+    if isinstance(tool_response, str):
+        return tool_response
+    return json.dumps(tool_response, ensure_ascii=False, default=str)
+
+
+def blocked_callback_result(
+    message: str, llm_response: LlmResponse | None
+) -> LlmResponse | dict[str, str]:
+    """Replacement for a blocked response, in the shape the callback returns.
+
+    An after_tool callback's return value becomes the tool's result, which
+    must be a dict; an after_model callback returns an LlmResponse.
+    """
+    if llm_response is None:
+        return {"result": message}
+    return LlmResponse(
+        content=types.Content(role="model", parts=[types.Part(text=message)])
+    )
+
+
 class ProtectionUtils:
     """Utility class for implementing various protection mechanisms"""
 
@@ -194,20 +224,14 @@ class ProtectionUtils:
         level: int = 0,
         tool_response: Any = None,
         **_: Any,
-    ) -> Optional[LlmResponse]:
+    ) -> LlmResponse | dict[str, str] | None:
         """Detect whether response text contains the level password.
 
         Wired as both an ``after_model_callback`` (ADK passes
         ``llm_response``) and an ``after_tool_callback`` (ADK passes
         ``tool_response``, a plain dict/value rather than an LlmResponse).
         """
-        if llm_response:
-            text = _extract_response_text(llm_response)
-        elif tool_response is not None:
-            text = json.dumps(tool_response, ensure_ascii=False)
-        else:
-            return None
-
+        text = _callback_text(llm_response, tool_response)
         if not text:
             return None
 
@@ -216,15 +240,8 @@ class ProtectionUtils:
             return None
 
         if password.lower() in text.lower():
-            return LlmResponse(
-                content=types.Content(
-                    role="model",
-                    parts=[
-                        types.Part(
-                            text="LLM call was blocked by detect_password_leak."
-                        )
-                    ],
-                )
+            return blocked_callback_result(
+                "LLM call was blocked by detect_password_leak.", llm_response
             )
 
         return None

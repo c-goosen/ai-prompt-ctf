@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { isAllowedUpload, runAgent, type Upload } from "@/lib/adk";
+import { adkErrorReply, isAllowedUpload, runAgent, type Upload } from "@/lib/adk";
 import { runCommand, type CommandResult } from "@/lib/commands";
-import { stripMessageMarkers, type ChatMessage } from "@/lib/events";
+import { FALLBACK_MESSAGE, stripMessageMarkers, type ChatMessage } from "@/lib/events";
 import { authorizedIdentity, COOKIE_NAMES, IDENTITY_COOKIE_OPTIONS } from "@/lib/identity";
 import { identityCookies } from "@/lib/request-identity";
 import { parseSlashCommand } from "@/lib/slash";
@@ -82,16 +82,14 @@ export async function POST(request: NextRequest) {
     messages = await runAgent(identity.username, identity.sessionId, text, upload);
   } catch (error) {
     console.error("Error calling ADK API:", (error as Error).message);
-    return NextResponse.json({
-      messages: errorMessage("Sorry, there was an error processing your request. Please try again."),
-    });
+    return NextResponse.json({ messages: errorMessage(adkErrorReply(error)) });
   }
 
   // Display-only marker stripping. Leaderboard credit is recorded by the
   // agent's submit_answer_func, never derived from model text.
-  return NextResponse.json({
-    messages: messages
-      .filter((message) => message.role !== "user")
-      .map(stripMessageMarkers),
-  });
+  const replies = messages
+    .filter((message) => message.role !== "user")
+    .map(stripMessageMarkers)
+    .filter((message) => message.text !== "" || message.thoughts);
+  return NextResponse.json({ messages: replies.length > 0 ? replies : [FALLBACK_MESSAGE] });
 }

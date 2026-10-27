@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 84" role="img" aria-label="PwnGPT: Agentic LLM CTF">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 84" role="img" aria-label="PwnGPT: Agent Hunger Games">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1c0937"/>
@@ -23,6 +23,6 @@
   <!-- wordmark -->
   <g font-family="ui-monospace, 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace" filter="url(#glow)">
     <text x="84" y="50" font-size="40" font-weight="800" fill="#ff2fd5" letter-spacing="-1">Pwn<tspan fill="#ffffff">GPT</tspan></text>
-    <text x="86" y="72" font-size="13.5" font-weight="700" fill="#3cfcd1" letter-spacing="3.2">AGENTIC LLM CTF</text>
+    <text x="86" y="72" font-size="13.5" font-weight="700" fill="#3cfcd1" letter-spacing="2">AGENT HUNGER GAMES</text>
   </g>
 </svg>

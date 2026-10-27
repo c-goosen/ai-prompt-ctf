@@ -39,10 +39,22 @@ export function adkApiUrl(): string {
   return (env("ADK_API_URL") ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
 }
 
-/** Timeout for an agent /run call; local Ollama models can be slow. */
+function positiveNumber(name: string, fallback: number): number {
+  const value = Number(env(name));
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+/**
+ * How long an agent run (/run_sse) may go without sending anything; local
+ * Ollama models can be slow to start answering.
+ */
 export function adkRunTimeoutMs(): number {
-  const value = Number(env("ADK_RUN_TIMEOUT_MS"));
-  return Number.isFinite(value) && value > 0 ? value : 180_000;
+  return positiveNumber("ADK_RUN_TIMEOUT_MS", 180_000);
+}
+
+/** Upper bound on an agent run, however steadily it streams. */
+export function adkRunMaxMs(): number {
+  return positiveNumber("ADK_RUN_MAX_MS", 600_000);
 }
 
 /** Level passwords keyed by level, defaulting like app_config.py (PASS_ZERO, ...). */
@@ -56,7 +68,7 @@ export function levelPasswords(): Record<number, string> {
 
 export const siteConfig = {
   name: () => env("CTF_NAME") ?? "BSIDES CTF Prompt Injection challenge",
-  subtitle: () => env("CTF_SUBTITLE") ?? "Agentic LLM CTF",
+  subtitle: () => env("CTF_SUBTITLE") ?? "Agent Hunger Games",
   discordUrl: () =>
     env("DISCORD_URL") ??
     "https://discord.com/channels/687602309395382282/1168515417514442834",

@@ -1,5 +1,15 @@
 import asyncio
 import logging
+import warnings
+
+# transformers 4.x DeBERTa-v2 decorates helpers with @torch.jit.script, which
+# warns on Python 3.14+ even though scripting still works.
+warnings.filterwarnings(
+    "ignore",
+    message=r"`torch\.jit\.script` is not supported in Python 3\.14",
+    category=FutureWarning,
+    module=r"torch\.jit\._script",
+)
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import pipeline

@@ -153,7 +153,7 @@ export function Sidebar({ discordUrl }: { discordUrl: string }) {
           </div>
           <Image
             src="/images/pwngpt-logo-hero.svg"
-            alt="PwnGPT: Agentic LLM CTF"
+            alt="PwnGPT: Agent Hunger Games"
             width={320}
             height={232}
             unoptimized
@@ -180,7 +180,7 @@ export function Sidebar({ discordUrl }: { discordUrl: string }) {
           ) : (
             <Image
               src="/images/pwngpt-logo-hero.svg"
-              alt="PwnGPT: Agentic LLM CTF"
+              alt="PwnGPT: Agent Hunger Games"
               width={320}
               height={232}
               priority

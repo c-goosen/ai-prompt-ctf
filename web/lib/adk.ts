@@ -1,8 +1,9 @@
 import "server-only";
 
-import { ADK_APP_NAME, adkApiUrl, adkRunTimeoutMs } from "./config";
+import { ADK_APP_NAME, adkApiUrl, adkRunMaxMs, adkRunTimeoutMs } from "./config";
 import {
   eventToMessage,
+  FALLBACK_MESSAGE,
   parseRunResponse,
   stripMessageMarkers,
   type AdkEvent,
@@ -30,13 +31,59 @@ export class AdkError extends Error {
   }
 }
 
+/** Status of the AdkError for a run that timed out. */
+const TIMEOUT_STATUS = 504;
+/** Status of the AdkError for an ADK API that can't be reached. */
+const UNREACHABLE_STATUS = 502;
+
 async function adkFetch(url: string, init: RequestInit & { timeoutMs?: number } = {}) {
-  const { timeoutMs = 30_000, ...rest } = init;
+  const { timeoutMs = 30_000, signal: given, ...rest } = init;
+  const signal = given ?? AbortSignal.timeout(timeoutMs);
   try {
-    return await fetch(url, { ...rest, signal: AbortSignal.timeout(timeoutMs) });
+    return await fetch(url, { ...rest, signal });
   } catch (error) {
-    throw new AdkError(`Failed to reach ADK API: ${(error as Error).message}`);
+    if (signal.aborted) {
+      throw signal.reason instanceof AdkError
+        ? signal.reason
+        : new AdkError("Timed out waiting for the ADK API", TIMEOUT_STATUS);
+    }
+    throw new AdkError(`Failed to reach ADK API: ${(error as Error).message}`, UNREACHABLE_STATUS);
   }
+}
+
+/** The reply shown to the player when an agent run fails. */
+export function adkErrorReply(error: unknown): string {
+  const status = error instanceof AdkError ? error.status : undefined;
+  if (status === TIMEOUT_STATUS) {
+    return "Sorry, the agent took too long to respond. Please try again.";
+  }
+  if (status === UNREACHABLE_STATUS) {
+    return "Sorry, the agent is unavailable right now. Please try again shortly.";
+  }
+  return "Sorry, there was an error processing your request. Please try again.";
+}
+
+/**
+ * Aborts a run once nothing has arrived for `idleMs`, or after `maxMs` in
+ * total. Streamed tokens count as progress, so a slow model that is still
+ * answering isn't cut off.
+ */
+function runDeadline(idleMs: number, maxMs: number) {
+  const controller = new AbortController();
+  const expire = () => controller.abort(new AdkError("The agent run timed out", TIMEOUT_STATUS));
+  let idle = setTimeout(expire, idleMs);
+  const total = setTimeout(expire, maxMs);
+  return {
+    signal: controller.signal,
+    progress() {
+      clearTimeout(idle);
+      idle = setTimeout(expire, idleMs);
+    },
+    clear() {
+      clearTimeout(idle);
+      clearTimeout(total);
+    },
+  };
 }
 
 /** Create the ADK session (empty state). Throws AdkError on HTTP failure. */
@@ -98,7 +145,11 @@ function toBase64(data: ArrayBuffer): string {
   return btoa(binary);
 }
 
-/** Send one user message (plus optional file) to the agent and parse the reply. */
+/**
+ * Send one user message (plus optional file) to the agent and parse the reply.
+ * If the run fails partway, the messages so far are returned followed by an
+ * error reply; it throws AdkError only when there is nothing to show.
+ */
 export async function runAgent(
   userId: string,
   sessionId: string,
@@ -118,22 +169,85 @@ export async function runAgent(
     });
   }
 
-  const response = await adkFetch(`${adkApiUrl()}/run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      appName: ADK_APP_NAME,
-      userId,
-      sessionId,
-      newMessage: { role: "user", parts },
-      streaming: false,
-    }),
-    timeoutMs: adkRunTimeoutMs(),
-  });
-  if (!response.ok) {
-    throw new AdkError(`ADK /run failed: ${response.status}`, response.status);
+  // /run_sse with token streaming rather than /run: /run sends nothing until
+  // the agent finishes, and Node's fetch gives up after 5 minutes without
+  // response headers, which a CPU-bound Ollama model easily exceeds.
+  const deadline = runDeadline(adkRunTimeoutMs(), adkRunMaxMs());
+  try {
+    const response = await adkFetch(`${adkApiUrl()}/run_sse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        appName: ADK_APP_NAME,
+        userId,
+        sessionId,
+        newMessage: { role: "user", parts },
+        streaming: true,
+      }),
+      signal: deadline.signal,
+    });
+    if (!response.ok || !response.body) {
+      throw new AdkError(`ADK /run_sse failed: ${response.status}`, response.status);
+    }
+    const { events, error } = await readFinalEvents(response.body, deadline);
+    const messages = parseRunResponse(events, redactPasswords);
+    if (!error) {
+      return messages;
+    }
+    const partial = messages.filter((message) => message !== FALLBACK_MESSAGE);
+    if (partial.length === 0) {
+      throw error;
+    }
+    console.error("ADK run failed partway:", error.message);
+    return [...partial, { role: "assistant", text: adkErrorReply(error) }];
+  } finally {
+    deadline.clear();
   }
-  return parseRunResponse(await response.json(), redactPasswords);
+}
+
+/**
+ * Collect the complete events of an ADK SSE stream, skipping partial token
+ * chunks. A failure ends the stream early but keeps the events before it.
+ */
+async function readFinalEvents(
+  body: ReadableStream<Uint8Array>,
+  deadline: ReturnType<typeof runDeadline>,
+): Promise<{ events: AdkEvent[]; error?: AdkError }> {
+  const events: AdkEvent[] = [];
+  const handle = (line: string) => {
+    if (!line.startsWith("data:")) {
+      return;
+    }
+    const event = JSON.parse(line.slice("data:".length)) as AdkEvent & { partial?: boolean; error?: string };
+    if (event.error) {
+      throw new AdkError(`ADK run failed: ${event.error}`);
+    }
+    if (!event.partial) {
+      events.push(event);
+    }
+  };
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    for await (const chunk of body) {
+      deadline.progress();
+      buffer += decoder.decode(chunk, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      lines.forEach(handle);
+    }
+    handle(buffer + decoder.decode());
+  } catch (error) {
+    if (deadline.signal.aborted && deadline.signal.reason instanceof AdkError) {
+      return { events, error: deadline.signal.reason };
+    }
+    return {
+      events,
+      error: error instanceof AdkError ? error : new AdkError(`ADK stream failed: ${(error as Error).message}`),
+    };
+  }
+  return { events };
 }
 
 /** Chat history for a session; empty when it doesn't exist or ADK is down. */

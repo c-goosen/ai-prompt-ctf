@@ -68,6 +68,34 @@ describe("eventToMessage", () => {
   });
 });
 
+describe("ADK error events", () => {
+  it("turns an error-only event into a notice", () => {
+    expect(eventToMessage({ errorCode: "MALFORMED_FUNCTION_CALL", errorMessage: "bad args" })).toEqual({
+      role: "assistant",
+      text: "The model made an invalid tool call. Please try again.",
+    });
+  });
+
+  it("keeps the thoughts of a thought-only turn and explains the missing answer", () => {
+    expect(
+      eventToMessage({
+        errorCode: "MODEL_RETURNED_NO_CONTENT",
+        content: { role: "model", parts: [{ text: "hmm", thought: true }] },
+      }),
+    ).toEqual({
+      role: "assistant",
+      text: "The model finished without an answer. Try rephrasing your message.",
+      thoughts: "hmm",
+    });
+  });
+
+  it("falls back to ADK's message for unknown codes", () => {
+    expect(eventToMessage({ errorCode: "SAFETY", errorMessage: "blocked" })?.text).toBe(
+      "The model failed (SAFETY): blocked",
+    );
+  });
+});
+
 describe("stripLeaderboardMarkers", () => {
   it("removes markers from text", () => {
     expect(stripLeaderboardMarkers('Congrats! <!--LEADERBOARD:{"status": "correct", "level": 3}-->')).toBe(

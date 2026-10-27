@@ -31,8 +31,10 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 8000/tcp
 
+# Pre-create the HF cache so the hf_cache volume is initialised owned by appuser.
 RUN groupadd -g 1500 appuser && \
-    useradd -m -u 1500 -g appuser appuser
+    useradd -m -u 1500 -g appuser appuser && \
+    install -d -o appuser -g appuser /home/appuser/.cache/huggingface
 
 WORKDIR /app
 

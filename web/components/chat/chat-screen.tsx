@@ -66,6 +66,8 @@ export function ChatScreen({
     }
   }
   const turnId = entries[turnStart]?.id;
+  // Until the player says something, including right after /newsession's notice.
+  const showWelcome = !entries.some((entry) => entry.role === "user");
 
   const suggestions = dismissed || pending ? [] : commandSuggestions(input, allCommands(skills));
   const active = suggestions[Math.min(selected, suggestions.length - 1)];
@@ -121,6 +123,8 @@ export function ChatScreen({
         setAlert({ kind: "register" });
       } else if (!response.ok) {
         setAlert({ kind: "error", message: body.message ?? body.error ?? `Request failed (${response.status})` });
+      } else if (!Array.isArray(body.messages) || body.messages.length === 0) {
+        setAlert({ kind: "error", message: "The server sent an empty response. Please try again." });
       } else {
         const replies = toEntries(body.messages as ChatMessage[], true);
         // /newsession: the old conversation belongs to the previous session.
@@ -205,8 +209,8 @@ export function ChatScreen({
   return (
     <div className="flex flex-1 flex-col">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 px-4 pt-6 pb-4 md:px-8" aria-live="polite">
-        {entries.length === 0 && <WelcomeMessages />}
         {entries.slice(0, turnStart).map(renderEntry)}
+        {showWelcome && <WelcomeMessages />}
         {turnId !== undefined ? (
           <div ref={turnRef} className="flex min-h-[calc(100dvh-14rem)] scroll-mt-18 flex-col gap-4 md:scroll-mt-6">
             {entries.slice(turnStart).map(renderEntry)}

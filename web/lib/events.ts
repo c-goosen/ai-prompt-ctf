@@ -12,7 +12,7 @@ export interface ChatMessage {
   thoughts?: string;
 }
 
-/** Loose shape of an ADK event as returned by /run and the sessions API. */
+/** Loose shape of an ADK event as returned by /run_sse and the sessions API. */
 export interface AdkEvent {
   author?: string;
   content?: {
@@ -20,6 +20,9 @@ export interface AdkEvent {
     text?: string;
     parts?: Array<string | AdkPart>;
   } | null;
+  /** Set by ADK when a model call failed, e.g. a thought-only turn. */
+  errorCode?: string;
+  errorMessage?: string;
 }
 
 interface AdkPart {
@@ -68,6 +71,18 @@ function sortKeys(value: unknown): unknown {
   return value;
 }
 
+const ERROR_NOTICES: Record<string, string> = {
+  MODEL_RETURNED_NO_CONTENT: "The model finished without an answer. Try rephrasing your message.",
+  MAX_TOKENS: "The model ran out of tokens before it finished. Try a shorter request.",
+  MALFORMED_FUNCTION_CALL: "The model made an invalid tool call. Please try again.",
+};
+
+/** What to tell the player about an ADK model error. */
+function errorNotice(event: AdkEvent): string {
+  const code = event.errorCode ?? "";
+  return ERROR_NOTICES[code] ?? `The model failed (${code}): ${event.errorMessage ?? "unknown error"}`;
+}
+
 /**
  * Convert one ADK event into a message, or null if it has no text.
  * `redact` replaces level passwords in password_search_func output.
@@ -112,6 +127,10 @@ export function eventToMessage(
     text = String(content.text ?? "").trim();
   }
   let thoughts = thoughtChunks.filter(Boolean).join("\n").trim();
+  if (event.errorCode) {
+    text = text ? `${text}\n\n${errorNotice(event)}` : errorNotice(event);
+    roleHint = "assistant";
+  }
   if (!text && !thoughts) {
     return null;
   }
@@ -131,7 +150,7 @@ export const FALLBACK_MESSAGE: ChatMessage = {
   text: "Sorry, I couldn't process your request. Please try again.",
 };
 
-/** Messages for a /run response; never empty. */
+/** Messages for an agent run's events; never empty. */
 export function parseRunResponse(
   events: unknown,
   redact?: (text: string) => string,

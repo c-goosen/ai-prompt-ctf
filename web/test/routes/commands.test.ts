@@ -3,19 +3,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET as skillsList } from "@/app/api/skills/route";
 import { POST as chat } from "@/app/v1/chat/completions/route";
 import { claimOrVerifyUsername } from "@/lib/identity";
-import { json, mockAdk, request, useTestDb } from "@/test/helpers";
+import { json, mockAdk, request, sse, useTestDb } from "@/test/helpers";
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** ADK double that records the prompt text of each /run. */
+/** ADK double that records the prompt text of each /run_sse. */
 function adk() {
   const prompts: string[] = [];
   mockAdk((url, init) => {
-    if (url.endsWith("/run")) {
+    if (url.endsWith("/run_sse")) {
       prompts.push(JSON.parse(String(init?.body)).newMessage.parts[0].text);
-      return json([{ content: { role: "model", parts: [{ text: "ok" }] } }]);
+      return sse([{ content: { role: "model", parts: [{ text: "ok" }] } }]);
     }
     return json({ id: "s", events: [] });
   });

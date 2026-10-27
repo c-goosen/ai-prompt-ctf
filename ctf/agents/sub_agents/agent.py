@@ -4,6 +4,8 @@ This file exposes a root agent that ADK web can discover in the sub_agents direc
 """
 
 from google.adk.agents import LlmAgent
+from google.adk.agents.context_cache_config import ContextCacheConfig
+from google.adk.apps import App
 
 from ctf.agents.tools import (
     submit_answer_func_tool,
@@ -106,3 +108,13 @@ Do not block the user if they submit the correct answer.
 
 
 root_agent = CTFSubAgentsRootAgent()  # noqa: F841
+
+# Every level transfer swaps the system instruction and tools, so give each
+# agent its own context cache. Gemini caches server-side; through LiteLLM the
+# cache markers are dropped for providers (like Ollama) that don't use them.
+# min_tokens matches Gemini 2.5's minimum cacheable prefix.
+app = App(
+    name="sub_agents",
+    root_agent=root_agent,
+    context_cache_config=ContextCacheConfig(min_tokens=2048),
+)

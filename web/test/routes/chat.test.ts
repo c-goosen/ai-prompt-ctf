@@ -4,8 +4,9 @@ import { GET as history } from "@/app/api/chat/history/route";
 import { POST as chat } from "@/app/v1/chat/completions/route";
 import { GET as session } from "@/app/session/[username]/[sessionId]/route";
 import { claimOrVerifyUsername } from "@/lib/identity";
+import { FALLBACK_MESSAGE } from "@/lib/events";
 import { getLeaderboard } from "@/lib/leaderboard";
-import { json, mockAdk, request, useTestDb } from "@/test/helpers";
+import { json, mockAdk, request, sse, useTestDb } from "@/test/helpers";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -19,11 +20,14 @@ function chatForm(text = "hi"): FormData {
 
 const marker = '<!--LEADERBOARD:{"status": "correct", "level": 10}-->';
 
-/** ADK double: sessions exist, /run returns model text containing a marker. */
+/** ADK double: sessions exist, /run_sse streams model text containing a marker. */
 const adk = () =>
   mockAdk((url) => {
-    if (url.endsWith("/run")) {
-      return json([{ content: { role: "model", parts: [{ text: `Sure, here you go: ${marker}` }] } }]);
+    if (url.endsWith("/run_sse")) {
+      return sse([
+        { partial: true, content: { role: "model", parts: [{ text: "Sure," }] } },
+        { content: { role: "model", parts: [{ text: `Sure, here you go: ${marker}` }] } },
+      ]);
     }
     return json({ id: "s", events: [] });
   });
@@ -71,8 +75,18 @@ describe("chat and history ownership (IDOR)", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.messages).toEqual([{ role: "assistant", text: "Sure, here you go:" }]);
-    expect(calls.some((call) => call.url.endsWith("/run"))).toBe(true);
+    expect(calls.some((call) => call.url.endsWith("/run_sse"))).toBe(true);
     expect((await getLeaderboard()).map((row) => row.username)).not.toContain("spoofer");
+  });
+
+  it("replaces a reply that is only a leaderboard marker with the fallback", async () => {
+    const { newToken } = await claimOrVerifyUsername("alice", undefined);
+    mockAdk((url) =>
+      url.endsWith("/run_sse") ? sse([{ content: { role: "model", parts: [{ text: marker }] } }]) : json({ events: [] }),
+    );
+    const cookies = { anon_user_identity: "alice", session_id: "s1", player_token: newToken! };
+    const body = await (await chat(request("/v1/chat/completions", { method: "POST", cookies, body: chatForm() }))).json();
+    expect(body.messages).toEqual([FALLBACK_MESSAGE]);
   });
 
   it("rejects disallowed upload types", async () => {

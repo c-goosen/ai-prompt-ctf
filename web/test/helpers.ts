@@ -52,3 +52,9 @@ export function request(
 
 export const json = (value: unknown, status = 200) =>
   new Response(JSON.stringify(value), { status, headers: { "content-type": "application/json" } });
+
+/** An ADK /run_sse response streaming the given events. */
+export const sse = (events: unknown[]) =>
+  new Response(events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""), {
+    headers: { "content-type": "text/event-stream" },
+  });

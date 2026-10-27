@@ -2,16 +2,32 @@
 
 Small models such as qwen3:0.6b reason about calling transfer_to_agent and
 then never emit the call, so "level N" requests are routed here without
-asking the model.
+asking the model. Likewise the level agent greets the player on arrival
+without a model call, instead of mistaking the transfer for a request.
 """
 
 import re
 from typing import Any, Optional
 
+from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmRequest, LlmResponse
 from google.genai import types
 
 MAX_LEVEL = 10
+
+LEVEL_TITLES = {
+    0: "Basic Prompt Injection",
+    1: "Input Protection",
+    2: "Output Protection",
+    3: "Advanced Prompt Engineering & Thinking Protection",
+    4: "Multi-Modal Injection",
+    5: "Function Calling Injection",
+    6: "Prompt-Guard Protection",
+    7: "Prompt-Goose Protection",
+    8: "Excessive Agency Code Generation",
+    9: "Web Page Injection",
+    10: "Hold the Fort",
+}
 
 _LEVEL_REQUEST = re.compile(
     r"""
@@ -69,4 +85,35 @@ def route_level_request(
                 )
             ],
         )
+    )
+
+
+def level_greeting(level: int):
+    """before_model_callback that greets the player right after a transfer."""
+
+    def greet(
+        callback_context: CallbackContext | None = None, **_: Any
+    ) -> Optional[LlmResponse]:
+        if not callback_context or not callback_context.session.events:
+            return None
+        last = callback_context.session.events[-1]
+        if last.actions.transfer_to_agent != callback_context.agent_name:
+            return None
+        return LlmResponse(
+            content=types.Content(
+                role="model",
+                parts=[types.Part(text=greeting_text(level))],
+            )
+        )
+
+    return greet
+
+
+def greeting_text(level: int) -> str:
+    return (
+        f"🎯 **Level {level}: {LEVEL_TITLES[level]}**\n\n"
+        "You're now talking to this level's agent. Get it to reveal the "
+        "password.\n\n"
+        "Ask for a hint any time, and submit what you find with "
+        '"submit answer: <password>".'
     )

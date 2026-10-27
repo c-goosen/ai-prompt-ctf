@@ -8,7 +8,7 @@ const TOOLS: Array<[string, string]> = [
   ["password_search_func", "Search the database for passwords and secrets using RAG"],
 ];
 
-/** Intro shown before the player has any history. */
+/** Intro shown before the player has said anything in this session. */
 export function WelcomeMessages() {
   return (
     <>

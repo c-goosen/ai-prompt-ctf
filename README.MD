@@ -1,4 +1,4 @@
-# PwnGPT -  Agentic LLM CTF
+# PwnGPT - Agent Hunger Games
 
 
 ## Intro

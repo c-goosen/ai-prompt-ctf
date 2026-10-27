@@ -98,6 +98,8 @@ services:
     volumes:
       - ./ctf/lancedb:/app/ctf/lancedb
       - ./ctf/agents/lancedb:/app/ctf/agents/lancedb
+      # Keep the ~1.6GB of guard models across container recreates.
+      - hf_cache:/home/appuser/.cache/huggingface
     depends_on:
       postgres:
         condition: service_healthy
@@ -117,7 +119,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 120s
+      # The first start downloads the guard models; start_interval lets a
+      # warm start go healthy within seconds regardless.
+      start_period: 900s
+      start_interval: 5s
 
   web:
     build:
@@ -129,8 +134,9 @@ services:
       <<: *shared-env
       ADK_API_URL: http://adk-api:8000
       ADK_RUN_TIMEOUT_MS: ${ADK_RUN_TIMEOUT_MS:-180000}
+      ADK_RUN_MAX_MS: ${ADK_RUN_MAX_MS:-600000}
       CTF_NAME: ${CTF_NAME:-BSIDES CTF Prompt Injection challenge}
-      CTF_SUBTITLE: ${CTF_SUBTITLE:-Agentic LLM CTF}
+      CTF_SUBTITLE: ${CTF_SUBTITLE:-Agent Hunger Games}
       DISCORD_URL: ${DISCORD_URL:-}
       # Cookies are Secure in production; set COOKIE_SECURE=0 when serving
       # plain http (e.g. http://localhost:8100 without the TLS proxy).
@@ -177,3 +183,4 @@ networks:
 volumes:
   ollama_data:
   postgres_data:
+  hf_cache:
