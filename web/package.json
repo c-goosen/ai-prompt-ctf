@@ -51,7 +51,7 @@
     "@vitejs/plugin-rsc": "0.5.38",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.2",
-    "shadcn": "4.22.1",
+    "shadcn": "4.22.2",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "vite": "8.3.5",
