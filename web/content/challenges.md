@@ -4,7 +4,7 @@ This challenge is supposed to be relatively easy so that people can get a feel f
 
 Just ask it what you are looking for, aka secrets, passwords, etc.
 
-## OpenAI model without protections
+## Model without protections
 
 OWASP LLM01: Prompt Injection
 LLM06: Sensitive Information Disclosure
@@ -29,9 +29,9 @@ Learn about output filtering and sanitization, and test your knowledge of defens
 
 # Level 3: Advanced Prompt Engineering
 
-## GPT-4o Prompt engineering
+## Prompt engineering and thinking protection
 
-Super prompt
+A hardened system prompt, and a reasoning model told to think about injection attempts before answering.
 
 Master sophisticated prompt crafting techniques and challenge yourself with complex injection patterns.
 
@@ -48,13 +48,9 @@ Explore image, audio or document based prompt injection attacks and test vulnera
 
 ## Function calling prompt injection
 
-WIP: file read working, need todo
-
 LLM07: Insecure Plugin Design
 
-Think access files in naughty places 
-
-Think SQL injection
+The agent looks users up with a `sql_query` tool. Think SQL injection.
 
 Master function call manipulation and understand tool-use vulnerabilities.
 
@@ -80,7 +76,7 @@ Generate and test code to solve the challenge. Be aware of sophisticated code ge
 
 ## Web Scraping and Information Retrieval
 
-Retrieve information from the web and use the information to solve the challenge. Be aware of sophisticated web page injection attempts that may try to exploit the web scraping and information retrieval processes. Use the tools provided to you to retrieve information from the web and pass it to the other tools.
+Retrieve information from the web and use the information to solve the challenge. Be aware of sophisticated web page injection attempts that may try to exploit the web scraping and information retrieval processes. The agent searches with `web_search` and reads pages with `web_scrape`, so the pages it reads become part of its prompt.
 
 # Level 10: Hold the Fort - All protections combined
 

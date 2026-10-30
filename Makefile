@@ -13,15 +13,16 @@ COMPOSE_CMD ?= docker compose
 COMPOSE_SERVICES ?= adk-api web
 
 .PHONY: run run-prod prepare-flags
-run: prepare-flags
+run:
 	$(COMPOSE_CMD) --profile default up --build $(COMPOSE_SERVICES)
 
 run-prod:
 	$(COMPOSE_CMD) --profile prod up --build $(COMPOSE_SERVICES)
 
-# Seed the level passwords (LanceDB RAG store + level 5 users.db) locally.
+# Seed the level passwords (LanceDB RAG store + level 5 users.db) locally,
+# from ctf/agents like the container does, so `adk web` there finds them.
 prepare-flags:
-	uv run python ctf/prepare_flags.py
+	cd ctf/agents && PYTHONPATH=$(CURDIR) PREPARE_FLAGS=1 DOWNLOAD_MODELS=0 uv run python -m ctf.agent_startup
 
 docker-image:
 	docker build --rm -t $(DOCKER_REPOSITORY):local web

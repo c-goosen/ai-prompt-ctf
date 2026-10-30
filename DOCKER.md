@@ -74,6 +74,7 @@ docker run -p 8000:8000 \
 
 ### Web app
 - `ADK_API_URL` - URL of the ADK API server (Compose: `http://adk-api:8000`)
+- `ADK_RUN_TIMEOUT_MS` / `ADK_RUN_MAX_MS` - How long an agent run may stream nothing (default 180 s), and its total limit (default 600 s)
 - `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` - Branding and the sidebar Discord link
 - `COOKIE_SECURE` - `1` behind HTTPS to mark identity cookies `Secure`; Compose defaults to `0` for plain http
 - `HOST` / `PORT` - Bind address (`0.0.0.0` / `8100` in the image). vinext uses `HOST`, not `HOSTNAME`.
@@ -84,7 +85,7 @@ docker run -p 8000:8000 \
 - `USE_GEMINI` - Set to `1` to use Gemini instead of Ollama (`prod` profile)
 - `GEMINI_MODEL_NAME` - Gemini model when `USE_GEMINI=1`
 - `OPENAI_API_KEY` - OpenAI API key (use with `OPENSOURCE_LLM_MODEL=openai/...` on `prod`)
-- `PREPARE_FLAGS` - seed the level flags into LanceDB and level 5's users.db on start (`ctf/agent_startup.py`); compose defaults it to `1`, set `0` to skip
+- `PREPARE_FLAGS` - Seed the level passwords into LanceDB and level 5's users.db when the container starts. Read by `ctf/agent_startup.py`, which runs before `adk web`. Off when unset, but Compose sets it to `1`; set `0` to skip. Outside Docker, run `make prepare-flags`
 - `DOWNLOAD_MODELS` - `0` to skip pre-downloading the Hugging Face guard models on start
 
 ### Ollama (`default` profile only)
@@ -122,4 +123,5 @@ docker run -p 8000:8000 \
 - Ensure the `ctf/agents` directory is copied into the image and `sub_agents/agent.py` exists
 
 ### LanceDB errors
-- Ensure volumes are mounted, check file permissions, and seed flags with `PREPARE_FLAGS=1`
+- Ensure volumes are mounted, check file permissions, and seed flags with `PREPARE_FLAGS=1` (or `make prepare-flags` outside Docker)
+- `No module named 'pandas'` from a password search means an old image: rebuild it (`docker compose up --build adk-api`)

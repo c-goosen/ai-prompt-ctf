@@ -25,6 +25,7 @@ All notable changes to PwnGPT. Dates are when the work landed on the `nextjs-mig
 - **Bookmarkable sessions.** `/ctf/<session-id>` opens a specific conversation.
 - **New slash commands:**
   - `/register <username> [session-id]` registers from the chat, under the register page's rate limit.
+  - `/start` goes to level 0, and `/continue` goes to your lowest unsolved level.
   - `/whoami` shows your username, session ID, completed levels, rank and next level.
   - `/challenges [level]` lists every level or shows one level's briefing.
   - `/faq` lists the FAQ topics.
@@ -34,7 +35,8 @@ All notable changes to PwnGPT. Dates are when the work landed on the `nextjs-mig
   guards run, so a guard can't block you from leaving.
 - **`web_search` tool for level 9.** It replaces ADK's `google_search` and returns titles, URLs and snippets that
   the agent can pass to `web_scrape`.
-- `make prepare-flags` seeds the level passwords locally. `make run` runs it first.
+- `make prepare-flags` seeds the level passwords for a local agent. It runs from `ctf/agents` like the container
+  does, so the agent finds the LanceDB table and `users.db`. Docker seeds on start instead.
 
 ### Changed
 - `/challenges`, `/faq` and `/discord` work before you register.
@@ -43,6 +45,10 @@ All notable changes to PwnGPT. Dates are when the work landed on the `nextjs-mig
 - The `google-adk[eval]` extra moved to the dev dependency group.
 - Docker Compose now seeds the passwords on every start (`PREPARE_FLAGS=1`) and keeps LanceDB in a named
   `lancedb_data` volume instead of bind mounts.
+- The FAQ (`/faq`) has new Commands, Scoring and ranks, and Troubleshooting sections. It now uses the right tool
+  names and gives level-specific techniques for levels 5, 8 and 9. The challenge briefings no longer mention
+  OpenAI or GPT-4o. The developer docs (`ADK_INTEGRATION.md`, `web/README.md`, `ctf/agents/*.md`, `DOCKER.md`)
+  describe `/run_sse` streaming, run tracking, model-free routing and the real agent layout.
 - Challenge difficulty is defined once in `web/lib/challenges.ts` and shared by the challenges page and the
   quest map.
 

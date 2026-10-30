@@ -3,7 +3,7 @@
 
 ## Intro
 
-Base on a combination of Vector Searching and OpenAI LLMs. Built as part of a company and BSIDES Cape Town event: 
+Built on vector search (RAG) and LLM agents: qwen3 on Ollama by default, or Gemini or OpenAI. Made for a company and the BSides Cape Town event: 
 https://twitter.com/crypticg00se/status/1731578440166293643 / https://bsidescapetown.co.za.
 
 This is v2 and has been run at 3 events and counting.
@@ -35,6 +35,7 @@ Please use and add challenges
   |---|---|
   | `/register <username> [session-id]` | Register (or switch user) from the chat |
   | `/level <0-10>` | Switch to a level. Typing "level N" in the chat also works |
+  | `/start`, `/continue` | Go to level 0, or to your lowest unsolved level |
   | `/hint` | Ask the current level for a hint |
   | `/submit <answer>` | Submit a password |
   | `/whoami` | Show your username, session ID, rank, XP and next level |
@@ -150,9 +151,9 @@ PASSWORD_TEN="Woohoo"
 ```
 Seed them into LanceDB (and the level 5 SQL table) with:
 ```bash
-make prepare-flags   # = uv run python ctf/prepare_flags.py; `make run` does this first
+make prepare-flags   # seeds ctf/lancedb and ctf/agents/users.db, where `adk web` in ctf/agents reads them
 ```
-In Docker, compose sets `PREPARE_FLAGS=1`, so the agent re-seeds them on every start.
+In Docker, Compose sets `PREPARE_FLAGS=1`, so the agent re-seeds them on every start.
 
 ## Run locally
 1. Agent: `cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000` (needs Ollama with `qwen3:0.6b`,
@@ -259,6 +260,7 @@ Set in `docker-compose.yml` or override when starting:
 | `PASSWORD_ZERO` … `PASSWORD_TEN` | adk-api, web | `PASS_ZERO` … | Level passwords |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres, adk-api, web | `ctf` | Leaderboard database (`POSTGRES_DB_URI` is built from these) |
 | `ADK_API_URL` | web | `http://adk-api:8000` | ADK API base URL (use service name inside Compose) |
+| `ADK_RUN_TIMEOUT_MS` / `ADK_RUN_MAX_MS` | web | `180000` / `600000` | How long an agent run may stream nothing, and its total limit |
 | `CTF_NAME` / `CTF_SUBTITLE` / `DISCORD_URL` | web | see compose | Branding and the sidebar Discord link |
 | `COOKIE_SECURE` | web | `0` | Set to `1` when served over HTTPS (marks identity cookies `Secure`) |
 

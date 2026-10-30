@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import challengesMarkdown from "@/content/challenges.generated";
-import { parseChallenges } from "@/lib/challenges";
+import { DIFFICULTY, difficulty, parseChallenges } from "@/lib/challenges";
 import { FINAL_LEVEL } from "@/lib/config";
 
 describe("parseChallenges", () => {
@@ -21,5 +21,13 @@ describe("parseChallenges", () => {
   it("parses every level in content/challenges.md", () => {
     const levels = parseChallenges(challengesMarkdown).map((challenge) => challenge.level);
     expect(levels).toEqual(Array.from({ length: FINAL_LEVEL + 1 }, (_, index) => index));
+  });
+});
+
+describe("difficulty", () => {
+  it("spreads levels evenly from Warm-up to Insane", () => {
+    const tiers = Array.from({ length: FINAL_LEVEL + 1 }, (_, level) => difficulty(level, FINAL_LEVEL));
+    expect(tiers).toEqual([1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]);
+    expect(DIFFICULTY[tiers[FINAL_LEVEL] - 1]).toBe("Insane");
   });
 });
