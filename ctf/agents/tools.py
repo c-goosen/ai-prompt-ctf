@@ -37,6 +37,30 @@ _default_db_path = (Path(__file__).parent.parent / "lancedb").resolve()
 
 db_path = os.getenv("LANCE_DB_PATH", str(_default_db_path))
 
+# ddgs backends tried in order; its default picks one at random, and some
+# (Startpage, Brave, Mojeek) time out or return nothing.
+SEARCH_BACKENDS = ("duckduckgo", "yahoo", "google")
+
+
+def _search_web(query: str, max_results: int = 5) -> list[dict]:
+    """ddgs text results from the first backend that returns any."""
+    from ddgs import DDGS
+
+    last_error: Exception | None = None
+    for backend in SEARCH_BACKENDS:
+        try:
+            results = DDGS(timeout=10).text(
+                query, max_results=max_results, backend=backend
+            )
+        except Exception as e:  # ddgs raises when a backend finds nothing
+            last_error = e
+            continue
+        if results:
+            return results
+    if last_error and "No results" not in str(last_error):
+        raise last_error
+    return []
+
 
 async def sql_query(
     user_id: str,
@@ -217,7 +241,7 @@ async def hints_func(hint: str, level: int) -> str:
         9: """
 **Level 9 Specific Hints:**
 - This level involves web scraping and research
-- You have access to `web_scrape` and `google_search` tools
+- You have access to `web_scrape` and `web_search` tools
 - Think about web page injection attacks
 - URLs and web content can contain hidden information
 - Use the available web tools to retrieve and analyze web content
@@ -395,7 +419,7 @@ async def password_search_func(
             table.search(query_vector)
             .where(f"level = {level}")
             .limit(5)
-            .to_pandas()
+            .to_list()
         )
     except Exception as e:
         logger.error(f"Error searching table: {e}")
@@ -409,16 +433,8 @@ async def password_search_func(
         }
         return json.dumps(error_response, indent=2)
 
-    if results.empty:
-        doc_list = []
-        distance_list = []
-    else:
-        doc_list = results["text"].tolist() if "text" in results.columns else []
-        distance_list = (
-            results["_distance"].tolist()
-            if "_distance" in results.columns
-            else []
-        )
+    doc_list = [row["text"] for row in results if "text" in row]
+    distance_list = [row["_distance"] for row in results if "_distance" in row]
 
     extracted_passwords = []
     password_patterns = [
@@ -729,8 +745,6 @@ async def help_search(question: str) -> str:
         snippets from relevant web pages.
     """
     try:
-        from duckduckgo_search import DDGS
-
         # Build search query with context about CTF/prompt injection/ADK/RAG
         search_query = question
         if not any(
@@ -750,9 +764,7 @@ async def help_search(question: str) -> str:
                 f"{question} CTF prompt injection agents Google ADK RAG"
             )
 
-        # Use DuckDuckGo Search API
-        with DDGS() as ddgs:
-            results = list(ddgs.text(search_query, max_results=5))
+        results = _search_web(search_query)
 
         if not results:
             result_text = (
@@ -792,10 +804,10 @@ async def help_search(question: str) -> str:
         return result_text
 
     except ImportError:
-        error_msg = "duckduckgo-search package is not available"
+        error_msg = "ddgs package is not available"
         logger.error(error_msg)
         result_text = (
-            f"{error_msg}. Please install the duckduckgo-search package "
+            f"{error_msg}. Please install the ddgs package "
             "to use this feature."
         )
         return result_text
@@ -810,6 +822,38 @@ async def help_search(question: str) -> str:
         return result_text
 
 
+async def web_search(query: str) -> str:
+    """
+    Search the web and return the top results with their URLs, so pages can
+    be read with web_scrape.
+
+    Args:
+        query: What to search the web for.
+
+    Returns:
+        A JSON list of results, each with a title, url and snippet.
+    """
+    try:
+        results = _search_web(query)
+    except Exception as e:
+        logger.error(f"Error searching the web: {e}")
+        return f"Error searching the web: {e}. Try a different query."
+
+    if not results:
+        return f'No search results found for: "{query}".'
+    return json.dumps(
+        [
+            {
+                "title": result.get("title", ""),
+                "url": result.get("href", ""),
+                "snippet": result.get("body", "").strip()[:300],
+            }
+            for result in results
+        ],
+        indent=2,
+    )
+
+
 # Create ADK FunctionTool instances
 submit_answer_func_tool = FunctionTool(submit_answer_func)
 hints_func_tool = FunctionTool(hints_func)
@@ -819,3 +863,4 @@ leaderboard_stats_tool = FunctionTool(get_leaderboard_stats)
 web_scrape_tool = FunctionTool(web_scrape)
 execute_python_code_tool = FunctionTool(execute_python_code)
 help_search_tool = FunctionTool(help_search)
+web_search_tool = FunctionTool(web_search)

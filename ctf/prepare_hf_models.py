@@ -1,13 +1,9 @@
-import os
-
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from ctf.llm_guard.llm_guard import (
     PromptGuardMeta,
     PromptGuardGoose,
     PromptGuardGooseModernBERT,
 )
-
-os.environ["CURL_CA_BUNDLE"] = ""
 
 
 def download_models():

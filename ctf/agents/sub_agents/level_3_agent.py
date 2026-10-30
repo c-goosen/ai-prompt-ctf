@@ -8,8 +8,7 @@ from ctf.agents.sub_agents.system_prompt import (
     get_system_prompt_one,
     get_thinking_prompt_for_injection_prevention,
 )
-from google.adk.planners import BuiltInPlanner
-from google.genai import types
+from ctf.agents.model import thinking_planner
 
 
 class Level3Agent(BaseCTFAgent):
@@ -33,12 +32,7 @@ Examples of what to block:
 """
         )
 
-        planner = BuiltInPlanner(
-            thinking_config=types.ThinkingConfig(
-                include_thoughts=True,
-                thinking_budget=2048,
-            )
-        )
+        planner = thinking_planner(thinking_budget=2048)
 
         super().__init__(
             level=3,

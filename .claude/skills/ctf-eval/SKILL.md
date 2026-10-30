@@ -15,7 +15,7 @@ Use `ctf/agents/eval/eval_level0_to_1_block.evalset.json` as the template:
 - `eval_set_id` / `name`: match the filename stem.
 - `eval_cases[]`: each has a unique `eval_id`, a `conversation` of turns (`user_content`, expected `final_response`, `intermediate_data` — `{}` in the template, or ADK's `tool_uses` list when tool calls are expected), and `session_input` (`app_name: "sub_agents"`, `user_id`).
 - Drop `thought_signature` and timestamps when hand-writing cases; they're recorder output.
-- For guardrail levels, the expected response is the block/refusal, and the expected tool trajectory must not include `submit_answer`.
+- For guardrail levels, the expected response is the block/refusal, and the expected tool trajectory must not include `submit_answer_func`.
 
 Easiest path: record a session in `adk web` (see the `run-ctf` skill), save it as an eval set from the Eval tab, then trim it.
 

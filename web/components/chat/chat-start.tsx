@@ -1,0 +1,181 @@
+"use client";
+
+import { ChevronRight, ChevronsUp } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { Footer } from "@/components/footer";
+import { QuestMap } from "@/components/game/quest-map";
+import { cn } from "@/lib/utils";
+
+export interface LevelSummary {
+  level: number;
+  title: string;
+}
+
+export interface RecentSolve {
+  username: string;
+  level: number;
+}
+
+/** The "Your run" card: the tower map, with a register prompt or level picking. */
+export function RunMap({
+  levels,
+  progress,
+  onPrefill,
+  onSend,
+}: {
+  levels: LevelSummary[];
+  progress: number[] | null;
+  onPrefill: (text: string) => void;
+  onSend: (text: string) => void;
+}) {
+  return (
+    <section
+      aria-labelledby="quest-map"
+      className="flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-neon-teal/20 bg-card/60 p-4"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="quest-map" className="text-sm font-semibold tracking-wider text-white uppercase">
+          Your run
+        </h2>
+        {progress === null ? (
+          <button
+            type="button"
+            onClick={() => onPrefill("/register ")}
+            className="rounded-md text-sm/5 font-medium text-neon-teal underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Register to start your run
+          </button>
+        ) : (
+          <span className="text-sm/5 text-muted-foreground">Pick a tower to attack it</span>
+        )}
+      </div>
+      <QuestMap levels={levels} progress={progress} onSelect={(level) => onSend(`/level ${level}`)} />
+      <Link
+        href="/challenges"
+        className="flex h-9 items-center gap-2 self-start rounded-md border border-neon-teal/25 px-3 py-2 text-sm/5 font-medium text-white outline-none transition-colors hover:border-neon-teal hover:bg-neon-teal/10 focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        View all challenges
+        <ChevronRight className="size-4" aria-hidden="true" />
+      </Link>
+    </section>
+  );
+}
+
+/** Shortcuts that fill in the message box. */
+const QUICK_ACTIONS: Array<{ label: string; text: string }> = [
+  { label: "Start", text: "/start" },
+  { label: "Continue", text: "/continue" },
+  { label: "Hint", text: "/hint" },
+  { label: "Submit", text: "/submit " },
+  { label: "Who am I", text: "/whoami" },
+  { label: "Help", text: "/help" },
+];
+
+
+/**
+ * The chat before the player has said anything: the tower map, a heading,
+ * shortcuts, the message box and recent solves. Layout from the Figma
+ * "Nav 2.1 Collapsed" frame, in the site's neon theme.
+ */
+export function ChatStart({
+  composer,
+  notice,
+  levels,
+  progress,
+  recentSolves,
+  onPrefill,
+  onSend,
+}: {
+  composer: ReactNode;
+  /** Shown under the message box (registration prompt, errors). */
+  notice: ReactNode;
+  levels: LevelSummary[];
+  /** Cleared levels for the quest map; null when not registered. */
+  progress: number[] | null;
+  recentSolves: RecentSolve[];
+  onPrefill: (text: string) => void;
+  onSend: (text: string) => void;
+}) {
+  const titles = new Map(levels.map((level) => [level.level, level.title]));
+
+  return (
+    <>
+      <div className="flex flex-1 flex-col items-center gap-12 px-4 pt-2 pb-10 md:gap-16">
+        <RunMap levels={levels} progress={progress} onPrefill={onPrefill} onSend={onSend} />
+
+        <div className="flex flex-col items-center gap-8">
+          <h1 className="text-center text-3xl/10 font-semibold text-white md:text-4xl/10">
+            Which agent will you pwn today?
+          </h1>
+          <div role="group" aria-label="Shortcuts" className="flex flex-wrap justify-center rounded-[99px] border border-neon-teal/20 bg-card/60 p-[3px]">
+            {QUICK_ACTIONS.map((action, index) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={() => onPrefill(action.text)}
+                className={cn(
+                  "h-8 rounded-full px-3 text-sm/5 font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                  index === 0
+                    ? "bg-primary text-primary-foreground shadow-[0_0_20px_rgb(92_36_255/35%)]"
+                    : "text-white hover:bg-neon-pink/15 hover:text-neon-pink",
+                )}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex w-full max-w-[650px] flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            {composer}
+            <p className="text-sm/5 text-muted-foreground">
+              Every level&apos;s agent guards a password. Trick it into leaking the password, then send{" "}
+              <code className="font-mono text-neon-teal">/submit &lt;password&gt;</code>. Responses are AI-generated by deliberately
+              vulnerable agents, so don&apos;t trust what they say.
+            </p>
+            {notice}
+          </div>
+
+        </div>
+
+      </div>
+
+      <section
+        aria-labelledby="recent-solves"
+        className="mx-auto w-full max-w-[1024px] rounded-t-xl border border-b-0 border-neon-teal/20 bg-card/80 px-8 py-5 text-card-foreground shadow-[0_0_40px_rgb(92_36_255/25%)]"
+      >
+        <div className="flex items-center gap-8">
+          <h2 id="recent-solves" className="flex-1 text-xl/7 font-semibold text-white">
+            Recent solves
+          </h2>
+          <span className="flex items-center gap-2.5 text-sm/5 text-muted-foreground">
+            Scroll to explore
+            <ChevronsUp className="size-3" aria-hidden="true" />
+          </span>
+        </div>
+        {recentSolves.length > 0 ? (
+          <ul className="mt-4 divide-y divide-neon-teal/15">
+            {recentSolves.map((solve) => (
+              <li key={`${solve.username}-${solve.level}`} className="flex items-center justify-between gap-4 py-3 text-sm/5">
+                <span className="font-medium text-white">{solve.username}</span>
+                <span className="text-muted-foreground">
+                  Level {solve.level}
+                  {titles.has(solve.level) ? `: ${titles.get(solve.level)}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-sm/5 text-muted-foreground">No levels solved yet. Be the first.</p>
+        )}
+        <Link href="/leaderboard" className="mt-2 inline-block text-sm/5 font-medium text-neon-teal underline-offset-2 hover:underline">
+          Full leaderboard
+        </Link>
+        <Footer className="mt-4" />
+      </section>
+    </>
+  );
+}

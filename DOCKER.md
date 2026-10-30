@@ -1,12 +1,10 @@
 # Docker Setup for AI Prompt CTF
 
-This directory contains Dockerfiles for running the AI Prompt CTF application in containers.
-
 ## Files
 
-- `Dockerfile.frontend` - Dockerfile for the FastAPI frontend server (port 8100)
-- `Dockerfile.adk` - Dockerfile for the Google ADK API server (port 8000)
-- `docker-compose.yml` - Docker Compose configuration to run both services together
+- `web/Dockerfile` - The web app (Next.js 16.4 on vinext) as a standalone Node server (port 8100). Build context: `web/`.
+- `Dockerfile.adk` - The Google ADK API server with the CTF agents (port 8000). Build context: repository root.
+- `docker-compose.yml` - Runs Ollama, Postgres, the agent, the web app and (optionally) Traefik together.
 
 ## Quick Start
 
@@ -35,65 +33,60 @@ Compose uses **profiles**:
    ```
 
 2. **Access the services:**
-   - Frontend: http://localhost:8100
+   - Web app: http://localhost:8100 (health: `/health`)
    - ADK API: http://localhost:8000
-   - Ollama: internal only (`http://ollama:11434` on the Compose network; not published to the host)
+   - Ollama and Postgres: internal only, on the Compose network
 
-3. **Run in detached mode:**
-   ```bash
-   docker-compose up -d
-   ```
+3. **Run in detached mode:** `docker compose up -d`
+4. **View logs:** `docker compose logs -f web adk-api`
+5. **Stop services:** `docker compose down` (add `-v` to drop the Postgres and Ollama volumes)
 
-4. **View logs:**
-   ```bash
-   docker-compose logs -f
-   ```
+Start-up order: `postgres` (healthy) → `adk-api` (downloads guard models, then healthy) → `web`.
 
-5. **Stop services:**
-   ```bash
-   docker-compose down
-   ```
+### Using Individual Images
 
-### Using Individual Dockerfiles
-
-#### Build Frontend Image
+#### Web app
 ```bash
-docker build -f Dockerfile.frontend -t ai-prompt-ctf-frontend .
-```
-
-#### Run Frontend Container
-```bash
+docker build -t ai-prompt-ctf-web web
 docker run -p 8100:8100 \
   -e ADK_API_URL=http://host.docker.internal:8000 \
-  ai-prompt-ctf-frontend
+  -e POSTGRES_DB_URI=postgresql://ctf:ctf@host.docker.internal:5432/ctf \
+  -e COOKIE_SECURE=0 \
+  ai-prompt-ctf-web
 ```
 
-#### Build ADK API Image
+#### ADK API
 ```bash
 docker build -f Dockerfile.adk -t ai-prompt-ctf-adk .
-```
-
-#### Run ADK API Container
-```bash
 docker run -p 8000:8000 \
-  -v $(pwd)/ctf/lancedb:/app/ctf/lancedb \
-  -v $(pwd)/ctf/agents/lancedb:/app/ctf/agents/lancedb \
+  -e POSTGRES_DB_URI=postgresql://ctf:ctf@host.docker.internal:5432/ctf \
+  -e PREPARE_FLAGS=1 \
+  -v ctf-lancedb:/app/ctf/lancedb \
   ai-prompt-ctf-adk
 ```
 
 ## Environment Variables
 
-### Frontend
-- `ADK_API_URL` - URL of the ADK API server (default: `http://127.0.0.1:8000`)
-- `OPENAI_API_KEY` - OpenAI API key (if using OpenAI models)
-- `FASTAPI_ENV` - FastAPI environment (default: `production`)
+### Shared by `adk-api` and `web` (`x-shared-env` in docker-compose.yml)
+- `POSTGRES_DB_URI` - Leaderboard database, built from `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` (default `ctf`).
+  Both services must use the same database: the agent records completions, the web app shows them.
+- `PASSWORD_ZERO` … `PASSWORD_TEN` - Level passwords. The web app needs them to redact RAG tool output.
+
+### Web app
+- `ADK_API_URL` - URL of the ADK API server (Compose: `http://adk-api:8000`)
+- `ADK_RUN_TIMEOUT_MS` / `ADK_RUN_MAX_MS` - How long an agent run may stream nothing (default 180 s), and its total limit (default 600 s)
+- `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` - Branding and the sidebar Discord link
+- `COOKIE_SECURE` - `1` behind HTTPS to mark identity cookies `Secure`; Compose defaults to `0` for plain http
+- `HOST` / `PORT` - Bind address (`0.0.0.0` / `8100` in the image). vinext uses `HOST`, not `HOSTNAME`.
 
 ### ADK API
-- `OLLAMA_API_BASE` - Ollama server URL for LiteLLM (`default` profile: `http://ollama:11434`; `prod`: set to your remote host)
+- `OLLAMA_API_BASE` - Ollama server URL for LiteLLM (`default` profile: `http://ollama:11434`; `prod`: your remote host)
 - `OPENSOURCE_LLM_MODEL` - Ollama model tag or LiteLLM model id (default: `qwen3:0.6b`)
 - `USE_GEMINI` - Set to `1` to use Gemini instead of Ollama (`prod` profile)
 - `GEMINI_MODEL_NAME` - Gemini model when `USE_GEMINI=1`
 - `OPENAI_API_KEY` - OpenAI API key (use with `OPENSOURCE_LLM_MODEL=openai/...` on `prod`)
+- `PREPARE_FLAGS` - Seed the level passwords into LanceDB and level 5's users.db when the container starts. Read by `ctf/agent_startup.py`, which runs before `adk web`. Off when unset, but Compose sets it to `1`; set `0` to skip. Outside Docker, run `make prepare-flags`
+- `DOWNLOAD_MODELS` - `0` to skip pre-downloading the Hugging Face guard models on start
 
 ### Ollama (`default` profile only)
 - `OLLAMA_MODEL` - Model to pull on startup (default: `qwen3:0.6b`, matches `OPENSOURCE_LLM_MODEL`)
@@ -103,38 +96,32 @@ docker run -p 8000:8000 \
 
 ## Volumes
 
-The docker-compose.yml mounts the following volumes:
-- `./ctf/lancedb` - LanceDB database for vector storage
-- `./ctf/agents/lancedb` - LanceDB database for agents
-- `./ctf/frontend/static` - Static files (CSS, images, etc.)
-- `./ctf/frontend/templates` - HTML templates
+- `lancedb_data` - LanceDB vector store with the level passwords (re-seeded on start)
+- `hf_cache` - Hugging Face guard and embedding models, so they download once
+- `postgres_data` - Leaderboard and player tokens
 - `ollama_data` - Persisted Ollama models between restarts
 
 ## Requirements
 
-- Docker 17.05 or higher (for multi-stage builds)
-- Docker Compose (for docker-compose.yml)
-
-## Notes
-
-- The frontend connects to the ADK API using the `ADK_API_URL` environment variable
-- In Docker Compose, services communicate using service names (e.g., `http://adk-api:8000`)
-- For local development, you may need to set `ADK_API_URL=http://host.docker.internal:8000` if running frontend in Docker but ADK API locally
-- With the `default` profile, Ollama runs in Docker; with `prod`, point `OLLAMA_API_BASE` at a reachable Ollama host or set `USE_GEMINI=1`
+- Docker 17.05 or higher (multi-stage builds)
+- Docker Compose v2 (`docker compose`)
 
 ## Troubleshooting
 
-### Frontend can't connect to ADK API
-- Check that `ADK_API_URL` is set correctly
-- In Docker Compose, use the service name: `http://adk-api:8000`
-- For standalone containers, use `http://host.docker.internal:8000` to access host services
+### Web app can't connect to the ADK API
+- Check `ADK_API_URL`; inside Compose use the service name: `http://adk-api:8000`
+- For standalone containers, use `http://host.docker.internal:8000` to reach services on the host
+- `curl localhost:8100/health` reports the ADK status and the error it saw
+
+### Leaderboard doesn't show solved levels
+- The agent and the web app must use the same `POSTGRES_DB_URI`
+
+### Registration fails with "temporarily unavailable"
+- The web app can't reach Postgres; check `docker compose logs postgres web`
 
 ### ADK API can't find agents
-- Ensure the `ctf/agents` directory is properly copied into the container
-- Check that `sub_agents/agent.py` exists in `ctf/agents/`
-- Verify that `sub_agents/` directory exists with level agents
+- Ensure the `ctf/agents` directory is copied into the image and `sub_agents/agent.py` exists
 
 ### LanceDB errors
-- Ensure volumes are properly mounted
-- Check file permissions on mounted directories
-
+- Ensure volumes are mounted, check file permissions, and seed flags with `PREPARE_FLAGS=1` (or `make prepare-flags` outside Docker)
+- `No module named 'pandas'` from a password search means an old image: rebuild it (`docker compose up --build adk-api`)

@@ -1,84 +1,40 @@
-# Running CTF Agents with ADK Web
+# Running the agents in ADK web
 
-This directory contains CTF agents that are compatible with the Google ADK web interface.
+`adk web` serves the ADK API that the web app uses, plus ADK's dev UI. The dev UI lets you talk to the agents
+directly and inspect every event, tool call and callback. See [README.md](README.md) for how the agents work.
 
-## Directory Structure
+## Start it
 
-The agents are organized according to ADK web requirements:
+From the repository root:
 
-```
-agents/
-├── sub_agents/              # ADK app "sub_agents" (production entry point)
-│   ├── agent.py             # CTFSubAgentsRootAgent coordinator
-│   ├── __init__.py
-│   ├── base_agent.py        # Base class for all level agents
-│   ├── protection_utils.py  # Protection utilities
-│   ├── level_0_agent.py     # Level 0 challenge agent
-│   ├── level_1_agent.py     # Level 1 challenge agent
-│   ├── ...
-│   └── level_10_agent.py    # Level 10 challenge agent
-└── README.md                # Documentation
+```bash
+uv sync
+make prepare-flags      # seed the level passwords (LanceDB + level 5's users.db)
+cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000
 ```
 
-## Quick Start
+Open http://127.0.0.1:8000 and pick the `sub_agents` app. API docs are at http://127.0.0.1:8000/docs.
 
-1. **Navigate to the agents directory:**
-   ```bash
-   cd /Users/goose/bsides/ai-prompt-ctf/ctf/agents
-   ```
+Requirements:
+- Ollama at `OLLAMA_API_BASE` (default `http://127.0.0.1:11434`) with the model pulled (`ollama pull qwen3:0.6b`),
+  or `USE_GEMINI=1` and a Gemini API key.
+- The same `PASSWORD_*` and `POSTGRES_DB_URI` settings as the web app, if you also run it. Without
+  `POSTGRES_DB_URI`, both use `ctf/leaderboard.db`.
 
-2. **Start the ADK web interface:**
-   ```bash
-   adk web
-   ```
+## Things to try
 
-3. **Access the web interface:**
-   - Open your browser to the URL shown in the terminal (typically `http://localhost:8000`)
-   - You should see the CTF Coordinator agent available
+| Message | What happens |
+|---|---|
+| "Hi" | The coordinator's welcome, with the level list |
+| "level 3" or "I want to try level 3" | Transfer to `Level3Agent` without a model call, then its greeting |
+| "hint" | `hints_func` for the current level |
+| "submit answer: PASS_ZERO" | `submit_answer_func`. If correct, the solve is recorded and the player moves to the next level |
 
-## Agent Structure
-
-The system implements the **Coordinator/Dispatcher Pattern** from [ADK Multi-Agent Systems](https://google.github.io/adk-docs/agents/multi-agents/):
-
-- **CTFSubAgentsRootAgent** (in `sub_agents/agent.py`): Main coordinator that welcomes users and delegates to level agents
-- **Level0Agent - Level10Agent** (in `sub_agents/`): Individual challenge agents with progressive security measures
-- **Agent Hierarchy**: All level agents are sub-agents of the root coordinator
-- **LLM-Driven Delegation**: Coordinator uses `transfer_to_agent` to route users to appropriate levels
-
-## Features
-
-✅ **ADK Web Compatible**: Proper directory structure with `sub_agents/agent.py` as root agent  
-✅ **Multi-Agent Architecture**: Proper agent hierarchy with sub-agents  
-✅ **LLM-Driven Delegation**: Automatic routing to level agents  
-✅ **Session State Management**: Persistent memory across interactions  
-✅ **Comprehensive Protection**: Multi-layer guardrails and callbacks  
-✅ **Progressive Security**: Level-specific protection mechanisms  
-
-## Usage
-
-1. **Start with the Coordinator**: The coordinator will welcome you and explain the CTF
-2. **Request a Level**: Ask to attempt a specific level (0-10)
-3. **Automatic Delegation**: The coordinator will transfer you to the appropriate level agent
-4. **Challenge Interaction**: Work with the level agent to solve the challenge
-
-## Example Interactions
-
-- "Hello, I want to start the CTF challenge"
-- "I want to try level 0"
-- "Can I attempt level 3?"
-- "What levels are available?"
-
-## Requirements
-
-- Ollama running on `http://localhost:11434`
-- `qwen3:0.6b` model available in Ollama
-- Google ADK installed (`pip install google-adk`)
-- LanceDB with CTF data populated
+These are the same messages the web app's `/level`, `/hint` and `/submit` commands send.
 
 ## Troubleshooting
 
-If you get "No agents found" error:
-1. Make sure you're in the `/ctf/agents` directory
-2. Verify `sub_agents/agent.py` exists
-3. Verify `sub_agents/` directory exists with level agents
-4. Check that Ollama is running and the model is available
+- **No agents found**: run from `ctf/agents`, so `sub_agents/agent.py` is found.
+- **Password search fails**: the LanceDB table hasn't been seeded. Run `make prepare-flags`.
+- **The first guarded message is slow**: levels 6, 7 and 10 load their Hugging Face classifier models on first use.
+- **Model errors**: check that Ollama is running and has the model (`ollama list`).

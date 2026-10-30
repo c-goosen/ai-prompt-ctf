@@ -4,6 +4,22 @@
 #
 # Enable default locally without flags: copy .env.example to .env (sets COMPOSE_PROFILES=default).
 
+# Settings both the Python agent and the web app need: the shared
+# leaderboard database and the level passwords (the web app redacts them).
+x-shared-env: &shared-env
+  POSTGRES_DB_URI: postgresql://${POSTGRES_USER:-ctf}:${POSTGRES_PASSWORD:-ctf}@postgres:5432/${POSTGRES_DB:-ctf}
+  PASSWORD_ZERO: ${PASSWORD_ZERO:-PASS_ZERO}
+  PASSWORD_ONE: ${PASSWORD_ONE:-PASS_ONE}
+  PASSWORD_TWO: ${PASSWORD_TWO:-PASS_TWO}
+  PASSWORD_THREE: ${PASSWORD_THREE:-PASS_THREE}
+  PASSWORD_FOUR: ${PASSWORD_FOUR:-PASS_FOUR}
+  PASSWORD_FIVE: ${PASSWORD_FIVE:-PASS_FIVE}
+  PASSWORD_SIX: ${PASSWORD_SIX:-PASS_SIX}
+  PASSWORD_SEVEN: ${PASSWORD_SEVEN:-PASS_SEVEN}
+  PASSWORD_EIGHT: ${PASSWORD_EIGHT:-PASS_EIGHT}
+  PASSWORD_NINE: ${PASSWORD_NINE:-PASS_NINE}
+  PASSWORD_TEN: ${PASSWORD_TEN:-PASS_TEN}
+
 services:
   ollama:
     profiles: ["default"]
@@ -42,6 +58,24 @@ services:
       - ctf-network
     restart: "no"
 
+  postgres:
+    image: postgres:17-alpine
+    container_name: ai-prompt-ctf-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ctf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ctf}
+      POSTGRES_DB: ${POSTGRES_DB:-ctf}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ctf-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   adk-api:
     build:
       context: .
@@ -52,16 +86,24 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - PYTHONUNBUFFERED=1
-      - USE_GEMINI=${USE_GEMINI:-0}
-      - GEMINI_MODEL_NAME=${GEMINI_MODEL_NAME:-}
-      - OPENSOURCE_LLM_MODEL=${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
-      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://ollama:11434}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      <<: *shared-env
+      PYTHONUNBUFFERED: "1"
+      USE_GEMINI: ${USE_GEMINI:-0}
+      GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME:-}
+      OPENSOURCE_LLM_MODEL: ${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
+      OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://ollama:11434}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Re-seed the level passwords (LanceDB RAG store + level 5 users.db)
+      # from the PASSWORD_* settings on every start.
+      PREPARE_FLAGS: ${PREPARE_FLAGS:-1}
+      DOWNLOAD_MODELS: ${DOWNLOAD_MODELS:-1}
     volumes:
-      - ./ctf/lancedb:/app/ctf/lancedb
-      - ./ctf/agents/lancedb:/app/ctf/agents/lancedb
+      - lancedb_data:/app/ctf/lancedb
+      # Keep the ~1.6GB of guard models across container recreates.
+      - hf_cache:/home/appuser/.cache/huggingface
     depends_on:
+      postgres:
+        condition: service_healthy
       ollama-init:
         condition: service_completed_successfully
         required: false
@@ -78,27 +120,31 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      # The first start downloads the guard models; start_interval lets a
+      # warm start go healthy within seconds regardless.
+      start_period: 900s
+      start_interval: 5s
 
-  frontend:
+  web:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: ai-prompt-ctf-frontend
+      context: ./web
+    container_name: ai-prompt-ctf-web
     ports:
       - "8100:8100"
     environment:
-      - PYTHONUNBUFFERED=1
-      - FASTAPI_ENV=production
-      - RELOAD=0
-      - CURL_CA_BUNDLE=""
-      - REQUESTS_CA_BUNDLE=""
-      - ADK_API_URL=http://adk-api:8000
-    volumes:
-      - ./ctf/frontend/static:/app/ctf/frontend/static
-      - ./ctf/frontend/templates:/app/ctf/frontend/templates
-      - ./ctf/lancedb:/app/ctf/lancedb
+      <<: *shared-env
+      ADK_API_URL: http://adk-api:8000
+      ADK_RUN_TIMEOUT_MS: ${ADK_RUN_TIMEOUT_MS:-180000}
+      ADK_RUN_MAX_MS: ${ADK_RUN_MAX_MS:-600000}
+      CTF_NAME: ${CTF_NAME:-BSIDES CTF Prompt Injection challenge}
+      CTF_SUBTITLE: ${CTF_SUBTITLE:-Agent Hunger Games}
+      DISCORD_URL: ${DISCORD_URL:-}
+      # Cookies are Secure in production; set COOKIE_SECURE=0 when serving
+      # plain http (e.g. http://localhost:8100 without the TLS proxy).
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
     depends_on:
+      postgres:
+        condition: service_healthy
       adk-api:
         condition: service_healthy
     networks:
@@ -109,18 +155,6 @@ services:
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=8100"
       - "traefik.docker.network=ctf-network"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health')",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   traefik:
     image: traefik:v2.11
@@ -141,7 +175,7 @@ services:
     networks:
       - ctf-network
     depends_on:
-      - frontend
+      - web
 
 networks:
   ctf-network:
@@ -149,3 +183,6 @@ networks:
 
 volumes:
   ollama_data:
+  postgres_data:
+  hf_cache:
+  lancedb_data:

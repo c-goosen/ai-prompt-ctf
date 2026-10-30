@@ -1,0 +1,132 @@
+@import "tailwindcss";
+@import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * PwnGPT neon theme (dark only), carried over from the old pwngpt.css:
+ * near-black violet background, teal (#3cfcd1) and pink (#ff2fd5) neon
+ * accents, violet (#5c24ff) primary.
+ */
+:root {
+  color-scheme: dark;
+  --background: #050014;
+  --foreground: #e8e6ff;
+  --card: #0e062d;
+  --card-foreground: #e4fdf7;
+  --popover: #0e062d;
+  --popover-foreground: #e8e6ff;
+  --primary: #5c24ff;
+  --primary-foreground: #ffffff;
+  --secondary: #ff2fd5;
+  --secondary-foreground: #14001a;
+  --muted: #120528;
+  --muted-foreground: #a8a2ff;
+  --accent: #29073f;
+  --accent-foreground: #e4fdf7;
+  --destructive: #ff4d6d;
+  --border: rgb(60 252 209 / 25%);
+  --input: rgb(60 252 209 / 30%);
+  --ring: #ff2fd5;
+  --chart-1: #3cfcd1;
+  --chart-2: #ff2fd5;
+  --chart-3: #5c24ff;
+  --chart-4: #a8a2ff;
+  --chart-5: #e4fdf7;
+  --radius: 0.75rem;
+  --sidebar: #090120;
+  --sidebar-foreground: #f4e7ff;
+  --sidebar-primary: #5c24ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #29073f;
+  --sidebar-accent-foreground: #e4fdf7;
+  --sidebar-border: rgb(255 47 213 / 25%);
+  --sidebar-ring: #ff2fd5;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --color-neon-teal: #3cfcd1;
+  --color-neon-pink: #ff2fd5;
+  --color-neon-violet: #5c24ff;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* A guard tower under siege trembles (quest map). */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1.5px) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(1.5px) rotate(1deg);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply text-foreground;
+    background:
+      radial-gradient(circle at top, rgb(111 71 255 / 25%), transparent 55%),
+      radial-gradient(circle at 20% 20%, rgb(255 47 213 / 20%), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgb(60 252 209 / 25%), transparent 45%),
+      var(--background);
+    background-attachment: fixed;
+  }
+  a {
+    color: inherit;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
