@@ -93,11 +93,12 @@ services:
       OPENSOURCE_LLM_MODEL: ${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
       OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://ollama:11434}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      PREPARE_FLAGS: ${PREPARE_FLAGS:-}
+      # Re-seed the level passwords (LanceDB RAG store + level 5 users.db)
+      # from the PASSWORD_* settings on every start.
+      PREPARE_FLAGS: ${PREPARE_FLAGS:-1}
       DOWNLOAD_MODELS: ${DOWNLOAD_MODELS:-1}
     volumes:
-      - ./ctf/lancedb:/app/ctf/lancedb
-      - ./ctf/agents/lancedb:/app/ctf/agents/lancedb
+      - lancedb_data:/app/ctf/lancedb
       # Keep the ~1.6GB of guard models across container recreates.
       - hf_cache:/home/appuser/.cache/huggingface
     depends_on:
@@ -184,3 +185,4 @@ volumes:
   ollama_data:
   postgres_data:
   hf_cache:
+  lancedb_data:

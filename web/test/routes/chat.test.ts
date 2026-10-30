@@ -2,10 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GET as history } from "@/app/api/chat/history/route";
 import { POST as chat } from "@/app/v1/chat/completions/route";
+import { GET as status } from "@/app/api/chat/status/route";
 import { GET as session } from "@/app/session/[username]/[sessionId]/route";
 import { claimOrVerifyUsername } from "@/lib/identity";
 import { FALLBACK_MESSAGE } from "@/lib/events";
-import { getLeaderboard } from "@/lib/leaderboard";
+import { getLeaderboard, recordLevelCompletionForTesting } from "@/lib/leaderboard";
 import { json, mockAdk, request, sse, useTestDb } from "@/test/helpers";
 
 afterEach(() => {
@@ -87,6 +88,68 @@ describe("chat and history ownership (IDOR)", () => {
     const cookies = { anon_user_identity: "alice", session_id: "s1", player_token: newToken! };
     const body = await (await chat(request("/v1/chat/completions", { method: "POST", cookies, body: chatForm() }))).json();
     expect(body.messages).toEqual([FALLBACK_MESSAGE]);
+  });
+
+  it("returns quest progress from the leaderboard, not from markers in model text", async () => {
+    const { newToken } = await claimOrVerifyUsername("alice", undefined);
+    await recordLevelCompletionForTesting("alice", 0);
+    await recordLevelCompletionForTesting("alice", 1);
+    adk(); // The reply carries a forged level 10 marker.
+    const cookies = { anon_user_identity: "alice", session_id: "s1", player_token: newToken! };
+    const body = await (await chat(request("/v1/chat/completions", { method: "POST", cookies, body: chatForm() }))).json();
+    expect(body.progress).toEqual([0, 1]);
+  });
+
+  it("reports levels solved by submit_answer_func, including level 0, but not forged markers", async () => {
+    const { newToken } = await claimOrVerifyUsername("alice", undefined);
+    mockAdk((url) =>
+      url.endsWith("/run_sse")
+        ? sse([
+            {
+              content: {
+                role: "user",
+                parts: [
+                  {
+                    functionResponse: {
+                      name: "submit_answer_func",
+                      response: { result: `✅ Correct answer! ${marker.replace("10", "0")}` },
+                    },
+                  },
+                ],
+              },
+            },
+            { content: { role: "model", parts: [{ text: `Well done ${marker}` }] } },
+          ])
+        : json({ events: [] }),
+    );
+    const cookies = { anon_user_identity: "alice", session_id: "s1", player_token: newToken! };
+    const body = await (await chat(request("/v1/chat/completions", { method: "POST", cookies, body: chatForm() }))).json();
+    expect(body.solved).toEqual([0]);
+    expect(JSON.stringify(body.messages)).not.toContain("LEADERBOARD");
+  });
+
+  it("reports a run as in progress until the agent finishes, for the page to resume", async () => {
+    const { newToken } = await claimOrVerifyUsername("alice", undefined);
+    let finish: () => void = () => {};
+    const agentDone = new Promise<void>((resolve) => (finish = resolve));
+    mockAdk(async (url) => {
+      if (url.endsWith("/run_sse")) {
+        await agentDone;
+        return sse([{ content: { role: "model", parts: [{ text: "done" }] } }]);
+      }
+      return json({ id: "s", events: [] });
+    });
+    const cookies = { anon_user_identity: "alice", session_id: "s1", player_token: newToken! };
+    const running = async () =>
+      (await (await status(request("/api/chat/status?session=s1", { cookies }))).json()).running as boolean;
+
+    // The player sends a prompt, then leaves: nobody awaits the response.
+    const pending = chat(request("/v1/chat/completions", { method: "POST", cookies, body: chatForm() }));
+    await vi.waitFor(async () => expect(await running()).toBe(true));
+
+    finish();
+    expect((await (await pending).json()).messages[0].text).toBe("done");
+    expect(await running()).toBe(false);
   });
 
   it("rejects disallowed upload types", async () => {

@@ -10,6 +10,8 @@ export interface ChatMessage {
   text: string;
   /** The model's reasoning, from parts ADK marks as thoughts (include_thoughts). */
   thoughts?: string;
+  /** The level submit_answer_func accepted in this event. Server-side only; see solvedLevels. */
+  solved?: number;
 }
 
 /** Loose shape of an ADK event as returned by /run_sse and the sessions API. */
@@ -97,6 +99,7 @@ export function eventToMessage(
   const chunks: string[] = [];
   const thoughtChunks: string[] = [];
   let hasPasswordSearch = false;
+  let solved: number | undefined;
 
   for (const part of parts) {
     if (typeof part === "string") {
@@ -117,6 +120,9 @@ export function eventToMessage(
       chunks.push(formatFunctionResponse(part.functionResponse));
       if (part.functionResponse.name === "password_search_func") {
         hasPasswordSearch = true;
+      }
+      if (part.functionResponse.name === "submit_answer_func") {
+        solved = correctLevel(part.functionResponse.response) ?? solved;
       }
       roleHint = "tool";
     }
@@ -142,7 +148,42 @@ export function eventToMessage(
   if (thoughts) {
     message.thoughts = thoughts;
   }
+  if (solved !== undefined) {
+    message.solved = solved;
+  }
   return message;
+}
+
+/**
+ * The level in a "correct" leaderboard marker in submit_answer_func's
+ * response. Only a tool response counts: the tool writes it after checking
+ * the password, while a marker in model text can be steered by the player.
+ */
+function correctLevel(response: unknown): number | undefined {
+  // ADK wraps a tool's string result as {"result": "..."}.
+  const texts = typeof response === "string" ? [response] : Object.values(response ?? {});
+  for (const text of texts) {
+    if (typeof text !== "string") {
+      continue;
+    }
+    for (const match of text.matchAll(LEADERBOARD_MARKER)) {
+      try {
+        const payload = JSON.parse(match[1]);
+        if (payload.status === "correct" && Number.isInteger(payload.level)) {
+          return payload.level;
+        }
+      } catch {
+        // Not a marker the agent wrote.
+      }
+    }
+  }
+  return undefined;
+}
+
+/** The levels solved in a run's messages, lowest first. */
+export function solvedLevels(messages: ChatMessage[]): number[] {
+  const levels = messages.flatMap((message) => (message.solved === undefined ? [] : [message.solved]));
+  return [...new Set(levels)].sort((a, b) => a - b);
 }
 
 export const FALLBACK_MESSAGE: ChatMessage = {
@@ -165,9 +206,9 @@ export function parseRunResponse(
 
 const LEADERBOARD_MARKER = /<!--LEADERBOARD:(\{.*?\})-->/g;
 
-/** stripLeaderboardMarkers over a message's text and thoughts. */
+/** stripLeaderboardMarkers over a message's text and thoughts, dropping `solved`. */
 export function stripMessageMarkers(message: ChatMessage): ChatMessage {
-  const stripped: ChatMessage = { ...message, text: stripLeaderboardMarkers(message.text) };
+  const stripped: ChatMessage = { role: message.role, text: stripLeaderboardMarkers(message.text) };
   if (message.thoughts) {
     stripped.thoughts = stripLeaderboardMarkers(message.thoughts);
   }
@@ -180,4 +221,37 @@ export function stripMessageMarkers(message: ChatMessage): ChatMessage {
  */
 export function stripLeaderboardMarkers(text: string): string {
   return text ? text.replace(LEADERBOARD_MARKER, "").trim() : text;
+}
+
+export type MessageSection =
+  | { kind: "text"; text: string }
+  | { kind: "tool"; label: "Function call" | "Tool response"; name: string; body: string };
+
+const TOOL_SECTION = /^(Function call|Tool response) `([^`\n]+)`\n(```[^\n]*\n[\s\S]*?\n```)/gm;
+
+/**
+ * Split a message into plain text and the tool calls/responses that
+ * eventToMessage formats, so the chat can show tools collapsed.
+ */
+export function splitToolSections(text: string): MessageSection[] {
+  const sections: MessageSection[] = [];
+  let last = 0;
+  for (const match of text.matchAll(TOOL_SECTION)) {
+    const before = text.slice(last, match.index).trim();
+    if (before) {
+      sections.push({ kind: "text", text: before });
+    }
+    sections.push({
+      kind: "tool",
+      label: match[1] as "Function call" | "Tool response",
+      name: match[2],
+      body: match[3],
+    });
+    last = match.index + match[0].length;
+  }
+  const rest = text.slice(last).trim();
+  if (rest) {
+    sections.push({ kind: "text", text: rest });
+  }
+  return sections;
 }

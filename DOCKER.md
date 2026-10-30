@@ -60,8 +60,8 @@ docker run -p 8100:8100 \
 docker build -f Dockerfile.adk -t ai-prompt-ctf-adk .
 docker run -p 8000:8000 \
   -e POSTGRES_DB_URI=postgresql://ctf:ctf@host.docker.internal:5432/ctf \
-  -v $(pwd)/ctf/lancedb:/app/ctf/lancedb \
-  -v $(pwd)/ctf/agents/lancedb:/app/ctf/agents/lancedb \
+  -e PREPARE_FLAGS=1 \
+  -v ctf-lancedb:/app/ctf/lancedb \
   ai-prompt-ctf-adk
 ```
 
@@ -84,7 +84,7 @@ docker run -p 8000:8000 \
 - `USE_GEMINI` - Set to `1` to use Gemini instead of Ollama (`prod` profile)
 - `GEMINI_MODEL_NAME` - Gemini model when `USE_GEMINI=1`
 - `OPENAI_API_KEY` - OpenAI API key (use with `OPENSOURCE_LLM_MODEL=openai/...` on `prod`)
-- `PREPARE_FLAGS` - `1` to seed the level flags into LanceDB on start (`ctf/agent_startup.py`)
+- `PREPARE_FLAGS` - seed the level flags into LanceDB and level 5's users.db on start (`ctf/agent_startup.py`); compose defaults it to `1`, set `0` to skip
 - `DOWNLOAD_MODELS` - `0` to skip pre-downloading the Hugging Face guard models on start
 
 ### Ollama (`default` profile only)
@@ -95,7 +95,8 @@ docker run -p 8000:8000 \
 
 ## Volumes
 
-- `./ctf/lancedb` and `./ctf/agents/lancedb` - LanceDB vector storage for the agent
+- `lancedb_data` - LanceDB vector store with the level passwords (re-seeded on start)
+- `hf_cache` - Hugging Face guard and embedding models, so they download once
 - `postgres_data` - Leaderboard and player tokens
 - `ollama_data` - Persisted Ollama models between restarts
 

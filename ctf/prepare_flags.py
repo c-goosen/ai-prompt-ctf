@@ -170,7 +170,7 @@ if __name__ == "__main__":
     except Exception:
         from embeddings import embed_text
     query_vector = embed_text("What is the password?")
-    results = table.search(query_vector).where("level = 2").limit(1).to_pandas()
+    results = table.search(query_vector).where("level = 2").limit(1).to_list()
     print(results)
-    if not results.empty and "text" in results.columns:
-        print(results["text"].iloc[0])
+    if results and "text" in results[0]:
+        print(results[0]["text"])

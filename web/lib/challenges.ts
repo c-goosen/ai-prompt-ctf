@@ -9,6 +9,13 @@ export interface Challenge {
   body: string;
 }
 
+export const DIFFICULTY = ["Warm-up", "Easy", "Medium", "Hard", "Insane"];
+
+/** 1-based index into DIFFICULTY, spreading levels 0..finalLevel evenly. */
+export function difficulty(level: number, finalLevel: number): number {
+  return Math.min(DIFFICULTY.length, Math.floor((level / (finalLevel + 1)) * DIFFICULTY.length) + 1);
+}
+
 const LEVEL_HEADING = /^# Level (\d+):\s*(.+)$/;
 const OWASP_LINE = /^(?:OWASP\s+)?(LLM\d{2}:.+)$/;
 

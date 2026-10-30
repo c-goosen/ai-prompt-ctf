@@ -12,12 +12,16 @@ DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 COMPOSE_CMD ?= docker compose
 COMPOSE_SERVICES ?= adk-api web
 
-.PHONY: run run-prod
-run:
+.PHONY: run run-prod prepare-flags
+run: prepare-flags
 	$(COMPOSE_CMD) --profile default up --build $(COMPOSE_SERVICES)
 
 run-prod:
 	$(COMPOSE_CMD) --profile prod up --build $(COMPOSE_SERVICES)
+
+# Seed the level passwords (LanceDB RAG store + level 5 users.db) locally.
+prepare-flags:
+	uv run python ctf/prepare_flags.py
 
 docker-image:
 	docker build --rm -t $(DOCKER_REPOSITORY):local web

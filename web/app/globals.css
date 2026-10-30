@@ -92,6 +92,20 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* A guard tower under siege trembles (quest map). */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1.5px) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(1.5px) rotate(1deg);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

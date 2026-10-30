@@ -86,6 +86,16 @@ export async function getLeaderboardSummary(): Promise<LeaderboardSummary> {
   };
 }
 
+/** The levels a player has on the board, lowest first. */
+export async function getPlayerLevels(username: string): Promise<number[]> {
+  const db = await getDb();
+  const rows = await db.query<{ level: number }>(
+    "SELECT level FROM leaderboard_entries WHERE username = $1 ORDER BY level",
+    [username],
+  );
+  return rows.map((row) => Number(row.level));
+}
+
 /** Registration puts the player on the board at level 0 (as before). */
 export async function ensureLeaderboardUser(username: string): Promise<void> {
   if (!username) {

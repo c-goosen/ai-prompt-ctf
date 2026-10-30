@@ -16,6 +16,56 @@ prompt injection, information retrieval and the security issues relating to LLMs
 
 Please use and add challenges
 
+![Quest map on the chat start screen](docs/screenshots/quest-map.png)
+
+## Features
+
+- **11 levels, 0 to 10.** Each level has an agent guarding a password, with defences that get harder as you go:
+  input and output guards, a hardened system prompt, multi-modal uploads (image, audio, PDF and JSON), SQL through
+  function calling, Prompt-Guard models, code execution, web page injection, and finally every protection combined. Levels are tagged with OWASP Top 10 for LLM categories.
+- **Quest map.** Levels are grouped into Warm-up, Easy, Medium, Hard and Insane zones that end at a boss. Your
+  character stands at your next uncleared level. Click a node to jump to that level.
+- **Siege on every solve.** A correct `/submit` sends a horde of gremlins to storm the level's tower. When it falls,
+  the chat carries on at the next level.
+- **XP and ranks.** Each cleared level gives XP based on its difficulty. Ranks go from *Script Kiddie* to
+  *AGI Whisperer*.
+- **Slash commands** with autocomplete:
+
+  | Command | What it does |
+  |---|---|
+  | `/register <username> [session-id]` | Register (or switch user) from the chat |
+  | `/level <0-10>` | Switch to a level. Typing "level N" in the chat also works |
+  | `/hint` | Ask the current level for a hint |
+  | `/submit <answer>` | Submit a password |
+  | `/whoami` | Show your username, session ID, rank, XP and next level |
+  | `/challenges [level]` | List the levels or show one briefing |
+  | `/leaderboard` | Show the top 10 players |
+  | `/newsession` | Start a fresh conversation (your progress is kept) |
+  | `/faq`, `/discord`, `/help` | Show the FAQ topics, the Discord link and the command list |
+  | `/skills …` | Save your own reusable prompts and run them as `/<name>` |
+
+- **Live leaderboard** with stat cards and a recent-completions feed. It refreshes every 30 seconds. Only the agent's
+  `submit_answer_func` can record a solve.
+- **Bookmarkable sessions** at `/ctf/<session-id>`. At events, the session ID can be your Quicket code.
+- **No accounts.** Claiming a username gives your browser an httpOnly ownership token.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Start screen before registering](docs/screenshots/home.png) | ![Slash command autocomplete](docs/screenshots/slash-commands.png) |
+| Start screen before registering | Slash command autocomplete |
+| ![A guardrail blocking a prompt injection](docs/screenshots/chat-level.png) | ![Level briefing from /challenges](docs/screenshots/chat-commands.png) |
+| A guardrail blocking a direct ask on level 1 | `/challenges 1` briefing in the chat |
+| ![Challenges page](docs/screenshots/challenges.png) | ![Live leaderboard](docs/screenshots/leaderboard.png) |
+| Challenges with difficulty and OWASP tags | Live leaderboard |
+| ![Gremlins topple the level 0 tower](docs/screenshots/siege.png) | |
+| The siege after `/submit PASS_ZERO` | |
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## WHOAMI
 Hacker, DevSecops, builder, AI/ML prompt injector and curious person. I give myself ridiculous challenges like building this.
 [WHOAMI](https://github.com/c-goosen)
@@ -48,7 +98,8 @@ The CTF uses a multi-agent architecture with a coordinator pattern, where a root
 The system consists of:
 - **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
 - **Level0Agent through Level10Agent**: Individual challenge agents with progressive security measures
-- **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, and `sql_query` that agents can call
+- **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, `sql_query`, `web_search` and `web_scrape` that agents can call
+- **Level routing**: "level N" from any agent hands the player to that level before the guards run, and each level greets the player on arrival
 
 ## Other Info
 [CHALLENGES](web/content/challenges.md)
@@ -99,9 +150,9 @@ PASSWORD_TEN="Woohoo"
 ```
 Seed them into LanceDB (and the level 5 SQL table) with:
 ```bash
-cd ctf/agents && PREPARE_FLAGS=1 uv run python -m ctf.agent_startup
+make prepare-flags   # = uv run python ctf/prepare_flags.py; `make run` does this first
 ```
-In Docker, set `PREPARE_FLAGS=1` on the `adk-api` service once.
+In Docker, compose sets `PREPARE_FLAGS=1`, so the agent re-seeds them on every start.
 
 ## Run locally
 1. Agent: `cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000` (needs Ollama with `qwen3:0.6b`,
@@ -203,7 +254,7 @@ Set in `docker-compose.yml` or override when starting:
 | `OLLAMA_MODEL` | ollama-init | `qwen3:0.6b` | Model pulled into Ollama on first run |
 | `OPENSOURCE_LLM_MODEL` | adk-api | `qwen3:0.6b` | Model name used by agents |
 | `USE_GEMINI` | adk-api | `0` | Set to `1` to use Gemini instead of Ollama |
-| `PREPARE_FLAGS` | adk-api | (off) | Set to `1` to seed level flags into LanceDB on start |
+| `PREPARE_FLAGS` | adk-api | `1` in compose, off otherwise | Seed level flags into LanceDB and level 5's users.db on start |
 | `DOWNLOAD_MODELS` | adk-api | `1` | Pre-download the guard models on start |
 | `PASSWORD_ZERO` … `PASSWORD_TEN` | adk-api, web | `PASS_ZERO` … | Level passwords |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres, adk-api, web | `ctf` | Leaderboard database (`POSTGRES_DB_URI` is built from these) |

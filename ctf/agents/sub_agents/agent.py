@@ -26,7 +26,11 @@ from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
 from ctf.agents.sub_agents.level_10_agent import Level10Agent
 from ctf.agents.model import model as model_config, thinking_planner
-from ctf.agents.sub_agents.level_router import route_level_request
+from ctf.agents.sub_agents.level_router import (
+    route_coordinator_submit,
+    route_level_request,
+)
+from ctf.app_config import settings
 
 
 class CTFSubAgentsRootAgent(LlmAgent):
@@ -56,7 +60,10 @@ class CTFSubAgentsRootAgent(LlmAgent):
             name="CTFSubAgentsRoot",
             model=model,
             planner=thinking_planner(),
-            before_model_callback=route_level_request,
+            before_model_callback=[
+                route_level_request,
+                route_coordinator_submit(settings.PASSWORDS),
+            ],
             instruction="""You are the CTF Coordinator for the AI Prompt Injection Capture The Flag challenge.  # noqa: E501
 
 When the user greets you or asks what is available, reply with this welcome message:

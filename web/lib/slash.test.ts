@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   allCommands,
+  challengesText,
   collapseCommandMarker,
   commandSuggestions,
   completeCommand,
   expandSkill,
+  faqText,
+  leaderboardText,
   parseSkillFile,
   parseSlashCommand,
   skillNameError,
@@ -74,5 +77,38 @@ describe("autocomplete", () => {
   it("adds a space for commands that take arguments", () => {
     expect(completeCommand(commands.find((c) => c.name === "level")!)).toBe("/level ");
     expect(completeCommand(commands.find((c) => c.name === "help")!)).toBe("/help");
+  });
+});
+
+describe("info commands", () => {
+  const challenges = [
+    { level: 0, title: "Basics", subtitle: null, owasp: ["LLM01: Prompt Injection"], body: "Just ask." },
+    { level: 1, title: "Input guard", subtitle: "Input Injection", owasp: [], body: "" },
+  ];
+
+  it("lists challenges, or briefs one", () => {
+    const list = challengesText(challenges);
+    expect(list).toContain("| 0 | Basics | LLM01: Prompt Injection |");
+    expect(list).toContain("| 1 | Input guard | - |");
+
+    const one = challengesText(challenges, 1);
+    expect(one).toContain("**Level 1: Input guard**");
+    expect(one).toContain("_Input Injection_");
+    expect(one).toContain("`/level 1`");
+    expect(challengesText(challenges, 7)).toContain("No level 7");
+  });
+
+  it("renders the leaderboard, escaping underscores in names", () => {
+    const row = { levelsCompleted: 3, highestLevel: 2, lastCompletedAt: null, firstCompletedAt: null };
+    const text = leaderboardText([{ ...row, username: "prompt_ninja" }], { players: 1, totalCompletions: 3 });
+    expect(text).toContain("| 1 | prompt\\_ninja | 2 | 3 |");
+    expect(text).toContain("1 players, 3 completions");
+    expect(leaderboardText([], { players: 0, totalCompletions: 0 })).toContain("No one is on the board yet");
+  });
+
+  it("lists FAQ headings", () => {
+    expect(faqText("intro\n## Prompt Injection\ntext\n## CTF\n")).toBe(
+      "**FAQ topics**\n\n- Prompt Injection\n- CTF\n\nRead the answers on the [FAQ](/faq) page.",
+    );
   });
 });

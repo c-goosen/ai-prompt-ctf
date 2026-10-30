@@ -59,6 +59,18 @@ _HINT_REQUEST = re.compile(
 )
 
 
+# The web app's /submit command sends "submit answer: <answer>".
+_SUBMIT_REQUEST = re.compile(
+    r"submit\s+answer\s*:\s*(?P<answer>\S.*)", re.IGNORECASE | re.DOTALL
+)
+
+
+def submitted_answer(text: str) -> Optional[str]:
+    """Return the answer when the whole message is "submit answer: <answer>"."""
+    match = _SUBMIT_REQUEST.fullmatch(text.strip())
+    return match.group("answer").strip() if match else None
+
+
 def requested_level(text: str) -> Optional[int]:
     """Return N when the whole message asks to play level N, else None.
 
@@ -93,7 +105,27 @@ def route_level_request(
     level = requested_level(text) if text else None
     if level is None:
         return None
+    return _transfer_to_level(level)
 
+
+def route_level_change(current_level: int):
+    """before_model_callback that moves a level agent's player to level N."""
+
+    def route(
+        llm_request: LlmRequest | None = None, **_: Any
+    ) -> Optional[LlmResponse]:
+        text = _user_text(llm_request)
+        level = requested_level(text) if text else None
+        if level is None:
+            return None
+        if level == current_level:
+            return _text_response(greeting_text(level))
+        return _transfer_to_level(level)
+
+    return route
+
+
+def _transfer_to_level(level: int) -> LlmResponse:
     return LlmResponse(
         content=types.Content(
             role="model",
@@ -104,6 +136,12 @@ def route_level_request(
                 )
             ],
         )
+    )
+
+
+def _text_response(text: str) -> LlmResponse:
+    return LlmResponse(
+        content=types.Content(role="model", parts=[types.Part(text=text)])
     )
 
 
@@ -118,12 +156,7 @@ def level_greeting(level: int):
         last = callback_context.session.events[-1]
         if last.actions.transfer_to_agent != callback_context.agent_name:
             return None
-        return LlmResponse(
-            content=types.Content(
-                role="model",
-                parts=[types.Part(text=greeting_text(level))],
-            )
-        )
+        return _text_response(greeting_text(level))
 
     return greet
 
@@ -150,6 +183,65 @@ def route_hint_request(level: int):
         )
 
     return route
+
+
+def route_submit_request(level: int):
+    """before_model_callback that checks "submit answer: X" for this level.
+
+    The model sometimes passes the wrong level, which fails a correct answer.
+    """
+
+    def route(
+        llm_request: LlmRequest | None = None, **_: Any
+    ) -> Optional[LlmResponse]:
+        text = _user_text(llm_request)
+        answer = submitted_answer(text) if text else None
+        if answer is None:
+            return None
+        return _submit(answer, level)
+
+    return route
+
+
+def route_coordinator_submit(passwords: dict[int, str]):
+    """before_model_callback for the coordinator, which has no level of its own.
+
+    The answer is checked against the level it is the password for, or
+    level 0 when it matches none (and is then marked incorrect).
+    """
+
+    def route(
+        llm_request: LlmRequest | None = None, **_: Any
+    ) -> Optional[LlmResponse]:
+        text = _user_text(llm_request)
+        answer = submitted_answer(text) if text else None
+        if answer is None:
+            return None
+        level = next(
+            (
+                level
+                for level, password in passwords.items()
+                if password == answer
+            ),
+            0,
+        )
+        return _submit(answer, level)
+
+    return route
+
+
+def _submit(answer: str, level: int) -> LlmResponse:
+    return LlmResponse(
+        content=types.Content(
+            role="model",
+            parts=[
+                types.Part.from_function_call(
+                    name="submit_answer_func",
+                    args={"answer": answer, "level": level},
+                )
+            ],
+        )
+    )
 
 
 def greeting_text(level: int) -> str:

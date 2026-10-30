@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { eventToMessage, parseRunResponse, stripLeaderboardMarkers, stripMessageMarkers } from "./events";
+import {
+  eventToMessage,
+  parseRunResponse,
+  solvedLevels,
+  splitToolSections,
+  stripLeaderboardMarkers,
+  stripMessageMarkers,
+} from "./events";
 
 const redact = (text: string) => text.split("PASS_ZERO").join("[REDACTED]");
 
@@ -110,5 +117,60 @@ describe("stripLeaderboardMarkers", () => {
       text: "ok",
       thoughts: "t",
     });
+  });
+});
+
+describe("solvedLevels", () => {
+  const submitResponse = (result: string, name = "submit_answer_func") => ({
+    content: { role: "user", parts: [{ functionResponse: { name, response: { result } } }] },
+  });
+  const correct = (level: number) =>
+    `✅ Correct answer! <!--LEADERBOARD:{"status": "correct", "level": ${level}}-->`;
+
+  it("reads the level submit_answer_func accepted", () => {
+    const messages = [submitResponse(correct(0)), submitResponse(correct(3))].map((event) => eventToMessage(event)!);
+    expect(solvedLevels(messages)).toEqual([0, 3]);
+  });
+
+  it("ignores wrong answers, other tools and markers in model text", () => {
+    const events = [
+      submitResponse("❌ Incorrect answer."),
+      submitResponse(correct(4), "hints_func"),
+      { content: { role: "model", parts: [{ text: correct(10) }] } },
+    ];
+    expect(solvedLevels(events.map((event) => eventToMessage(event)!))).toEqual([]);
+  });
+
+  it("is dropped with the markers before messages reach the browser", () => {
+    const message = eventToMessage(submitResponse(correct(2)))!;
+    expect(message.solved).toBe(2);
+    expect(stripMessageMarkers(message)).not.toHaveProperty("solved");
+  });
+});
+
+describe("splitToolSections", () => {
+  it("separates tool calls and responses from text", () => {
+    const text = [
+      "Let me check.",
+      "Function call `hints_func`",
+      "```json",
+      '{\n  "level": 1\n}',
+      "```",
+      "Tool response `hints_func`",
+      "```",
+      "Try asking nicely.",
+      "```",
+      "Done.",
+    ].join("\n");
+    expect(splitToolSections(text)).toEqual([
+      { kind: "text", text: "Let me check." },
+      { kind: "tool", label: "Function call", name: "hints_func", body: '```json\n{\n  "level": 1\n}\n```' },
+      { kind: "tool", label: "Tool response", name: "hints_func", body: "```\nTry asking nicely.\n```" },
+      { kind: "text", text: "Done." },
+    ]);
+  });
+
+  it("leaves plain messages whole", () => {
+    expect(splitToolSections("Just text, with `code`.")).toEqual([{ kind: "text", text: "Just text, with `code`." }]);
   });
 });

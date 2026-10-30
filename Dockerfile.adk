@@ -1,9 +1,10 @@
 # Dockerfile for ADK API Server
-# Builder uses the full trixie image (buildpack-deps) so packages like `regex`
-# can compile when no cp314 wheel exists. Production stays slim.
+# Both stages use the slim image: every locked dependency ships a cp314 wheel,
+# so nothing needs compiling. If a new dependency only has an sdist, switch the
+# builder to the full `-trixie` image (buildpack-deps) to get a toolchain.
 # https://docs.astral.sh/uv/guides/integration/docker/
 
-FROM ghcr.io/astral-sh/uv:0.11.21-python3.14-trixie AS builder
+FROM ghcr.io/astral-sh/uv:0.11.21-python3.14-trixie-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -42,6 +43,8 @@ WORKDIR /app
 # avoids a slow per-file ownership rewrite of the whole tree during COPY.
 COPY --from=builder /app/.venv /app/.venv
 COPY --chown=appuser:appuser . /app
+# Owned by appuser so the lancedb_data volume is initialised writable.
+RUN install -d -o appuser -g appuser /app/ctf/lancedb
 
 USER appuser
 WORKDIR /app/ctf/agents

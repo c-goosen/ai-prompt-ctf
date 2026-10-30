@@ -1,15 +1,25 @@
 import "server-only";
 
+import challengesMarkdown from "@/content/challenges.generated";
+import faqMarkdown from "@/content/faq.generated";
+
 import { createSession } from "./adk";
+import { parseChallenges } from "./challenges";
+import { siteConfig } from "./config";
+import { getLeaderboard, getLeaderboardSummary, getPlayerLevels } from "./leaderboard";
+import { currentLevel, rankFor, totalXp } from "./progress";
 import { getSkill, listSkills, removeSkill, saveSkill } from "./skills";
 import {
   MAX_LEVEL,
   MAX_SKILL_BODY,
   MAX_SKILL_DESCRIPTION,
   MAX_SKILLS,
+  challengesText,
   describeSkill,
   expandSkill,
+  faqText,
   helpText,
+  leaderboardText,
   parseSkillFile,
   skillNameError,
   type SlashCommand,
@@ -30,12 +40,41 @@ const MAX_SKILL_FILE_BYTES = 64 * 1024;
 const reply = (text: string): CommandResult => ({ kind: "reply", text });
 const prompt = (text: string): CommandResult => ({ kind: "prompt", text });
 
+const challenges = parseChallenges(challengesMarkdown);
+
+/** Commands that only read public content, so they work before registering. */
+export const PUBLIC_COMMANDS = new Set(["challenges", "faq", "discord"]);
+
+/** Answer one of PUBLIC_COMMANDS. */
+export function runPublicCommand(command: SlashCommand): CommandResult {
+  const { name, args } = command;
+  switch (name) {
+    case "challenges": {
+      if (!args) {
+        return reply(challengesText(challenges));
+      }
+      return /^\d{1,2}$/.test(args)
+        ? reply(challengesText(challenges, Number(args)))
+        : reply(`Usage: \`/challenges [0-${MAX_LEVEL}]\``);
+    }
+    case "faq":
+      return reply(faqText(faqMarkdown));
+    case "discord":
+      return reply(`Join the conversation on [Discord](${siteConfig.discordUrl()}).`);
+  }
+  throw new Error(`/${name} is not a public command`);
+}
+
 export async function runCommand(
-  username: string,
+  player: { username: string; sessionId: string },
   command: SlashCommand,
   file?: File,
 ): Promise<CommandResult> {
+  const { username } = player;
   const { name, args } = command;
+  if (PUBLIC_COMMANDS.has(name)) {
+    return runPublicCommand(command);
+  }
   switch (name) {
     case "help":
       return reply(helpText(await listSkills(username)));
@@ -61,8 +100,19 @@ export async function runCommand(
       return prompt(args ? `Give me a hint for the current level: ${args}` : "Give me a hint for the current level.");
     case "submit":
       return args ? prompt(`submit answer: ${args}`) : reply("Usage: `/submit <answer>`");
-    case "leaderboard":
-      return prompt("Show me the leaderboard stats.");
+    case "leaderboard": {
+      const [rows, summary] = await Promise.all([getLeaderboard(10), getLeaderboardSummary()]);
+      return reply(leaderboardText(rows, summary));
+    }
+    case "whoami":
+      return reply(await whoamiText(player));
+    case "start":
+      return prompt("level 0");
+    case "continue": {
+      const next = currentLevel(await getPlayerLevels(username));
+      // Same routing as /level, so the coordinator switches deterministically.
+      return next === null ? reply("You've cleared every level. Nothing left to pwn!") : prompt(`level ${next}`);
+    }
     case "skills":
       return runSkillsCommand(username, args, file);
   }
@@ -72,6 +122,20 @@ export async function runCommand(
     return reply(`Unknown command \`/${name}\`. Type \`/help\` to see commands and your skills.`);
   }
   return prompt(expandSkill(skill, args));
+}
+
+async function whoamiText({ username, sessionId }: { username: string; sessionId: string }): Promise<string> {
+  const levels = await getPlayerLevels(username);
+  const next = currentLevel(levels);
+  const xp = totalXp(levels);
+  return [
+    `You are **${username.replace(/_/g, "\\_")}**.`,
+    "",
+    `- Session ID: \`${sessionId}\` (your Quicket code at the event)`,
+    `- On the leaderboard at levels: ${levels.length > 0 ? levels.join(", ") : "none yet"}`,
+    `- Rank: ${rankFor(xp).title} (${xp} XP)`,
+    next !== null ? `- Next up: \`/level ${next}\`` : "- You've completed every level!",
+  ].join("\n");
 }
 
 async function runSkillsCommand(username: string, args: string, file?: File): Promise<CommandResult> {

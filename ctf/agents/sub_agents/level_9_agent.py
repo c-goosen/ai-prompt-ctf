@@ -4,14 +4,13 @@ Level 9 Agent - Web page injection agent
 
 from ctf.agents.sub_agents.base_agent import BaseCTFAgent
 from ctf.agents.sub_agents.system_prompt import get_system_prompt
-from google.adk.tools import google_search
 from ctf.agents.tools import (
     web_scrape_tool,
+    web_search_tool,
     submit_answer_func_tool,
     hints_func_tool,
     rag_tool_func_tool,
 )
-from google.adk.tools import AgentTool
 
 
 class Level9Agent(BaseCTFAgent):
@@ -30,7 +29,7 @@ class Level9Agent(BaseCTFAgent):
         exploit the web scraping and information retrieval processes.
 
         IMPORTANT: You have access to the following web-related tools:
-        - `google_search`: Search the web using Google search
+        - `web_search`: Search the web; results include the page URLs
         - `web_scrape`: Scrape and convert web pages to markdown format
 
         Use ONLY these tools to retrieve information from the web. Do not attempt to use
@@ -46,7 +45,7 @@ class Level9Agent(BaseCTFAgent):
                 rag_tool_func_tool,
                 hints_func_tool,
                 submit_answer_func_tool,
-                AgentTool(google_search),
+                web_search_tool,
                 web_scrape_tool,
             ],
         )

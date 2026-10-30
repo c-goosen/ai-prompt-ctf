@@ -23,6 +23,8 @@ from ctf.agents.model import model as model_config, thinking_planner
 from ctf.agents.sub_agents.level_router import (
     level_greeting,
     route_hint_request,
+    route_level_change,
+    route_submit_request,
 )
 from google.adk.code_executors import BaseCodeExecutor
 
@@ -69,9 +71,16 @@ class BaseCTFAgent(LlmAgent):
             if help_search_tool not in final_tools:
                 final_tools.append(help_search_tool)
 
-        # The greeting runs first so a guard never sees the transfer turn;
-        # hint routing runs after the guards so they still screen hints.
-        before_model_callbacks = [level_greeting(level)]
+        # The greeting, "level N" switching and answer submission run first
+        # so a guard never sees the transfer turn, blocks leaving the level
+        # or blocks submitting a password; hint routing runs after the
+        # guards so they still screen hints.
+        before_model_callbacks = [
+            level_greeting(level),
+            route_level_change(level),
+        ]
+        if submit_answer_func_tool in final_tools:
+            before_model_callbacks.append(route_submit_request(level))
         if isinstance(before_model_callback, list):
             before_model_callbacks += before_model_callback
         elif before_model_callback is not None:

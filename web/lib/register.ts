@@ -2,7 +2,7 @@ import "server-only";
 
 import { AdkError, createSession } from "./adk";
 import { getDb } from "./db";
-import { claimOrVerifyUsername, hashToken } from "./identity";
+import { claimOrVerifyUsername, COOKIE_NAMES, hashToken, IDENTITY_COOKIE_OPTIONS } from "./identity";
 import { ensureLeaderboardUser } from "./leaderboard";
 import { isValidSessionId, isValidUsername, SESSION_ID_RULES, USERNAME_RULES } from "./validation";
 
@@ -77,6 +77,18 @@ export async function registerPlayer(input: {
     console.error("Could not add player to the leaderboard:", (error as Error).message);
   }
   return { ok: true, username, sessionId, newToken: claim.newToken };
+}
+
+/** Store a registration in the identity cookies (a response's or next/headers'). */
+export function setIdentityCookies(
+  cookies: { set(name: string, value: string, options: typeof IDENTITY_COOKIE_OPTIONS): unknown },
+  outcome: Extract<RegisterOutcome, { ok: true }>,
+): void {
+  cookies.set(COOKIE_NAMES.username, outcome.username, IDENTITY_COOKIE_OPTIONS);
+  cookies.set(COOKIE_NAMES.sessionId, outcome.sessionId, IDENTITY_COOKIE_OPTIONS);
+  if (outcome.newToken) {
+    cookies.set(COOKIE_NAMES.playerToken, outcome.newToken, IDENTITY_COOKIE_OPTIONS);
+  }
 }
 
 async function releaseClaim(username: string, token: string): Promise<void> {

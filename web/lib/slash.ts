@@ -4,6 +4,9 @@
  * autocomplete, so it is unit tested directly.
  */
 
+import type { Challenge } from "./challenges";
+import type { LeaderboardRow, LeaderboardSummary } from "./leaderboard";
+
 export interface SlashCommand {
   /** Lower-cased name without the slash. */
   name: string;
@@ -30,11 +33,26 @@ export const MAX_SKILL_DESCRIPTION = 200;
 
 export const BUILTIN_COMMANDS: CommandInfo[] = [
   { name: "help", usage: "/help", description: "Show commands and your installed skills" },
+  {
+    name: "register",
+    usage: "/register <username> [session-id]",
+    description: "Register (or switch to) a username, like the register page",
+  },
   { name: "level", usage: `/level <0-${MAX_LEVEL}>`, description: "Switch to a challenge level" },
+  { name: "start", usage: "/start", description: "Go to level 0, the warm-up" },
+  { name: "continue", usage: "/continue", description: "Jump to your lowest unfinished level" },
   { name: "newsession", usage: "/newsession", description: "Start a fresh conversation (keeps your progress)" },
   { name: "hint", usage: "/hint", description: "Ask for a hint for the current level" },
   { name: "submit", usage: "/submit <answer>", description: "Submit a flag or password" },
-  { name: "leaderboard", usage: "/leaderboard", description: "Show leaderboard stats" },
+  { name: "leaderboard", usage: "/leaderboard", description: "Show the top players" },
+  { name: "whoami", usage: "/whoami", description: "Show your username, session ID and progress" },
+  {
+    name: "challenges",
+    usage: "/challenges [level]",
+    description: "List the challenges, or show one level's briefing",
+  },
+  { name: "faq", usage: "/faq", description: "Show the FAQ topics" },
+  { name: "discord", usage: "/discord", description: "Get the Discord link" },
   { name: "skills", usage: "/skills", description: "List your installed skills" },
   {
     name: "skills install",
@@ -172,6 +190,64 @@ export function helpText(skills: Array<Pick<Skill, "name" | "description">>): st
     "",
     "`$ARGUMENTS` is replaced by whatever you type after the command.",
   ].join("\n");
+}
+
+/** Markdown for /challenges: every level, or one level's briefing. */
+export function challengesText(challenges: Challenge[], level?: number): string {
+  if (level === undefined) {
+    return [
+      "**Challenges**",
+      "",
+      "| Level | Title | OWASP |",
+      "| --- | --- | --- |",
+      ...challenges.map(
+        (challenge) => `| ${challenge.level} | ${challenge.title} | ${challenge.owasp.join(", ") || "-"} |`,
+      ),
+      "",
+      "Use `/challenges <level>` for a briefing and `/level <n>` to play one, or see [Challenges](/challenges).",
+    ].join("\n");
+  }
+  const challenge = challenges.find((candidate) => candidate.level === level);
+  if (!challenge) {
+    return `No level ${level}. Usage: \`/challenges [0-${MAX_LEVEL}]\``;
+  }
+  return [
+    `**Level ${challenge.level}: ${challenge.title}**`,
+    ...(challenge.subtitle ? ["", `_${challenge.subtitle}_`] : []),
+    ...(challenge.owasp.length > 0 ? ["", challenge.owasp.map((tag) => `\`${tag}\``).join(" ")] : []),
+    ...(challenge.body ? ["", challenge.body] : []),
+    "",
+    `Type \`/level ${challenge.level}\` to start.`,
+  ].join("\n");
+}
+
+/** Markdown for /leaderboard. */
+export function leaderboardText(rows: LeaderboardRow[], summary: LeaderboardSummary): string {
+  if (rows.length === 0) {
+    return "No one is on the board yet. See [Leaderboard](/leaderboard).";
+  }
+  return [
+    "**Leaderboard**",
+    "",
+    "| # | Player | Highest level | Levels done |",
+    "| --- | --- | --- | --- |",
+    // Usernames may contain "_", which markdown would read as emphasis.
+    ...rows.map(
+      (row, index) =>
+        `| ${index + 1} | ${row.username.replace(/_/g, "\\_")} | ${row.highestLevel} | ${row.levelsCompleted} |`,
+    ),
+    "",
+    `${summary.players} players, ${summary.totalCompletions} completions. Full board: [Leaderboard](/leaderboard).`,
+  ].join("\n");
+}
+
+/** Markdown for /faq: the FAQ's section headings. */
+export function faqText(markdown: string): string {
+  const topics = markdown
+    .split("\n")
+    .filter((line) => line.startsWith("## "))
+    .map((line) => `- ${line.slice(3).trim()}`);
+  return ["**FAQ topics**", "", ...topics, "", "Read the answers on the [FAQ](/faq) page."].join("\n");
 }
 
 /** Built-in commands plus the player's skills, as autocomplete entries. */

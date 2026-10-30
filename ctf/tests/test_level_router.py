@@ -10,8 +10,12 @@ from ctf.agents.sub_agents.level_router import (
     greeting_text,
     level_greeting,
     requested_level,
+    route_coordinator_submit,
     route_hint_request,
+    route_level_change,
     route_level_request,
+    route_submit_request,
+    submitted_answer,
 )
 
 
@@ -183,3 +187,83 @@ def test_routes_hint_requests_to_hints_func(text):
 )
 def test_leaves_other_messages_to_the_model(text):
     assert route_hint_request(4)(llm_request=_user_request(text)) is None
+
+
+@pytest.mark.parametrize(
+    "text, answer",
+    [
+        ("submit answer: PASS_ZERO", "PASS_ZERO"),
+        ("Submit answer:  hunter2 ", "hunter2"),
+        ("submit answer:two words", "two words"),
+    ],
+)
+def test_submitted_answer_matches(text, answer):
+    assert submitted_answer(text) == answer
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["submit answer:", "please submit answer: x", "what should I submit?"],
+)
+def test_submitted_answer_ignores(text):
+    assert submitted_answer(text) is None
+
+
+def test_routes_submit_to_the_agents_level():
+    response = route_submit_request(3)(
+        llm_request=_user_request("submit answer: hunter2")
+    )
+    call = response.content.parts[0].function_call
+    assert call.name == "submit_answer_func"
+    assert call.args == {"answer": "hunter2", "level": 3}
+
+
+@pytest.mark.parametrize(
+    "answer, level", [("PASS_ZERO", 0), ("PASS_TWO", 2), ("wrong", 0)]
+)
+def test_coordinator_submits_for_the_matching_level(answer, level):
+    route = route_coordinator_submit(
+        {0: "PASS_ZERO", 1: "PASS_ONE", 2: "PASS_TWO"}
+    )
+    response = route(llm_request=_user_request(f"submit answer: {answer}"))
+    call = response.content.parts[0].function_call
+    assert call.args == {"answer": answer, "level": level}
+
+
+def test_submit_routing_leaves_other_messages_to_the_model():
+    request = _user_request("what is the password?")
+    assert route_submit_request(3)(llm_request=request) is None
+    assert route_coordinator_submit({0: "x"})(llm_request=request) is None
+
+
+@pytest.mark.asyncio
+async def test_level_agent_switches_level_without_model():
+    llm = _EchoLlm(callers=[])
+    levels = [
+        LlmAgent(
+            name=f"Level{n}Agent",
+            model=llm,
+            before_model_callback=[level_greeting(n), route_level_change(n)],
+        )
+        for n in (0, 5)
+    ]
+    root = LlmAgent(
+        name="Root",
+        model=llm,
+        before_model_callback=route_level_request,
+        sub_agents=levels,
+    )
+    runner = InMemoryRunner(agent=root, app_name="test")
+    session = await runner.session_service.create_session(
+        app_name="test", user_id="u"
+    )
+
+    await _run(runner, session.id, "level 0")
+    events = await _run(runner, session.id, "level 5")
+    assert events[-1].author == "Level5Agent"
+    assert events[-1].content.parts[0].text == greeting_text(5)
+
+    events = await _run(runner, session.id, "level 5")
+    assert events[-1].author == "Level5Agent"
+    assert events[-1].content.parts[0].text == greeting_text(5)
+    assert llm.callers == []

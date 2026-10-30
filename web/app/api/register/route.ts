@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { COOKIE_NAMES, IDENTITY_COOKIE_OPTIONS } from "@/lib/identity";
+import { COOKIE_NAMES } from "@/lib/identity";
 import { ADK_APP_NAME } from "@/lib/config";
-import { registerPlayer } from "@/lib/register";
+import { registerPlayer, setIdentityCookies } from "@/lib/register";
 
 /** JSON registration API (the register page uses a Server Action instead). */
 export async function POST(request: NextRequest) {
@@ -37,10 +37,6 @@ export async function POST(request: NextRequest) {
     app_name: ADK_APP_NAME,
     ...(outcome.newToken ? { player_token: outcome.newToken } : {}),
   });
-  response.cookies.set(COOKIE_NAMES.username, outcome.username, IDENTITY_COOKIE_OPTIONS);
-  response.cookies.set(COOKIE_NAMES.sessionId, outcome.sessionId, IDENTITY_COOKIE_OPTIONS);
-  if (outcome.newToken) {
-    response.cookies.set(COOKIE_NAMES.playerToken, outcome.newToken, IDENTITY_COOKIE_OPTIONS);
-  }
+  setIdentityCookies(response.cookies, outcome);
   return response;
 }

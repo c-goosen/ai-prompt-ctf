@@ -1,12 +1,15 @@
 import { ArrowRight, ShieldAlert, Skull } from "lucide-react";
 import Link from "next/link";
 
+import { ChallengesMap } from "@/components/game/challenges-map";
 import { Markdown } from "@/components/markdown";
 import { PageShell } from "@/components/page-shell";
 import { ShimmerButton } from "@/components/watermelon/shimmer-button";
 import challengesMarkdown from "@/content/challenges.generated";
-import { parseChallenges, type Challenge } from "@/lib/challenges";
+import { DIFFICULTY, difficulty, parseChallenges, type Challenge } from "@/lib/challenges";
 import { FINAL_LEVEL, siteConfig } from "@/lib/config";
+import { getPlayerLevels } from "@/lib/leaderboard";
+import { currentPlayer } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 // Title comes from CTF_SUBTITLE at runtime, so don't prerender at build time.
@@ -14,14 +17,9 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Challenges · PwnGPT" };
 
 const challenges = parseChallenges(challengesMarkdown);
-const DIFFICULTY = ["Warm-up", "Easy", "Medium", "Hard", "Insane"];
-
-function difficulty(level: number) {
-  return Math.min(DIFFICULTY.length, Math.floor((level / (FINAL_LEVEL + 1)) * DIFFICULTY.length) + 1);
-}
 
 function Difficulty({ level }: { level: number }) {
-  const score = difficulty(level);
+  const score = difficulty(level, FINAL_LEVEL);
   return (
     <div className="flex items-center gap-2" aria-label={`Difficulty: ${DIFFICULTY[score - 1]}`}>
       <div className="flex gap-0.5" aria-hidden="true">
@@ -102,12 +100,20 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
   );
 }
 
-export default function ChallengesPage() {
+export default async function ChallengesPage() {
+  const player = await currentPlayer();
+  const progress = player ? await getPlayerLevels(player.username).catch(() => null) : null;
   return (
     <PageShell
       title={siteConfig.subtitle()}
       description={`${challenges.length} levels of prompt injection, from a defenceless model to every guard combined. Get the agent to leak each level's password.`}
     >
+      <section
+        aria-label="Your run"
+        className="rounded-2xl border border-neon-teal/20 bg-card/60 p-4"
+      >
+        <ChallengesMap levels={challenges.map(({ level, title }) => ({ level, title }))} progress={progress} />
+      </section>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <nav aria-label="Jump to level" className="flex flex-wrap gap-1.5">
           {challenges.map((challenge) => (
