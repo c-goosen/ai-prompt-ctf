@@ -22,5 +22,5 @@
   // Before deploying, add the Postgres connection and secrets:
   //   npx wrangler hyperdrive create pwngpt-db --connection-string="postgresql://..."
   //   then add: "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<id from above>" }]
-  //   npx wrangler secret put PASSWORD_ZERO   (and PASSWORD_ONE ... PASSWORD_TEN)
+  //   npx wrangler secret put PASSWORD_ZERO   (and PASSWORD_ONE ... PASSWORD_FIFTEEN)
 }

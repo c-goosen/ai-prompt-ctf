@@ -242,3 +242,37 @@ class _Obj:
 )
 def test_get_username_from_context(context, username):
     assert tools_module._get_username_from_context(context) == username
+
+
+@pytest.mark.parametrize(
+    "level, transfers",
+    [(0, ["Level1Agent"]), (settings.FINAL_LEVEL, [])],
+    ids=["moves-on", "final-level-stays"],
+)
+def test_submit_answer_only_transfers_to_a_level_that_exists(
+    monkeypatch, level, transfers
+):
+    calls = []
+    monkeypatch.setattr(
+        tools_module,
+        "transfer_to_agent",
+        lambda agent_name, tool_context: calls.append(agent_name),
+    )
+    result = asyncio.run(
+        tools_module.submit_answer_func(settings.PASSWORDS[level], level)
+    )
+    assert result.startswith("✅")
+    assert calls == transfers
+
+
+def test_hints_list_only_the_levels_own_tools():
+    from ctf.agents.sub_agents.agent import (
+        root_agent,
+    )  # noqa: F401 (registers tools)
+
+    level_0 = asyncio.run(tools_module.hints_func("hint", 0))
+    level_12 = asyncio.run(tools_module.hints_func("hint", 12))
+    assert "`password_search_func`" in level_0
+    assert "`password_search_func`" not in level_12
+    assert "password search function" not in level_12
+    assert "`call_plugin`" in level_12

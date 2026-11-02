@@ -1,7 +1,7 @@
 # CTF agents
 
 The CTF's agents, built with the [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/). The ADK
-app is `sub_agents`: a coordinator plus one agent per level (0-10). Each level agent guards a password. The web app
+app is `sub_agents`: a coordinator plus one agent per level (0-15). Each level agent guards a password. The web app
 in `../../web` talks to it over the ADK API server (see [ADK_INTEGRATION.md](../../ADK_INTEGRATION.md)), and
 [ADK_WEB_README.md](ADK_WEB_README.md) covers running it in the ADK dev UI.
 
@@ -19,11 +19,11 @@ ctf/agents/
     ├── guard_rails.py       # Input and output guardrails
     ├── protection_utils.py  # Classifier-model guards and password-leak detection
     ├── system_prompt.py     # Shared system prompts
-    └── level_0_agent.py … level_10_agent.py
+    └── level_0_agent.py … level_11_agent.py
 ```
 
-Lower-level checks (input filters, output regexes, text normalization) and the Hugging Face classifiers live in
-`ctf/llm_guard/`.
+Lower-level checks (input filters, output regexes, text normalization), the Hugging Face classifiers and the
+Ollama decision-model client (`decision.py`) live in `ctf/llm_guard/`.
 
 ## Model
 
@@ -68,7 +68,12 @@ why level changes, submits, hints and greetings are handled without the model.
 | 7 | Prompt-Goose | `llm_guard_prompt_injection_goose` (`cgoosen/prompt-tackler_modernbert`) |
 | 8 | Excessive agency | `execute_python_code`: the password is in the subprocess environment |
 | 9 | Web page injection | `web_search` and `web_scrape`, so web pages are indirect input |
-| 10 | Hold the Fort | Input guard, both classifiers, and password-leak detection on output |
+| 10 | Decision model | `decision_model_guard`: an Ollama decision model (`DECISION_MODEL`, default `d1-omni:600m`) scores each prompt through `/v1/systemone`, blocking at `DECISION_THRESHOLD`. Fails closed if Ollama can't be reached |
+| 11 | Triage Hijack | No LLM: `triage_ticket` has the decision model choose a helpdesk action from the player's ticket (a `choice` question). `open_vault` reveals the password; the ticket's author record says unverified customer |
+| 12 | Poisoned Plugin | `install plugin <name>: <description>` skips the chat guard and lands in the instructions. The API key is in the prompt, replies are leak-guarded, and `call_plugin` echoes its arguments unguarded |
+| 13 | False Memories | Chat about the vault is blocked; `remember: <fact>` is saved unscreened and loaded as trusted facts. `open_vault` returns the password |
+| 14 | Trojan Review | Code in a fenced block only; the note outside it is screened, comments in the code are not. The deploy key is in the prompt; only tool results are leak-guarded |
+| 15 | Hold the Fort | Input guard, both classifiers, the decision model, and password-leak detection on output |
 
 ## Tools (`tools.py`)
 
@@ -94,7 +99,8 @@ make prepare-flags                                              # seed LanceDB a
 cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000    # or: uv run adk api_server
 ```
 
-Needs Ollama with the model pulled (`ollama pull qwen3:0.6b`), or `USE_GEMINI=1`. The guard models download from
+Needs Ollama with the model pulled (`ollama pull qwen3:0.6b`), or `USE_GEMINI=1`. Levels 10, 11 and 15 also need the
+decision model in Ollama (`ollama pull d1-omni:600m`), even when the agents run on Gemini. The guard models download from
 Hugging Face on first use, or at container start (`DOWNLOAD_MODELS`).
 
 ## Tests

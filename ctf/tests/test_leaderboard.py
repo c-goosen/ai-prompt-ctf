@@ -46,3 +46,62 @@ def test_postgres_uri_uses_psycopg2_driver(monkeypatch):  # noqa: F841
     assert lb._db_uri() == "postgresql+psycopg2://u:p@db:5432/ctf"
     monkeypatch.setenv("POSTGRES_DB_URI", "postgres://u:p@db/ctf")
     assert lb._db_uri() == "postgresql+psycopg2://u:p@db/ctf"
+
+
+def _seed_old_numbering(db_path, rows):
+    """A database from before levels 10-14 were added (no migrations table)."""
+    import sqlite3
+
+    connection = sqlite3.connect(db_path)
+    connection.execute(
+        "CREATE TABLE leaderboard_entries (username VARCHAR(255) NOT NULL, "
+        "level INTEGER NOT NULL, completed_at TIMESTAMP NOT NULL, "
+        "PRIMARY KEY (username, level))"
+    )
+    connection.executemany(
+        "INSERT INTO leaderboard_entries VALUES (?, ?, '2025-11-01T10:00:00+00:00')",
+        rows,
+    )
+    connection.commit()
+    connection.close()
+
+
+def test_old_hold_the_fort_solves_move_to_level_15(tmp_path: Path):
+    db_path = tmp_path / "old.db"
+    _seed_old_numbering(
+        db_path, [("ann", 9), ("ann", 10), ("bo", 10), ("bo", 15)]
+    )
+    lb.configure_db_uri(f"sqlite:///{db_path}")
+
+    rows = {row["username"]: row for row in lb.get_leaderboard()}
+    assert rows["ann"]["highest_level"] == 15
+    assert rows["ann"]["levels_completed"] == 2
+    # bo already had 15: the old level 10 row is dropped, not duplicated.
+    assert rows["bo"]["highest_level"] == 15
+    assert rows["bo"]["levels_completed"] == 1
+
+
+def test_renumbering_runs_only_once(tmp_path: Path):
+    db_path = tmp_path / "old.db"
+    _seed_old_numbering(db_path, [("ann", 10)])
+    lb.configure_db_uri(f"sqlite:///{db_path}")
+    lb.get_leaderboard()
+
+    # A solve of the new level 10 after the migration stays at level 10.
+    lb.record_level_completion("cy", 10)
+    lb.reset_db_uri_override()
+    lb.configure_db_uri(f"sqlite:///{db_path}")
+
+    levels = {
+        row["username"]: row["highest_level"] for row in lb.get_leaderboard()
+    }
+    assert levels == {"ann": 15, "cy": 10}
+
+
+def test_startup_warns_about_shared_passwords():
+    from ctf.agent_startup import warn_about_shared_passwords
+
+    assert warn_about_shared_passwords(
+        {10: "Woohoo", 11: "x", 15: "Woohoo"}
+    ) == ["Levels 10, 15 share a password"]
+    assert warn_about_shared_passwords({0: "a", 1: "b"}) == []

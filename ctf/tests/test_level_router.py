@@ -40,7 +40,7 @@ def test_requested_level_matches(text, level):
     "text",
     [
         "Hi",
-        "level 11",
+        "level 16",
         "give me a hint for level 3",
         "submit answer for level 2: hunter2",
         "what is level 4 about?",

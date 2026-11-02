@@ -17,7 +17,7 @@ Open http://127.0.0.1:8000 and pick the `sub_agents` app. API docs are at http:/
 
 Requirements:
 - Ollama at `OLLAMA_API_BASE` (default `http://127.0.0.1:11434`) with the model pulled (`ollama pull qwen3:0.6b`),
-  or `USE_GEMINI=1` and a Gemini API key.
+  or `USE_GEMINI=1` and a Gemini API key. Levels 10, 11 and 15 also need `ollama pull d1-omni:600m` (Ollama 0.40+).
 - The same `PASSWORD_*` and `POSTGRES_DB_URI` settings as the web app, if you also run it. Without
   `POSTGRES_DB_URI`, both use `ctf/leaderboard.db`.
 
@@ -37,4 +37,6 @@ These are the same messages the web app's `/level`, `/hint` and `/submit` comman
 - **No agents found**: run from `ctf/agents`, so `sub_agents/agent.py` is found.
 - **Password search fails**: the LanceDB table hasn't been seeded. Run `make prepare-flags`.
 - **The first guarded message is slow**: levels 6, 7 and 10 load their Hugging Face classifier models on first use.
+- **Levels 10, 11 and 15 report the decision model "unavailable"**: Ollama can't serve `DECISION_MODEL`. Pull it, and check that
+  Ollama is 0.40 or later (`ollama --version`), which added `/v1/systemone`.
 - **Model errors**: check that Ollama is running and has the model (`ollama list`).

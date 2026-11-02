@@ -70,7 +70,7 @@ docker run -p 8000:8000 \
 ### Shared by `adk-api` and `web` (`x-shared-env` in docker-compose.yml)
 - `POSTGRES_DB_URI` - Leaderboard database, built from `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` (default `ctf`).
   Both services must use the same database: the agent records completions, the web app shows them.
-- `PASSWORD_ZERO` … `PASSWORD_TEN` - Level passwords. The web app needs them to redact RAG tool output.
+- `PASSWORD_ZERO` … `PASSWORD_FIFTEEN` - Level passwords. The web app needs them to redact RAG tool output.
 
 ### Web app
 - `ADK_API_URL` - URL of the ADK API server (Compose: `http://adk-api:8000`)
@@ -86,10 +86,13 @@ docker run -p 8000:8000 \
 - `GEMINI_MODEL_NAME` - Gemini model when `USE_GEMINI=1`
 - `OPENAI_API_KEY` - OpenAI API key (use with `OPENSOURCE_LLM_MODEL=openai/...` on `prod`)
 - `PREPARE_FLAGS` - Seed the level passwords into LanceDB and level 5's users.db when the container starts. Read by `ctf/agent_startup.py`, which runs before `adk web`. Off when unset, but Compose sets it to `1`; set `0` to skip. Outside Docker, run `make prepare-flags`
+- `DECISION_MODEL` - The decision model for levels 10, 11 and 15, an [Ollama decision model](https://ollama.com/search?c=decision) called through `/v1/systemone` (default `d1-omni:600m`; needs Ollama 0.40+). `ollama-init` pulls it too
+- `DECISION_THRESHOLD` - Attack probability at which levels 10 and 15 block a prompt (default `0.5`)
 - `DOWNLOAD_MODELS` - `0` to skip pre-downloading the Hugging Face guard models on start
 
 ### Ollama (`default` profile only)
 - `OLLAMA_MODEL` - Model to pull on startup (default: `qwen3:0.6b`, matches `OPENSOURCE_LLM_MODEL`)
+- `DECISION_MODEL` - Pulled on startup as well, for levels 10, 11 and 15 (default: `d1-omni:600m`)
 
 ### Compose
 - `COMPOSE_PROFILES` - `default` or `prod` (see `.env.example`)

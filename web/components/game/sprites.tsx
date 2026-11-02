@@ -1,6 +1,6 @@
 /**
  * Tower-defence sprites for the quest map, drawn inline in the neon palette:
- * guard towers (one per level), the level 10 fortress, and the player's
+ * guard towers (one per level), the final level's fortress, and the player's
  * gremlins. Decorative; the map's buttons carry the accessible labels.
  */
 
@@ -65,7 +65,7 @@ export function Tower({ state, className }: { state: TowerState; className?: str
   );
 }
 
-/** The level 10 boss: a two-towered fortress with a gate. 72x60. */
+/** The final level's boss: a two-towered fortress with a gate. 72x60. */
 export function Fortress({ state, className }: { state: TowerState; className?: string }) {
   if (state === "destroyed") {
     return (

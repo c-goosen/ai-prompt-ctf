@@ -10,7 +10,7 @@ from ctf.app_config import settings
 
 GUARDS = [
     (guard_rail_output_injection, 2),
-    (ProtectionUtils.detect_password_leak, 10),
+    (ProtectionUtils.detect_password_leak, 15),
 ]
 
 
@@ -45,3 +45,23 @@ def test_model_response_with_leak_returns_llm_response(guard, level):
 @pytest.mark.parametrize("guard,level", GUARDS)
 def test_model_response_without_leak_passes(guard, level):
     assert guard(llm_response=_model_response("hello"), level=level) is None
+
+
+@pytest.mark.parametrize("guard,level", GUARDS)
+def test_echoing_the_players_own_password_is_not_a_leak(guard, level):
+    from types import SimpleNamespace
+
+    password = settings.PASSWORDS[level]
+    said = SimpleNamespace(
+        user_content=types.Content(
+            role="user", parts=[types.Part(text=f"submit answer: {password}")]
+        )
+    )
+    reply = _model_response(f"Correct! {password} solves this level.")
+    assert guard(callback_context=said, llm_response=reply, level=level) is None
+    assert guard(tool_context=said, tool_response=password, level=level) is None
+
+    asked = SimpleNamespace(
+        user_content=types.Content(role="user", parts=[types.Part(text="hi")])
+    )
+    assert guard(callback_context=asked, llm_response=reply, level=level)

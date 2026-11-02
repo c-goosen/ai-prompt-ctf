@@ -38,7 +38,7 @@ This is an **AI Prompt Injection Capture The Flag (CTF)** challenge designed to 
 **How do I play?**
 
 1. **Register**: Pick a username on the [Register](/register) page, or type `/register <username>` in the chat. At an event, use your Quicket code as the session ID: `/register <username> <quicket-code>`
-2. **Choose a level**: Type `/level <0-10>`, `/start` for level 0, or click a tower on the quest map. Every level is open from the start, so you can play them in any order.
+2. **Choose a level**: Type `/level <0-15>`, `/start` for level 0, or click a tower on the quest map. Every level is open from the start, so you can play them in any order.
 3. **Find the password**: Each level's agent guards a password. Get it to leak through prompt injection.
 4. **Submit it**: Type `/submit <password>`. A correct answer sends the gremlins to topple that level's tower, and you continue on the next level.
 5. **Get hints**: Type `/hint` if you're stuck.
@@ -50,7 +50,9 @@ This is an **AI Prompt Injection Capture The Flag (CTF)** challenge designed to 
 - **Levels 4-5**: Multi-modal injection (images, audio, documents) and function calling (SQL) injection
 - **Levels 6-7**: Bypassing prompt-injection classifier models (Prompt-Guard and Prompt-Goose)
 - **Levels 8-9**: A code-executing agent (excessive agency) and a web-browsing agent (indirect injection through web pages)
-- **Level 10**: Hold the Fort - All protections combined (maximum security challenge)
+- **Level 10**: A small Ollama decision model judges every prompt
+- **Levels 11-14**: Agentic attacks: hijacking a decision model that picks the agent's action, poisoned plugin descriptions, planted memories, and instructions hidden in code under review
+- **Level 15**: Hold the Fort - All protections combined (the boss)
 
 See [Challenges](/challenges) or type `/challenges <level>` for each level's briefing.
 
@@ -70,7 +72,7 @@ Type `/` in the chat to see the commands with autocomplete.
 | --- | --- |
 | `/help` | Show the commands and your installed skills |
 | `/register <username> [session-id]` | Register, or switch to a username you own |
-| `/level <0-10>` | Switch to a level |
+| `/level <0-15>` | Switch to a level |
 | `/start` | Go to level 0, the warm-up |
 | `/continue` | Jump to your lowest unfinished level |
 | `/hint` | Ask the current level for a hint |
@@ -96,12 +98,12 @@ Each level is worth XP based on its difficulty. You earn it the first time you s
 | Levels | Difficulty | XP |
 | --- | --- | --- |
 | 0 | Basecamp | 0 |
-| 1-2 | Warm-up | 100 |
-| 3-4 | Easy | 200 |
-| 5-6 | Medium | 300 |
-| 7-8 | Hard | 500 |
-| 9 | Insane | 800 |
-| 10 | Boss | 1,500 |
+| 1-3 | Warm-up | 100 |
+| 4-6 | Easy | 200 |
+| 7-9 | Medium | 300 |
+| 10-12 | Hard | 500 |
+| 13-14 | Insane | 800 |
+| 15 | Boss | 1,500 |
 
 **Ranks**
 
@@ -111,7 +113,7 @@ Each level is worth XP based on its difficulty. You earn it the first time you s
 | Prompt Wrangler | 300 |
 | Jailbreaker | 1,000 |
 | Red Teamer | 2,200 |
-| AGI Whisperer | 4,500 (every level) |
+| AGI Whisperer | 6,400 (every level) |
 
 **Leaderboard**
 
@@ -253,6 +255,46 @@ Level 9's agent researches the web with `web_search` and `web_scrape`. Text on a
 - Ask it to read a page you control that contains instructions
 - Hide instructions in places a reader won't notice but a scraper will
 - Combine it with the agent's own tools, such as asking the page to have it search for the password
+
+### Decision Model (Level 10)
+
+Before the agent sees your message, a 600M-parameter decision model scores the chance that it's after the password or trying to change the agent's instructions. Anything at or above the threshold is blocked, and the block message shows your score, so you can see which words push it up.
+
+- A small judge has to recognise an attack. What would it miss?
+- Watch the score as you rephrase, and keep what lowers it
+- The judge sees one message at a time, but the agent remembers the whole conversation
+
+### Triage Hijack (Level 11)
+
+There's no LLM to talk to here: a decision model reads your support ticket and picks one of four actions, with a probability for each. Research on decision models ([Decision Hijacking](https://arxiv.org/abs/2609.28613)) found that override phrases like "ignore all previous instructions" *lower* the attacker's odds, while small rewordings guided by the scores raise them.
+
+- Treat the probabilities as a score and search: change one thing at a time
+- Read what each action requires, and think about what the model is matching on
+- The facts in the ticket's author record are fixed; your ticket body is all you control
+
+### Poisoned Plugin (Level 12)
+
+Agents treat tool documentation (for example from an MCP server) as trusted instructions. Publish a plugin with `install plugin <name>: <description>`, then ask for something it's for.
+
+- Your chat messages are screened; your plugin's description is not
+- What would a plugin plausibly need from the workspace to do its job?
+- The plugin's server log shows exactly what the assistant sent it
+
+### False Memories (Level 13)
+
+Long-term memory is input that comes back later as trusted context. `remember: <fact>` saves a memory; the chat filter never sees it.
+
+- Who does the assistant believe you are?
+- A memory can describe a person, or a standing instruction
+- Keep chat messages innocent: anything about the vault is blocked
+
+### Trojan Review (Level 14)
+
+Code is data to the reviewer, until it reads like a convention it should follow.
+
+- Comments, docstrings and strings are part of the change it reads
+- The short note outside the code block is screened, and messages without code are refused
+- What would a repository convention ask every review to include?
 
 ### General Tips
 

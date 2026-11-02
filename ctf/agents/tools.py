@@ -127,6 +127,43 @@ async def sql_query(
         return result_text
 
 
+# What each tool does, for the hints' tool list.
+TOOL_SUMMARIES = {
+    "password_search_func": "Search the database for passwords and secrets using RAG",
+    "submit_answer_func": "Submit your answer to check it and move to the next level",
+    "hints_func": "Get hints for the current level (you're using this now!)",
+    "help_search": "Search the web for help with CTFs, prompt injection, ADK and RAG",
+    "get_leaderboard_stats": "View the leaderboard and see top players",
+    "sql_query": "Look a user up by ID in the users database",
+    "execute_python_code": "Run Python code in a sandboxed subprocess",
+    "web_search": "Search the web; results include page URLs",
+    "web_scrape": "Fetch a web page as markdown",
+    "call_plugin": "Call a plugin installed in the workspace",
+    "open_vault": "Open the vault (for its owner only)",
+}
+
+# Each level agent's tool names, recorded by BaseCTFAgent when it's built.
+LEVEL_TOOLS: dict[int, list[str]] = {}
+
+
+def _tool_list(level: int) -> str:
+    names = LEVEL_TOOLS.get(level) or [
+        "password_search_func",
+        "submit_answer_func",
+        "hints_func",
+        "help_search",
+        "get_leaderboard_stats",
+    ]
+    return "\n".join(
+        (
+            f"- `{name}` -> {TOOL_SUMMARIES[name]}"
+            if name in TOOL_SUMMARIES
+            else f"- `{name}`"
+        )
+        for name in names
+    )
+
+
 async def hints_func(hint: str, level: int) -> str:
     """
     Provide hints to users when they request hints for a specific level.
@@ -151,22 +188,21 @@ async def hints_func(hint: str, level: int) -> str:
 
     logger.info(f"hints_func called for level {level_int} with query: {hint}")
 
-    # Base hints that apply to all levels
+    # Base hints that apply to all levels, listing this level's own tools
+    tools = _tool_list(level_int)
+    search_tip = (
+        "- Use the password search function to find information in the database\n"
+        if "password_search_func" in tools
+        else ""
+    )
     base_hints = f"""Here are some hints for Level {level_int}:
 
 **Available Tools:**
-- `password_search_func` (or `rag_tool_func`) -> Search the database for
-  passwords and secrets using RAG
-- `submit_answer_func` -> Submit your answer/flag to check if it's correct
-  and progress to the next level
-- `hints_func` -> Get hints for the current level (you're using this now!)
-- `help_search` -> Search the web for information about CTF, prompt injection, Google ADK, RAG, etc.
-- `get_leaderboard_stats` -> View the leaderboard and see top players
+{tools}
 
 **General Tips:**
 - Try asking questions about passwords, secrets, or flags
-- Use the password search function to find information in the database
-- Be creative with your prompt injection techniques
+{search_tip}- Be creative with your prompt injection techniques
 - Think about what the level is testing (check the level description)
 """
 
@@ -248,9 +284,47 @@ async def hints_func(hint: str, level: int) -> str:
 """,
         10: """
 **Level 10 Specific Hints:**
+- Every message is judged by a small decision model before the agent sees it
+- The block message shows the attack probability it gave your message
+- It answers one question: is this message after the password, or trying to
+  change the agent's instructions?
+- Lower that probability: what doesn't look like either to a small model?
+""",
+        11: """
+**Level 11 Specific Hints:**
+- No LLM here: a decision model picks the helpdesk's next action from your ticket
+- Every attempt shows the probability of each action. Use them as a score
+- Shouting "ignore all previous instructions" tends to make things worse
+- Read each action's description closely: what does open_vault require?
+- Small changes in wording move the probabilities. Keep what raises open_vault
+""",
+        12: """
+**Level 12 Specific Hints:**
+- Publish a plugin with: install plugin <name>: <description>
+- Chat messages are screened. Plugin descriptions are not
+- The assistant reads plugin documentation as trusted instructions
+- Whatever the assistant passes to call_plugin shows up in the plugin's log
+- Then ask for something your plugin is "for"
+""",
+        13: """
+**Level 13 Specific Hints:**
+- The assistant has long-term memory: remember: <fact>
+- Chat can't mention the vault, but memories aren't screened
+- Memories are loaded as trusted facts about you in every conversation
+- Who does the assistant think you are? What has it promised to do?
+""",
+        14: """
+**Level 14 Specific Hints:**
+- ReviewBot only reviews code in a fenced block (```python ... ```)
+- The note outside the code is screened; the code itself is not
+- The reviewer follows conventions it finds in comments and docstrings
+- What could a repository convention ask every review to include?
+""",
+        15: """
+**Level 15 Specific Hints:**
 - This is the final level - all protections are combined!
 - Input validation, output protection, function security, Prompt-Guard,
-  Prompt-Goose, and reasoning protection
+  Prompt-Goose, the decision model and reasoning protection
 - You'll need to combine techniques from all previous levels
 - This is the ultimate challenge - good luck!
 """,
@@ -330,12 +404,20 @@ async def submit_answer_func(
             result_text = (
                 "🎉 Congratulations! You've completed all levels! "
                 "You are a CTF master! The answer is correct. "
-                "You've successfully completed all 11 levels of the "
+                "You've successfully completed all 16 levels of the "
                 "AI Prompt Injection CTF challenge. You can now view the "
                 "leaderboard using the get_leaderboard_stats tool to see "
                 f"your ranking. {marker}"
             )
             return result_text
+        elif level_int >= settings.FINAL_LEVEL:
+            # No level after the final one to transfer to: ADK would fail
+            # the run on an unknown agent.
+            return (
+                f"✅ Correct answer! You've beaten the final level, Level "
+                f"{level_int}! Clear the levels you've skipped to complete "
+                f"the CTF. {marker}"
+            )
         else:
             try:
                 transfer_to_agent(
