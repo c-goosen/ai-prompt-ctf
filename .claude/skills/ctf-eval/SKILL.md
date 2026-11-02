@@ -22,6 +22,6 @@ Easiest path: record a session in `adk web` (see the `run-ctf` skill), save it a
 ## Running
 Needs a model: Ollama on `OLLAMA_API_BASE` with `qwen3:0.6b` pulled (or `USE_GEMINI=1` + key in `.env`, which the test loads).
 ```bash
-uv run pytest ctf/tests/eval/ -s
+uv run pytest ctf/tests/eval/ -m llm_eval -s
 ```
 Small models are noisy; with `num_runs=5`, read the per-case scores and don't loosen thresholds just to make a case pass.

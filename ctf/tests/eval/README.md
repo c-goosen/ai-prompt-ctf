@@ -9,9 +9,9 @@ This directory contains evaluation tests for the CTF agents using Google ADK's `
 
 ## Running Evaluations
 
-Run all evaluation tests:
+Evaluations need a real model, so they are deselected by default and do not run in CI. Run all evaluation tests:
 ```bash
-uv run pytest ctf/tests/eval/
+uv run pytest ctf/tests/eval/ -m llm_eval
 ```
 
 Run a specific test:
