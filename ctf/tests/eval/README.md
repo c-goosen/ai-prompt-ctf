@@ -16,7 +16,7 @@ uv run pytest ctf/tests/eval/ -m llm_eval
 
 Run a specific test:
 ```bash
-uv run pytest ctf/tests/eval/test_agents.py::test_sub_agents
+uv run pytest ctf/tests/eval/test_agents.py::test_sub_agents -m llm_eval
 ```
 
 ## Evaluation Data Format
