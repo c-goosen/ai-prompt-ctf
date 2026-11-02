@@ -8,3 +8,10 @@ minimumReleaseAgeExclude:
   - framer-motion@14.5.0
   - motion-dom@14.5.0
   - motion@14.5.0
+overrides:
+  # Dependabot #428, #431-434: miniflare pins a vulnerable undici.
+  undici@7: ">=7.30.1 <8"
+  # Dependabot #424: @shuding/opentype.js resolves a vulnerable fflate.
+  fflate@0: ">=0.7.5 <0.8"
+  # Dependabot #429: @tailwindcss/typography pins a vulnerable version.
+  postcss-selector-parser@6: "6.1.5"
