@@ -25,3 +25,5 @@ Needs a model: Ollama on `OLLAMA_API_BASE` with `qwen3:0.6b` pulled (or `USE_GEM
 uv run pytest ctf/tests/eval/ -m llm_eval -s
 ```
 Small models are noisy; with `num_runs=5`, read the per-case scores and don't loosen thresholds just to make a case pass.
+
+If you changed Python (such as the runner in `ctf/tests/eval/`), run `make format`, then `make ci-lint`. `.evalset.json` files aren't covered by either.

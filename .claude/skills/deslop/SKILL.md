@@ -13,4 +13,8 @@ This includes:
 - Casts to any to get around type issues
 - Any other style that is inconsistent with the file
 
+Then format and lint what you changed, and fix anything they report:
+- Python: `make format`, then `make ci-lint`
+- `web/`: `pnpm --dir web lint && pnpm --dir web typecheck`
+
 Report at the end with only a 1-3 sentence summary of what you changed

@@ -1,6 +1,6 @@
 ---
 name: ctf-check
-description: Run the same lint, type and test checks as CI locally, for the Python agent (black, flake8, pytest) and the Next.js web app (eslint, tsc, vitest, vinext/Next/Workers builds). Use before committing or pushing, or when the user asks to run checks, lint, or tests.
+description: Apply formatting, then run the same lint, type and test checks as CI locally, for the Python agent (black, flake8, pytest) and the Next.js web app (eslint, tsc, vitest, vinext/Next/Workers builds). Use before committing or pushing, or when the user asks to format code or run checks, lint, or tests.
 ---
 
 # Run CI checks locally
@@ -8,11 +8,11 @@ description: Run the same lint, type and test checks as CI locally, for the Pyth
 Mirrors `.github/workflows/ci.yml`: a Python job (`make ci-lint`, `make ci-test`) and a `web` job.
 
 ## Python agent
-1. `uv sync --dev --locked`
-2. `make ci-lint` — `black --check`, `flake8` (both skip `web/`)
-   - If black fails: `make format`, then re-run.
+1. `uv sync --dev --locked` — black's style changes between releases, so an out-of-date local version can pass files that CI rejects.
+2. `make format` — applies black in place. A black bump in `uv.lock` can reformat files you didn't touch; commit those too, or CI fails.
+3. `make ci-lint` — `black --check`, `flake8` (both skip `web/`)
    - Fix flake8 findings by hand; don't add `# noqa` unless the line is a long prompt string (existing convention).
-3. Tests with CI's environment:
+4. Tests with CI's environment:
    ```bash
    OPENAI_API_KEY="" HUGGINGFACE_API_KEY="" PYTEST_CURRENT_TEST=true make ci-test
    ```
