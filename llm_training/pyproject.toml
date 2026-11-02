@@ -5,9 +5,9 @@ description = ""
 authors = [{ name = "Christo Goosen", email = "christogoosen@gmail.com" }]
 requires-python = ">=3.13,<3.15"
 dependencies = [
-    "transformers[torch]>=4.51.1,<5",
+    "transformers[torch]>=5.10,<6",
     "accelerate>=1.5.2,<2",
-    "huggingface-hub[hf-xet]>=0.30.2,<0.31",
+    "huggingface-hub[hf-xet]>=1,<2",
     "jupyter>=1.0.0,<2",
     "datasets>=5.0.0,<6",
     "evaluate>=0.4.1,<0.5",
