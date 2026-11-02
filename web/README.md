@@ -29,7 +29,7 @@ the scripts above run first.
 
 | Path | What |
 |---|---|
-| `app/` | Pages (`/`, `/ctf`, `/ctf/[sessionId]`, `/leaderboard`, `/register`, `/faq`, `/challenges`) and route handlers (`/v1/chat/completions`, `/api/register`, `/api/chat/history`, `/api/chat/status`, `/api/skills`, `/session/[username]/[sessionId]`, `/health`) |
+| `app/` | Pages (`/`, `/ctf`, `/ctf/<session>` (older links), `/ctf/<username>/<session>`, `/leaderboard`, `/register`, `/faq`, `/challenges`) and route handlers (`/v1/chat/completions`, `/api/register`, `/api/chat/history`, `/api/chat/status`, `/api/skills`, `/session/[username]/[sessionId]`, `/health`) |
 | `components/` | UI. `components/chat/` is the chat (start screen, messages, input), `components/game/` the quest map, sprites and siege animation, and `components/watermelon/` the adapted Watermelon components |
 | `content/` | `faq.md` and `challenges.md`, shown on `/faq` and `/challenges` and by the `/faq` and `/challenges` commands |
 | `lib/` | Server logic: `adk` (ADK client), `runs` (agent runs that outlive the request), `events` + `redact` (message parsing, password redaction, solve detection), `slash` + `commands` (slash commands), `skills`, `identity` + `register` (username ownership), `leaderboard`, `progress` (XP, ranks, quest position), `challenges` (parsing and difficulty), `db` (Postgres or SQLite), `rate-limit`, `config` |
@@ -47,6 +47,7 @@ the scripts above run first.
 | `PASSWORD_ZERO` … `PASSWORD_FIFTEEN` | `PASS_ZERO` … | Level passwords, used to redact RAG tool output |
 | `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` | see `lib/config.ts` | Branding |
 | `COOKIE_SECURE` | on in production | Set `0` when serving production builds over plain http |
+| `SITE_URL` | unset | Public URL of the site, so link previews can find their image |
 | `HOST`, `PORT` | `0.0.0.0`, `3000` | Standalone server bind address |
 
 ## Cloudflare Workers

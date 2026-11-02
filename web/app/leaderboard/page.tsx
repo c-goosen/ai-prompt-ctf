@@ -129,7 +129,7 @@ export default async function LeaderboardPage() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-neon-teal opacity-75 motion-reduce:hidden" />
             <span className="relative inline-flex size-2 rounded-full bg-neon-teal" />
           </span>
-          Ranked by highest level reached, then by who got there first. Updates every 30 seconds.
+          Ranked by highest level reached, then levels cleared, then who got there first. Updates every 30 seconds.
         </span>
       }
     >

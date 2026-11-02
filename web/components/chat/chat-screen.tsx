@@ -12,7 +12,7 @@ import { QuestMap } from "@/components/game/quest-map";
 import { MessageEnter } from "@/components/watermelon/inline-toast";
 import { LabeledProgressIndicator } from "@/components/watermelon/labeled-progress-indicator";
 import type { ChatMessage } from "@/lib/events";
-import { currentLevel, newlyCleared, rankFor, totalXp, xpFor } from "@/lib/progress";
+import { completesRun, currentLevel, newlyCleared, rankFor, totalXp, xpFor } from "@/lib/progress";
 import { allCommands, commandSuggestions, completeCommand, MAX_LEVEL, type CommandInfo, type Skill } from "@/lib/slash";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,7 @@ export function ChatScreen({
   initialMessages,
   initialSkills,
   registered,
+  username: initialUsername,
   sessionId: initialSessionId,
   levels,
   completedLevels,
@@ -49,7 +50,8 @@ export function ChatScreen({
   /** For autocomplete; refreshed after each `/skills` command. */
   initialSkills: Array<Pick<Skill, "name" | "description">>;
   registered: boolean;
-  /** The session shown, kept in the URL as /ctf/<session> so it can be bookmarked. */
+  /** The player and session shown, kept in the URL as /ctf/<username>/<session> so it can be bookmarked. */
+  username: string | null;
   sessionId: string | null;
   levels: LevelSummary[];
   /** Levels the player is on the board for; null when not registered. */
@@ -66,6 +68,7 @@ export function ChatScreen({
   const [resuming, setResuming] = useState(running);
   const [alert, setAlert] = useState<Alert | null>(registered ? null : { kind: "register" });
   const [skills, setSkills] = useState(initialSkills);
+  const [username, setUsername] = useState(initialUsername);
   const [sessionId, setSessionId] = useState(initialSessionId);
   const [selected, setSelected] = useState(0);
   const [dismissed, setDismissed] = useState(false);
@@ -77,7 +80,7 @@ export function ChatScreen({
     textInput.current?.focus();
   }, []);
   const fileInput = useRef<HTMLInputElement>(null);
-  const textInput = useRef<HTMLInputElement>(null);
+  const textInput = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const turnRef = useRef<HTMLDivElement>(null);
 
@@ -113,51 +116,14 @@ export function ChatScreen({
     endRef.current?.scrollIntoView({ block: "end" });
   }, []);
 
-  // Show the session in the address bar (/ and /ctf included) without a navigation.
+  // Show the player and session in the address bar (/ and /ctf included) without a navigation.
   useEffect(() => {
-    const path = sessionId ? `/ctf/${encodeURIComponent(sessionId)}` : null;
+    const path =
+      username && sessionId ? `/ctf/${encodeURIComponent(username)}/${encodeURIComponent(sessionId)}` : null;
     if (path && window.location.pathname !== path) {
       window.history.replaceState(window.history.state, "", path);
     }
-  }, [sessionId]);
-
-
-  // Poll a run started before the page loaded, then show its reply.
-  useEffect(() => {
-    if (!resuming) {
-      return;
-    }
-    const query = sessionId ? `?session=${encodeURIComponent(sessionId)}` : "";
-    let stopped = false;
-    const timer = setInterval(async () => {
-      try {
-        const status = await (await fetch(`/api/chat/status${query}`)).json();
-        if (stopped || status.running) {
-          return;
-        }
-        stopped = true;
-        clearInterval(timer);
-        const body = await (await fetch(`/api/chat/history${query}`)).json();
-        if (Array.isArray(body.messages)) {
-          setEntries(toEntries(body.messages as ChatMessage[], true));
-        }
-        if (Array.isArray(body.progress)) {
-          updateProgress(body.progress as number[]);
-        }
-      } catch {
-        // Try again on the next tick.
-        return;
-      }
-      setResuming(false);
-      setPending(false);
-    }, RESUME_POLL_MS);
-    return () => {
-      stopped = true;
-      clearInterval(timer);
-    };
-    // updateProgress reads the latest progress when the run ends; re-polling on each change isn't wanted.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resuming, sessionId]);
+  }, [username, sessionId]);
 
   // A new prompt scrolls up to the top of the view, and its reply fills in below it.
   useEffect(() => {
@@ -206,6 +172,10 @@ export function ChatScreen({
         const replies = toEntries(body.messages as ChatMessage[], true);
         // /newsession: the old conversation belongs to the previous session.
         setEntries((prev) => (body.newSession ? replies : [...prev, ...replies]));
+        // /register can switch players; /newsession only moves the session.
+        if (typeof body.username === "string") {
+          setUsername(body.username);
+        }
         if (typeof body.sessionId === "string") {
           setSessionId(body.sessionId);
         }
@@ -252,8 +222,10 @@ export function ChatScreen({
     // The agent moves the player to the next level; after the final one,
     // point back at the lowest level still standing, if any.
     const following = Math.max(...solved) + 1;
-    const upcoming = following <= MAX_LEVEL ? following : currentLevel([...after, ...solved]);
+    const complete = completesRun(before, [...after, ...solved]);
+    const upcoming = complete ? null : following <= MAX_LEVEL ? following : currentLevel([...after, ...solved]);
     setLevelUp({
+      complete,
       levels: solved,
       xp: firstClears.reduce((sum, level) => sum + xpFor(level), 0),
       rank: progress && afterRank !== beforeRank ? afterRank : undefined,
@@ -263,6 +235,43 @@ export function ChatScreen({
           : { level: upcoming, title: levels.find((level) => level.level === upcoming)?.title ?? "" },
     });
   }
+
+  // Poll a run started before the page loaded, then show its reply.
+  useEffect(() => {
+    if (!resuming) {
+      return;
+    }
+    const query = sessionId ? `?session=${encodeURIComponent(sessionId)}` : "";
+    let stopped = false;
+    const timer = setInterval(async () => {
+      try {
+        const status = await (await fetch(`/api/chat/status${query}`)).json();
+        if (stopped || status.running) {
+          return;
+        }
+        stopped = true;
+        clearInterval(timer);
+        const body = await (await fetch(`/api/chat/history${query}`)).json();
+        if (Array.isArray(body.messages)) {
+          setEntries(toEntries(body.messages as ChatMessage[], true));
+        }
+        if (Array.isArray(body.progress)) {
+          updateProgress(body.progress as number[]);
+        }
+      } catch {
+        // Try again on the next tick.
+        return;
+      }
+      setResuming(false);
+      setPending(false);
+    }, RESUME_POLL_MS);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
+    // updateProgress reads the latest progress when the run ends; re-polling on each change isn't wanted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resuming, sessionId]);
 
   function changeInput(value: string) {
     setInput(value);
@@ -280,21 +289,31 @@ export function ChatScreen({
     textInput.current?.focus();
   }
 
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!active) {
-      return;
+  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    // Shift+Enter adds a line; Enter confirming IME composition isn't a send.
+    const enter = event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing;
+    if (active) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const step = event.key === "ArrowDown" ? 1 : -1;
+        setSelected((suggestions.indexOf(active) + step + suggestions.length) % suggestions.length);
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setDismissed(true);
+        return;
+      }
+      if (event.key === "Tab" || (enter && input.trim() !== `/${active.name}`)) {
+        // Enter runs a fully typed command; otherwise it completes, like Tab.
+        event.preventDefault();
+        pick(active);
+        return;
+      }
     }
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    if (enter) {
       event.preventDefault();
-      const step = event.key === "ArrowDown" ? 1 : -1;
-      setSelected((suggestions.indexOf(active) + step + suggestions.length) % suggestions.length);
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      setDismissed(true);
-    } else if (event.key === "Tab" || (event.key === "Enter" && input.trim() !== `/${active.name}`)) {
-      // Enter runs a fully typed command; otherwise it completes, like Tab.
-      event.preventDefault();
-      pick(active);
+      void send(input.trim());
     }
   }
 
@@ -375,14 +394,15 @@ export function ChatScreen({
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         />
         <div className="flex px-4 py-3">
-          <input
+          <textarea
             ref={textInput}
             name="text_input"
+            rows={1}
             value={input}
             onChange={(event) => changeInput(event.target.value)}
             onKeyDown={onKeyDown}
             disabled={pending}
-            placeholder="Message PwnGPT… (type / for commands)"
+            placeholder="Message PwnGPT… (type / for commands, Shift+Enter for a new line)"
             aria-label="Message"
             role="combobox"
             aria-expanded={active !== undefined}
@@ -390,7 +410,7 @@ export function ChatScreen({
             aria-autocomplete="list"
             aria-activedescendant={active ? `command-${active.name.replace(" ", "-")}` : undefined}
             autoComplete="off"
-            className="min-w-0 flex-1 bg-transparent text-base/6 outline-none placeholder:text-white/45 disabled:opacity-60"
+            className="field-sizing-content max-h-48 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent text-base/6 outline-none placeholder:text-white/45 disabled:opacity-60"
           />
         </div>
         <div className="flex items-center gap-4 px-3 pt-1.5 pb-3">

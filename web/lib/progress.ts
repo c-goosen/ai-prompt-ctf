@@ -61,6 +61,11 @@ export function currentLevel(levels: number[]): number | null {
   return null;
 }
 
+/** Whether `after` cleared the last level still standing in `before`, in any order. */
+export function completesRun(before: number[], after: number[]): boolean {
+  return currentLevel(before) !== null && currentLevel(after) === null;
+}
+
 /** Levels cleared since `before` (Basecamp excluded), lowest first. */
 export function newlyCleared(before: number[], after: number[]): number[] {
   return after.filter((level) => level > 0 && !before.includes(level)).sort((a, b) => a - b);

@@ -117,7 +117,7 @@ Each level is worth XP based on its difficulty. You earn it the first time you s
 
 **Leaderboard**
 
-Players are ranked by the highest level they've solved, then by who got there first. A solve only counts when the agent's `submit_answer_func` tool checks the password. Getting the model to *say* you won doesn't count.
+Players are ranked by the highest level they've solved, then by how many levels they've cleared, then by who got there first. A solve only counts when the agent's `submit_answer_func` tool checks the password. Getting the model to *say* you won doesn't count.
 
 ## RAG?
 

@@ -12,11 +12,20 @@ DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/$(DOCKER_CONTAINER_NAME)
 COMPOSE_CMD ?= docker compose
 COMPOSE_SERVICES ?= adk-api web
 
-.PHONY: run run-prod prepare-flags
+.PHONY: run run-prod run-remote prepare-flags
 run:
 	$(COMPOSE_CMD) --profile default up --build $(COMPOSE_SERVICES)
 
 run-prod:
+	$(COMPOSE_CMD) --profile prod up --build $(COMPOSE_SERVICES)
+
+# Use an Ollama outside Compose, from OLLAMA_API_BASE in the environment or .env.
+# Without it, the agent would fall back to the local container, which isn't started.
+run-remote:
+	@if $(COMPOSE_CMD) --profile prod config adk-api | grep -q 'OLLAMA_API_BASE: http://ollama:'; then \
+		echo "Set OLLAMA_API_BASE in .env, or: make run-remote OLLAMA_API_BASE=http://<host>:11434" >&2; \
+		exit 1; \
+	fi
 	$(COMPOSE_CMD) --profile prod up --build $(COMPOSE_SERVICES)
 
 # Seed the level passwords (LanceDB RAG store + level 5 users.db) locally,

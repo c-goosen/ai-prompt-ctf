@@ -105,7 +105,7 @@ export function Sidebar({ discordUrl }: { discordUrl: string }) {
       {/* Mobile: top bar with a slide-in drawer. */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar/90 px-3 backdrop-blur md:hidden">
         <Link href="/ctf" prefetch={false} className="flex items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <Image src="/images/pwngpt-mark.svg" alt="" width={32} height={32} unoptimized className="size-8" />
+          <Image src="/images/pwngpt-mark.webp" alt="" width={32} height={32} unoptimized className="size-8" />
           <span className="font-mono text-lg font-extrabold tracking-tight text-neon-pink">
             Pwn<span className="text-white">GPT</span>
           </span>
@@ -152,7 +152,7 @@ export function Sidebar({ discordUrl }: { discordUrl: string }) {
             </button>
           </div>
           <Image
-            src="/images/pwngpt-logo-hero.svg"
+            src="/images/pwngpt-logo-hero.webp"
             alt="PwnGPT: Agent Hunger Games"
             width={320}
             height={232}
@@ -176,10 +176,10 @@ export function Sidebar({ discordUrl }: { discordUrl: string }) {
           className="flex justify-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
-            <Image src="/images/pwngpt-mark.svg" alt="PwnGPT" width={40} height={40} unoptimized className="size-10" />
+            <Image src="/images/pwngpt-mark.webp" alt="PwnGPT" width={40} height={40} unoptimized className="size-10" />
           ) : (
             <Image
-              src="/images/pwngpt-logo-hero.svg"
+              src="/images/pwngpt-logo-hero.webp"
               alt="PwnGPT: Agent Hunger Games"
               width={320}
               height={232}

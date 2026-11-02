@@ -63,6 +63,23 @@ const zones = DIFFICULTY.map((label, index) => {
   };
 });
 
+// Building [width, height] pairs, repeated along each row of the map.
+const BUILDINGS = [
+  [34, 46], [22, 74], [40, 30], [18, 96], [30, 58], [44, 38], [20, 84], [28, 52], [36, 110], [24, 42], [32, 68],
+];
+
+/** A skyline silhouette along the bottom of a map row, as an SVG path. */
+function skylinePath(baseline: number, start: number): string {
+  let path = `M0 ${baseline}`;
+  let x = 0;
+  for (let i = start; x < WIDTH; i++) {
+    const [width, height] = BUILDINGS[i % BUILDINGS.length];
+    path += `V${baseline - height}H${x + width}`;
+    x += width;
+  }
+  return `${path}V${baseline}z`;
+}
+
 /** Catmull-Rom curve from node i to i+1, as an SVG path. */
 function segmentPath(i: number): string {
   const p0 = NODES[Math.max(i - 1, 0)];
@@ -179,7 +196,7 @@ function Sparks() {
       {sparks.map((spark, i) => (
         <motion.span
           key={i}
-          className="absolute size-1 rounded-full bg-neon-pink shadow-[0_0_6px_#ff2fd5]"
+          className="absolute size-1 rounded-full bg-neon-yellow shadow-[0_0_6px_#fcee0a]"
           initial={{ x: 0, y: 0, opacity: 0 }}
           animate={{ x: spark.x, y: spark.y, opacity: [0, 1, 0] }}
           transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.18, ease: "easeOut" }}
@@ -286,6 +303,7 @@ export function QuestMap({
           <defs>
             <linearGradient id="quest-trail" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" stopColor="#3cfcd1" />
+              <stop offset="0.5" stopColor="#fcee0a" />
               <stop offset="1" stopColor="#ff2fd5" />
             </linearGradient>
             <filter id="quest-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -296,6 +314,8 @@ export function QuestMap({
               </feMerge>
             </filter>
           </defs>
+          <path d={skylinePath(196, 0)} fill="#5c24ff" fillOpacity={0.14} />
+          <path d={skylinePath(HEIGHT, 5)} fill="#ff2fd5" fillOpacity={0.09} />
           {zones.map((zone) => (
             <rect
               key={zone.label}
@@ -303,7 +323,7 @@ export function QuestMap({
               y={zone.y}
               width={zone.width}
               height={zone.height}
-              rx={40}
+              rx={10}
               strokeWidth={1.5}
               strokeDasharray="6 6"
               className={zone.style}

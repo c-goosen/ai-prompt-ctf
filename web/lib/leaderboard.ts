@@ -45,7 +45,7 @@ export async function getLeaderboard(limit = 25): Promise<LeaderboardRow[]> {
             MIN(completed_at) AS first_completed_at
        FROM leaderboard_entries
       GROUP BY username
-      ORDER BY MAX(level) DESC, MIN(completed_at) ASC
+      ORDER BY MAX(level) DESC, COUNT(*) DESC, MIN(completed_at) ASC
       LIMIT $1`,
     [limit],
   );

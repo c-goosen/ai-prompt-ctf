@@ -16,7 +16,7 @@ cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000
 Open http://127.0.0.1:8000 and pick the `sub_agents` app. API docs are at http://127.0.0.1:8000/docs.
 
 Requirements:
-- Ollama at `OLLAMA_API_BASE` (default `http://127.0.0.1:11434`) with the model pulled (`ollama pull qwen3:0.6b`),
+- Ollama at `OLLAMA_API_BASE` (default `http://127.0.0.1:11434`) with the model pulled (`ollama pull qwen3.5:2b`),
   or `USE_GEMINI=1` and a Gemini API key. Levels 10, 11 and 15 also need `ollama pull d1-omni:600m` (Ollama 0.40+).
 - The same `PASSWORD_*` and `POSTGRES_DB_URI` settings as the web app, if you also run it. Without
   `POSTGRES_DB_URI`, both use `ctf/leaderboard.db`.
