@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // The chat page sends the session from its URL (/ctf/<session>). ADK keeps
+  // The chat page sends the session from its URL (/ctf/<username>/<session>). ADK keeps
   // sessions per user, so this can only reach the player's own sessions.
   const requested = form.get("session_id");
   const player = {
@@ -190,6 +190,7 @@ async function registerFromChat(request: NextRequest, args: string) {
     ],
     // A different player's session, so the client drops the old conversation.
     newSession: true,
+    username: outcome.username,
     sessionId: outcome.sessionId,
     progress: await progressOf(outcome.username),
   });

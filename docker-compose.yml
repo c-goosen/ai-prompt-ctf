@@ -51,7 +51,7 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:0.6b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
       # Levels 10, 11 and 15's decision model (ollama.com/search?c=decision).
       DECISION_MODEL: ${DECISION_MODEL:-d1-omni:600m}
     entrypoint: ["/bin/sh", "-c"]
@@ -99,7 +99,7 @@ services:
       PYTHONUNBUFFERED: "1"
       USE_GEMINI: ${USE_GEMINI:-0}
       GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME:-}
-      OPENSOURCE_LLM_MODEL: ${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
+      OPENSOURCE_LLM_MODEL: ${OPENSOURCE_LLM_MODEL:-qwen3.5:2b}
       OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://ollama:11434}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       # Levels 10, 11 and 15's decision model, served by the same Ollama.

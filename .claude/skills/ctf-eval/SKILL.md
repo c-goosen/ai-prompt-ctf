@@ -20,7 +20,7 @@ Use `ctf/agents/eval/eval_level0_to_1_block.evalset.json` as the template:
 Easiest path: record a session in `adk web` (see the `run-ctf` skill), save it as an eval set from the Eval tab, then trim it.
 
 ## Running
-Needs a model: Ollama on `OLLAMA_API_BASE` with `qwen3:0.6b` pulled (or `USE_GEMINI=1` + key in `.env`, which the test loads).
+Needs a model: Ollama on `OLLAMA_API_BASE` with `qwen3.5:2b` pulled (or `USE_GEMINI=1` + key in `.env`, which the test loads).
 ```bash
 uv run pytest ctf/tests/eval/ -m llm_eval -s
 ```

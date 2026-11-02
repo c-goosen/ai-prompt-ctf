@@ -11,7 +11,7 @@ PwnGPT is a prompt injection CTF with 16 levels (0-15). Players attack LLM agent
 | `ctf/tests/` | Python tests | `pytest` |
 | `web/` | UI and non-agent server logic: Next.js 16.4 on vinext (Vite), Tailwind v4, shadcn/ui | Node 24, `pnpm` |
 
-- Models run through Ollama (`qwen3:0.6b`) by default, or Gemini or OpenAI. LanceDB is the vector store.
+- Models run through Ollama (`qwen3.5:2b`) by default, or Gemini or OpenAI. LanceDB is the vector store.
 - Use `uv` for all Python dependencies (`uv add`, `uv remove`, `uv sync`), never `pip` or `poetry`.
 - Use `pnpm` for `web/`, never `npm` or `yarn`.
 
@@ -49,7 +49,7 @@ pnpm --dir web build:cf
 make run                 # full stack in Docker; web app on http://localhost:8100
 ```
 
-Without Docker, the agent needs `ollama serve` and `ollama pull qwen3:0.6b` first (or `USE_GEMINI=1`). Levels 10, 11 and 15 also need `ollama pull d1-omni:600m`, even on Gemini. Then run these in two terminals:
+Without Docker, the agent needs `ollama serve` and `ollama pull qwen3.5:2b` first (or `USE_GEMINI=1`). Levels 10, 11 and 15 also need `ollama pull d1-omni:600m`, even on Gemini. Then run these in two terminals:
 ```bash
 make prepare-flags && cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000
 make web-install && make web-dev    # http://localhost:3000

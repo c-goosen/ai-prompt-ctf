@@ -26,7 +26,7 @@ Browser -> Web app (8100 in Docker, 3000 in dev) -> ADK API Server (8000) -> sub
      agent. For example, `/submit X` sends `submit answer: X`.
 3. Everything else needs the identity cookies. `anon_user_identity` and `session_id` must be well formed, and the
    httpOnly `player_token` must match the stored hash for that username. Otherwise the route returns 401 and never
-   calls ADK. A `session_id` field from `/ctf/<session>` overrides the cookie's session, and ADK keeps sessions per
+   calls ADK. A `session_id` field from `/ctf/<username>/<session>` overrides the cookie's session, and ADK keeps sessions per
    user, so it only reaches the player's own sessions.
 4. `web/lib/adk.ts` makes sure the session exists:
    - `GET /apps/sub_agents/users/{user_id}/sessions/{session_id}`

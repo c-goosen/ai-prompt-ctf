@@ -9,7 +9,7 @@ import { isValidSessionId } from "@/lib/validation";
 /**
  * The caller's chat history and quest progress; empty unless the cookies
  * prove ownership. `?session=` picks one of the player's own sessions (the
- * chat page's /ctf/<session>); ADK keeps sessions per user, so it can't
+ * chat page's /ctf/<username>/<session>); ADK keeps sessions per user, so it can't
  * reach anyone else's.
  */
 export async function GET(request: NextRequest) {

@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { ChatScreen } from "@/components/chat/chat-screen";
 import challengesMarkdown from "@/content/challenges.generated";
 import { getSessionHistory } from "@/lib/adk";
@@ -24,17 +26,23 @@ async function recentSolves() {
 }
 
 /**
- * The chat for /, /ctf and /ctf/<session>. Without a session in the URL it
- * shows the one in the player's cookie.
+ * The chat for /, /ctf, /ctf/<session> and /ctf/<username>/<session>. Without
+ * a session in the URL it shows the one in the player's cookie. Sessions are
+ * always loaded for the signed-in player, so another player's URL is a 404
+ * rather than this player's chat under that name.
  */
-export async function ChatPage({ sessionId }: { sessionId?: string }) {
+export async function ChatPage({ username, sessionId }: { username?: string; sessionId?: string }) {
   const player = await currentPlayer();
+  if (player && username && username !== player.username) {
+    notFound();
+  }
   if (!player) {
     return (
       <ChatScreen
         initialMessages={[]}
         initialSkills={[]}
         registered={false}
+        username={null}
         sessionId={null}
         levels={levels}
         completedLevels={null}
@@ -55,6 +63,7 @@ export async function ChatPage({ sessionId }: { sessionId?: string }) {
       initialMessages={history}
       initialSkills={skills.map(({ name, description }) => ({ name, description }))}
       registered
+      username={player.username}
       sessionId={session}
       levels={levels}
       completedLevels={completedLevels}

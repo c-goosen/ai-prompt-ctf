@@ -13,7 +13,7 @@ How to run the agent and web app without Docker, and how to debug a level. For C
 ```bash
 uv sync
 make web-install   # = pnpm --dir web install --frozen-lockfile
-ollama pull qwen3:0.6b
+ollama pull qwen3.5:2b
 ollama pull d1-omni:600m   # levels 10, 11 and 15, even when the agents run on Gemini
 ```
 

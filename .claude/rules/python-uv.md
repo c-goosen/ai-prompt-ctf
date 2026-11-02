@@ -8,7 +8,7 @@ This project uses the uv package manager. Running anything equates to the follow
 The agents are built with google adk.
 The frontend is a Next.js 16.4 app built with vinext (Vite) + Tailwind CSS in web/ (pnpm, not uv)
 The vector DB is lancedb
-LLMS used are via Ollama and are qwen3:0.6b
+LLMS used are via Ollama and are qwen3.5:2b
 
 Google ADK docs: https://google.github.io/adk-docs/
 

@@ -47,7 +47,7 @@ Then open http://localhost:8100. The first start downloads the models, which can
 
   ![Live leaderboard with stat cards, player rankings and recent completions](docs/screenshots/leaderboard.png)
 
-- **Bookmarkable sessions** at `/ctf/<session-id>`. At events, the session ID can be your Quicket code.
+- **Bookmarkable sessions** at `/ctf/<username>/<session-id>`. At events, the session ID can be your Quicket code.
 - **No accounts.** A username is claimed on first registration, which gives your browser an httpOnly ownership token. Chat history and leaderboard progress are tied to it.
 
 ## Screenshots

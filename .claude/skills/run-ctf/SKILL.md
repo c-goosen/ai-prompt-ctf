@@ -15,18 +15,19 @@ description: Launch the PwnGPT CTF stack locally (Ollama, Python ADK agent, Post
 ```bash
 make run          # = docker compose --profile default up --build adk-api web
 ```
-- Ollama runs in a container; `ollama-init` pulls `qwen3:0.6b` on first start.
+- Ollama runs in a container; `ollama-init` pulls `qwen3.5:2b` on first start.
 - The agent container downloads the Hugging Face guard models before serving
   (`ctf/agent_startup.py`, minutes on first run; `DOWNLOAD_MODELS=0` skips it).
   Set `PREPARE_FLAGS=1` once to seed the RAG flags. Watch `docker compose logs -f adk-api`.
 - `web` waits for `adk-api` to be healthy, then serves on 8100.
 - Cookies are only marked `Secure` when `COOKIE_SECURE` isn't `0`. Compose defaults
   it to `0` for plain-http localhost; set `COOKIE_SECURE=1` behind TLS.
+- Ollama on another machine: `make run-remote` with `OLLAMA_API_BASE` set in `.env` or the command. It doesn't start the local Ollama container.
 - Host Ollama or Gemini instead: `make run-prod` with `OLLAMA_API_BASE=http://host.docker.internal:11434` or `USE_GEMINI=1`.
 - Stop: `docker compose down` (add `-v` to wipe the Postgres volume).
 
 ## Option B — pnpm + uv, no Docker
-Prerequisites: Node 24 + pnpm, `ollama serve` and `ollama pull qwen3:0.6b`; optional `PASSWORD_*` env vars (defaults are `PASS_ZERO`…), the same values for both processes.
+Prerequisites: Node 24 + pnpm, `ollama serve` and `ollama pull qwen3.5:2b`; optional `PASSWORD_*` env vars (defaults are `PASS_ZERO`…), the same values for both processes.
 
 1. Agent, run from the agents dir like `Dockerfile.adk` does:
    ```bash

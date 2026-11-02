@@ -31,7 +31,7 @@ make run
 
 To run `docker compose up` without `--profile`, copy `.env.example` to `.env`, which sets `COMPOSE_PROFILES=default`.
 
-On first start, `ollama-init` pulls the default model (`qwen3:0.6b`) and the decision model, and the agent container downloads the Hugging Face guard models before serving (`ctf/agent_startup.py`). This can take several minutes.
+On first start, `ollama-init` pulls the default model (`qwen3.5:2b`) and the decision model, and the agent container downloads the Hugging Face guard models before serving (`ctf/agent_startup.py`). This can take several minutes.
 
 Start-up order: `postgres` (healthy) → `adk-api` (downloads guard models, then healthy) → `web`.
 
@@ -43,12 +43,18 @@ Use the `prod` profile when Ollama runs outside Compose, or when using Gemini or
 make run-prod
 ```
 
-Remote Ollama on the host (the models must already be pulled there):
+Remote Ollama, for example a machine with a GPU. This doesn't start the local Ollama container, and it stops with an error if `OLLAMA_API_BASE` isn't set in `.env` or the command. Nothing pulls models for you, so pull the chat and decision models on that machine first:
+
+```bash
+make run-remote OLLAMA_API_BASE=http://<host>:11434
+```
+
+Ollama on the host (the models must already be pulled there):
 
 ```bash
 COMPOSE_PROFILES=prod \
   OLLAMA_API_BASE=http://host.docker.internal:11434 \
-  OPENSOURCE_LLM_MODEL=qwen3:0.6b \
+  OPENSOURCE_LLM_MODEL=qwen3.5:2b \
   docker compose up --build
 ```
 
@@ -145,7 +151,7 @@ Set these in your shell or `.env`. Defaults are the ones Compose applies.
 
 ### ADK API
 - `OLLAMA_API_BASE` - Ollama server URL for LiteLLM (`default` profile: `http://ollama:11434`; `prod`: your remote host)
-- `OPENSOURCE_LLM_MODEL` - Ollama model tag or LiteLLM model id (default: `qwen3:0.6b`)
+- `OPENSOURCE_LLM_MODEL` - Ollama model tag or LiteLLM model id (default: `qwen3.5:2b`)
 - `USE_GEMINI` - Set to `1` to use Gemini instead of Ollama (`prod` profile)
 - `GEMINI_MODEL_NAME` - Gemini model when `USE_GEMINI=1`
 - `OPENAI_API_KEY` - OpenAI API key (use with `OPENSOURCE_LLM_MODEL=openai/...` on `prod`)
@@ -156,7 +162,7 @@ Set these in your shell or `.env`. Defaults are the ones Compose applies.
 - `LANCE_DB_PATH` - LanceDB directory for the RAG tool (default: `ctf/lancedb`). Compose doesn't set it, so it uses the `lancedb_data` volume mounted at that path
 
 ### Ollama (`default` profile only)
-- `OLLAMA_MODEL` - Model to pull on startup (default: `qwen3:0.6b`). Keep it the same as `OPENSOURCE_LLM_MODEL`
+- `OLLAMA_MODEL` - Model to pull on startup (default: `qwen3.5:2b`). Keep it the same as `OPENSOURCE_LLM_MODEL`
 - `DECISION_MODEL` - Pulled on startup as well, for levels 10, 11 and 15 (default: `d1-omni:600m`)
 
 For example, to use a different Ollama model:

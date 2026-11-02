@@ -27,7 +27,7 @@ Ollama decision-model client (`decision.py`) live in `ctf/llm_guard/`.
 
 ## Model
 
-`model.py` uses Ollama through LiteLLM (`OPENSOURCE_LLM_MODEL`, default `qwen3:0.6b`, at `OLLAMA_API_BASE`). It
+`model.py` uses Ollama through LiteLLM (`OPENSOURCE_LLM_MODEL`, default `qwen3.5:2b`, at `OLLAMA_API_BASE`). It
 switches to Gemini when `USE_GEMINI=1` or `GEMINI_MODEL_NAME` is set. Agents get `thinking_planner()`, which asks
 the model to return its reasoning with each response. qwen3 thinks by default, so its thought parts are dropped
 unless the planner asks for them.
@@ -99,7 +99,7 @@ make prepare-flags                                              # seed LanceDB a
 cd ctf/agents && uv run adk web --host 127.0.0.1 --port 8000    # or: uv run adk api_server
 ```
 
-Needs Ollama with the model pulled (`ollama pull qwen3:0.6b`), or `USE_GEMINI=1`. Levels 10, 11 and 15 also need the
+Needs Ollama with the model pulled (`ollama pull qwen3.5:2b`), or `USE_GEMINI=1`. Levels 10, 11 and 15 also need the
 decision model in Ollama (`ollama pull d1-omni:600m`), even when the agents run on Gemini. The guard models download from
 Hugging Face on first use, or at container start (`DOWNLOAD_MODELS`).
 
