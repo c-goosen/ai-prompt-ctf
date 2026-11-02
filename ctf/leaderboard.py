@@ -174,16 +174,12 @@ def _apply_hold_the_fort_migration(engine: Engine) -> int:
         ).first()
         if applied:
             return 0
-        conn.execute(
-            text(
-                """
+        conn.execute(text("""
                 DELETE FROM leaderboard_entries
                 WHERE level = 10 AND username IN (
                     SELECT username FROM leaderboard_entries WHERE level = 15
                 )
-                """
-            )
-        )
+                """))
         moved = conn.execute(
             text("UPDATE leaderboard_entries SET level = 15 WHERE level = 10")
         ).rowcount
@@ -207,21 +203,17 @@ def _migrate_legacy_tables(engine: Engine) -> None:
     with engine.begin() as conn:
         # Check if table exists
         if is_postgres:
-            check_table = text(
-                """
+            check_table = text("""
                 SELECT EXISTS (
                     SELECT FROM information_schema.tables
                     WHERE table_name = 'leaderboard_entries'
                 )
-            """
-            )
+            """)
         else:
-            check_table = text(
-                """
+            check_table = text("""
                 SELECT name FROM sqlite_master
                 WHERE type='table' AND name='leaderboard_entries'
-            """
-            )
+            """)
 
         table_exists = conn.execute(check_table).scalar()
         if not table_exists:
@@ -229,19 +221,11 @@ def _migrate_legacy_tables(engine: Engine) -> None:
 
         # Get column info
         if is_postgres:
-            rows = (
-                conn.execute(
-                    text(
-                        """
+            rows = conn.execute(text("""
                     SELECT column_name as name
                     FROM information_schema.columns
                     WHERE table_name = 'leaderboard_entries'
-                """
-                    )
-                )
-                .mappings()
-                .all()
-            )
+                """)).mappings().all()
         else:
             rows = (
                 conn.execute(text("PRAGMA table_info(leaderboard_entries)"))

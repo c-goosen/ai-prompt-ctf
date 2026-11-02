@@ -3,7 +3,6 @@
 from transformers import AutoTokenizer, AutoModel
 import torch
 
-
 # Global cache for model and tokenizer
 _embedding_model = None
 _tokenizer = None

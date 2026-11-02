@@ -18,7 +18,6 @@ from typing import List, Tuple
 
 import httpx
 
-
 # Configuration
 ADK_API_URL = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
 APP_NAME = "sub_agents"

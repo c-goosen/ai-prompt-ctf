@@ -40,8 +40,7 @@ async def migrate_events_table(db_url: str) -> None:
         async with async_session() as session:
             # Check if columns exist and add them if they don't
             # Also fix any string 'null' values to actual NULL
-            check_and_add_column = text(
-                """
+            check_and_add_column = text("""
                 DO $$
                 BEGIN
                     -- Add input_transcription column if it doesn't exist
@@ -80,8 +79,7 @@ async def migrate_events_table(db_url: str) -> None:
                         RAISE NOTICE 'Fixed string null values in output_transcription';
                     END IF;
                 END $$;
-            """
-            )
+            """)
 
             await session.execute(check_and_add_column)
             await session.commit()
