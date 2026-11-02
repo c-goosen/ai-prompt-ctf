@@ -47,6 +47,7 @@ the scripts above run first.
 | `PASSWORD_ZERO` … `PASSWORD_FIFTEEN` | `PASS_ZERO` … | Level passwords, used to redact RAG tool output |
 | `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` | see `lib/config.ts` | Branding |
 | `COOKIE_SECURE` | on in production | Set `0` when serving production builds over plain http |
+| `SITE_URL` | unset | Public URL of the site, so link previews can find their image |
 | `HOST`, `PORT` | `0.0.0.0`, `3000` | Standalone server bind address |
 
 ## Cloudflare Workers

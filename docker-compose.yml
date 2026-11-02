@@ -154,6 +154,8 @@ services:
       # Cookies are Secure in production; set COOKIE_SECURE=0 when serving
       # plain http (e.g. http://localhost:8100 without the TLS proxy).
       COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      # Public URL of the site, for the image in link previews.
+      SITE_URL: ${SITE_URL:-}
     depends_on:
       postgres:
         condition: service_healthy

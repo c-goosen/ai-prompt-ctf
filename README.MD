@@ -1,5 +1,7 @@
 # PwnGPT - Agent Hunger Games
 
+<p align="center"><img src="web/public/images/pwn_gpt_logo.webp" alt="PwnGPT: a cartoon netrunner in a neon hoodie, with Table Mountain and Cape Town behind them" width="420"></p>
+
 An open source prompt injection CTF. Players attack LLM agents across 16 levels to extract each level's password, learning about prompt injection, information retrieval and the security issues around LLMs along the way.
 
 It runs on Google ADK agents with RAG, using qwen3 on Ollama by default, or Gemini or OpenAI. It was made for a company and the [BSides Cape Town](https://bsidescapetown.co.za) event ([background](https://twitter.com/crypticg00se/status/1731578440166293643)). This is v2, and it has been run at 3 events and counting.

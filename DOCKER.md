@@ -147,6 +147,7 @@ Set these in your shell or `.env`. Defaults are the ones Compose applies.
 - `ADK_RUN_TIMEOUT_MS` / `ADK_RUN_MAX_MS` - How long an agent run may stream nothing (default 180 s), and its total limit (default 600 s)
 - `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` - Branding and the sidebar Discord link
 - `COOKIE_SECURE` - `1` behind HTTPS to mark identity cookies `Secure`; Compose defaults to `0` for plain http
+- `SITE_URL` - the public URL of the site, so link previews can find their image
 - `HOST` / `PORT` - Bind address (`0.0.0.0` / `8100` in the image). vinext uses `HOST`, not `HOSTNAME`.
 
 ### ADK API

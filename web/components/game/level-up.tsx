@@ -4,6 +4,7 @@ import { Crown, Trophy } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { Finale } from "@/components/game/finale";
 import { Fortress, Gremlin, Tower } from "@/components/game/sprites";
 import { MAX_LEVEL } from "@/lib/slash";
 
@@ -16,6 +17,8 @@ export interface LevelUpEvent {
   rank?: string;
   /** The next level to play, or null after the boss. */
   next: { level: number; title: string } | null;
+  /** This solve cleared the last level still standing: play the finale instead. */
+  complete?: boolean;
 }
 
 type Phase = "march" | "attack" | "fallen";
@@ -35,12 +38,19 @@ const GREMLINS = [
 ];
 const DEBRIS = 14;
 const PARTICLES = 24;
-const PARTICLE_COLORS = ["#3cfcd1", "#ff2fd5", "#5c24ff", "#e4fdf7"];
+const PARTICLE_COLORS = ["#3cfcd1", "#ff2fd5", "#fcee0a", "#e4fdf7"];
 
 /** Gremlins storming a tower when a level is solved. Click, Escape or wait to continue. */
 export function LevelUp({ event, onClose }: { event: LevelUpEvent | null; onClose: () => void }) {
   return (
-    <AnimatePresence>{event && <Siege key={event.levels.join(",")} event={event} onClose={onClose} />}</AnimatePresence>
+    <AnimatePresence>
+      {event &&
+        (event.complete ? (
+          <Finale key="finale" onClose={onClose} />
+        ) : (
+          <Siege key={event.levels.join(",")} event={event} onClose={onClose} />
+        ))}
+    </AnimatePresence>
   );
 }
 
@@ -91,6 +101,11 @@ function Siege({ event, onClose }: { event: LevelUpEvent; onClose: () => void })
     >
       {/* The battlefield */}
       <div className="relative h-48 w-full max-w-md" aria-hidden="true">
+        {/* A jagged paint slash behind the fight. */}
+        <svg viewBox="0 0 400 180" preserveAspectRatio="none" className="absolute inset-0 size-full opacity-50">
+          <path d="M0 150L120 95l-14 22L290 20l-16 28L400 4 268 112l12-22-136 74 10-20-102 26z" fill="#fcee0a" />
+          <path d="M400 70L286 124l10-18-106 62h92l76-38-8 14z" fill="#ff2fd5" />
+        </svg>
         <div className="absolute inset-x-0 bottom-6 h-px bg-gradient-to-r from-transparent via-neon-teal/50 to-transparent" />
 
         {/* The tower (or the final level's fortress), shaking under attack */}
@@ -201,7 +216,7 @@ function Sparks() {
         return (
           <motion.span
             key={i}
-            className="absolute size-1.5 rounded-full bg-neon-pink shadow-[0_0_8px_#ff2fd5]"
+            className="absolute size-1.5 rounded-full bg-neon-yellow shadow-[0_0_8px_#fcee0a]"
             initial={{ x: 0, y: 0, opacity: 0 }}
             animate={{ x: Math.cos(angle) * 34, y: Math.sin(angle) * 34 - 10, opacity: [0, 1, 0] }}
             transition={{ duration: 0.5, repeat: Infinity, delay: (i % 4) * 0.12, ease: "easeOut" }}
@@ -212,7 +227,7 @@ function Sparks() {
   );
 }
 
-/** Stones flying off as the tower collapses. */
+/** Shards flying off as the tower collapses. */
 function Debris() {
   return (
     <span className="pointer-events-none absolute top-1/2 left-1/2" aria-hidden="true">
@@ -221,7 +236,7 @@ function Debris() {
         return (
           <motion.span
             key={i}
-            className="absolute size-2 rounded-[2px] bg-[#a8a2ff]"
+            className="absolute size-2 rounded-[2px] bg-neon-yellow"
             initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
             animate={{
               x: side * (20 + (i * 13) % 70),

@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { currentLevel, maxXp, newlyCleared, rankFor, totalXp, xpFor } from "./progress";
+import { completesRun, currentLevel, maxXp, newlyCleared, rankFor, totalXp, xpFor } from "./progress";
 
 describe("progress", () => {
+  it("completes the run on the last level standing, whichever level that is", () => {
+    const all = Array.from({ length: 16 }, (_, level) => level);
+    const withoutThree = all.filter((level) => level !== 3);
+    expect(completesRun(withoutThree, all)).toBe(true);
+    expect(completesRun(all.slice(0, 15), all)).toBe(true);
+    // Not there yet: the boss alone doesn't finish the run.
+    expect(completesRun([0], [0, 15])).toBe(false);
+    // Already finished: re-solving a level doesn't replay the finale.
+    expect(completesRun(all, all)).toBe(false);
+  });
+
+
   it("scores levels by difficulty, with Basecamp free and a boss bonus", () => {
     expect(xpFor(0)).toBe(0);
     expect(xpFor(1)).toBe(100);

@@ -13,6 +13,15 @@ import {
 describe("leaderboard", () => {
   const { db } = useTestDb();
 
+  it("breaks highest-level ties by levels completed before first completion", async () => {
+    await recordLevelCompletionForTesting("early", 3, new Date("2026-01-01T09:00:00Z"));
+    await recordLevelCompletionForTesting("thorough", 1, new Date("2026-01-01T10:00:00Z"));
+    await recordLevelCompletionForTesting("thorough", 3, new Date("2026-01-01T11:00:00Z"));
+
+    const rows = await getLeaderboard();
+    expect(rows.map((row) => row.username)).toEqual(["thorough", "early"]);
+  });
+
   it("orders by highest level, then earliest first completion", async () => {
     await recordLevelCompletionForTesting("bob", 1, new Date("2026-01-01T10:00:00Z"));
     await recordLevelCompletionForTesting("alice", 1, new Date("2026-01-01T09:00:00Z"));

@@ -9,7 +9,11 @@ import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
+// Link previews need an absolute image URL; without this it points at localhost.
+const siteUrl = process.env.SITE_URL;
+
 export const metadata: Metadata = {
+  metadataBase: siteUrl && URL.canParse(siteUrl) ? new URL(siteUrl) : undefined,
   title: "PwnGPT",
   description: "A LLM prompt injection CTF",
   keywords: ["pwngpt", "pwn", "gpt", "ctf", "prompt injection", "cgoosen"],

@@ -12,7 +12,7 @@ import { QuestMap } from "@/components/game/quest-map";
 import { MessageEnter } from "@/components/watermelon/inline-toast";
 import { LabeledProgressIndicator } from "@/components/watermelon/labeled-progress-indicator";
 import type { ChatMessage } from "@/lib/events";
-import { currentLevel, newlyCleared, rankFor, totalXp, xpFor } from "@/lib/progress";
+import { completesRun, currentLevel, newlyCleared, rankFor, totalXp, xpFor } from "@/lib/progress";
 import { allCommands, commandSuggestions, completeCommand, MAX_LEVEL, type CommandInfo, type Skill } from "@/lib/slash";
 import { cn } from "@/lib/utils";
 
@@ -222,8 +222,10 @@ export function ChatScreen({
     // The agent moves the player to the next level; after the final one,
     // point back at the lowest level still standing, if any.
     const following = Math.max(...solved) + 1;
-    const upcoming = following <= MAX_LEVEL ? following : currentLevel([...after, ...solved]);
+    const complete = completesRun(before, [...after, ...solved]);
+    const upcoming = complete ? null : following <= MAX_LEVEL ? following : currentLevel([...after, ...solved]);
     setLevelUp({
+      complete,
       levels: solved,
       xp: firstClears.reduce((sum, level) => sum + xpFor(level), 0),
       rank: progress && afterRank !== beforeRank ? afterRank : undefined,
