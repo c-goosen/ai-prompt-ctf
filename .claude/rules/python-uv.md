@@ -3,7 +3,7 @@ These rules define strict guidelines for managing Python dependencies in this pr
 
 This project uses the uv package manager. Running anything equates to the following examples:
 * uv run adk web (web console for development)
-* uv run api_server
+* uv run adk api_server (API only; run both from ctf/agents)
 
 The agents are built with google adk.
 The frontend is a Next.js 16.4 app built with vinext (Vite) + Tailwind CSS in web/ (pnpm, not uv)

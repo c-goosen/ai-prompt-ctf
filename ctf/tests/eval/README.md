@@ -5,7 +5,7 @@ This directory contains evaluation tests for the CTF agents using Google ADK's `
 ## Structure
 
 - `test_agents.py` - Main evaluation test file
-- `../agents/eval/` - Directory containing evaluation data files (`.evalset.json`)
+- `ctf/agents/eval/` - Directory containing evaluation data files (`.evalset.json`)
 
 ## Running Evaluations
 
@@ -39,7 +39,6 @@ Evaluation criteria are configured in `ctf/agents/eval/adk_eval_config.json`:
 
 ## Adding New Evaluations
 
-1. Create a new `.evalset.json` file in `ctf/agents/eval/`
-2. Add a new test function in `test_agents.py` if needed
-3. Run the evaluation to verify agent behavior
+1. Create a new `.evalset.json` file in `ctf/agents/eval/`. `test_agents.py` picks up every file there, so it needs no new test function.
+2. Run the evaluation to verify agent behavior
 
