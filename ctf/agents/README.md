@@ -19,7 +19,7 @@ ctf/agents/
     ├── guard_rails.py       # Input and output guardrails
     ├── protection_utils.py  # Classifier-model guards and password-leak detection
     ├── system_prompt.py     # Shared system prompts
-    └── level_0_agent.py … level_11_agent.py
+    └── level_0_agent.py … level_15_agent.py
 ```
 
 Lower-level checks (input filters, output regexes, text normalization), the Hugging Face classifiers and the
@@ -110,4 +110,4 @@ uv run pytest ctf/tests -q                                       # unit tests, i
 uv run pytest ctf/tests/test_vals.py -m adk_api -o addopts=""    # end-to-end, needs a running agent
 ```
 
-To add a level, follow the `add-ctf-level` skill.
+To add a level, follow [Adding a level](../../docs/adding-a-level.md).

@@ -44,7 +44,7 @@ the scripts above run first.
 | `ADK_RUN_TIMEOUT_MS` | `180000` | How long an agent run may stream nothing before it's abandoned |
 | `ADK_RUN_MAX_MS` | `600000` | Upper bound on an agent run |
 | `POSTGRES_DB_URI` | (unset → SQLite `../ctf/leaderboard.db`) | Must be the same database the agent writes |
-| `PASSWORD_ZERO` … `PASSWORD_TEN` | `PASS_ZERO` … | Level passwords, used to redact RAG tool output |
+| `PASSWORD_ZERO` … `PASSWORD_FIFTEEN` | `PASS_ZERO` … | Level passwords, used to redact RAG tool output |
 | `CTF_NAME`, `CTF_SUBTITLE`, `DISCORD_URL` | see `lib/config.ts` | Branding |
 | `COOKIE_SECURE` | on in production | Set `0` when serving production builds over plain http |
 | `HOST`, `PORT` | `0.0.0.0`, `3000` | Standalone server bind address |
@@ -60,7 +60,7 @@ Cloudflare Tunnel).
    npx wrangler hyperdrive create pwngpt-db --connection-string="postgresql://user:pass@host:5432/ctf"
    ```
 2. Set `vars.ADK_API_URL` in `cloudflare/wrangler.jsonc`, and the passwords as secrets:
-   `npx wrangler secret put PASSWORD_ZERO` (… `PASSWORD_TEN`).
+   `npx wrangler secret put PASSWORD_ZERO` (… `PASSWORD_FIFTEEN`).
 3. `pnpm deploy:cf`.
 
 On Workers each request opens its own Postgres client (Workers can't share sockets between requests; Hyperdrive
