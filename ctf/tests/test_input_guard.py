@@ -1,4 +1,4 @@
-"""Input guardrail (Level 1 and Level 10) and the request/response helpers."""
+"""Input guardrail (Levels 1, 12 and 15) and the request/response helpers."""
 
 import pytest
 from google.adk.models import LlmRequest, LlmResponse
@@ -155,3 +155,31 @@ def test_callback_text():
     assert _callback_text(None, "tool") == "tool"
     assert _callback_text(None, {"result": "x"}) == '{"result": "x"}'
     assert _callback_text(None, None) == ""
+
+
+def test_extract_last_user_message_skips_the_turn_after_a_tool_call():
+    """The player's message was screened when the turn began; don't block the reply."""
+    request = LlmRequest(
+        contents=[
+            types.Content(
+                role="user", parts=[types.Part(text="submit answer: X")]
+            ),
+            types.Content(
+                role="model",
+                parts=[
+                    types.Part.from_function_call(
+                        name="submit_answer_func", args={}
+                    )
+                ],
+            ),
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_function_response(
+                        name="submit_answer_func", response={"result": "✅"}
+                    )
+                ],
+            ),
+        ]
+    )
+    assert _extract_last_user_message(request) == ""

@@ -29,7 +29,16 @@ class Settings(BaseSettings):
         8: os.getenv("PASSWORD_EIGHT", "PASS_EIGHT"),
         9: os.getenv("PASSWORD_NINE", "PASS_NINE"),
         10: os.getenv("PASSWORD_TEN", "PASS_TEN"),
+        11: os.getenv("PASSWORD_ELEVEN", "PASS_ELEVEN"),
+        12: os.getenv("PASSWORD_TWELVE", "PASS_TWELVE"),
+        13: os.getenv("PASSWORD_THIRTEEN", "PASS_THIRTEEN"),
+        14: os.getenv("PASSWORD_FOURTEEN", "PASS_FOURTEEN"),
+        15: os.getenv("PASSWORD_FIFTEEN", "PASS_FIFTEEN"),
     }
+    # Levels 10 and 11: an Ollama decision model (ollama.com/search?c=decision)
+    # that scores each prompt, and the score at which a prompt is blocked.
+    DECISION_MODEL: str = os.getenv("DECISION_MODEL", "d1-omni:600m")
+    DECISION_THRESHOLD: float = float(os.getenv("DECISION_THRESHOLD", "0.5"))
     # Regex list for things like IPs, credit cards etc
     # Amazon vouchers, etc.
     REGEX_LIST: list = [
@@ -45,7 +54,7 @@ class Settings(BaseSettings):
         r"[a-f0-9]{8}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{4}\\-[a-f0-9]{12}",
         r"\\b[A-Za-z0-9._%+-]+(\\[AT\\]|@)[A-Za-z0-9.-]+(\\[DOT\\]|\\.)[A-Za-z]{2,}\\b",
     ]
-    FINAL_LEVEL: int = 10
+    FINAL_LEVEL: int = 15
     logger: object = logging.getLogger(__name__)
     ADK_API_URL: str = os.getenv("ADK_API_URL", "http://127.0.0.1:8000")
     LEADERBOARD_DB_PATH: str = os.getenv(

@@ -9,6 +9,9 @@ LanceDB flags anyway.
   level 5 users.db with the level passwords.
 - DOWNLOAD_MODELS (on by default): pre-download the Hugging Face guard
   models so the first guarded request doesn't stall on a download.
+- Always: create the leaderboard tables and apply pending migrations (such as
+  moving old Hold the Fort solves to its new level), so the web app's
+  leaderboard is right before anyone submits.
 """
 
 import logging
@@ -26,8 +29,34 @@ def _enabled(name: str, default: str) -> bool:
     )
 
 
+def warn_about_shared_passwords(passwords: dict[int, str]) -> list[str]:
+    """Warn when levels share a password: one would solve the other."""
+    levels_by_password: dict[str, list[int]] = {}
+    for level, password in passwords.items():
+        levels_by_password.setdefault(password, []).append(level)
+    warnings = [
+        f"Levels {', '.join(map(str, levels))} share a password"
+        for levels in levels_by_password.values()
+        if len(levels) > 1
+    ]
+    for warning in warnings:
+        logger.warning("%s; give each level its own PASSWORD_*.", warning)
+    return warnings
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
+    from ctf.app_config import settings
+
+    warn_about_shared_passwords(settings.PASSWORDS)
+    try:
+        from ctf.leaderboard import prepare_database
+
+        prepare_database()
+    except (
+        Exception
+    ) as e:  # the agent still serves; the leaderboard retries later
+        logger.error("Could not prepare the leaderboard database: %s", e)
     if _enabled("PREPARE_FLAGS", ""):
         from ctf.agents.tools import db_path
         from ctf.prepare_flags import prepare_flags

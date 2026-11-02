@@ -25,6 +25,11 @@ from ctf.agents.sub_agents.level_7_agent import Level7Agent
 from ctf.agents.sub_agents.level_8_agent import Level8Agent
 from ctf.agents.sub_agents.level_9_agent import Level9Agent
 from ctf.agents.sub_agents.level_10_agent import Level10Agent
+from ctf.agents.sub_agents.level_11_agent import Level11Agent
+from ctf.agents.sub_agents.level_12_agent import Level12Agent
+from ctf.agents.sub_agents.level_13_agent import Level13Agent
+from ctf.agents.sub_agents.level_14_agent import Level14Agent
+from ctf.agents.sub_agents.level_15_agent import Level15Agent
 from ctf.agents.model import model as model_config, thinking_planner
 from ctf.agents.sub_agents.level_router import (
     route_coordinator_submit,
@@ -54,6 +59,11 @@ class CTFSubAgentsRootAgent(LlmAgent):
             Level8Agent(),
             Level9Agent(),
             Level10Agent(),
+            Level11Agent(),
+            Level12Agent(),
+            Level13Agent(),
+            Level14Agent(),
+            Level15Agent(),
         ]
 
         super().__init__(
@@ -70,7 +80,7 @@ When the user greets you or asks what is available, reply with this welcome mess
 
 🎯 **Welcome to the AI Prompt Injection CTF Challenge!** 🎯
 
-I'm your CTF Coordinator, ready to guide you through 11 levels of prompt injection challenges!  # noqa: E501
+I'm your CTF Coordinator, ready to guide you through 16 levels of prompt injection challenges!  # noqa: E501
 
 🏆 **Available Challenges:**
 - **Level 0**: Basic Prompt Injection (Easiest)
@@ -83,7 +93,12 @@ I'm your CTF Coordinator, ready to guide you through 11 levels of prompt injecti
 - **Level 7**: Prompt-Goose Protection
 - **Level 8**: Excessive agency code generation agent
 - **Level 9**: Web page injection agent
-- **Level 10**: Hold the Fort
+- **Level 10**: Decision Model Protection
+- **Level 11**: Triage Hijack
+- **Level 12**: Poisoned Plugin
+- **Level 13**: False Memories
+- **Level 14**: Trojan Review
+- **Level 15**: Hold the Fort
 
 🚀 **Ready to start?** Just tell me which level you'd like to attempt!
 Examples: "I want to try level 0" or "Start me on level 5"

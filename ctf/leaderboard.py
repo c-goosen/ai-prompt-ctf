@@ -27,7 +27,7 @@ from sqlalchemy import (
 )
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from ctf.app_config import settings
@@ -132,7 +132,66 @@ def _ensure_schema(engine: Engine) -> None:
         return
     _migrate_legacy_tables(engine)
     Base.metadata.create_all(engine)
+    _renumber_hold_the_fort(engine)
     _SCHEMA_INITIALIZED = True
+
+
+# Level renumberings, applied once per database and recorded by name.
+MIGRATIONS_TABLE_SQL = """
+    CREATE TABLE IF NOT EXISTS leaderboard_migrations (
+        name VARCHAR(255) PRIMARY KEY
+    )
+"""
+HOLD_THE_FORT_MIGRATION = "hold_the_fort_level_10_to_15"
+
+
+def _renumber_hold_the_fort(engine: Engine) -> None:
+    """Move completions of Hold the Fort from level 10 to its new number, 15.
+
+    Levels 10-14 were added before Hold the Fort, so a level 10 completion
+    recorded before then is a Hold the Fort solve. Runs once: later level 10
+    completions are the new level 10's. A player who already has a level 15
+    completion keeps it, and their old level 10 row is dropped.
+    """
+    try:
+        moved = _apply_hold_the_fort_migration(engine)
+    except IntegrityError:
+        # Another process applied it first, in its own transaction.
+        return
+    if moved:
+        logger.info(
+            f"Moved {moved} Hold the Fort completions from level 10 to 15"
+        )
+
+
+def _apply_hold_the_fort_migration(engine: Engine) -> int:
+    """Apply the renumbering; return how many completions moved (0 if done)."""
+    with engine.begin() as conn:
+        conn.execute(text(MIGRATIONS_TABLE_SQL))
+        applied = conn.execute(
+            text("SELECT 1 FROM leaderboard_migrations WHERE name = :name"),
+            {"name": HOLD_THE_FORT_MIGRATION},
+        ).first()
+        if applied:
+            return 0
+        conn.execute(
+            text(
+                """
+                DELETE FROM leaderboard_entries
+                WHERE level = 10 AND username IN (
+                    SELECT username FROM leaderboard_entries WHERE level = 15
+                )
+                """
+            )
+        )
+        moved = conn.execute(
+            text("UPDATE leaderboard_entries SET level = 15 WHERE level = 10")
+        ).rowcount
+        conn.execute(
+            text("INSERT INTO leaderboard_migrations (name) VALUES (:name)"),
+            {"name": HOLD_THE_FORT_MIGRATION},
+        )
+    return moved
 
 
 def _migrate_legacy_tables(engine: Engine) -> None:
@@ -271,6 +330,11 @@ def _to_iso(value: datetime | None) -> str | None:
     return value.isoformat() if value is not None else None
 
 
+def prepare_database() -> None:
+    """Create the tables and apply pending migrations now, not on first use."""
+    _get_engine()
+
+
 def format_leaderboard_marker(level: int, status: str = "correct") -> str:
     payload = json.dumps({"status": status, "level": level})
     return f"{LEADERBOARD_MARKER_PREFIX}{payload}{LEADERBOARD_MARKER_SUFFIX}"
@@ -377,13 +441,13 @@ def get_leaderboard_summary() -> dict:
         return {"players": 0, "total_completions": 0}
 
 
-def has_completed_all_levels(username: str, final_level: int = 10) -> bool:
+def has_completed_all_levels(username: str, final_level: int = 15) -> bool:
     """
     Check if a user has completed all levels (0 through final_level).
 
     Args:
         username: The username to check
-        final_level: The highest level number (default 10, so checks 0-10)
+        final_level: The highest level number (default 15, so checks 0-15)
 
     Returns:
         True if the user has completed all levels, False otherwise

@@ -9,6 +9,7 @@ from ctf.agents.sub_agents.guard_rails import (
     guard_rail_input_injection,
     guard_rail_output_injection,
 )
+from ctf.agents.sub_agents.level_12_agent import guard_other_tools
 from ctf.agents.sub_agents.protection_utils import ProtectionUtils
 from ctf.app_config import settings
 
@@ -24,16 +25,21 @@ INPUT_GUARDS = {
     1: [guard_rail_input_injection],
     6: [ProtectionUtils.llm_guard_prompt_injection_meta],
     7: [ProtectionUtils.llm_guard_prompt_injection_goose],
-    10: [
+    10: [ProtectionUtils.decision_model_guard],
+    12: [guard_rail_input_injection],
+    15: [
         guard_rail_input_injection,
         ProtectionUtils.llm_guard_prompt_injection_meta,
         ProtectionUtils.llm_guard_prompt_injection_goose,
+        ProtectionUtils.decision_model_guard,
     ],
 }
 
 OUTPUT_GUARDS = {
     2: [guard_rail_output_injection],
-    10: [ProtectionUtils.detect_password_leak],
+    12: [ProtectionUtils.detect_password_leak],
+    14: [ProtectionUtils.detect_password_leak],
+    15: [ProtectionUtils.detect_password_leak],
 }
 
 LEVELS = range(settings.FINAL_LEVEL + 1)
@@ -78,8 +84,17 @@ def test_input_guards(level):
 def test_output_guards_screen_model_and_tool_output(level):
     agent = AGENTS[f"Level{level}Agent"]
     expected = OUTPUT_GUARDS.get(level, [])
-    assert _guards(agent.after_model_callback, level) == expected
-    assert _guards(agent.after_tool_callback, level) == expected
+    # Level 14's defence is all on the way in, so only its tools are guarded.
+    model_expected = [] if level == 14 else expected
+    assert _guards(agent.after_model_callback, level) == model_expected
+    # Level 12 guards every tool but call_plugin, its way in (see below).
+    tool_expected = [] if level == 12 else expected
+    assert _guards(agent.after_tool_callback, level) == tool_expected
+
+
+def test_poisoned_plugin_leaves_only_the_plugin_call_unguarded():
+    callbacks = _callbacks(AGENTS["Level12Agent"].after_tool_callback)
+    assert callbacks == [guard_other_tools]
 
 
 @pytest.mark.xfail(

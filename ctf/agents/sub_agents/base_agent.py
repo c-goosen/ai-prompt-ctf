@@ -12,6 +12,7 @@ from google.adk.agents.llm_agent import (
     BeforeToolCallback,
 )
 from ctf.agents.tools import (
+    LEVEL_TOOLS,
     hints_func_tool,
     submit_answer_func_tool,
     rag_tool_func_tool,
@@ -70,6 +71,8 @@ class BaseCTFAgent(LlmAgent):
             # Always add help_search_tool if not already present
             if help_search_tool not in final_tools:
                 final_tools.append(help_search_tool)
+
+        LEVEL_TOOLS[level] = [tool.name for tool in final_tools]
 
         # The greeting, "level N" switching and answer submission run first
         # so a guard never sees the transfer turn, blocks leaving the level

@@ -22,10 +22,15 @@ const PASSWORD_ENV_NAMES = [
   "PASSWORD_EIGHT",
   "PASSWORD_NINE",
   "PASSWORD_TEN",
+  "PASSWORD_ELEVEN",
+  "PASSWORD_TWELVE",
+  "PASSWORD_THIRTEEN",
+  "PASSWORD_FOURTEEN",
+  "PASSWORD_FIFTEEN",
 ] as const;
 
 /** Highest level number; levels run 0..FINAL_LEVEL inclusive. */
-export const FINAL_LEVEL = 10;
+export const FINAL_LEVEL = 15;
 
 /** ADK app that contains every level agent (ctf/agents/sub_agents). */
 export const ADK_APP_NAME = "sub_agents";

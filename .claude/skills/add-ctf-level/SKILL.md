@@ -43,14 +43,14 @@ Bind `level=N` with `functools.partial` and pass as callback lists:
 - `web/lib/slash.ts`: raise `MAX_LEVEL` (the `/level` range, `/challenges`, the quest map and XP all use it).
 - `web/lib/progress.ts`: check the XP per difficulty and the rank thresholds still make sense. The new final level
   becomes the 1500 XP boss, and `difficulty()` in `web/lib/challenges.ts` re-spreads the other levels.
-- `web/components/game/quest-map.tsx`: the map is laid out for levels 0-10 (two rows ending at the boss), so add
-  a node position for the new level.
+- `web/components/game/quest-map.tsx`: `NODES` holds one position per level (two rows ending at the boss), so add
+  one for the new level and rebalance the rows.
 - `web/content/faq.md`: the level lists, the XP and rank tables, and the technique sections.
 - `web/cloudflare/wrangler.jsonc` comment: the secret list for Workers deploys.
 
 ## 5. Other hard-coded counts
 - `ctf/agents/tools.py`: "completed all N levels" message.
-- `grep -rn "11 levels\|Level10" --include=*.py --include=*.ts --include=*.tsx --include=*.md --include=*.MD . --exclude-dir=node_modules` to catch stragglers.
+- `grep -rn "16 levels\|Level15" --include=*.py --include=*.ts --include=*.tsx --include=*.md --include=*.MD . --exclude-dir=node_modules` to catch stragglers.
 
 ## 6. Docs
 - `web/content/challenges.md`: new `# Level N:` section matching existing ones (shown on `/challenges`).

@@ -20,9 +20,11 @@ Please use and add challenges
 
 ## Features
 
-- **11 levels, 0 to 10.** Each level has an agent guarding a password, with defences that get harder as you go:
+- **16 levels, 0 to 15.** Each level has an agent guarding a password, with defences that get harder as you go:
   input and output guards, a hardened system prompt, multi-modal uploads (image, audio, PDF and JSON), SQL through
-  function calling, Prompt-Guard models, code execution, web page injection, and finally every protection combined. Levels are tagged with OWASP Top 10 for LLM categories.
+  function calling, Prompt-Guard models, code execution, web page injection, a small Ollama decision model judging
+  every prompt, a decision model you hijack instead of an LLM, poisoned plugin descriptions, planted memories, code
+  review injection, and finally every protection combined. Levels are tagged with OWASP Top 10 for LLM categories.
 - **Quest map.** Levels are grouped into Warm-up, Easy, Medium, Hard and Insane zones that end at a boss. Your
   character stands at your next uncleared level. Click a node to jump to that level.
 - **Siege on every solve.** A correct `/submit` sends a horde of gremlins to storm the level's tower. When it falls,
@@ -34,7 +36,7 @@ Please use and add challenges
   | Command | What it does |
   |---|---|
   | `/register <username> [session-id]` | Register (or switch user) from the chat |
-  | `/level <0-10>` | Switch to a level. Typing "level N" in the chat also works |
+  | `/level <0-15>` | Switch to a level. Typing "level N" in the chat also works |
   | `/start`, `/continue` | Go to level 0, or to your lowest unsolved level |
   | `/hint` | Ask the current level for a hint |
   | `/submit <answer>` | Submit a password |
@@ -96,10 +98,12 @@ The CTF uses a multi-agent architecture with a coordinator pattern, where a root
 
 ![Agent Design Map](agent-design-map.png)
 
+*The agent structure graph from the ADK dev UI (`uv run adk web`, app `sub_agents`): solid arrows are sub-agents, dashed arrows are tools.*
+
 The system consists of:
 - **CTFSubAgentsRoot**: Main coordinator agent that routes users to appropriate level agents
-- **Level0Agent through Level10Agent**: Individual challenge agents with progressive security measures
-- **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, `sql_query`, `web_search` and `web_scrape` that agents can call
+- **Level0Agent through Level15Agent**: Individual challenge agents with progressive security measures
+- **Function Tools**: Specialized functions like `submit_answer_func`, `password_search_func`, `hints_func`, `sql_query`, `execute_python_code`, `web_search` and `web_scrape` that agents can call
 - **Level routing**: "level N" from any agent hands the player to that level before the guards run, and each level greets the player on arrival
 
 ## Other Info
@@ -147,8 +151,19 @@ PASSWORD_SIX="L33tH@x0r"
 PASSWORD_SEVEN="P@SSWORD123"
 PASSWORD_EIGHT="OWASPTOP10AI"
 PASSWORD_NINE="SKYNETRECRUIT"
-PASSWORD_TEN="Woohoo"
+PASSWORD_TEN="JUDGEMENTCALL"
+PASSWORD_ELEVEN="DECISIONMADE"
+PASSWORD_TWELVE="PLUGANDPLAY"
+PASSWORD_THIRTEEN="TOTALRECALL"
+PASSWORD_FOURTEEN="LGTM_SHIPIT"
+PASSWORD_FIFTEEN="Woohoo"
 ```
+Every level needs its own password: one level's password must never solve another.
+
+**Upgrading from 11 levels (0-10):** Hold the Fort moved from level 10 to level 15, and levels 10-14 are new.
+- Move your old `PASSWORD_TEN` to `PASSWORD_FIFTEEN`, and set new values for `PASSWORD_TEN` … `PASSWORD_FOURTEEN`.
+- Existing leaderboard entries move on their own: the agent moves level 10 completions to level 15 once, when it
+  starts against the database (recorded in the `leaderboard_migrations` table).
 Seed them into LanceDB (and the level 5 SQL table) with:
 ```bash
 make prepare-flags   # seeds ctf/lancedb and ctf/agents/users.db, where `adk web` in ctf/agents reads them
@@ -253,11 +268,13 @@ Set in `docker-compose.yml` or override when starting:
 | Variable | Service | Default | Description |
 |----------|---------|---------|-------------|
 | `OLLAMA_MODEL` | ollama-init | `qwen3:0.6b` | Model pulled into Ollama on first run |
+| `DECISION_MODEL` | ollama-init, adk-api | `d1-omni:600m` | Levels 10, 11 and 15's decision model, from [Ollama's decision models](https://ollama.com/search?c=decision); also pulled on first run |
+| `DECISION_THRESHOLD` | adk-api | `0.5` | Attack probability at which levels 10 and 15 block a prompt |
 | `OPENSOURCE_LLM_MODEL` | adk-api | `qwen3:0.6b` | Model name used by agents |
 | `USE_GEMINI` | adk-api | `0` | Set to `1` to use Gemini instead of Ollama |
 | `PREPARE_FLAGS` | adk-api | `1` in compose, off otherwise | Seed level flags into LanceDB and level 5's users.db on start |
 | `DOWNLOAD_MODELS` | adk-api | `1` | Pre-download the guard models on start |
-| `PASSWORD_ZERO` … `PASSWORD_TEN` | adk-api, web | `PASS_ZERO` … | Level passwords |
+| `PASSWORD_ZERO` … `PASSWORD_FIFTEEN` | adk-api, web | `PASS_ZERO` … | Level passwords |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres, adk-api, web | `ctf` | Leaderboard database (`POSTGRES_DB_URI` is built from these) |
 | `ADK_API_URL` | web | `http://adk-api:8000` | ADK API base URL (use service name inside Compose) |
 | `ADK_RUN_TIMEOUT_MS` / `ADK_RUN_MAX_MS` | web | `180000` / `600000` | How long an agent run may stream nothing, and its total limit |

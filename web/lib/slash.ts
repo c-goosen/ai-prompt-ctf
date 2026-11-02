@@ -26,7 +26,7 @@ export interface Skill {
   body: string;
 }
 
-export const MAX_LEVEL = 10;
+export const MAX_LEVEL = 15;
 export const MAX_SKILLS = 20;
 export const MAX_SKILL_BODY = 8_000;
 export const MAX_SKILL_DESCRIPTION = 200;

@@ -11,7 +11,7 @@ Browser -> Web app (8100 in Docker, 3000 in dev) -> ADK API Server (8000) -> sub
 
 1. **Web app** (`web/`): UI, registration and username ownership, the chat proxy, history, leaderboard, rate limits.
 2. **ADK API server**: `adk web` / `adk api_server` serving the `sub_agents` app from `ctf/agents`.
-3. **Agents** (`ctf/agents/sub_agents/`): `CTFSubAgentsRoot` routes to `Level0Agent` … `Level10Agent`, which apply
+3. **Agents** (`ctf/agents/sub_agents/`): `CTFSubAgentsRoot` routes to `Level0Agent` … `Level15Agent`, which apply
    the guardrails and call the tools (`ctf/agents/tools.py`). See [ctf/agents/README.md](ctf/agents/README.md).
 
 ## Request flow

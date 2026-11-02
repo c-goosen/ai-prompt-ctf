@@ -27,7 +27,7 @@ describe("parseChallenges", () => {
 describe("difficulty", () => {
   it("spreads levels evenly from Warm-up to Insane", () => {
     const tiers = Array.from({ length: FINAL_LEVEL + 1 }, (_, level) => difficulty(level, FINAL_LEVEL));
-    expect(tiers).toEqual([1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]);
+    expect(tiers).toEqual([1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5]);
     expect(DIFFICULTY[tiers[FINAL_LEVEL] - 1]).toBe("Insane");
   });
 });

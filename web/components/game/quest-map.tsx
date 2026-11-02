@@ -14,22 +14,28 @@ export interface QuestLevel {
   title: string;
 }
 
-// The map is drawn in a 1000x300 box: levels 0-5 left to right on the top
-// row, then 6-10 back right to left below, ending at the boss.
+// The map is drawn in a 1000x400 box: levels 0-7 left to right on the top
+// row, then 8-15 back right to left below, ending at the boss. Positions
+// keep each difficulty zone's bounding box clear of its neighbours.
 const WIDTH = 1000;
-const HEIGHT = 380;
+const HEIGHT = 400;
 const NODES: Array<{ x: number; y: number }> = [
   { x: 70, y: 140 },
-  { x: 240, y: 120 },
-  { x: 410, y: 150 },
-  { x: 580, y: 120 },
-  { x: 750, y: 150 },
-  { x: 920, y: 140 },
-  { x: 845, y: 320 },
-  { x: 665, y: 305 },
-  { x: 485, y: 335 },
-  { x: 305, y: 305 },
-  { x: 125, y: 320 },
+  { x: 190, y: 120 },
+  { x: 310, y: 150 },
+  { x: 430, y: 120 },
+  { x: 555, y: 150 },
+  { x: 650, y: 120 },
+  { x: 740, y: 150 },
+  { x: 930, y: 140 },
+  { x: 930, y: 330 },
+  { x: 840, y: 315 },
+  { x: 720, y: 345 },
+  { x: 610, y: 315 },
+  { x: 500, y: 345 },
+  { x: 370, y: 315 },
+  { x: 240, y: 345 },
+  { x: 85, y: 335 },
 ];
 
 const ZONE_STYLES = [
@@ -193,7 +199,7 @@ function nodeState(level: number, progress: number[] | null, position: number | 
 
 /**
  * The siege trail: every level is a guard tower on a winding path through
- * the difficulty zones, ending at the level 10 fortress. The player's gremlin
+ * the difficulty zones, ending at the final level's fortress. The player's gremlin
  * horde camps at the next tower to break; cleared towers lie in smoking rubble.
  * `progress` is null for visitors who haven't registered (everything locked).
  */

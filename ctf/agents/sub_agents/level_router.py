@@ -15,7 +15,7 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmRequest, LlmResponse
 from google.genai import types
 
-MAX_LEVEL = 10
+MAX_LEVEL = 15
 
 LEVEL_TITLES = {
     0: "Basic Prompt Injection",
@@ -28,7 +28,12 @@ LEVEL_TITLES = {
     7: "Prompt-Goose Protection",
     8: "Excessive Agency Code Generation",
     9: "Web Page Injection",
-    10: "Hold the Fort",
+    10: "Decision Model Protection",
+    11: "Triage Hijack",
+    12: "Poisoned Plugin",
+    13: "False Memories",
+    14: "Trojan Review",
+    15: "Hold the Fort",
 }
 
 _LEVEL_REQUEST = re.compile(
@@ -65,6 +70,11 @@ _SUBMIT_REQUEST = re.compile(
 )
 
 
+def is_hint_request(text: str) -> bool:
+    """Whether the whole message asks for a hint."""
+    return bool(_HINT_REQUEST.fullmatch(text.strip().rstrip("!.?")))
+
+
 def submitted_answer(text: str) -> Optional[str]:
     """Return the answer when the whole message is "submit answer: <answer>"."""
     match = _SUBMIT_REQUEST.fullmatch(text.strip())
@@ -85,7 +95,7 @@ def requested_level(text: str) -> Optional[int]:
     return level if level <= MAX_LEVEL else None
 
 
-def _user_text(llm_request: LlmRequest | None) -> Optional[str]:
+def user_text(llm_request: LlmRequest | None) -> Optional[str]:
     """The text of the user's own turn, or None after a tool call."""
     if not llm_request or not llm_request.contents:
         return None
@@ -101,7 +111,7 @@ def route_level_request(
     """before_model_callback that transfers "level N" requests directly."""
     # Only the user's own turn: after a tool call the last content is a
     # function response, and re-routing then would loop.
-    text = _user_text(llm_request)
+    text = user_text(llm_request)
     level = requested_level(text) if text else None
     if level is None:
         return None
@@ -114,7 +124,7 @@ def route_level_change(current_level: int):
     def route(
         llm_request: LlmRequest | None = None, **_: Any
     ) -> Optional[LlmResponse]:
-        text = _user_text(llm_request)
+        text = user_text(llm_request)
         level = requested_level(text) if text else None
         if level is None:
             return None
@@ -167,8 +177,8 @@ def route_hint_request(level: int):
     def route(
         llm_request: LlmRequest | None = None, **_: Any
     ) -> Optional[LlmResponse]:
-        text = _user_text(llm_request)
-        if not text or not _HINT_REQUEST.fullmatch(text.strip().rstrip("!.?")):
+        text = user_text(llm_request)
+        if not text or not is_hint_request(text):
             return None
         return LlmResponse(
             content=types.Content(
@@ -194,7 +204,7 @@ def route_submit_request(level: int):
     def route(
         llm_request: LlmRequest | None = None, **_: Any
     ) -> Optional[LlmResponse]:
-        text = _user_text(llm_request)
+        text = user_text(llm_request)
         answer = submitted_answer(text) if text else None
         if answer is None:
             return None
@@ -213,7 +223,7 @@ def route_coordinator_submit(passwords: dict[int, str]):
     def route(
         llm_request: LlmRequest | None = None, **_: Any
     ) -> Optional[LlmResponse]:
-        text = _user_text(llm_request)
+        text = user_text(llm_request)
         answer = submitted_answer(text) if text else None
         if answer is None:
             return None

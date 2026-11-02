@@ -22,6 +22,12 @@ from google.adk.evaluation import AgentEvaluator
 
 pytest_plugins = ("pytest_asyncio",)
 
+# These call a real model, so they are deselected by default (see pyproject).
+# Run them with: uv run pytest ctf/tests/eval/ -m llm_eval -s
+pytestmark = pytest.mark.llm_eval
+
+EVAL_DATA_DIR = pathlib.Path(__file__).parent.parent.parent / "agents" / "eval"
+
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
@@ -30,19 +36,20 @@ def load_env():
 
 
 @pytest.mark.asyncio
-async def test_sub_agents():
-    """Test the sub_agents app with evaluation data.
+@pytest.mark.parametrize(
+    "evalset",
+    sorted(EVAL_DATA_DIR.glob("*.evalset.json")),
+    ids=lambda path: path.name.removesuffix(".evalset.json"),
+)
+async def test_sub_agents(evalset):
+    """Run an evaluation set in ctf/agents/eval/ against the sub_agents app.
 
-    This test runs all evaluation sets found in ctf/agents/eval/
-    against the sub_agents app. It will evaluate agent behavior
-    including tool usage, response quality, and security protections.
+    Evaluates agent behavior including tool usage, response quality, and
+    security protections. Each file is passed explicitly because, given a
+    directory, AgentEvaluator only looks for *.test.json files.
     """
-    # Path to eval data directory containing .evalset.json files
-    eval_data_dir = (
-        pathlib.Path(__file__).parent.parent.parent / "agents" / "eval"
-    )
     await AgentEvaluator.evaluate(
-        "sub_agents",
-        str(eval_data_dir),
+        "ctf.agents.sub_agents.agent",
+        str(evalset),
         num_runs=5,
     )

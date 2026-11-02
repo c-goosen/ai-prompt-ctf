@@ -67,8 +67,9 @@ extend-exclude = "^/web/"
 markers = [
     "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
     "adk_api: marks tests that require ADK API server running",
+    "llm_eval: marks ADK evaluations that require a real model (select with '-m llm_eval')",
 ]
-addopts = "-m \"not adk_api\" --tb=short"
+addopts = "-m \"not adk_api and not llm_eval\" --tb=short"
 
 
 

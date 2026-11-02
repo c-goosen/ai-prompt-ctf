@@ -11,6 +11,7 @@ from ctf.agents.sub_agents.protection_utils import (
     _callback_text,
     _extract_last_user_message,
     blocked_callback_result,
+    player_sent,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,9 +55,12 @@ def guard_rail_output_injection(
     llm_response: LlmResponse | None = None,
     level: int = 2,
     tool_response: Any = None,
+    tool_context: Any = None,
     **_: Any,
 ) -> LlmResponse | dict[str, str] | None:
     """Guardrail for output: block responses/tool outputs leaking the password.
+
+    A password the player typed this turn isn't a leak.
 
     Wired as an ``after_model_callback`` (ADK passes ``llm_response``) and as an
     ``after_tool_callback`` (ADK passes ``tool_response``, the raw tool result).
@@ -66,7 +70,11 @@ def guard_rail_output_injection(
         return None
 
     password = settings.PASSWORDS.get(level)
-    if password and password.lower() in text.lower():
+    if (
+        password
+        and password.lower() in text.lower()
+        and not player_sent(callback_context or tool_context, password)
+    ):
         return blocked_callback_result(
             "LLM response was blocked by guard_rail_output_injection.",
             llm_response,

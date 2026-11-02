@@ -19,6 +19,11 @@ x-shared-env: &shared-env
   PASSWORD_EIGHT: ${PASSWORD_EIGHT:-PASS_EIGHT}
   PASSWORD_NINE: ${PASSWORD_NINE:-PASS_NINE}
   PASSWORD_TEN: ${PASSWORD_TEN:-PASS_TEN}
+  PASSWORD_ELEVEN: ${PASSWORD_ELEVEN:-PASS_ELEVEN}
+  PASSWORD_TWELVE: ${PASSWORD_TWELVE:-PASS_TWELVE}
+  PASSWORD_THIRTEEN: ${PASSWORD_THIRTEEN:-PASS_THIRTEEN}
+  PASSWORD_FOURTEEN: ${PASSWORD_FOURTEEN:-PASS_FOURTEEN}
+  PASSWORD_FIFTEEN: ${PASSWORD_FIFTEEN:-PASS_FIFTEEN}
 
 services:
   ollama:
@@ -47,13 +52,17 @@ services:
     environment:
       OLLAMA_HOST: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:0.6b}
+      # Levels 10, 11 and 15's decision model (ollama.com/search?c=decision).
+      DECISION_MODEL: ${DECISION_MODEL:-d1-omni:600m}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         set -e
-        echo "Pulling $${OLLAMA_MODEL} into Ollama..."
-        ollama pull "$${OLLAMA_MODEL}"
-        echo "Model $${OLLAMA_MODEL} is ready."
+        for model in "$${OLLAMA_MODEL}" "$${DECISION_MODEL}"; do
+          echo "Pulling $${model} into Ollama..."
+          ollama pull "$${model}"
+        done
+        echo "Models $${OLLAMA_MODEL} and $${DECISION_MODEL} are ready."
     networks:
       - ctf-network
     restart: "no"
@@ -93,6 +102,9 @@ services:
       OPENSOURCE_LLM_MODEL: ${OPENSOURCE_LLM_MODEL:-qwen3:0.6b}
       OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://ollama:11434}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Levels 10, 11 and 15's decision model, served by the same Ollama.
+      DECISION_MODEL: ${DECISION_MODEL:-d1-omni:600m}
+      DECISION_THRESHOLD: ${DECISION_THRESHOLD:-0.5}
       # Re-seed the level passwords (LanceDB RAG store + level 5 users.db)
       # from the PASSWORD_* settings on every start.
       PREPARE_FLAGS: ${PREPARE_FLAGS:-1}

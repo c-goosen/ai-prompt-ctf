@@ -93,7 +93,7 @@ function Siege({ event, onClose }: { event: LevelUpEvent; onClose: () => void })
       <div className="relative h-48 w-full max-w-md" aria-hidden="true">
         <div className="absolute inset-x-0 bottom-6 h-px bg-gradient-to-r from-transparent via-neon-teal/50 to-transparent" />
 
-        {/* The tower (or the level 10 fortress), shaking under attack */}
+        {/* The tower (or the final level's fortress), shaking under attack */}
         <motion.div
           className="absolute bottom-6 left-[68%] -translate-x-1/2"
           animate={
