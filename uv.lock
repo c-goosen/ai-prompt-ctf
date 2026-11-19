@@ -96,7 +96,7 @@ dev = [
     { name = "deadcode", specifier = ">=2.4.1" },
     { name = "deepeval", specifier = ">=4.0.2" },
     { name = "flake8", specifier = ">=6.1.0,<8" },
-    { name = "flake8-bugbear", specifier = ">=23.12.2,<24" },
+    { name = "flake8-bugbear", specifier = ">=23.12.2,<27" },
     { name = "google-adk", extras = ["eval"], specifier = ">=2.0.0" },
     { name = "huggingface-hub", specifier = ">=1.3,<2" },
     { name = "importanize", specifier = ">=0.7.0,<0.8" },
@@ -898,15 +898,15 @@ wheels = [
 
 [[package]]
 name = "flake8-bugbear"
-version = "23.12.2"
+version = "26.10.27"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
     { name = "flake8" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/fa/fede86c46ba912f2ebd4067de4279be50ecc550f43d470a9f233c6de79a4/flake8-bugbear-23.12.2.tar.gz", hash = "sha256:32b2903e22331ae04885dae25756a32a8c666c85142e933f43512a70f342052a", size = 61699, upload-time = "2023-12-02T22:59:16.899Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/42/fb5947d70cf6a370d824ea60a79eacfa71729eef3084c0172c071c44e3bd/flake8_bugbear-26.10.27.tar.gz", hash = "sha256:2dbacb5149856a38ff539f21098ec5f1b70d8ebe0c87fe107dacda28a2d83955", size = 124849, upload-time = "2026-10-27T16:09:02.969Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/77/087de3a265b00d3197ffc90424da6c22180a24578460ee43cc8b97556bc0/flake8_bugbear-23.12.2-py3-none-any.whl", hash = "sha256:83324bad4d90fee4bf64dd69c61aff94debf8073fbd807c8b6a36eec7a2f0719", size = 31564, upload-time = "2023-12-02T22:59:15.269Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/33/269ef2c8b6a8a1c9ba44555796da18820bcc1e862d1efe8cdc5d6bc3f92c/flake8_bugbear-26.10.27-py3-none-any.whl", hash = "sha256:84be4e7533f9e9e4c98c1fdadecddb9b527aaea32509f7779ce2e6ec79ba012d", size = 57117, upload-time = "2026-10-27T16:09:01.528Z" },
 ]
 
 [[package]]
