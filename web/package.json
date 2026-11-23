@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
-    "cn": "0.5.0",
+    "cn": "0.5.2",
     "lucide-react": "1.62.0",
     "motion": "14.9.0",
     "next": "16.4.5",
